@@ -1,0 +1,22 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: #252525;
+}
+
+canvas {
+  width: 100vw;
+  height: 56.25vw;
+  background: black;
+  max-height: 100vh;
+  max-width: 177.78vh;
+  margin: auto;
+  position: absolute;
+  top:0;
+  bottom:0; /* vertical center */
+  left:0;
+  right:0; /* horizontal center */
+}
