@@ -1,11 +1,21 @@
 
-import { Body, Fixture } from 'planck'
+import { Body, Fixture, FixtureDef } from 'planck'
 import { Actor } from './actor'
-import { Stage } from './stage'
+import { Color } from './color'
 
-class Feature {
+export class Feature {
   actor: Actor
-  body: Body
+  color: Color
   fixture: Fixture
-  stage: Stage
+
+  constructor(props: {
+    actor: Actor
+    fixtureDef: FixtureDef
+    color: Color
+  }) {
+    this.actor = props.actor
+    this.color = props.color
+    this.fixture = this.actor.body.createFixture(props.fixtureDef)
+    this.fixture.setUserData(this)
+  }
 }

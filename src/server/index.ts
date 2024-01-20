@@ -1,7 +1,8 @@
 import express from 'express'
 import path from 'path'
 import http from 'http'
-// import { ClientToServerEvents, ServerToClientEvents } from '../shared/socket'
+import { Stage } from './stage'
+
 const app = express()
 const staticPath = path.join(__dirname, '..', '..', 'dist')
 const staticMiddleware = express.static(staticPath)
@@ -12,3 +13,5 @@ console.info('PORT set as', PORT)
 server.listen(PORT, () => {
   console.info(`Listening on :${PORT}`)
 })
+
+void new Stage()
