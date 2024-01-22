@@ -1,23 +1,49 @@
 import { Body } from 'planck'
 import { Stage } from './stage'
-import { Component } from './component'
-import { Actor } from './actor'
+import { Component } from '../shared/component'
+import { Actor } from './actors/actor'
+import { Summary } from '../shared/summary'
 
 export class Runner {
   stage: Stage
   timeStep = 1 / 60
   timeScale = 1
   paused = false
+  components: Component[]
 
   constructor (props: {
     stage: Stage
   }) {
     console.log('runner')
     this.stage = props.stage
+    this.components = this.getComponents()
     setInterval(() => this.step(), this.timeStep)
   }
 
-  getComponents (): void {
+  step (): void {
+    if (this.paused) return
+    const bodies = this.getBodies()
+    bodies.forEach(body => {
+      const actor = body.getUserData() as Actor
+      body.applyForceToCenter(actor.force)
+    })
+    const stepSize = this.timeStep * this.timeScale
+    this.stage.world.step(stepSize)
+    this.components = this.getComponents()
+    this.stage.onStep()
+  }
+
+  getMessage (props: {
+    actor: Actor
+  }): Summary {
+    const state = new Summary({
+      components: this.components,
+      position: props.actor.body.getPosition()
+    })
+    return state
+  }
+
+  getComponents (): Component[] {
     const bodies = this.getBodies()
     const components: Component[] = []
     bodies.forEach(body => {
@@ -25,13 +51,7 @@ export class Runner {
       const component = new Component({ actor })
       components.push(component)
     })
-  }
-
-  step (): void {
-    if (this.paused) return
-    const stepSize = this.timeStep * this.timeScale
-    this.stage.world.step(stepSize)
-    this.stage.onStep()
+    return components
   }
 
   getBodies (): Body[] {

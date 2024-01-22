@@ -1,17 +1,20 @@
-import express from 'express'
-import path from 'path'
-import http from 'http'
 import { Stage } from './stage'
+import { io } from './server'
+import { Vec2 } from 'planck'
 
-const app = express()
-const staticPath = path.join(__dirname, '..', '..', 'dist')
-const staticMiddleware = express.static(staticPath)
-app.use(staticMiddleware)
-const server = new http.Server(app)
-const PORT = process.env.PORT ?? 3000
-console.info('PORT set as', PORT)
-server.listen(PORT, () => {
-  console.info(`Listening on :${PORT}`)
+const stage = new Stage()
+
+io.on('connection', socket => {
+  console.log('connection:', socket.id)
+  socket.emit('connected')
+  const ball = stage.addPlayer({ position: Vec2(0, 0) })
+  socket.on('force', (force: Vec2) => {
+    ball.force = force
+    const message = stage.runner.getMessage({ actor: ball })
+    socket.emit('serverUpdateClient', message)
+  })
+  socket.on('disconnect', () => {
+    console.log('disconnect:', socket.id)
+    stage.world.destroyBody(ball.body)
+  })
 })
-
-void new Stage()

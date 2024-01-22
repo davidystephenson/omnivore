@@ -1,9 +1,9 @@
 import { Circle, Vec2 } from 'planck'
 import { Actor } from './actor'
-import { Stage } from './stage'
-import { Color } from './color'
+import { Stage } from '../stage'
+import { Color } from '../color'
 
-export class Ball extends Actor {
+export class Player extends Actor {
   constructor (props: {
     stage: Stage
     position: Vec2
@@ -14,7 +14,7 @@ export class Ball extends Actor {
         position: props.position,
         bullet: true,
         fixedRotation: true,
-        linearDamping: 1
+        linearDamping: 0.1
       },
       label: 'player',
       stage: props.stage
@@ -25,7 +25,7 @@ export class Ball extends Actor {
       density: 1,
       restitution: 0
     }
-    const color = new Color({ red: 0, green: 0, blue: 0 })
+    const color = new Color({ red: 0, green: 0, blue: 255 })
     this.createFeature({ fixtureDef, color })
   }
 }
