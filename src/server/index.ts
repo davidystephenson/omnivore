@@ -7,14 +7,14 @@ const stage = new Stage()
 io.on('connection', socket => {
   console.log('connection:', socket.id)
   socket.emit('connected')
-  const ball = stage.addPlayer({ position: Vec2(0, 0) })
+  const player = stage.addPlayer({ position: Vec2(0, 0) })
   socket.on('force', (force: Vec2) => {
-    ball.force = force
-    const summary = stage.runner.getSummary({ actor: ball })
+    player.force = force
+    const summary = stage.runner.getSummary({ actor: player })
     socket.emit('serverUpdateClient', summary)
   })
   socket.on('disconnect', () => {
     console.log('disconnect:', socket.id)
-    stage.world.destroyBody(ball.body)
+    stage.world.destroyBody(player.body)
   })
 })
