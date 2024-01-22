@@ -10,8 +10,8 @@ io.on('connection', socket => {
   const ball = stage.addPlayer({ position: Vec2(0, 0) })
   socket.on('force', (force: Vec2) => {
     ball.force = force
-    const message = stage.runner.getSummary({ actor: ball })
-    socket.emit('serverUpdateClient', message)
+    const summary = stage.runner.getSummary({ actor: ball })
+    socket.emit('serverUpdateClient', summary)
   })
   socket.on('disconnect', () => {
     console.log('disconnect:', socket.id)
