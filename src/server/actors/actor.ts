@@ -1,6 +1,6 @@
 import { Body, BodyDef, FixtureDef, Vec2 } from 'planck'
 import { Stage } from '../stage'
-import { Feature } from '../feature'
+import { Feature } from './feature'
 import { Color } from '../color'
 
 export class Actor {

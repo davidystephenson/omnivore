@@ -10,7 +10,7 @@ io.on('connection', socket => {
   const ball = stage.addPlayer({ position: Vec2(0, 0) })
   socket.on('force', (force: Vec2) => {
     ball.force = force
-    const message = stage.runner.getMessage({ actor: ball })
+    const message = stage.runner.getSummary({ actor: ball })
     socket.emit('serverUpdateClient', message)
   })
   socket.on('disconnect', () => {

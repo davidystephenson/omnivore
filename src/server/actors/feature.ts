@@ -1,7 +1,7 @@
 
 import { Fixture, FixtureDef } from 'planck'
-import { Actor } from './actors/actor'
-import { Color } from './color'
+import { Actor } from './actor'
+import { Color } from '../color'
 
 export class Feature {
   actor: Actor

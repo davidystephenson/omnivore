@@ -1,6 +1,6 @@
 import { CircleShape, PolygonShape, Vec2 } from 'planck'
 import { Color } from '../server/color'
-import { Feature } from '../server/feature'
+import { Feature } from '../server/actors/feature'
 
 export class Element {
   color: Color

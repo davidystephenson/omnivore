@@ -33,14 +33,14 @@ export class Runner {
     this.stage.onStep()
   }
 
-  getMessage (props: {
+  getSummary (props: {
     actor: Actor
   }): Summary {
-    const state = new Summary({
+    const summary = new Summary({
       components: this.components,
       position: props.actor.body.getPosition()
     })
-    return state
+    return summary
   }
 
   getComponents (): Component[] {
