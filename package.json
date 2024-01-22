@@ -2,7 +2,6 @@
   "name": "omnivore",
   "version": "0.0.0",
   "description": "",
-  
   "scripts": {
     "build:server": "npx tsc",
     "build:client": "npx parcel build src/client/index.html",
