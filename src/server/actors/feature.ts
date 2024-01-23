@@ -1,14 +1,14 @@
 
-import { Body, Fixture, FixtureDef } from 'planck'
+import { Fixture, FixtureDef } from 'planck'
 import { Actor } from './actor'
-import { Color } from './color'
+import { Color } from '../color'
 
 export class Feature {
   actor: Actor
   color: Color
   fixture: Fixture
 
-  constructor(props: {
+  constructor (props: {
     actor: Actor
     fixtureDef: FixtureDef
     color: Color

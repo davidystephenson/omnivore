@@ -11,8 +11,8 @@ export class Color {
     alpha?: number
   }) {
     this.red = props.red
-    this.green = props.red
-    this.blue = props.red
-    this.alpha = props.red ?? this.red
+    this.green = props.green
+    this.blue = props.blue
+    this.alpha = props.alpha ?? this.alpha
   }
 }

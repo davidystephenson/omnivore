@@ -1,25 +1,30 @@
 import { World, Vec2 } from 'planck'
 import { Runner } from './runner'
-import { Ball } from './ball'
+import { Player } from './actors/player'
+import { Wall } from './actors/wall'
 
 export class Stage {
   world: World
   runner: Runner
-  ball: Ball
 
   constructor () {
     this.world = new World({ gravity: Vec2(0, 0) })
     this.runner = new Runner({ stage: this })
-    this.ball = this.addBall({ position: Vec2(0, 0) })
+    this.addWall({ halfWidth: 10, halfHeight: 1, position: Vec2(0, 10) })
+    this.addWall({ halfWidth: 10, halfHeight: 1, position: Vec2(0, -10) })
+    this.addWall({ halfWidth: 1, halfHeight: 15, position: Vec2(20, 0) })
+    this.addWall({ halfWidth: 1, halfHeight: 15, position: Vec2(-20, 0) })
   }
 
-  addBall (props: { position: Vec2 }): Ball {
-    const ball = new Ball({ stage: this, position: props.position })
-    return ball
+  addPlayer (props: { position: Vec2 }): Player {
+    const player = new Player({ stage: this, ...props })
+    return player
   }
 
-  onStep (): void {
-    // console.log('ball.body.getPosition()', this.ball.body.getPosition())
-    // this.ball.body.applyForceToCenter(Vec2(1, 0))
+  addWall (props: { halfWidth: number, halfHeight: number, position: Vec2 }): Wall {
+    const wall = new Wall({ stage: this, ...props })
+    return wall
   }
+
+  onStep (): void {}
 }
