@@ -1,5 +1,6 @@
 import { Vec2 } from 'planck'
 import { Component } from '../shared/component'
+import { Summary } from '../shared/summary'
 
 export class Renderer {
   lerp = 0.5
@@ -75,8 +76,9 @@ export class Renderer {
     context.fill()
   }
 
-  updateComponents (components: Component[]): void {
+  updateComponents (summary: Summary): void {
     const newComponentMap = new Map<number, Component>()
+    const components = summary.components
     components.forEach(component => {
       const oldComponent = this.componentMap.get(component.id)
       if (oldComponent != null) {
@@ -85,6 +87,7 @@ export class Renderer {
         component.position = Vec2.add(Vec2.mul(oldPosition, this.lerp), Vec2.mul(newPosition, 1 - this.lerp))
       }
       newComponentMap.set(component.id, component)
+      if (component.id === summary.id) this.camera.position = component.position
     })
     this.componentMap = newComponentMap
   }
