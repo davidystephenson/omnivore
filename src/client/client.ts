@@ -6,6 +6,7 @@ import { Renderer } from './renderer'
 
 const input = new Input()
 const renderer = new Renderer()
+const movePower = 20
 
 const socket = io()
 socket.on('connected', () => {
@@ -25,7 +26,8 @@ function updateServer (): void {
   if (input.isKeyDown('s') || input.isKeyDown('ArrowDown')) y -= 1
   if (input.isKeyDown('a') || input.isKeyDown('ArrowLeft')) x -= 1
   if (input.isKeyDown('d') || input.isKeyDown('ArrowRight')) x += 1
-  const force = Vec2(x, y)
-  force.normalize()
+  const direction = Vec2(x, y)
+  direction.normalize()
+  const force = Vec2.mul(direction, movePower)
   socket.emit('force', force)
 }
