@@ -13,8 +13,7 @@ socket.on('connected', () => {
   console.log('connected')
 })
 socket.on('serverUpdateClient', (summary: Summary) => {
-  renderer.updateComponents(summary.components)
-  renderer.camera.position = summary.position
+  renderer.updateComponents(summary)
 })
 
 setInterval(updateServer, 1 / 60)

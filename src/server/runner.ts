@@ -23,7 +23,7 @@ export class Runner {
 
   step (): void {
     if (this.paused) return
-    this.worldTime = this.timeStep
+    this.worldTime += this.timeStep
     const bodies = this.getBodies()
     bodies.forEach(body => {
       const actor = body.getUserData() as Actor
@@ -40,7 +40,7 @@ export class Runner {
   }): Summary {
     const summary = new Summary({
       components: this.components,
-      position: props.actor.body.getPosition()
+      id: props.actor.id
     })
     return summary
   }
