@@ -9,6 +9,8 @@ export class Runner {
   timeStep = 1 / 60
   timeScale = 1
   paused = false
+  worldTime = 0
+  serverTime = 0
   components: Component[]
 
   constructor (props: {
@@ -17,11 +19,17 @@ export class Runner {
     console.log('runner')
     this.stage = props.stage
     this.components = this.getComponents()
+    this.serverTime = performance.now()
     setInterval(() => this.step(), this.timeStep)
   }
 
   step (): void {
     if (this.paused) return
+    const newSeverTime = performance.now()
+    const serverTimeStep = newSeverTime - this.serverTime
+    console.log('TimeStepDiff', serverTimeStep - this.timeStep)
+    this.serverTime = newSeverTime
+    this.worldTime += this.timeStep
     const bodies = this.getBodies()
     bodies.forEach(body => {
       const actor = body.getUserData() as Actor
