@@ -1,8 +1,10 @@
 import { Body } from 'planck'
 import { Stage } from './stage'
-import { Component } from '../shared/component'
-import { Actor } from './actors/actor'
+import { Element } from '../shared/element'
+import { Feature } from './feature/feature'
 import { Summary } from '../shared/summary'
+import { Player } from './actor/player'
+import { Rope } from '../shared/rope'
 
 export class Runner {
   stage: Stage
@@ -10,14 +12,16 @@ export class Runner {
   timeScale = 1
   paused = false
   worldTime = 0
-  components: Component[]
+  elements: Element[]
+  ropes: Rope[]
 
   constructor (props: {
     stage: Stage
   }) {
     console.log('runner')
     this.stage = props.stage
-    this.components = this.getComponents()
+    this.elements = this.getElements()
+    this.ropes = this.getRopes()
     setInterval(() => this.step(), 1000 * this.timeStep)
   }
 
@@ -26,34 +30,47 @@ export class Runner {
     this.worldTime += this.timeStep
     const bodies = this.getBodies()
     bodies.forEach(body => {
-      const actor = body.getUserData() as Actor
+      const actor = body.getUserData() as Feature
       body.applyForceToCenter(actor.force)
     })
     const stepSize = this.timeStep * this.timeScale
     this.stage.world.step(stepSize)
-    this.components = this.getComponents()
+    this.elements = this.getElements()
+    this.ropes = this.getRopes()
     this.stage.onStep()
   }
 
   getSummary (props: {
-    actor: Actor
+    player: Player
   }): Summary {
     const summary = new Summary({
-      components: this.components,
-      id: props.actor.id
+      elements: this.elements,
+      ropes: this.ropes,
+      id: props.player.eye.id
     })
     return summary
   }
 
-  getComponents (): Component[] {
+  getElements (): Element[] {
     const bodies = this.getBodies()
-    const components: Component[] = []
+    const elements: Element[] = []
     bodies.forEach(body => {
-      const actor = body.getUserData() as Actor
-      const component = new Component({ actor })
-      components.push(component)
+      const actor = body.getUserData() as Feature
+      const element = new Element({ feature: actor })
+      elements.push(element)
     })
-    return components
+    return elements
+  }
+
+  getRopes (): Rope[] {
+    const ropes: Rope[] = []
+    this.stage.actors.forEach(actor => {
+      actor.joints.forEach(joint => {
+        const rope = new Rope({ joint })
+        ropes.push(rope)
+      })
+    })
+    return ropes
   }
 
   getBodies (): Body[] {

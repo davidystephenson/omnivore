@@ -1,14 +1,18 @@
-import { Component } from './component'
+import { Element } from './element'
+import { Rope } from './rope'
 
 export class Summary {
-  components: Component[]
+  elements: Element[]
+  ropes: Rope[]
   id: number
 
   constructor (props: {
-    components: Component[]
+    elements: Element[]
+    ropes: Rope[]
     id: number
   }) {
-    this.components = props.components
+    this.elements = props.elements
+    this.ropes = props.ropes
     this.id = props.id
   }
 }
