@@ -1,11 +1,13 @@
 import { World, Vec2 } from 'planck'
 import { Runner } from './runner'
-import { Player } from './actors/player'
-import { Wall } from './actors/wall'
+import { Player } from './actor/player'
+import { Wall } from './actor/wall'
+import { Actor } from './actor/actor'
 
 export class Stage {
   world: World
   runner: Runner
+  actors = new Map<number, Actor>()
 
   constructor () {
     this.world = new World({ gravity: Vec2(0, 0) })

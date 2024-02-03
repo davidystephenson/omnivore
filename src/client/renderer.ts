@@ -1,10 +1,12 @@
 import { Vec2 } from 'planck'
-import { Component } from '../shared/component'
+import { Element } from '../shared/element'
 import { Summary } from '../shared/summary'
+import { Rope } from '../shared/rope'
 
 export class Renderer {
   lerp = 0.5
-  componentMap = new Map<number, Component>()
+  elements = new Map<number, Element>()
+  ropes: Rope[] = []
   canvas: HTMLCanvasElement
   context: CanvasRenderingContext2D
   camera = {
@@ -18,31 +20,33 @@ export class Renderer {
     if (context == null) throw new Error('No Canvas')
     this.context = context
     this.render()
-    window.onmousedown = (event: MouseEvent) => {
-      this.componentMap.forEach(component => {
-        console.log(component.position)
-      })
-    }
   }
 
   render (): void {
     window.requestAnimationFrame(t => this.render())
     this.context.resetTransform()
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    this.componentMap.forEach(component => {
+    this.followCamera()
+    this.ropes.forEach(rope => {
+      this.context.lineWidth = 0.1
+      this.context.strokeStyle = 'green'
+      this.context.beginPath()
+      this.context.moveTo(rope.positionA.x, rope.positionA.y)
+      this.context.lineTo(rope.positionB.x, rope.positionB.y)
+      this.context.stroke()
+    })
+    this.elements.forEach(element => {
       this.followCamera()
-      this.context.translate(component.position.x, component.position.y)
-      this.context.rotate(component.angle)
-      component.elements.forEach(element => {
-        const color = element.color
-        this.context.fillStyle = `rgba(${color.red},${color.green},${color.blue},${color.alpha})`
-        if (element.circle != null) {
-          this.drawCircle(element.circle.center, element.circle.radius)
-        }
-        if (element.polygon != null) {
-          this.drawPolygon(element.polygon.vertices)
-        }
-      })
+      this.context.translate(element.position.x, element.position.y)
+      this.context.rotate(element.angle)
+      const color = element.color
+      this.context.fillStyle = `rgba(${color.red},${color.green},${color.blue},${color.alpha})`
+      if (element.circle != null) {
+        this.drawCircle(element.circle.center, element.circle.radius)
+      }
+      if (element.polygon != null) {
+        this.drawPolygon(element.polygon.vertices)
+      }
     })
   }
 
@@ -76,19 +80,19 @@ export class Renderer {
     context.fill()
   }
 
-  updateComponents (summary: Summary): void {
-    const newComponentMap = new Map<number, Component>()
-    const components = summary.components
-    components.forEach(component => {
-      const oldComponent = this.componentMap.get(component.id)
-      if (oldComponent != null) {
-        const oldPosition = oldComponent.position
-        const newPosition = component.position
-        component.position = Vec2.add(Vec2.mul(oldPosition, this.lerp), Vec2.mul(newPosition, 1 - this.lerp))
+  updateElements (summary: Summary): void {
+    const newElements = new Map<number, Element>()
+    summary.elements.forEach(element => {
+      const oldElement = this.elements.get(element.id)
+      if (oldElement != null) {
+        const oldPosition = oldElement.position
+        const newPosition = element.position
+        element.position = Vec2.add(Vec2.mul(oldPosition, this.lerp), Vec2.mul(newPosition, 1 - this.lerp))
       }
-      newComponentMap.set(component.id, component)
-      if (component.id === summary.id) this.camera.position = component.position
+      newElements.set(element.id, element)
+      if (element.id === summary.id) this.camera.position = element.position
     })
-    this.componentMap = newComponentMap
+    this.elements = newElements
+    this.ropes = summary.ropes
   }
 }
