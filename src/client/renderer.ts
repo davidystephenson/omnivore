@@ -9,6 +9,7 @@ export class Renderer {
   ropes: Rope[] = []
   canvas: HTMLCanvasElement
   context: CanvasRenderingContext2D
+  id: number = 0
   camera = {
     position: new Vec2(0, 0),
     zoom: 0
@@ -27,6 +28,27 @@ export class Renderer {
     this.context.resetTransform()
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
     this.followCamera()
+    this.elements.forEach(element => {
+      this.followCamera()
+      if (element.id === this.id) {
+        this.context.translate(element.position.x, element.position.y)
+        this.context.fillStyle = 'rgba(50,50,50,1)'
+        this.context.lineWidth = 0.4
+        this.context.beginPath()
+        if (element.circle != null) {
+          const x = element.circle.center.x
+          const y = element.circle.center.y
+          const halfHeight = 13
+          const halfWidth = halfHeight * 16 / 9
+          this.context.moveTo(x - halfWidth, y + halfHeight)
+          this.context.lineTo(x - halfWidth, y - halfHeight)
+          this.context.lineTo(x + halfWidth, y - halfHeight)
+          this.context.lineTo(x + halfWidth, y + halfHeight)
+          this.context.closePath()
+          this.context.fill()
+        }
+      }
+    })
     this.ropes.forEach(rope => {
       this.context.lineWidth = 0.1
       this.context.strokeStyle = 'green'
@@ -39,14 +61,8 @@ export class Renderer {
       this.followCamera()
       this.context.translate(element.position.x, element.position.y)
       this.context.rotate(element.angle)
-      const color = element.color
-      this.context.fillStyle = `rgba(${color.red},${color.green},${color.blue},${color.alpha})`
-      if (element.circle != null) {
-        this.drawCircle(element.circle.center, element.circle.radius)
-      }
-      if (element.polygon != null) {
-        this.drawPolygon(element.polygon.vertices)
-      }
+      this.drawCircle(element)
+      this.drawPolygon(element)
     })
   }
 
@@ -60,24 +76,56 @@ export class Renderer {
     this.context.translate(-this.camera.position.x, -this.camera.position.y)
   }
 
-  drawPolygon (vertices: Vec2[]): void {
-    const context = this.context
-    context.beginPath()
-    vertices.forEach((vertex, i) => {
-      const x = vertex.x
-      const y = vertex.y
-      if (i === 0) context.moveTo(x, y)
-      else context.lineTo(x, y)
-    })
-    context.closePath()
-    context.fill()
+  drawPolygon (element: Element): void {
+    if (element.polygon != null) {
+      const context = this.context
+      context.save()
+      const color = element.color
+      this.context.fillStyle = `rgba(${color.red},${color.green},${color.blue},${color.alpha})`
+      context.beginPath()
+      element.polygon.vertices.forEach((vertex, i) => {
+        const x = vertex.x
+        const y = vertex.y
+        if (i === 0) context.moveTo(x, y)
+        else context.lineTo(x, y)
+      })
+      context.closePath()
+      context.clip()
+      context.fill()
+      const borderColor = element.borderColor
+      this.context.strokeStyle = `rgba(${borderColor.red},${borderColor.green},${borderColor.blue},${borderColor.alpha})`
+      this.context.lineWidth = 2 * element.borderWidth
+      context.beginPath()
+      element.polygon.vertices.forEach((vertex, i) => {
+        const x = vertex.x
+        const y = vertex.y
+        if (i === 0) context.moveTo(x, y)
+        else context.lineTo(x, y)
+      })
+      context.closePath()
+      context.stroke()
+      context.restore()
+    }
   }
 
-  drawCircle (center: Vec2, radius: number): void {
-    const context = this.context
-    context.beginPath()
-    context.arc(center.x, center.y, radius, 0, 2 * Math.PI)
-    context.fill()
+  drawCircle (element: Element): void {
+    if (element.circle != null) {
+      const context = this.context
+      context.save()
+      const color = element.color
+      this.context.fillStyle = `rgba(${color.red},${color.green},${color.blue},${color.alpha})`
+      context.beginPath()
+      context.arc(element.circle.center.x, element.circle.center.y, element.circle.radius, 0, 2 * Math.PI)
+      context.fill()
+      context.clip()
+      const borderColor = element.borderColor
+      this.context.strokeStyle = `rgba(${borderColor.red},${borderColor.green},${borderColor.blue},${borderColor.alpha})`
+      this.context.lineWidth = 2 * element.borderWidth
+      context.beginPath()
+      context.arc(element.circle.center.x, element.circle.center.y, element.circle.radius, 0, 2 * Math.PI)
+      context.stroke()
+      context.restore()
+    }
   }
 
   updateElements (summary: Summary): void {
@@ -94,5 +142,6 @@ export class Renderer {
     })
     this.elements = newElements
     this.ropes = summary.ropes
+    this.id = summary.id
   }
 }

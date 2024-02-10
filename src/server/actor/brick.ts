@@ -1,9 +1,9 @@
 import { Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Actor } from './actor'
-import { Barrier } from '../feature/barrier'
+import { Crate } from '../feature/crate'
 
-export class Wall extends Actor {
+export class Brick extends Actor {
   constructor (props: {
     stage: Stage
     halfWidth: number
@@ -11,12 +11,12 @@ export class Wall extends Actor {
     position: Vec2
   }) {
     super({ stage: props.stage, label: 'wall' })
-    const barrier = new Barrier({
+    const crate = new Crate({
       position: props.position,
       halfHeight: props.halfHeight,
       halfWidth: props.halfWidth,
       actor: this
     })
-    this.features.push(barrier)
+    this.features.push(crate)
   }
 }

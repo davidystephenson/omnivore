@@ -1,12 +1,14 @@
 import { CircleShape, PolygonShape, Vec2 } from 'planck'
 import { Feature } from '../server/feature/feature'
-import { Color } from '../server/color'
+import { Color } from './color'
 
 export class Element {
   angle: number
   position: Vec2
   id: number
   color: Color
+  borderColor: Color
+  borderWidth: number
   circle?: {
     center: Vec2
     radius: number
@@ -22,6 +24,8 @@ export class Element {
     this.position = props.feature.body.getPosition()
     this.angle = props.feature.body.getAngle()
     this.color = props.feature.color
+    this.borderColor = props.feature.borderColor
+    this.borderWidth = props.feature.borderWidth
     this.id = props.feature.id
     const shape = props.feature.fixture.getShape()
     if (shape instanceof CircleShape) {

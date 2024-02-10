@@ -1,8 +1,8 @@
-import { Circle, RopeJoint, Vec2 } from 'planck'
+import { RopeJoint, Vec2 } from 'planck'
 import { Feature } from '../feature/feature'
 import { Stage } from '../stage'
-import { Color } from '../color'
 import { Actor } from './actor'
+import { Mouth } from '../feature/mouth'
 
 export class Player extends Actor {
   eye: Feature
@@ -14,6 +14,7 @@ export class Player extends Actor {
   }) {
     super({ stage: props.stage, label: 'player' })
     this.eye = this.createMouth({ position: props.position })
+    this.eye.borderWidth = 0.2
     const mouth = this.createMouth({
       position: Vec2.add(props.position, Vec2(0, 3)),
       cell: this.eye
@@ -27,13 +28,8 @@ export class Player extends Actor {
   createMouth (props: {
     position: Vec2
     cell?: Feature
-  }): Feature {
-    const mouth = this.createFeature({
-      position: props.position,
-      shape: new Circle(Vec2(0, 0), 1),
-      color: new Color({ red: 0, green: 0, blue: 255 }),
-      label: 'mouth'
-    })
+  }): Mouth {
+    const mouth = new Mouth({ position: props.position, actor: this })
     if (props.cell != null) {
       const joint = new RopeJoint({
         bodyA: props.cell.body,
@@ -47,6 +43,7 @@ export class Player extends Actor {
       this.stage.world.createJoint(joint)
     }
     this.mouths.push(mouth)
+    this.features.push(mouth)
     return mouth
   }
 }
