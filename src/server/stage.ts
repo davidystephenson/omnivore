@@ -1,21 +1,37 @@
-import { World, Vec2 } from 'planck'
+import { World, Vec2, Contact, Body } from 'planck'
 import { Runner } from './runner'
 import { Player } from './actor/player'
 import { Wall } from './actor/wall'
 import { Actor } from './actor/actor'
+import { Brick } from './actor/brick'
+import { Feature } from './feature/feature'
+import { Mouth } from './feature/mouth'
+import { Barrier } from './feature/barrier'
 
 export class Stage {
   world: World
   runner: Runner
+  destructionQueue: Body[] = []
   actors = new Map<number, Actor>()
 
   constructor () {
     this.world = new World({ gravity: Vec2(0, 0) })
+    this.world.on('pre-solve', contact => this.preSolve(contact))
     this.runner = new Runner({ stage: this })
+
+    // outer walls
+    this.addWall({ halfWidth: 50, halfHeight: 1, position: Vec2(0, 50) })
+    this.addWall({ halfWidth: 50, halfHeight: 1, position: Vec2(0, -50) })
+    this.addWall({ halfWidth: 1, halfHeight: 50, position: Vec2(50, 0) })
+    this.addWall({ halfWidth: 1, halfHeight: 50, position: Vec2(-50, 0) })
+
+    // inner walls
     this.addWall({ halfWidth: 10, halfHeight: 1, position: Vec2(0, 10) })
     this.addWall({ halfWidth: 10, halfHeight: 1, position: Vec2(0, -10) })
     this.addWall({ halfWidth: 1, halfHeight: 15, position: Vec2(20, 0) })
     this.addWall({ halfWidth: 1, halfHeight: 15, position: Vec2(-20, 0) })
+
+    void new Brick({ stage: this, halfWidth: 1, halfHeight: 2, position: Vec2(10, 0) })
   }
 
   addPlayer (props: { position: Vec2 }): Player {
@@ -28,5 +44,46 @@ export class Stage {
     return wall
   }
 
-  onStep (): void {}
+  onStep (): void {
+    this.destructionQueue.forEach(body => {
+      this.world.destroyBody(body)
+    })
+  }
+
+  preSolve (contact: Contact): void {
+    const fixtureA = contact.getFixtureA()
+    const fixtureB = contact.getFixtureB()
+    const featureA = fixtureA.getBody().getUserData() as Feature
+    const featureB = fixtureB.getBody().getUserData() as Feature
+    const mouthyA = featureA instanceof Mouth
+    const mouthyB = featureB instanceof Mouth
+    const mouthy = mouthyA || mouthyB
+    if (!mouthy) return
+    const wallyA = featureA instanceof Barrier
+    const wallyB = featureB instanceof Barrier
+    const wally = wallyA || wallyB
+    if (wally) return
+    if (featureA.actor === featureB.actor) return
+    featureA.health -= mouthyA ? 0.1 : 0.5
+    featureB.health -= mouthyB ? 0.1 : 0.5
+    featureA.color.alpha = featureA.health
+    featureB.color.alpha = featureB.health
+    if (featureA.health <= 0) {
+      this.destructionQueue.push(featureA.body)
+      if (mouthyA) {
+        featureA.actor.features.forEach(feature => this.destructionQueue.push(feature.body))
+        this.actors.delete(featureA.actor.id)
+      } else {
+        this.destructionQueue.push(featureA.body)
+      }
+    }
+    if (featureB.health <= 0) {
+      if (mouthyB) {
+        featureB.actor.features.forEach(feature => this.destructionQueue.push(feature.body))
+        this.actors.delete(featureB.actor.id)
+      } else {
+        this.destructionQueue.push(featureB.body)
+      }
+    }
+  }
 }
