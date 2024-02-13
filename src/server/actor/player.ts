@@ -3,6 +3,7 @@ import { Feature } from '../feature/feature'
 import { Stage } from '../stage'
 import { Actor } from './actor'
 import { Mouth } from '../feature/mouth'
+import { Color } from '../../shared/color'
 
 export class Player extends Actor {
   eye: Feature
@@ -45,5 +46,32 @@ export class Player extends Actor {
     this.mouths.push(mouth)
     this.features.push(mouth)
     return mouth
+  }
+
+  onStep (): void {
+    super.onStep()
+    if (this.invincibleTime === 0) {
+      this.features.forEach(feature => {
+        feature.borderColor = new Color({ red: 0, green: 255, blue: 0 })
+      })
+    }
+  }
+
+  respawn (): void {
+    const eyePosition = this.eye.body.getPosition()
+    this.invincibleTime = 5
+    const noise = Vec2(0.1 * Math.random(), 0.1 * Math.random())
+    this.features.forEach(feature => {
+      feature.health = 1
+      feature.color.alpha = feature.health
+      feature.borderColor = new Color({ red: 0, green: 0, blue: 255 })
+      const featurePosition = feature.body.getPosition()
+      const relativePosition = Vec2.sub(featurePosition, eyePosition)
+      feature.deathPosition = Vec2.clone(featurePosition)
+      feature.spawnPosition = Vec2.add(relativePosition, noise)
+    })
+    this.features.forEach(feature => {
+      feature.body.setPosition(feature.spawnPosition)
+    })
   }
 }
