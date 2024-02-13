@@ -7,11 +7,14 @@ import { Brick } from './actor/brick'
 import { Feature } from './feature/feature'
 import { Mouth } from './feature/mouth'
 import { Barrier } from './feature/barrier'
+import { Killing } from './killing'
 
 export class Stage {
   world: World
   runner: Runner
   destructionQueue: Body[] = []
+  respawnQueue: Player[] = []
+  killingQueue: Killing[] = []
   actors = new Map<number, Actor>()
 
   constructor () {
@@ -45,9 +48,23 @@ export class Stage {
   }
 
   onStep (): void {
+    this.actors.forEach(actor => actor.onStep())
     this.destructionQueue.forEach(body => {
       this.world.destroyBody(body)
     })
+    this.respawnQueue.forEach(player => {
+      player.respawn()
+    })
+    this.killingQueue.forEach(killing => {
+      const killerPosition = killing.killer.body.getPosition()
+      const victimPosition = killing.victim.deathPosition
+      const killingVector = Vec2.sub(victimPosition, killerPosition)
+      const brickPosition = Vec2.combine(1, killerPosition, 2, killingVector)
+      void new Brick({ stage: this, halfWidth: 1, halfHeight: 2, position: brickPosition })
+    })
+    this.killingQueue = []
+    this.respawnQueue = []
+    this.destructionQueue = []
   }
 
   preSolve (contact: Contact): void {
@@ -64,26 +81,27 @@ export class Stage {
     const wally = wallyA || wallyB
     if (wally) return
     if (featureA.actor === featureB.actor) return
-    featureA.health -= mouthyA ? 0.1 : 0.5
-    featureB.health -= mouthyB ? 0.1 : 0.5
-    featureA.color.alpha = featureA.health
-    featureB.color.alpha = featureB.health
-    if (featureA.health <= 0) {
-      this.destructionQueue.push(featureA.body)
-      if (mouthyA) {
-        featureA.actor.features.forEach(feature => this.destructionQueue.push(feature.body))
-        this.actors.delete(featureA.actor.id)
-      } else {
-        this.destructionQueue.push(featureA.body)
+    const pairs = [
+      [featureA, featureB],
+      [featureB, featureA]
+    ]
+    pairs.forEach(pair => {
+      const feature = pair[0]
+      const otherFeature = pair[1]
+      if (feature.actor.invincibleTime > 0) return
+      if (!(otherFeature.actor instanceof Player)) return
+      feature.health -= feature instanceof Mouth ? 0.1 : 0.5
+      feature.color.alpha = featureA.health
+      if (feature.health <= 0) {
+        if (feature.actor instanceof Player) {
+          this.respawnQueue.push(feature.actor)
+          const killing = new Killing({ victim: feature, killer: otherFeature })
+          this.killingQueue.push(killing)
+        } else {
+          this.destructionQueue.push(feature.body)
+          this.actors.delete(feature.actor.id)
+        }
       }
-    }
-    if (featureB.health <= 0) {
-      if (mouthyB) {
-        featureB.actor.features.forEach(feature => this.destructionQueue.push(feature.body))
-        this.actors.delete(featureB.actor.id)
-      } else {
-        this.destructionQueue.push(featureB.body)
-      }
-    }
+    })
   }
 }

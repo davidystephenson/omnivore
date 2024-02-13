@@ -12,6 +12,8 @@ export class Feature {
   borderWidth: number
   color: Color
   borderColor: Color
+  spawnPosition = Vec2(0, 0)
+  deathPosition = Vec2(0, 0)
   health = 1
 
   constructor (props: {

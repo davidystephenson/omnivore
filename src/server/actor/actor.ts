@@ -9,6 +9,7 @@ export class Actor {
   stage: Stage
   label: string
   id: number
+  invincibleTime = 5
 
   constructor (props: {
     stage: Stage
@@ -19,5 +20,9 @@ export class Actor {
     Actor.count += 1
     this.id = Actor.count
     this.stage.actors.set(this.id, this)
+  }
+
+  onStep (): void {
+    this.invincibleTime = Math.max(0, this.invincibleTime - this.stage.runner.timeStep)
   }
 }

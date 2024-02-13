@@ -135,7 +135,10 @@ export class Renderer {
       if (oldElement != null) {
         const oldPosition = oldElement.position
         const newPosition = element.position
-        element.position = Vec2.add(Vec2.mul(oldPosition, this.lerp), Vec2.mul(newPosition, 1 - this.lerp))
+        const distance = Vec2.distance(oldPosition, newPosition)
+        if (distance < 1) {
+          element.position = Vec2.add(Vec2.mul(oldPosition, this.lerp), Vec2.mul(newPosition, 1 - this.lerp))
+        }
       }
       newElements.set(element.id, element)
       if (element.id === summary.id) this.camera.position = element.position

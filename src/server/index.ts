@@ -16,6 +16,9 @@ io.on('connection', socket => {
     if (controls.down) y -= 1
     if (controls.left) x -= 1
     if (controls.right) x += 1
+    if (controls.select) {
+      player.eye.body.setPosition(Vec2(0, 0))
+    }
     const direction = Vec2(x, y)
     direction.normalize()
     const force = Vec2.mul(direction, 20)
