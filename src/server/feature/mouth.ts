@@ -4,10 +4,13 @@ import { Feature } from './feature'
 import { Actor } from '../actor/actor'
 
 export class Mouth extends Feature {
+  radius: number
   constructor (props: {
     position: Vec2
     actor: Actor
+    radius?: number
   }) {
+    const radius = props.radius ?? 1
     super({
       bodyDef: {
         type: 'dynamic',
@@ -17,7 +20,7 @@ export class Mouth extends Feature {
         linearDamping: 0.1
       },
       fixtureDef: {
-        shape: new Circle(Vec2(0, 0), 1),
+        shape: new Circle(Vec2(0, 0), radius),
         density: 1,
         restitution: 0
       },
@@ -26,5 +29,6 @@ export class Mouth extends Feature {
       color: new Color({ red: 0, green: 128, blue: 0 }),
       borderColor: new Color({ red: 0, green: 0, blue: 255 })
     })
+    this.radius = radius
   }
 }

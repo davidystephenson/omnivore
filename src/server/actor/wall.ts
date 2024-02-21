@@ -4,6 +4,7 @@ import { Actor } from './actor'
 import { Barrier } from '../feature/barrier'
 
 export class Wall extends Actor {
+  barrier: Barrier
   constructor (props: {
     stage: Stage
     halfWidth: number
@@ -11,12 +12,12 @@ export class Wall extends Actor {
     position: Vec2
   }) {
     super({ stage: props.stage, label: 'wall' })
-    const barrier = new Barrier({
+    this.barrier = new Barrier({
       position: props.position,
       halfHeight: props.halfHeight,
       halfWidth: props.halfWidth,
       actor: this
     })
-    this.features.push(barrier)
+    this.features.push(this.barrier)
   }
 }
