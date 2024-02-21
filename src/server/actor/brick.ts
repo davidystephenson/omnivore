@@ -19,6 +19,7 @@ export class Brick extends Actor {
       halfWidth: props.halfWidth,
       actor: this
     })
+    this.invincibleTime = 0.1
     this.features.push(this.crate)
   }
 

@@ -21,7 +21,8 @@ export class Crate extends Feature {
       fixtureDef: {
         shape: new BoxShape(props.halfWidth, props.halfHeight),
         density: 1,
-        restitution: 0
+        restitution: 0,
+        friction: 0
       },
       label: 'player',
       actor: props.actor,

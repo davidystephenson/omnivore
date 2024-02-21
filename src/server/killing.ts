@@ -17,20 +17,17 @@ export class Killing {
   }
 
   execute (): void {
-    console.log('begin execute')
     const killerPosition = this.killer.body.getPosition()
-    const victimPosition = this.victim.deathPosition
-    const brickDirection = getCompass(Vec2.sub(victimPosition, killerPosition))
+    const brickDirection = getCompass(Vec2.sub(this.victim.deathPosition, killerPosition))
     const brickLookDistance = brickDirection.x !== 0 ? SIGHT.x : SIGHT.y
     const sideLookDistance = brickDirection.x !== 0 ? SIGHT.y : SIGHT.x
-    const killerRadius = this.killer.radius
-    const nearPoint = Vec2.combine(1, killerPosition, killerRadius, brickDirection)
+    const base = Vec2.combine(1, killerPosition, this.killer.radius, brickDirection)
     const sideDirections = [
       Vec2(-brickDirection.y, brickDirection.x),
       Vec2(brickDirection.y, -brickDirection.x)
     ]
     const nearLookPoints = sideDirections.map(sideDirection => {
-      return Vec2.combine(1, nearPoint, sideLookDistance, sideDirection)
+      return Vec2.combine(1, base, sideLookDistance, sideDirection)
     })
     const farLookPoints = nearLookPoints.map((point: Vec2): Vec2 => {
       return Vec2.combine(1, point, brickLookDistance, brickDirection)
@@ -41,54 +38,53 @@ export class Killing {
     const lookLowerBound = Vec2(Math.min(...lookPointsX), Math.min(...lookPointsY))
     const lookUpperBound = Vec2(Math.max(...lookPointsX), Math.max(...lookPointsY))
     const lookBox = new AABB(lookLowerBound, lookUpperBound)
-    const brickBox = this.trim(nearPoint, lookBox)
+    const brickBox = this.trim({ base, lookBox })
     const halfWidth = brickBox.getExtents().x
     const halfHeight = brickBox.getExtents().y
     const brickPosition = brickBox.getCenter()
-    console.log('halfWidth', halfWidth)
-    console.log('halfHeight', halfHeight)
     if (Math.min(halfWidth, halfHeight) > 0) {
       void new Brick({ stage: this.stage, halfWidth, halfHeight, position: brickPosition })
     }
-    console.log('end execute')
   }
 
-  trim (preserve: Vec2, box: AABB): AABB {
-    const widthFirstBox = this.trimHeight(preserve, this.trimWidth(preserve, box))
-    const heightFirstBox = this.trimWidth(preserve, this.trimHeight(preserve, box))
+  trim (props: { base: Vec2, lookBox: AABB }): AABB {
+    const widthTrimmed = this.trimWidth(props)
+    const heightTrimmed = this.trimWidth(props)
+    const widthFirstBox = this.trimHeight({ base: props.base, lookBox: widthTrimmed })
+    const heightFirstBox = this.trimWidth({ base: props.base, lookBox: heightTrimmed })
     const widthFirstArea = this.getArea(widthFirstBox)
     const heightFirstArea = this.getArea(heightFirstBox)
     if (widthFirstArea > heightFirstArea) return widthFirstBox
     return heightFirstBox
   }
 
-  trimWidth (base: Vec2, box: AABB): AABB {
-    box.extend(-0.1)
-    const upperBound = box.upperBound.clone()
-    const lowerBound = box.lowerBound.clone()
-    this.stage.world.queryAABB(box, (fixture: Fixture): boolean => {
+  trimWidth (props: { base: Vec2, lookBox: AABB }): AABB {
+    const lowerBound = props.lookBox.lowerBound.clone()
+    const upperBound = props.lookBox.upperBound.clone()
+    const extended = new AABB(lowerBound, upperBound)
+    extended.extend(-0.2)
+    this.stage.world.queryAABB(extended, (fixture: Fixture): boolean => {
       const fixtureBox = fixture.getAABB(0)
-      if (fixtureBox.lowerBound.x > base.x) upperBound.x = fixtureBox.lowerBound.x
-      if (fixtureBox.upperBound.x < base.x) lowerBound.x = fixtureBox.upperBound.x
+      if (fixtureBox.lowerBound.x > props.base.x) upperBound.x = fixtureBox.lowerBound.x
+      if (fixtureBox.upperBound.x < props.base.x) lowerBound.x = fixtureBox.upperBound.x
       return true
     })
     const trimmed = new AABB(lowerBound, upperBound)
-    trimmed.extend(-0.1)
     return trimmed
   }
 
-  trimHeight (base: Vec2, box: AABB): AABB {
-    box.extend(-0.1)
-    const upperBound = box.upperBound.clone()
-    const lowerBound = box.lowerBound.clone()
-    this.stage.world.queryAABB(box, (fixture: Fixture): boolean => {
+  trimHeight (props: { base: Vec2, lookBox: AABB }): AABB {
+    const lowerBound = props.lookBox.lowerBound.clone()
+    const upperBound = props.lookBox.upperBound.clone()
+    const extended = new AABB(lowerBound, upperBound)
+    extended.extend(-0.2)
+    this.stage.world.queryAABB(extended, (fixture: Fixture): boolean => {
       const fixtureBox = fixture.getAABB(0)
-      if (fixtureBox.lowerBound.y > base.y) upperBound.y = fixtureBox.lowerBound.y
-      if (fixtureBox.upperBound.y < base.y) lowerBound.y = fixtureBox.upperBound.y
+      if (fixtureBox.lowerBound.y > props.base.y) upperBound.y = fixtureBox.lowerBound.y
+      if (fixtureBox.upperBound.y < props.base.y) lowerBound.y = fixtureBox.upperBound.y
       return true
     })
     const trimmed = new AABB(lowerBound, upperBound)
-    trimmed.extend(-0.1)
     return trimmed
   }
 
