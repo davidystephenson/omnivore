@@ -22,7 +22,8 @@ export class Mouth extends Feature {
       fixtureDef: {
         shape: new Circle(Vec2(0, 0), radius),
         density: 1,
-        restitution: 0
+        restitution: 0,
+        friction: 0
       },
       label: 'mouth',
       actor: props.actor,

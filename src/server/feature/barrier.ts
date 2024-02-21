@@ -18,7 +18,8 @@ export class Barrier extends Feature {
       fixtureDef: {
         shape: Box(props.halfWidth, props.halfHeight),
         density: 1,
-        restitution: 0
+        restitution: 0,
+        friction: 0
       },
       label: 'barrier',
       actor: props.actor,
