@@ -1,13 +1,12 @@
 import { RopeJoint, Vec2 } from 'planck'
-import { Feature } from '../feature/feature'
 import { Stage } from '../stage'
 import { Actor } from './actor'
 import { Mouth } from '../feature/mouth'
 import { Color } from '../../shared/color'
 
 export class Player extends Actor {
-  eye: Feature
-  mouths: Feature[] = []
+  eye: Mouth
+  mouths: Mouth[] = []
 
   constructor (props: {
     stage: Stage
@@ -16,6 +15,8 @@ export class Player extends Actor {
     super({ stage: props.stage, label: 'player' })
     this.eye = this.createMouth({ position: props.position })
     this.eye.borderWidth = 0.2
+    this.eye.health = Math.random()
+    /*
     const mouth = this.createMouth({
       position: Vec2.add(props.position, Vec2(0, 3)),
       cell: this.eye
@@ -24,11 +25,12 @@ export class Player extends Actor {
       position: Vec2.add(mouth.body.getPosition(), Vec2(0, 3)),
       cell: mouth
     })
+    */
   }
 
   createMouth (props: {
     position: Vec2
-    cell?: Feature
+    cell?: Mouth
   }): Mouth {
     const mouth = new Mouth({ position: props.position, actor: this })
     if (props.cell != null) {
@@ -52,6 +54,7 @@ export class Player extends Actor {
     super.onStep()
     if (this.invincibleTime === 0) {
       this.features.forEach(feature => {
+        feature.color.alpha = feature.health
         feature.borderColor = new Color({ red: 0, green: 255, blue: 0 })
       })
     }
@@ -62,7 +65,7 @@ export class Player extends Actor {
     this.invincibleTime = 5
     const noise = Vec2(0.1 * Math.random(), 0.1 * Math.random())
     this.features.forEach(feature => {
-      feature.health = 1
+      feature.health = Math.random()
       feature.color.alpha = feature.health
       feature.borderColor = new Color({ red: 0, green: 0, blue: 255 })
       const featurePosition = feature.body.getPosition()

@@ -2,6 +2,7 @@ import { Vec2 } from 'planck'
 import { Element } from '../shared/element'
 import { Summary } from '../shared/summary'
 import { Rope } from '../shared/rope'
+import { SIGHT } from '../shared/constants'
 
 export class Renderer {
   lerp = 0.5
@@ -38,12 +39,10 @@ export class Renderer {
         if (element.circle != null) {
           const x = element.circle.center.x
           const y = element.circle.center.y
-          const halfHeight = 13
-          const halfWidth = halfHeight * 16 / 9
-          this.context.moveTo(x - halfWidth, y + halfHeight)
-          this.context.lineTo(x - halfWidth, y - halfHeight)
-          this.context.lineTo(x + halfWidth, y - halfHeight)
-          this.context.lineTo(x + halfWidth, y + halfHeight)
+          this.context.moveTo(x - SIGHT.x, y + SIGHT.y)
+          this.context.lineTo(x - SIGHT.x, y - SIGHT.y)
+          this.context.lineTo(x + SIGHT.x, y - SIGHT.y)
+          this.context.lineTo(x + SIGHT.x, y + SIGHT.y)
           this.context.closePath()
           this.context.fill()
         }

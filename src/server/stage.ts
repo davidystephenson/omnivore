@@ -20,6 +20,7 @@ export class Stage {
   constructor () {
     this.world = new World({ gravity: Vec2(0, 0) })
     this.world.on('pre-solve', contact => this.preSolve(contact))
+    this.world.on('begin-contact', contact => this.beginContact(contact))
     this.runner = new Runner({ stage: this })
 
     // outer walls
@@ -55,19 +56,13 @@ export class Stage {
     this.respawnQueue.forEach(player => {
       player.respawn()
     })
-    this.killingQueue.forEach(killing => {
-      const killerPosition = killing.killer.body.getPosition()
-      const victimPosition = killing.victim.deathPosition
-      const killingVector = Vec2.sub(victimPosition, killerPosition)
-      const brickPosition = Vec2.combine(1, killerPosition, 2, killingVector)
-      void new Brick({ stage: this, halfWidth: 1, halfHeight: 2, position: brickPosition })
-    })
+    this.killingQueue.forEach(killing => killing.execute())
     this.killingQueue = []
     this.respawnQueue = []
     this.destructionQueue = []
   }
 
-  preSolve (contact: Contact): void {
+  beginContact (contact: Contact): void {
     const fixtureA = contact.getFixtureA()
     const fixtureB = contact.getFixtureB()
     const featureA = fixtureA.getBody().getUserData() as Feature
@@ -88,14 +83,19 @@ export class Stage {
     pairs.forEach(pair => {
       const feature = pair[0]
       const otherFeature = pair[1]
-      if (feature.actor.invincibleTime > 0) return
-      if (!(otherFeature.actor instanceof Player)) return
-      feature.health -= feature instanceof Mouth ? 0.1 : 0.5
-      feature.color.alpha = featureA.health
+      if (!(otherFeature.actor instanceof Player) && feature.actor instanceof Player) return
+      if (feature.actor.invincibleTime === 0) {
+        feature.health -= feature instanceof Mouth ? 0.2 : 0.5
+        feature.color.alpha = featureA.health
+      }
       if (feature.health <= 0) {
         if (feature.actor instanceof Player) {
           this.respawnQueue.push(feature.actor)
-          const killing = new Killing({ victim: feature, killer: otherFeature })
+          const killing = new Killing({
+            victim: feature as Mouth,
+            stage: this,
+            killer: otherFeature as Mouth
+          })
           this.killingQueue.push(killing)
         } else {
           this.destructionQueue.push(feature.body)
@@ -104,4 +104,6 @@ export class Stage {
       }
     })
   }
+
+  preSolve (contact: Contact): void {}
 }
