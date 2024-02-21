@@ -24,9 +24,5 @@ export class Brick extends Actor {
 
   onStep (): void {
     super.onStep()
-    const colliding = this.crate.body.getContactList() != null
-    if (colliding) this.crate.health -= 0.01
-    if (this.crate.health <= 0) this.stage.destructionQueue.push(this.crate.body)
-    this.crate.color.alpha = this.crate.health
   }
 }

@@ -18,7 +18,6 @@ export class Killing {
 
   execute (): void {
     console.log('begin execute')
-    if (this.killer.actor.invincibleTime > 0) return
     const killerPosition = this.killer.body.getPosition()
     const victimPosition = this.victim.deathPosition
     const brickDirection = getCompass(Vec2.sub(victimPosition, killerPosition))
@@ -91,42 +90,6 @@ export class Killing {
     const trimmed = new AABB(lowerBound, upperBound)
     trimmed.extend(-0.1)
     return trimmed
-  }
-
-  trimBaseWidth (base: Vec2, box: AABB): AABB {
-    const lowerBound = box.lowerBound.clone()
-    const upperBound = box.upperBound.clone()
-    const leftPoint = Vec2(base.x - SIGHT.x, base.y)
-    const rightPoint = Vec2(base.x + SIGHT.x, base.y)
-    this.stage.world.rayCast(base, leftPoint, (fixture, point, normal, fraction) => {
-      const fixtureBox = fixture.getAABB(0)
-      if (fixtureBox.upperBound.x < base.x) lowerBound.x = fixtureBox.upperBound.x
-      return fraction
-    })
-    this.stage.world.rayCast(base, rightPoint, (fixture, point, normal, fraction) => {
-      const fixtureBox = fixture.getAABB(0)
-      if (fixtureBox.lowerBound.x > base.x) upperBound.x = fixtureBox.lowerBound.x
-      return fraction
-    })
-    return new AABB(lowerBound, upperBound)
-  }
-
-  trimBaseHeight (base: Vec2, box: AABB): AABB {
-    const lowerBound = box.lowerBound.clone()
-    const upperBound = box.upperBound.clone()
-    const downPoint = Vec2(base.x, base.y - SIGHT.y)
-    const upPoint = Vec2(base.x, base.y + SIGHT.y)
-    this.stage.world.rayCast(base, downPoint, (fixture, point, normal, fraction) => {
-      const fixtureBox = fixture.getAABB(0)
-      if (fixtureBox.upperBound.y < base.y) lowerBound.y = fixtureBox.upperBound.y
-      return fraction
-    })
-    this.stage.world.rayCast(base, upPoint, (fixture, point, normal, fraction) => {
-      const fixtureBox = fixture.getAABB(0)
-      if (fixtureBox.lowerBound.y > base.y) upperBound.y = fixtureBox.lowerBound.y
-      return fraction
-    })
-    return new AABB(lowerBound, upperBound)
   }
 
   getArea (box: AABB): number {
