@@ -23,6 +23,6 @@ export class Actor {
   }
 
   onStep (): void {
-    this.invincibleTime = Math.max(0, this.invincibleTime - this.stage.runner.timeStep)
+    // this.invincibleTime = Math.max(0, this.invincibleTime - this.stage.runner.timeStep)
   }
 }
