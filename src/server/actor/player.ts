@@ -3,6 +3,7 @@ import { Stage } from '../stage'
 import { Actor } from './actor'
 import { Mouth } from '../feature/mouth'
 import { Color } from '../../shared/color'
+import { directionFromTo, rotate } from '../math'
 
 export class Player extends Actor {
   eye: Mouth
@@ -15,14 +16,56 @@ export class Player extends Actor {
     super({ stage: props.stage, label: 'player' })
     this.eye = this.createMouth({ position: props.position })
     this.eye.borderWidth = 0.2
-    this.eye.health = Math.random()
-    const mouth = this.createMouth({
-      position: Vec2.add(props.position, Vec2(0, 3)),
-      cell: this.eye
+    this.eye.health = 1
+    const eyePosition = this.eye.body.getPosition()
+    const north = Vec2(0, 3)
+    const steps1 = [-0.75, -0.25, 0.25, 0.75]
+    const layer1: Mouth[] = []
+    steps1.forEach(i => {
+      const offset = rotate(north, Math.PI * i)
+      layer1.push(this.createMouth({
+        position: Vec2.add(eyePosition, offset),
+        cell: this.eye
+      }))
     })
-    this.createMouth({
-      position: Vec2.add(mouth.body.getPosition(), Vec2(0, 3)),
-      cell: mouth
+    const steps2 = [-1, 0, 1]
+    const layer2: Mouth[] = []
+    layer1.forEach(parent => {
+      steps2.forEach(i => {
+        const parentPosition = parent.body.getPosition()
+        const away = directionFromTo(eyePosition, parentPosition)
+        const offset = rotate(Vec2.mul(away, 3), 1 * i)
+        layer2.push(this.createMouth({
+          position: Vec2.add(parentPosition, offset),
+          cell: parent
+        }))
+      })
+    })
+    const steps3 = [-0.5, 0.5]
+    const layer3: Mouth[] = []
+    layer2.forEach(parent => {
+      steps3.forEach(i => {
+        const parentPosition = parent.body.getPosition()
+        const away = directionFromTo(eyePosition, parentPosition)
+        const offset = rotate(Vec2.mul(away, 3), 1 * i)
+        layer3.push(this.createMouth({
+          position: Vec2.add(parentPosition, offset),
+          cell: parent
+        }))
+      })
+    })
+    const steps4 = [0]
+    const layer4: Mouth[] = []
+    layer3.forEach(parent => {
+      steps4.forEach(i => {
+        const parentPosition = parent.body.getPosition()
+        const away = directionFromTo(eyePosition, parentPosition)
+        const offset = rotate(Vec2.mul(away, 3), 1 * i)
+        layer4.push(this.createMouth({
+          position: Vec2.add(parentPosition, offset),
+          cell: parent
+        }))
+      })
     })
   }
 
@@ -50,12 +93,12 @@ export class Player extends Actor {
 
   onStep (): void {
     super.onStep()
-    if (this.invincibleTime === 0) {
-      this.features.forEach(feature => {
-        feature.color.alpha = feature.health
+    this.features.forEach(feature => {
+      feature.color.alpha = feature.health
+      if (this.invincibleTime === 0) {
         feature.borderColor = new Color({ red: 0, green: 255, blue: 0 })
-      })
-    }
+      }
+    })
   }
 
   respawn (): void {

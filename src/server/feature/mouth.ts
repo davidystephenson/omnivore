@@ -1,13 +1,14 @@
 import { Vec2, Circle } from 'planck'
 import { Color } from '../../shared/color'
 import { Feature } from './feature'
-import { Actor } from '../actor/actor'
+import { Player } from '../actor/player'
 
 export class Mouth extends Feature {
   radius: number
+  actor: Player
   constructor (props: {
     position: Vec2
-    actor: Actor
+    actor: Player
     radius?: number
   }) {
     const radius = props.radius ?? 1
@@ -30,6 +31,7 @@ export class Mouth extends Feature {
       color: new Color({ red: 0, green: 128, blue: 0 }),
       borderColor: new Color({ red: 0, green: 0, blue: 255 })
     })
+    this.actor = props.actor
     this.radius = radius
   }
 }
