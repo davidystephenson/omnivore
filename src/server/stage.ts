@@ -37,7 +37,7 @@ export class Stage {
     this.addWall({ halfWidth: 1, halfHeight: 15, position: Vec2(-20, 0) })
     */
 
-    void new Brick({ stage: this, halfWidth: 1, halfHeight: 2, position: Vec2(10, 0) })
+    // void new Brick({ stage: this, halfWidth: 1, halfHeight: 2, position: Vec2(10, 0) })
   }
 
   addPlayer (props: { position: Vec2 }): Player {
