@@ -18,7 +18,7 @@ export class Player extends Actor {
     this.eye.borderWidth = 0.2
     this.eye.health = 1
     const eyePosition = this.eye.body.getPosition()
-    const north = Vec2(0, 3)
+    const north = Vec2(0, 1)
 
     /*
     const steps1 = [-0.75, -0.25, 0.25, 0.75]
@@ -27,67 +27,112 @@ export class Player extends Actor {
     const steps4 = [0]
     */
 
-    const steps1 = [0]
-    const steps2 = [-0.7, 0, 0.7]
-    const steps3 = [-0.4, 0, 0.4]
-    const steps4 = [-0.1, 0.1]
+    // type Tree = Record<number, Record<number, Record<number, Record<number, {}>>>>
 
-    type Tree = Record<number, Record<number, Record<number, Record<number, {}>>>>
+    // const tree: Tree = {
+    //   0: {
+    //     '-0.3': {},
+    //     0: {},
+    //     0.3: {}
+    //   },
+    //   1: {
+    //     '-0.3': {},
+    //     0: {
+    //       0: {
+    //         0: {}
+    //       }
+    //     },
+    //     0.3: {}
+    //   }
+    // }
+
+    interface Branch {
+      angle: number
+      radius: number
+      branches: Branch[]
+    }
+
+    interface Tree {
+      branches: Branch[]
+    }
 
     const tree: Tree = {
-      0: {
-        '-0.3': {},
-        0: {},
-        0.3: {}
-      },
-      1: {
-        '-0.3': {},
-        0: {
-          0: {
-            0: {}
-          }
+      branches: [
+        {
+          angle: 0,
+          radius: 1,
+          branches: [
+            { angle: -0.3, radius: 0.2, branches: [] },
+            { angle: 0, radius: 0.5, branches: [] },
+            { angle: 0.3, radius: 0.2, branches: [] }
+          ]
         },
-        0.3: {}
-      }
+        {
+          angle: 1,
+          radius: 0.2,
+          branches: [
+            { angle: -0.3, radius: 0.2, branches: [] },
+            {
+              angle: 0,
+              radius: 0.3,
+              branches: [
+                {
+                  angle: 0,
+                  radius: 0.4,
+                  branches: [
+                    { angle: 0, radius: 0.5, branches: [] }
+                  ]
+                }
+              ]
+            },
+            { angle: 0.4, radius: 1, branches: [] }
+          ]
+        }
+      ]
     }
 
     const cells: Mouth[] = []
-
-    for (const key1 in tree) {
-      const offset = rotate(north, Math.PI * Number(key1))
+    const gap = 0.4 - Number.MIN_VALUE
+    for (const branch1 of tree.branches) {
+      const distance = this.eye.radius + branch1.radius + gap
+      const offset = rotate(Vec2.mul(north, distance), Math.PI * branch1.angle)
       const child1 = this.createMouth({
         position: Vec2.add(eyePosition, offset),
-        cell: this.eye
+        cell: this.eye,
+        radius: branch1.radius
       })
       cells.push(child1)
-      const branch1 = tree[key1]
-      for (const key2 in branch1) {
+      for (const branch2 of branch1.branches) {
         const parentPosition = child1.body.getPosition()
         const away = directionFromTo(eyePosition, parentPosition)
-        const offset = rotate(Vec2.mul(away, 3), Math.PI * Number(key2))
+        const distance = child1.radius + branch2.radius + gap
+        const offset = rotate(Vec2.mul(away, distance), Math.PI * branch2.angle)
         const child2 = this.createMouth({
           position: Vec2.add(parentPosition, offset),
-          cell: child1
+          cell: child1,
+          radius: branch2.radius
         })
         cells.push(child2)
-        const branch2 = branch1[key2]
-        for (const key3 in branch2) {
+        for (const branch3 of branch2.branches) {
           const parentPosition = child2.body.getPosition()
           const away = directionFromTo(eyePosition, parentPosition)
-          const offset = rotate(Vec2.mul(away, 3), Math.PI * Number(key3))
+          const distance = child2.radius + branch3.radius + gap
+          const offset = rotate(Vec2.mul(away, distance), Math.PI * branch3.angle)
           const child3 = this.createMouth({
             position: Vec2.add(parentPosition, offset),
-            cell: child2
+            cell: child2,
+            radius: branch3.radius
           })
           cells.push(child3)
-          const branch3 = branch2[key3]
-          for (const key4 in branch3) {
+          for (const branch4 of branch3.branches) {
             const parentPosition = child3.body.getPosition()
             const away = directionFromTo(eyePosition, parentPosition)
-            const offset = rotate(Vec2.mul(away, 3), Math.PI * Number(key4))
+            const distance = child3.radius + branch4.radius + gap
+            const offset = rotate(Vec2.mul(away, distance), Math.PI * branch4.angle)
             const child4 = this.createMouth({
               position: Vec2.add(parentPosition, offset),
-              cell: child3
+              cell: child3,
+              radius: branch4.radius
             })
             cells.push(child4)
           }
@@ -146,16 +191,18 @@ export class Player extends Actor {
   createMouth (props: {
     position: Vec2
     cell?: Mouth
+    radius?: number
   }): Mouth {
-    const mouth = new Mouth({ position: props.position, actor: this })
+    const mouth = new Mouth({ position: props.position, actor: this, radius: props.radius })
     if (props.cell != null) {
+      const maxLength = Vec2.distance(props.position, props.cell.body.getPosition())
       const joint = new RopeJoint({
         bodyA: props.cell.body,
         bodyB: mouth.body,
         localAnchorA: Vec2(0, 0),
         localAnchorB: Vec2(0, 0),
         collideConnected: true,
-        maxLength: 3
+        maxLength
       })
       this.joints.push(joint)
       this.stage.world.createJoint(joint)
