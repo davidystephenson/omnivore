@@ -107,5 +107,19 @@ export class Stage {
     })
   }
 
-  preSolve (contact: Contact): void {}
+  preSolve (contact: Contact): void {
+    const fixtureA = contact.getFixtureA()
+    const fixtureB = contact.getFixtureB()
+    const featureA = fixtureA.getBody().getUserData() as Feature
+    const featureB = fixtureB.getBody().getUserData() as Feature
+    const pairs = [
+      [featureA, featureB],
+      [featureB, featureA]
+    ]
+    pairs.forEach(pair => {
+      const feature = pair[0]
+      const otherFeature = pair[1]
+      if (feature.label === 'egg' && otherFeature.label === 'mouth') contact.setEnabled(false)
+    })
+  }
 }

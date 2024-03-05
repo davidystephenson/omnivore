@@ -1,191 +1,182 @@
-import { RopeJoint, Vec2 } from 'planck'
+/*
+const distance = this.eye.radius + branch1.radius + this.gap
+const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * branch1.angle)
+const child1 = this.createMouth({
+  position: Vec2.add(eyePosition, offset),
+  cell: this.eye,
+  radius: branch1.radius
+})
+for (const branch2 of branch1.branches) {
+  const parentPosition = child1.body.getPosition()
+  const distance = child1.radius + branch2.radius + this.gap
+  const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * branch2.angle)
+  const child2 = this.createMouth({
+    position: Vec2.add(parentPosition, offset),
+    cell: child1,
+    radius: branch2.radius
+  })
+  for (const branch3 of branch2.branches) {
+    const parentPosition = child2.body.getPosition()
+    const distance = child2.radius + branch3.radius + this.gap
+    const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * branch3.angle)
+    const child3 = this.createMouth({
+      position: Vec2.add(parentPosition, offset),
+      cell: child2,
+      radius: branch3.radius
+    })
+    for (const branch4 of branch3.branches) {
+      const parentPosition = child3.body.getPosition()
+      const distance = child3.radius + branch4.radius + this.gap
+      const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * branch4.angle)
+      this.createMouth({
+        position: Vec2.add(parentPosition, offset),
+        cell: child3,
+        radius: branch4.radius
+      })
+    }
+  }
+}
+*/
+
+import { CircleShape, RopeJoint, Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Actor } from './actor'
 import { Mouth } from '../feature/mouth'
 import { Color } from '../../shared/color'
-import { directionFromTo, rotate } from '../math'
+import { rotate } from '../math'
+import { Egg } from '../feature/egg'
+
+interface Branch {
+  angle: number
+  radius: number
+  branches: Branch[]
+}
 
 export class Player extends Actor {
-  eye: Mouth
+  eye: Egg | Mouth
   mouths: Mouth[] = []
+  north = Vec2(0, 1)
+  spawnPosition: Vec2
+  gap = 0.5
+  tree: Branch
+  readyToHatch = false
+  hatched = false
 
   constructor (props: {
     stage: Stage
     position: Vec2
   }) {
     super({ stage: props.stage, label: 'player' })
-    this.eye = this.createMouth({ position: props.position })
-    this.eye.borderWidth = 0.2
-    this.eye.health = 1
-    const eyePosition = this.eye.body.getPosition()
-    const north = Vec2(0, 1)
+    this.spawnPosition = props.position
 
-    /*
-    const steps1 = [-0.75, -0.25, 0.25, 0.75]
-    const steps2 = [-1 / 3, 0, 1 / 3]
-    const steps3 = [-0.1, 0.1]
-    const steps4 = [0]
-    */
-
-    // type Tree = Record<number, Record<number, Record<number, Record<number, {}>>>>
-
-    // const tree: Tree = {
-    //   0: {
-    //     '-0.3': {},
-    //     0: {},
-    //     0.3: {}
-    //   },
-    //   1: {
-    //     '-0.3': {},
-    //     0: {
-    //       0: {
-    //         0: {}
-    //       }
-    //     },
-    //     0.3: {}
-    //   }
-    // }
-
-    interface Branch {
-      angle: number
-      radius: number
-      branches: Branch[]
-    }
-
-    interface Tree {
-      branches: Branch[]
-    }
-
-    const tree: Tree = {
+    this.tree = {
+      radius: 0.3,
+      angle: 0,
       branches: [
         {
           angle: 0,
-          radius: 1,
+          radius: 0.3,
           branches: [
-            { angle: -0.3, radius: 0.2, branches: [] },
             { angle: 0, radius: 0.5, branches: [] },
-            { angle: 0.3, radius: 0.2, branches: [] }
+            { angle: 0.25, radius: 0.5, branches: [] },
+            { angle: 0, radius: 0.3, branches: [] }
           ]
         },
         {
-          angle: 1,
-          radius: 0.2,
+          angle: 0.5,
+          radius: 0.3,
           branches: [
-            { angle: -0.3, radius: 0.2, branches: [] },
+            { angle: 0.25, radius: 0.3, branches: [] },
             {
-              angle: 0,
+              angle: 0.5,
               radius: 0.3,
               branches: [
                 {
-                  angle: 0,
+                  angle: 0.5,
                   radius: 0.4,
                   branches: [
-                    { angle: 0, radius: 0.5, branches: [] }
+                    { angle: 0.5, radius: 0.5, branches: [] }
                   ]
                 }
               ]
             },
-            { angle: 0.4, radius: 1, branches: [] }
+            { angle: 0.75, radius: 1, branches: [] }
           ]
         }
       ]
     }
 
-    const cells: Mouth[] = []
-    const gap = 0.4 - Number.MIN_VALUE
-    for (const branch1 of tree.branches) {
-      const distance = this.eye.radius + branch1.radius + gap
-      const offset = rotate(Vec2.mul(north, distance), Math.PI * branch1.angle)
-      const child1 = this.createMouth({
-        position: Vec2.add(eyePosition, offset),
-        cell: this.eye,
-        radius: branch1.radius
-      })
-      cells.push(child1)
-      for (const branch2 of branch1.branches) {
-        const parentPosition = child1.body.getPosition()
-        const away = directionFromTo(eyePosition, parentPosition)
-        const distance = child1.radius + branch2.radius + gap
-        const offset = rotate(Vec2.mul(away, distance), Math.PI * branch2.angle)
-        const child2 = this.createMouth({
-          position: Vec2.add(parentPosition, offset),
-          cell: child1,
-          radius: branch2.radius
-        })
-        cells.push(child2)
-        for (const branch3 of branch2.branches) {
-          const parentPosition = child2.body.getPosition()
-          const away = directionFromTo(eyePosition, parentPosition)
-          const distance = child2.radius + branch3.radius + gap
-          const offset = rotate(Vec2.mul(away, distance), Math.PI * branch3.angle)
-          const child3 = this.createMouth({
-            position: Vec2.add(parentPosition, offset),
-            cell: child2,
-            radius: branch3.radius
-          })
-          cells.push(child3)
-          for (const branch4 of branch3.branches) {
-            const parentPosition = child3.body.getPosition()
-            const away = directionFromTo(eyePosition, parentPosition)
-            const distance = child3.radius + branch4.radius + gap
-            const offset = rotate(Vec2.mul(away, distance), Math.PI * branch4.angle)
-            const child4 = this.createMouth({
-              position: Vec2.add(parentPosition, offset),
-              cell: child3,
-              radius: branch4.radius
-            })
-            cells.push(child4)
-          }
-        }
-      }
-    }
+    const circles: CircleShape[] = []
+    this.addCircles({ branch: this.tree, circles })
+    const top = Math.max(...circles.map(circle => circle.getCenter().y + circle.getRadius()))
+    const bottom = Math.min(...circles.map(circle => circle.getCenter().y - circle.getRadius()))
+    const right = Math.max(...circles.map(circle => circle.getCenter().x + circle.getRadius()))
+    const left = Math.min(...circles.map(circle => circle.getCenter().x - circle.getRadius()))
+    const position = Vec2(0.5 * right + 0.5 * left, 0.5 * top + 0.5 * bottom)
+    const hx = 0.5 * (right - left)
+    const hy = 0.5 * (top - bottom)
+    this.eye = new Egg({ actor: this, position, hx, hy })
 
-    /*
-    const layer1: Mouth[] = []
-    steps1.forEach(i => {
-      const offset = rotate(north, Math.PI * i)
-      layer1.push(this.createMouth({
-        position: Vec2.add(eyePosition, offset),
-        cell: this.eye
-      }))
-    })
-    const layer2: Mouth[] = []
-    layer1.forEach(parent => {
-      steps2.forEach(i => {
-        const parentPosition = parent.body.getPosition()
-        const away = directionFromTo(eyePosition, parentPosition)
-        const offset = rotate(Vec2.mul(away, 3), Math.PI * i)
-        layer2.push(this.createMouth({
-          position: Vec2.add(parentPosition, offset),
-          cell: parent
-        }))
+    setTimeout(() => { this.readyToHatch = true }, 5000)
+  }
+
+  hatch = (): void => {
+    // if(this.eye.body.getContactList() != null)
+    this.hatched = true
+    this.stage.destructionQueue.push(this.eye.body)
+    this.spawnPosition = this.eye.body.getPosition()
+    this.eye = this.grow({ branch: this.tree })
+    this.eye.borderWidth = 0.2
+  }
+
+  getOffset (props: { parent: Mouth, branch: Branch }): Vec2 {
+    const parentPosition = props.parent.body.getPosition()
+    const distance = props.parent.radius + props.branch.radius + this.gap
+    const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * props.branch.angle)
+    const offsetPosition = Vec2.add(parentPosition, offset)
+    return offsetPosition
+  }
+
+  addCircles (props: {
+    branch: Branch
+    circles: CircleShape[]
+    parentPosition?: Vec2
+    parentRadius?: number
+  }): void {
+    let center = this.spawnPosition
+    if (props.parentPosition != null && props.parentRadius != null) {
+      const distance = props.parentRadius + props.branch.radius + this.gap
+      const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * props.branch.angle)
+      center = Vec2.add(props.parentPosition, offset)
+    }
+    const circle = new CircleShape(center, props.branch.radius)
+    props.circles.push(circle)
+    for (const childBranch of props.branch.branches) {
+      this.addCircles({
+        branch: childBranch,
+        parentPosition: circle.getCenter(),
+        parentRadius: circle.getRadius(),
+        circles: props.circles
       })
+    }
+  }
+
+  grow (props: {
+    branch: Branch
+    parent?: Mouth
+  }): Mouth {
+    const position = props.parent == null
+      ? this.spawnPosition
+      : this.getOffset({ parent: props.parent, branch: props.branch })
+    const mouth = this.createMouth({
+      position,
+      cell: props.parent,
+      radius: props.branch.radius
     })
-    const layer3: Mouth[] = []
-    layer2.forEach(parent => {
-      steps3.forEach(i => {
-        const parentPosition = parent.body.getPosition()
-        const away = directionFromTo(eyePosition, parentPosition)
-        const offset = rotate(Vec2.mul(away, 3), Math.PI * i)
-        layer3.push(this.createMouth({
-          position: Vec2.add(parentPosition, offset),
-          cell: parent
-        }))
-      })
-    })
-    const layer4: Mouth[] = []
-    layer3.forEach(parent => {
-      steps4.forEach(i => {
-        const parentPosition = parent.body.getPosition()
-        const away = directionFromTo(eyePosition, parentPosition)
-        const offset = rotate(Vec2.mul(away, 3), 1 * i)
-        layer4.push(this.createMouth({
-          position: Vec2.add(parentPosition, offset),
-          cell: parent
-        }))
-      })
-    })
-    */
+    for (const childBranch of props.branch.branches) {
+      this.grow({ branch: childBranch, parent: mouth })
+    }
+    return mouth
   }
 
   createMouth (props: {
@@ -220,6 +211,7 @@ export class Player extends Actor {
         feature.borderColor = new Color({ red: 0, green: 255, blue: 0 })
       }
     })
+    if (this.readyToHatch && !this.hatched) this.hatch()
   }
 
   respawn (): void {

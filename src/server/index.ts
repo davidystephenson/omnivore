@@ -22,7 +22,10 @@ io.on('connection', socket => {
     const direction = Vec2(x, y)
     direction.normalize()
     const force = Vec2.mul(direction, 20)
-    player.mouths.forEach(mouth => { mouth.force = force })
+    if (player.mouths.length === 0) {
+      player.eye.force = Vec2.mul(force, player.eye.body.getMass())
+    }
+    player.mouths.forEach(mouth => { mouth.force = Vec2.mul(force, mouth.body.getMass()) })
     const summary = stage.runner.getSummary({ player })
     socket.emit('serverUpdateClient', summary)
   })
