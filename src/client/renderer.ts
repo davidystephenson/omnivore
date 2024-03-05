@@ -36,16 +36,16 @@ export class Renderer {
         this.context.fillStyle = 'rgba(50,50,50,1)'
         this.context.lineWidth = 0.4
         this.context.beginPath()
-        if (element.circle != null) {
-          const x = element.circle.center.x
-          const y = element.circle.center.y
-          this.context.moveTo(x - SIGHT.x, y + SIGHT.y)
-          this.context.lineTo(x - SIGHT.x, y - SIGHT.y)
-          this.context.lineTo(x + SIGHT.x, y - SIGHT.y)
-          this.context.lineTo(x + SIGHT.x, y + SIGHT.y)
-          this.context.closePath()
-          this.context.fill()
-        }
+        const center = element.circle?.center ?? Vec2(0, 0)
+        const x = center.x
+        const y = center.y
+
+        this.context.moveTo(x - SIGHT.x, y + SIGHT.y)
+        this.context.lineTo(x - SIGHT.x, y - SIGHT.y)
+        this.context.lineTo(x + SIGHT.x, y - SIGHT.y)
+        this.context.lineTo(x + SIGHT.x, y + SIGHT.y)
+        this.context.closePath()
+        this.context.fill()
       }
     })
     this.ropes.forEach(rope => {
