@@ -1,5 +1,5 @@
 import { AABB, Fixture, Vec2 } from 'planck'
-import { SIGHT } from '../shared/constants'
+import { SIGHT } from '../shared/sight'
 import { Brick } from './actor/brick'
 import { Mouth } from './feature/mouth'
 import { getCompass } from './math'

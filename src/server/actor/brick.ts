@@ -12,7 +12,7 @@ export class Brick extends Actor {
     halfHeight: number
     position: Vec2
   }) {
-    super({ stage: props.stage, label: 'wall' })
+    super({ stage: props.stage, label: 'brick' })
     this.crate = new Crate({
       position: props.position,
       halfHeight: props.halfHeight,

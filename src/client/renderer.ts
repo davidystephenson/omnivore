@@ -2,7 +2,7 @@ import { Vec2 } from 'planck'
 import { Element } from '../shared/element'
 import { Summary } from '../shared/summary'
 import { Rope } from '../shared/rope'
-import { SIGHT } from '../shared/constants'
+import { SIGHT } from '../shared/sight'
 
 export class Renderer {
   lerp = 0.5
@@ -29,26 +29,22 @@ export class Renderer {
     this.context.resetTransform()
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
     this.followCamera()
-    this.elements.forEach(element => {
-      this.followCamera()
-      if (element.id === this.id) {
-        this.context.translate(element.position.x, element.position.y)
-        this.context.fillStyle = 'rgba(50,50,50,1)'
-        this.context.lineWidth = 0.4
-        this.context.beginPath()
-        const center = element.circle?.center ?? Vec2(0, 0)
-        const x = center.x
-        const y = center.y
-
-        this.context.moveTo(x - SIGHT.x, y + SIGHT.y)
-        this.context.lineTo(x - SIGHT.x, y - SIGHT.y)
-        this.context.lineTo(x + SIGHT.x, y - SIGHT.y)
-        this.context.lineTo(x + SIGHT.x, y + SIGHT.y)
-        this.context.closePath()
-        this.context.fill()
-      }
-    })
+    const eye = this.elements.get(this.id)
+    if (eye == null) {
+      return
+    }
+    this.context.translate(eye.position.x, eye.position.y)
+    this.context.fillStyle = 'rgba(50,50,50,1)'
+    this.context.lineWidth = 0.4
+    this.context.beginPath()
+    this.context.moveTo(-SIGHT.x, SIGHT.y)
+    this.context.lineTo(-SIGHT.x, -SIGHT.y)
+    this.context.lineTo(SIGHT.x, -SIGHT.y)
+    this.context.lineTo(SIGHT.x, SIGHT.y)
+    this.context.closePath()
+    this.context.fill()
     this.ropes.forEach(rope => {
+      this.followCamera()
       this.context.lineWidth = 0.1
       this.context.strokeStyle = 'green'
       this.context.beginPath()

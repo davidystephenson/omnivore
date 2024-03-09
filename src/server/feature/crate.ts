@@ -24,7 +24,7 @@ export class Crate extends Feature {
         restitution: 0,
         friction: 0
       },
-      label: 'player',
+      label: 'crate',
       actor: props.actor,
       color: new Color({ red: 200, green: 200, blue: 200 }),
       borderColor: new Color({ red: 225, green: 225, blue: 225 })
