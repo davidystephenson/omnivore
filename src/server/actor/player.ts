@@ -203,6 +203,8 @@ export class Player extends Actor {
     return mouth
   }
 
+  flee (): void {}
+
   onStep (): void {
     super.onStep()
     this.features.forEach(feature => {
@@ -211,6 +213,7 @@ export class Player extends Actor {
         feature.borderColor = new Color({ red: 0, green: 255, blue: 0 })
       }
     })
+    if (!this.hatched) this.flee()
     if (this.readyToHatch && !this.hatched) this.hatch()
   }
 

@@ -43,8 +43,11 @@ export class Runner {
   getSummary (props: {
     player: Player
   }): Summary {
+    const featuresInVision = props.player.eye.getFeaturesInVision()
+    const idsInVision = featuresInVision.map(feature => feature.id)
+    const filteredElements = this.elements.filter(element => idsInVision.includes(element.id))
     const summary = new Summary({
-      elements: this.elements,
+      elements: filteredElements,
       ropes: this.ropes,
       id: props.player.eye.id
     })
