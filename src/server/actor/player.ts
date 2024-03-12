@@ -1,43 +1,3 @@
-/*
-const distance = this.eye.radius + branch1.radius + this.gap
-const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * branch1.angle)
-const child1 = this.createMouth({
-  position: Vec2.add(eyePosition, offset),
-  cell: this.eye,
-  radius: branch1.radius
-})
-for (const branch2 of branch1.branches) {
-  const parentPosition = child1.body.getPosition()
-  const distance = child1.radius + branch2.radius + this.gap
-  const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * branch2.angle)
-  const child2 = this.createMouth({
-    position: Vec2.add(parentPosition, offset),
-    cell: child1,
-    radius: branch2.radius
-  })
-  for (const branch3 of branch2.branches) {
-    const parentPosition = child2.body.getPosition()
-    const distance = child2.radius + branch3.radius + this.gap
-    const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * branch3.angle)
-    const child3 = this.createMouth({
-      position: Vec2.add(parentPosition, offset),
-      cell: child2,
-      radius: branch3.radius
-    })
-    for (const branch4 of branch3.branches) {
-      const parentPosition = child3.body.getPosition()
-      const distance = child3.radius + branch4.radius + this.gap
-      const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * branch4.angle)
-      this.createMouth({
-        position: Vec2.add(parentPosition, offset),
-        cell: child3,
-        radius: branch4.radius
-      })
-    }
-  }
-}
-*/
-
 import { CircleShape, RopeJoint, Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Actor } from './actor'
@@ -45,6 +5,8 @@ import { Mouth } from '../feature/mouth'
 import { Color } from '../../shared/color'
 import { rotate } from '../math'
 import { Egg } from '../feature/egg'
+import { Feature } from '../feature/feature'
+import { Rope } from '../../shared/rope'
 
 interface Branch {
   angle: number
@@ -59,6 +21,7 @@ export class Player extends Actor {
   spawnPosition: Vec2
   gap = 0.5
   tree: Branch
+  featuresInVision: Feature[] = []
   readyToHatch = false
   hatched = false
 
@@ -196,6 +159,9 @@ export class Player extends Actor {
         maxLength
       })
       this.joints.push(joint)
+      const rope = new Rope({ joint })
+      props.cell.ropes.push(rope)
+      mouth.ropes.push(rope)
       this.stage.world.createJoint(joint)
     }
     this.mouths.push(mouth)
@@ -203,10 +169,11 @@ export class Player extends Actor {
     return mouth
   }
 
-  flee (): void {}
+  flee (): void { }
 
   onStep (): void {
     super.onStep()
+    this.featuresInVision = this.eye.getFeaturesInVision()
     this.features.forEach(feature => {
       feature.color.alpha = feature.health
       if (this.invincibleTime === 0) {
