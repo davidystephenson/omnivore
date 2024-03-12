@@ -2,6 +2,8 @@ import { AABB, Body, BodyDef, Fixture, FixtureDef, Vec2 } from 'planck'
 import { Color } from '../../shared/color'
 import { Actor } from '../actor/actor'
 import { SIGHT } from '../../shared/sight'
+// import { DebugLine } from '../../shared/debugLine'
+import { Rope } from '../../shared/rope'
 
 export class Feature {
   body: Body
@@ -12,6 +14,7 @@ export class Feature {
   id: number
   borderWidth: number
   color: Color
+  ropes: Rope[] = []
   borderColor: Color
   spawnPosition = Vec2(0, 0)
   deathPosition = Vec2(0, 0)
@@ -60,16 +63,38 @@ export class Feature {
     return featuresInRange
   }
 
-  getFeaturesInVision (): Feature[] {
-    const featuresInVision: Feature[] = []
-    const featuresInRange = this.getFeaturesInRange()
+  isPointInRange (point: Vec2): boolean {
     const position = this.body.getPosition()
-    featuresInRange.forEach(feature => {
+    const upper = Vec2.add(position, SIGHT)
+    const lower = Vec2.sub(position, SIGHT)
+    const xInside = lower.x <= point.x && point.x <= upper.x
+    const yInside = lower.y <= point.y && point.x <= upper.y
+    return xInside && yInside
+  }
+
+  isPointVisble (point: Vec2): boolean {
+    if (!this.isPointInRange(point)) return false
+    const position = this.body.getPosition()
+    let visible = true
+    this.actor.stage.world.rayCast(position, point, (fixture, point, normal, fraction) => {
+      const collideFeature = fixture.getUserData() as Feature
+      const isMouth = collideFeature.label === 'mouth'
+      if (isMouth) return 1
+      visible = false
+      return 0
+    })
+    return visible
+  }
+
+  getFeaturesInVision (): Feature[] {
+    const featuresInRange = this.getFeaturesInRange()
+    const featuresInVision = featuresInRange.filter(feature => {
       if (feature.label === 'barrier') {
-        featuresInVision.push(feature)
-        return
+        return true
       }
+      if (feature.actor.id === this.actor.id) return true
       const featurePosition = feature.body.getPosition()
+      const position = this.body.getPosition()
       let visible = true
       this.actor.stage.world.rayCast(position, featurePosition, (fixture, point, normal, fraction) => {
         const collideFeature = fixture.getUserData() as Feature
@@ -79,7 +104,11 @@ export class Feature {
         visible = false
         return 0
       })
-      if (visible) featuresInVision.push(feature)
+      // const color = visible ? new Color({ red: 0, green: 255, blue: 0 }) : new Color({ red: 255, green: 0, blue: 0 })
+      // const debugLine = new DebugLine({ anchorA: position, anchorB: featurePosition, color })
+      // this.actor.stage.runner.debugLines.push(debugLine)
+      if (visible) return true
+      return false
     })
     return featuresInVision
   }

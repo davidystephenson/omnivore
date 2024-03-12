@@ -3,11 +3,13 @@ import { Element } from '../shared/element'
 import { Summary } from '../shared/summary'
 import { Rope } from '../shared/rope'
 import { SIGHT } from '../shared/sight'
+import { DebugLine } from '../shared/debugLine'
 
 export class Renderer {
   lerp = 0.5
   elements = new Map<number, Element>()
   ropes: Rope[] = []
+  debugLines: DebugLine[] = []
   canvas: HTMLCanvasElement
   context: CanvasRenderingContext2D
   id: number = 0
@@ -58,6 +60,15 @@ export class Renderer {
       this.context.rotate(element.angle)
       this.drawCircle(element)
       this.drawPolygon(element)
+    })
+    this.debugLines.forEach(debugLine => {
+      this.followCamera()
+      this.context.lineWidth = 0.05
+      this.context.strokeStyle = `rgba(${debugLine.color.red}, ${debugLine.color.green}, ${debugLine.color.blue}, ${debugLine.color.alpha})`
+      this.context.beginPath()
+      this.context.moveTo(debugLine.anchorA.x, debugLine.anchorA.y)
+      this.context.lineTo(debugLine.anchorB.x, debugLine.anchorB.y)
+      this.context.stroke()
     })
   }
 
@@ -140,6 +151,7 @@ export class Renderer {
     })
     this.elements = newElements
     this.ropes = summary.ropes
+    this.debugLines = summary.debugLines
     this.id = summary.id
   }
 }

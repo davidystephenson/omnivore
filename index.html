@@ -1,0 +1,151 @@
+<html>
+<head>
+  <title>Ping Pong</title>
+</head>
+
+<body>
+  <canvas id="gameCanvas" width="800" height="450"></canvas>
+  <script>
+    let canvas = document.getElementById('gameCanvas');
+    let context = canvas.getContext('2d');
+
+    let centerX = canvas.width / 2;
+    let centerY = canvas.height / 2;
+
+    let player1X = 10
+    let player2X = canvas.width - 20;
+    let player1Y = centerY - 50;
+    let player2Top = centerY - 50;
+    let player1Bouncing = false;
+    let player2Bouncing = false;
+    let paddleHeight = 100;
+    let player1Score = 0;
+    let player2Score = 0;
+
+    document.addEventListener('keydown', event => {
+      event.preventDefault()
+      if (event.key === 'w') {
+        player1Y -= 10;
+      }
+      if (event.key === 's') {
+        player1Y += 10;
+      }
+      if (event.key === 'ArrowUp') {
+        player2Top -= 10;
+      }
+      if (event.key === 'ArrowDown') {
+        player2Top += 10;
+      }
+    });
+
+    function update() {
+      // Move the ball
+      ballX += ballSpeedX;
+      ballY += ballSpeedY;
+
+      const ballTop = ballY - 10
+      const ballBottom = ballY + 10
+
+      // Bounce the ball off the top and bottom walls
+      if (ballTop < 0 || ballBottom > canvas.height) {
+        ballSpeedY = collide(ballSpeedY)
+      }
+      // Check if the ball hit player 1's paddle
+      const outsideLeft = ballX < 30
+      const abovePlayer1 = ballTop > player1Y
+      const belowPlayer1 = ballBottom < player1Y + paddleHeight
+      const player1Collide = outsideLeft && abovePlayer1 && belowPlayer1
+      if (player1Collide && !player1Bouncing) {
+        ballSpeedX = collide(ballSpeedX)
+        player1Bouncing = true
+      } else if (!player1Collide) {
+        player1Bouncing = false
+      }
+
+      // Check if the ball hit player 2's paddle
+      const ballRight = ballX + 10
+      const player2Left = canvas.width - 20
+      const outsideRight = ballRight > player2Left
+      const belowPlayer2Top = ballBottom > player2Top
+      const player2Bottom = player2Top + paddleHeight
+      const abovePlayer2Bottom = ballTop < player2Bottom
+      const topCornerDistance = getDistance(ballX,ballY,player2Left,player2Top)
+      const bottomCornerDistance = getDistance(ballX,ballY,player2Left,player2Bottom)
+      const player2Collide = outsideRight && belowPlayer2Top && abovePlayer2Bottom
+      if (player2Collide) {
+        console.log('player2Collide', player2Collide)
+        const overlap = ballRight - player2Left
+        ballX = ballX - overlap
+        ballSpeedX = collide(ballSpeedX)      
+      }
+
+      // Check if the ball went out of bounds on player 1's side
+      if (ballX < 0) {
+        player2Score++;
+        startBall();
+      }
+
+      // Check if the ball went out of bounds on player 2's side
+      if (ballX > canvas.width) {
+        player1Score++;
+        startBall();
+      }
+      // Draw the background
+      context.fillStyle = 'black';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw the ball
+      context.fillStyle = 'white';
+      context.beginPath();
+      context.arc(ballX, ballY, 10, 0, Math.PI * 2);
+      context.fill();
+
+      // Draw player 1's paddle
+      context.fillStyle = 'red';
+      context.fillRect(player1X, player1Y, 10, paddleHeight);
+
+      // Draw player 2's paddle
+      context.fillStyle = 'blue';
+      context.fillRect(player2X, player2Top, 10, paddleHeight);
+
+      // Draw the score
+      context.fillStyle = 'white';
+      context.font = '30px Arial';
+      const message = `${player1Score} - ${player2Score}`;
+      context.fillText(message, canvas.width / 2 - 50, 50);
+      requestAnimationFrame(update);
+    }
+
+    function collide(speed) {
+      const acceleration = Math.random() * 0.1
+      if (speed > 0) {
+        return -speed // - acceleration
+      } else {
+        return -speed // + acceleration
+      }
+    }
+
+    function getDistance(x1,y1,x2,y2) {
+      const xDistance = Math.abs(x1-x2)
+      const yDistance = Math.abs(y1-y2)
+      return Math.sqrt(xDistance*xDistance + yDistance*yDistance)
+    }
+
+    function dot(x1,y1,x2,y2) {
+      return x1*x2 + y1*y2
+    }
+
+    function startBall() {
+      ballX = canvas.width / 2;
+      ballY = canvas.height / 2;
+      ballSpeedX = 2
+      ballSpeedY = 2
+      // ballSpeedX = 1 + Math.random() * 3
+      // ballSpeedY = 4 - ballSpeedX
+    }
+
+    startBall()
+    update();
+  </script>
+</body>
+</html>
