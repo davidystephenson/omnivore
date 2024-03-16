@@ -39,7 +39,6 @@ export class Runner {
     this.debugLines = []
     this.stage.onStep()
     this.elements = this.getElements()
-    console.log(this.debugLines.length)
   }
 
   getSummary (props: {
