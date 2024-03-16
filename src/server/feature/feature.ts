@@ -1,4 +1,4 @@
-import { AABB, Body, BodyDef, Fixture, FixtureDef, Vec2 } from 'planck'
+import { AABB, Body, BodyDef, CircleShape, Fixture, FixtureDef, Vec2 } from 'planck'
 import { Color } from '../../shared/color'
 import { Actor } from '../actor/actor'
 // import { DebugLine } from '../../shared/debugLine'
@@ -6,7 +6,6 @@ import { Rope } from '../../shared/rope'
 import { DebugLine } from '../../shared/debugLine'
 import { SIGHT } from '../../shared/sight'
 import { directionFromTo, rotate } from '../math'
-import { Mouth } from './mouth'
 import { Line } from '../../shared/line'
 
 let actorCount = 0
@@ -108,22 +107,24 @@ export class Feature {
   }
 
   isFeatureVisible (targetFeature: Feature): Boolean {
-    const selfPosition = this.body.getPosition()
+    const myPosition = this.body.getPosition()
     if (targetFeature.label === 'barrier') {
       return true
     }
     if (targetFeature.actor.id === this.actor.id) return true
     const targetPosition = targetFeature.body.getPosition()
-    const lines: Line[] = [new Line({ a: selfPosition, b: targetPosition })]
-    if (this instanceof Mouth && targetFeature instanceof Mouth) {
-      const direction = directionFromTo(selfPosition, targetPosition)
+    const lines: Line[] = [new Line({ a: myPosition, b: targetPosition })]
+    const myShape = this.fixture.getShape()
+    const targetShape = targetFeature.fixture.getShape()
+    if (myShape instanceof CircleShape && targetShape instanceof CircleShape) {
+      const direction = directionFromTo(myPosition, targetPosition)
       const rightDirection = rotate(direction, 0.5 * Math.PI)
-      const rightSelfPosition = Vec2.combine(1, selfPosition, this.radius, rightDirection)
-      const rightTargetPosition = Vec2.combine(1, targetPosition, targetFeature.radius, rightDirection)
+      const rightSelfPosition = Vec2.combine(1, myPosition, myShape.getRadius(), rightDirection)
+      const rightTargetPosition = Vec2.combine(1, targetPosition, targetShape.getRadius(), rightDirection)
       lines.push(new Line({ a: rightSelfPosition, b: rightTargetPosition }))
       const leftDirection = rotate(direction, -0.5 * Math.PI)
-      const leftSelfPosition = Vec2.combine(1, selfPosition, this.radius, leftDirection)
-      const leftTargetPosition = Vec2.combine(1, targetPosition, targetFeature.radius, leftDirection)
+      const leftSelfPosition = Vec2.combine(1, myPosition, myShape.getRadius(), leftDirection)
+      const leftTargetPosition = Vec2.combine(1, targetPosition, targetShape.getRadius(), leftDirection)
       lines.push(new Line({ a: leftSelfPosition, b: leftTargetPosition }))
     }
     return lines.some(line => this.isClear(line.a, line.b, targetFeature.id))

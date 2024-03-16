@@ -8,7 +8,6 @@ const stage = new Stage()
 io.on('connection', socket => {
   console.log('connection:', socket.id)
   socket.emit('connected')
-  /*
   const player = stage.addPlayer({ position: Vec2(0, 0) })
   socket.on('controls', (controls: Controls) => {
     let x = 0
@@ -37,5 +36,4 @@ io.on('connection', socket => {
     })
     stage.actors.delete(player.id)
   })
-  */
 })
