@@ -1,9 +1,15 @@
 import { AABB, Body, BodyDef, Fixture, FixtureDef, Vec2 } from 'planck'
 import { Color } from '../../shared/color'
 import { Actor } from '../actor/actor'
-import { SIGHT } from '../../shared/sight'
 // import { DebugLine } from '../../shared/debugLine'
 import { Rope } from '../../shared/rope'
+import { DebugLine } from '../../shared/debugLine'
+import { SIGHT } from '../../shared/sight'
+import { directionFromTo, rotate } from '../math'
+import { Mouth } from './mouth'
+import { Line } from '../../shared/line'
+
+let actorCount = 0
 
 export class Feature {
   body: Body
@@ -15,10 +21,10 @@ export class Feature {
   borderWidth: number
   color: Color
   ropes: Rope[] = []
-  borderColor: Color
   spawnPosition = Vec2(0, 0)
   deathPosition = Vec2(0, 0)
   health = 1
+  maximumHealth = 1
 
   constructor (props: {
     bodyDef: BodyDef
@@ -26,7 +32,6 @@ export class Feature {
     label?: string
     actor: Actor
     color: Color
-    borderColor: Color
     borderWidth?: number
   }) {
     this.actor = props.actor
@@ -36,7 +41,6 @@ export class Feature {
     this.fixture = this.body.createFixture(props.fixtureDef)
     this.fixture.setUserData(this)
     this.color = props.color
-    this.borderColor = props.borderColor
     this.borderWidth = props.borderWidth ?? 0.1
     actorCount += 1
     this.id = actorCount
@@ -72,46 +76,56 @@ export class Feature {
     return xInside && yInside
   }
 
-  isPointVisble (point: Vec2): boolean {
-    if (!this.isPointInRange(point)) return false
-    const position = this.body.getPosition()
-    let visible = true
-    this.actor.stage.world.rayCast(position, point, (fixture, point, normal, fraction) => {
+  isClear (startPoint: Vec2, targetPoint: Vec2, targetId?: number, debug?: boolean): boolean {
+    if (!this.isPointInRange(targetPoint)) return false
+    let clear = true
+    this.actor.stage.world.rayCast(startPoint, targetPoint, (fixture, point, normal, fraction) => {
       const collideFeature = fixture.getUserData() as Feature
+      const isTarget = collideFeature.id === targetId
       const isMouth = collideFeature.label === 'mouth'
-      if (isMouth) return 1
-      visible = false
+      if (isTarget || isMouth) return 1
+      clear = false
       return 0
     })
-    return visible
+    const color = clear
+      ? new Color({
+        red: 0,
+        green: 255,
+        blue: 0
+      })
+      : new Color({
+        red: 0,
+        green: 255,
+        blue: 0
+      })
+    void new DebugLine({
+      a: startPoint,
+      b: targetPoint,
+      color,
+      stage: this.actor.stage
+    })
+    return clear
   }
 
-  getFeaturesInVision (): Feature[] {
-    const featuresInRange = this.getFeaturesInRange()
-    const featuresInVision = featuresInRange.filter(feature => {
-      if (feature.label === 'barrier') {
-        return true
-      }
-      if (feature.actor.id === this.actor.id) return true
-      const featurePosition = feature.body.getPosition()
-      const position = this.body.getPosition()
-      let visible = true
-      this.actor.stage.world.rayCast(position, featurePosition, (fixture, point, normal, fraction) => {
-        const collideFeature = fixture.getUserData() as Feature
-        const isTarget = collideFeature.id === feature.id
-        const isMouth = collideFeature.label === 'mouth'
-        if (isTarget || isMouth) return 1
-        visible = false
-        return 0
-      })
-      // const color = visible ? new Color({ red: 0, green: 255, blue: 0 }) : new Color({ red: 255, green: 0, blue: 0 })
-      // const debugLine = new DebugLine({ anchorA: position, anchorB: featurePosition, color })
-      // this.actor.stage.runner.debugLines.push(debugLine)
-      if (visible) return true
-      return false
-    })
-    return featuresInVision
+  isFeatureVisible (targetFeature: Feature): Boolean {
+    const selfPosition = this.body.getPosition()
+    if (targetFeature.label === 'barrier') {
+      return true
+    }
+    if (targetFeature.actor.id === this.actor.id) return true
+    const targetPosition = targetFeature.body.getPosition()
+    const lines: Line[] = [new Line({ a: selfPosition, b: targetPosition })]
+    if (this instanceof Mouth && targetFeature instanceof Mouth) {
+      const direction = directionFromTo(selfPosition, targetPosition)
+      const rightDirection = rotate(direction, 0.5 * Math.PI)
+      const rightSelfPosition = Vec2.combine(1, selfPosition, this.radius, rightDirection)
+      const rightTargetPosition = Vec2.combine(1, targetPosition, targetFeature.radius, rightDirection)
+      lines.push(new Line({ a: rightSelfPosition, b: rightTargetPosition }))
+      const leftDirection = rotate(direction, -0.5 * Math.PI)
+      const leftSelfPosition = Vec2.combine(1, selfPosition, this.radius, leftDirection)
+      const leftTargetPosition = Vec2.combine(1, targetPosition, targetFeature.radius, leftDirection)
+      lines.push(new Line({ a: leftSelfPosition, b: leftTargetPosition }))
+    }
+    return lines.some(line => this.isClear(line.a, line.b, targetFeature.id))
   }
 }
-
-let actorCount = 0

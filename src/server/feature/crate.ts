@@ -1,9 +1,9 @@
 import { Vec2, BoxShape } from 'planck'
 import { Color } from '../../shared/color'
-import { Feature } from './feature'
 import { Actor } from '../actor/actor'
+import { Chunk } from './chunk'
 
-export class Crate extends Feature {
+export class Crate extends Chunk {
   constructor (props: {
     position: Vec2
     actor: Actor
@@ -11,23 +11,11 @@ export class Crate extends Feature {
     halfHeight: number
   }) {
     super({
-      bodyDef: {
-        type: 'dynamic',
-        position: props.position,
-        bullet: true,
-        linearDamping: 0.1,
-        angularDamping: 0.1
-      },
-      fixtureDef: {
-        shape: new BoxShape(props.halfWidth, props.halfHeight),
-        density: 1,
-        restitution: 0,
-        friction: 0
-      },
-      label: 'crate',
+      position: props.position,
       actor: props.actor,
-      color: new Color({ red: 200, green: 200, blue: 200 }),
-      borderColor: new Color({ red: 225, green: 225, blue: 225 })
+      shape: new BoxShape(props.halfWidth, props.halfHeight),
+      color: new Color({ red: 0, green: 255, blue: 255 }),
+      label: 'crate'
     })
   }
 }

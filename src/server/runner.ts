@@ -38,6 +38,8 @@ export class Runner {
     this.elements = this.getElements()
     this.debugLines = []
     this.stage.onStep()
+    this.elements = this.getElements()
+    console.log(this.debugLines.length)
   }
 
   getSummary (props: {
@@ -58,8 +60,11 @@ export class Runner {
     const bodies = this.getBodies()
     const elements: Element[] = []
     bodies.forEach(body => {
-      const actor = body.getUserData() as Feature
-      const element = new Element({ feature: actor })
+      const feature = body.getUserData() as Feature
+      if (!(feature instanceof Feature)) {
+        throw new Error('User data is not a feature')
+      }
+      const element = new Element({ feature })
       elements.push(element)
     })
     return elements

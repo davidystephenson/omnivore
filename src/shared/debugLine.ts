@@ -1,22 +1,19 @@
 import { Vec2 } from 'planck'
 import { Color } from './color'
+import { Stage } from '../server/stage'
+import { Line } from './line'
 
-export class DebugLine {
-  anchorA: Vec2
-  anchorB: Vec2
+export class DebugLine extends Line {
   color: Color
 
   constructor (props: {
-    anchorA: Vec2
-    anchorB: Vec2
+    a: Vec2
+    b: Vec2
     color: Color
+    stage: Stage
   }) {
-    this.anchorA = props.anchorA
-    this.anchorB = props.anchorB
+    super({ a: props.a, b: props.b })
     this.color = props.color
-  }
-
-  onStep (): void {
-    // this.invincibleTime = Math.max(0, this.invincibleTime - this.stage.runner.timeStep)
+    props.stage.runner.debugLines.push(this)
   }
 }

@@ -63,11 +63,11 @@ export class Renderer {
     })
     this.debugLines.forEach(debugLine => {
       this.followCamera()
-      this.context.lineWidth = 0.05
+      this.context.lineWidth = 0.01
       this.context.strokeStyle = `rgba(${debugLine.color.red}, ${debugLine.color.green}, ${debugLine.color.blue}, ${debugLine.color.alpha})`
       this.context.beginPath()
-      this.context.moveTo(debugLine.anchorA.x, debugLine.anchorA.y)
-      this.context.lineTo(debugLine.anchorB.x, debugLine.anchorB.y)
+      this.context.moveTo(debugLine.a.x, debugLine.a.y)
+      this.context.lineTo(debugLine.b.x, debugLine.b.y)
       this.context.stroke()
     })
   }

@@ -3,6 +3,8 @@ import { Color } from '../../shared/color'
 import { Feature } from './feature'
 import { Player } from '../actor/player'
 
+console.log('Feature (mouth)', Feature)
+
 export class Mouth extends Feature {
   radius: number
   actor: Player
@@ -28,8 +30,7 @@ export class Mouth extends Feature {
       },
       label: 'mouth',
       actor: props.actor,
-      color: new Color({ red: 0, green: 128, blue: 0 }),
-      borderColor: new Color({ red: 0, green: 0, blue: 255 })
+      color: new Color({ red: 0, green: 128, blue: 0 })
     })
     this.actor = props.actor
     this.radius = radius
