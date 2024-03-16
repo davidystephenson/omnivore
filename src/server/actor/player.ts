@@ -2,7 +2,6 @@ import { CircleShape, RopeJoint, Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Actor } from './actor'
 import { Mouth } from '../feature/mouth'
-import { Color } from '../../shared/color'
 import { rotate } from '../math'
 import { Egg } from '../feature/egg'
 import { Feature } from '../feature/feature'
@@ -38,34 +37,34 @@ export class Player extends Actor {
       branches: [
         {
           angle: 0,
-          radius: 0.3,
+          radius: 1,
           branches: [
-            { angle: 0, radius: 0.5, branches: [] },
-            { angle: 0.25, radius: 0.5, branches: [] },
-            { angle: 0, radius: 0.3, branches: [] }
-          ]
-        },
-        {
-          angle: 0.5,
-          radius: 0.3,
-          branches: [
-            { angle: 0.25, radius: 0.3, branches: [] },
-            {
-              angle: 0.5,
-              radius: 0.3,
-              branches: [
-                {
-                  angle: 0.5,
-                  radius: 0.4,
-                  branches: [
-                    { angle: 0.5, radius: 0.5, branches: [] }
-                  ]
-                }
-              ]
-            },
-            { angle: 0.75, radius: 1, branches: [] }
+            // { angle: 0, radius: 0.3, branches: [] },
+            // { angle: 0.25, radius: 0.3, branches: [] },
+            // { angle: 0, radius: 0.3, branches: [] }
           ]
         }
+        // {
+        //   angle: 0.3,
+        //   radius: 0.3,
+        //   branches: [
+        //     { angle: 0.25, radius: 0.3, branches: [] },
+        //     {
+        //       angle: 0.3,
+        //       radius: 0.3,
+        //       branches: [
+        //         {
+        //           angle: 0.5,
+        //           radius: 0.3,
+        //           branches: [
+        //             { angle: 0.5, radius: 0.3, branches: [] }
+        //           ]
+        //         }
+        //       ]
+        //     },
+        //     { angle: 0.75, radius: 0.3, branches: [] }
+        //   ]
+        // }
       ]
     }
 
@@ -173,12 +172,9 @@ export class Player extends Actor {
 
   onStep (): void {
     super.onStep()
-    this.featuresInVision = this.eye.getFeaturesInVision()
-    this.features.forEach(feature => {
-      feature.color.alpha = feature.health
-      if (this.invincibleTime === 0) {
-        feature.borderColor = new Color({ red: 0, green: 255, blue: 0 })
-      }
+    const featuresInRange = this.eye.getFeaturesInRange()
+    this.featuresInVision = featuresInRange.filter(targetFeature => {
+      return this.mouths.some(mouth => mouth.isFeatureVisible(targetFeature))
     })
     if (!this.hatched) this.flee()
     if (this.readyToHatch && !this.hatched) this.hatch()
@@ -190,8 +186,6 @@ export class Player extends Actor {
     const noise = Vec2(0.1 * Math.random(), 0.1 * Math.random())
     this.features.forEach(feature => {
       feature.health = 1
-      feature.color.alpha = feature.health
-      feature.borderColor = new Color({ red: 0, green: 0, blue: 255 })
       const featurePosition = feature.body.getPosition()
       const relativePosition = Vec2.sub(featurePosition, eyePosition)
       feature.deathPosition = Vec2.clone(featurePosition)

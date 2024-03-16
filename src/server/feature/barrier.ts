@@ -23,8 +23,7 @@ export class Barrier extends Feature {
       },
       label: 'barrier',
       actor: props.actor,
-      color: new Color({ red: 0, green: 0, blue: 255 }),
-      borderColor: new Color({ red: 0, green: 0, blue: 255 })
+      color: new Color({ red: 0, green: 0, blue: 255 })
     })
   }
 }

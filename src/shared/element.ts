@@ -23,8 +23,14 @@ export class Element {
   }) {
     this.position = props.feature.body.getPosition()
     this.angle = props.feature.body.getAngle()
-    this.color = props.feature.color
-    this.borderColor = props.feature.borderColor
+    this.borderColor = props.feature.color
+    const healthRatio = props.feature.health / props.feature.maximumHealth
+    this.color = new Color({
+      red: props.feature.color.red,
+      green: props.feature.color.green,
+      blue: props.feature.color.blue,
+      alpha: healthRatio
+    })
     this.borderWidth = props.feature.borderWidth
     this.id = props.feature.id
     const shape = props.feature.fixture.getShape()

@@ -25,7 +25,7 @@ window.onmousedown = (event: MouseEvent) => {
 
 const socket = io()
 socket.on('connected', () => {
-  console.log('connected')
+  console.log('connected!')
 })
 socket.on('serverUpdateClient', (summary: Summary) => {
   lastSummary = summary
