@@ -79,7 +79,7 @@ export class Player extends Actor {
     const hy = 0.5 * (top - bottom)
     this.eye = new Egg({ actor: this, position, hx, hy })
 
-    setTimeout(() => { this.readyToHatch = true }, 5000)
+    setTimeout(() => { this.readyToHatch = true }, 0)
   }
 
   hatch = (): void => {
@@ -174,6 +174,9 @@ export class Player extends Actor {
     super.onStep()
     const featuresInRange = this.eye.getFeaturesInRange()
     this.featuresInVision = featuresInRange.filter(targetFeature => {
+      if (this.eye instanceof Egg) {
+        return this.eye.isFeatureVisible(targetFeature)
+      }
       return this.mouths.some(mouth => mouth.isFeatureVisible(targetFeature))
     })
     if (!this.hatched) this.flee()

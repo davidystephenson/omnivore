@@ -1,11 +1,11 @@
-import { AABB, Body, BodyDef, CircleShape, Fixture, FixtureDef, Vec2 } from 'planck'
+import { AABB, Body, BodyDef, CircleShape, Fixture, FixtureDef, PolygonShape, Vec2 } from 'planck'
 import { Color } from '../../shared/color'
 import { Actor } from '../actor/actor'
 // import { DebugLine } from '../../shared/debugLine'
 import { Rope } from '../../shared/rope'
 import { DebugLine } from '../../shared/debugLine'
 import { SIGHT } from '../../shared/sight'
-import { directionFromTo, rotate } from '../math'
+import { directionFromTo, range, rotate } from '../math'
 import { Line } from '../../shared/line'
 
 let actorCount = 0
@@ -93,8 +93,8 @@ export class Feature {
         blue: 0
       })
       : new Color({
-        red: 0,
-        green: 255,
+        red: 255,
+        green: 0,
         blue: 0
       })
     void new DebugLine({
@@ -106,27 +106,97 @@ export class Feature {
     return clear
   }
 
+  checkCircleToCircle (fromFeature: Feature, toFeature: Feature, fromCircle: CircleShape, toCircle: CircleShape): Boolean {
+    const myPosition = fromFeature.body.getPosition()
+    const targetPosition = toFeature.body.getPosition()
+    const lines: Line[] = [new Line({ a: myPosition, b: targetPosition })]
+    const direction = directionFromTo(myPosition, targetPosition)
+    const rightDirection = rotate(direction, 0.5 * Math.PI)
+    const rightSelfPosition = Vec2.combine(1, myPosition, fromCircle.getRadius(), rightDirection)
+    const rightTargetPosition = Vec2.combine(1, targetPosition, toCircle.getRadius(), rightDirection)
+    lines.push(new Line({ a: rightSelfPosition, b: rightTargetPosition }))
+    const leftDirection = rotate(direction, -0.5 * Math.PI)
+    const leftSelfPosition = Vec2.combine(1, myPosition, fromCircle.getRadius(), leftDirection)
+    const leftTargetPosition = Vec2.combine(1, targetPosition, toCircle.getRadius(), leftDirection)
+    lines.push(new Line({ a: leftSelfPosition, b: leftTargetPosition }))
+    return lines.some(line => this.isClear(line.a, line.b, toFeature.id))
+  }
+
+  checkCircleToPolygon (fromFeature: Feature, toFeature: Feature, fromCircle: CircleShape, toPolygon: PolygonShape): Boolean {
+    const lines: Line[] = []
+    const fromCenterPosition = fromFeature.body.getPosition()
+    const toCenterPosition = toFeature.body.getPosition()
+    const toPositions = toPolygon.m_vertices.map(vertex => Vec2.add(toCenterPosition, vertex))
+    range(0, toPositions.length - 1).forEach(i => {
+      const j = (i + 1) % toPositions.length
+      const point1 = toPositions[i]
+      lines.push(new Line({ a: fromCenterPosition, b: point1 }))
+      const point2 = toPositions[j]
+      const distance = Vec2.distance(point1, point2)
+      if (distance <= 0.6) return false
+      const segmentCount = Math.ceil(distance / 0.6)
+      const segmentLength = distance / segmentCount
+      const segmentDirection = directionFromTo(point1, point2)
+      range(0, segmentCount - 1).forEach(i => {
+        const toPosition = Vec2.combine(1, point1, i * segmentLength, segmentDirection)
+        const direction = directionFromTo(fromCenterPosition, toPosition)
+        const rightDirection = rotate(direction, 0.5 * Math.PI)
+        const leftDirection = rotate(direction, -0.5 * Math.PI)
+        const fromRightPosition = Vec2.combine(1, fromCenterPosition, fromCircle.getRadius(), rightDirection)
+        const fromLeftPosition = Vec2.combine(1, fromCenterPosition, fromCircle.getRadius(), leftDirection)
+        lines.push(new Line({ a: fromCenterPosition, b: toPosition }))
+        lines.push(new Line({ a: fromRightPosition, b: toPosition }))
+        lines.push(new Line({ a: fromLeftPosition, b: toPosition }))
+      })
+    })
+    return lines.some(line => this.isClear(line.a, line.b, toFeature.id))
+  }
+
+  checkPolygonToPolygon (fromFeature: Feature, toFeature: Feature, fromCircle: CircleShape, toPolygon: PolygonShape): Boolean {
+    const lines: Line[] = []
+    const fromCenterPosition = fromFeature.body.getPosition()
+    const toCenterPosition = toFeature.body.getPosition()
+    const toPositions = toPolygon.m_vertices.map(vertex => Vec2.add(toCenterPosition, vertex))
+    range(0, toPositions.length - 1).forEach(i => {
+      const j = (i + 1) % toPositions.length
+      const point1 = toPositions[i]
+      const point2 = toPositions[j]
+      const distance = Vec2.distance(point1, point2)
+      if (distance <= 0.6) return false
+      const segmentCount = Math.ceil(distance / 0.6)
+      const segmentLength = distance / segmentCount
+      const segmentDirection = Vec2.sub(point2, point1)
+      range(0, segmentCount - 1).forEach(() => {
+        const toPosition = Vec2.combine(1, point1, segmentLength, segmentDirection)
+        const direction = directionFromTo(fromCenterPosition, toPosition)
+        const rightDirection = rotate(direction, 0.5 * Math.PI)
+        const leftDirection = rotate(direction, -0.5 * Math.PI)
+        const fromRightPosition = Vec2.combine(1, fromCenterPosition, fromCircle.getRadius(), rightDirection)
+        const fromLeftPosition = Vec2.combine(1, fromCenterPosition, fromCircle.getRadius(), leftDirection)
+        lines.push(new Line({ a: fromCenterPosition, b: toPosition }))
+        lines.push(new Line({ a: fromRightPosition, b: toPosition }))
+        lines.push(new Line({ a: fromLeftPosition, b: toPosition }))
+      })
+    })
+    return lines.some(line => this.isClear(line.a, line.b, toFeature.id))
+  }
+
   isFeatureVisible (targetFeature: Feature): Boolean {
-    const myPosition = this.body.getPosition()
     if (targetFeature.label === 'barrier') {
       return true
     }
     if (targetFeature.actor.id === this.actor.id) return true
-    const targetPosition = targetFeature.body.getPosition()
-    const lines: Line[] = [new Line({ a: myPosition, b: targetPosition })]
     const myShape = this.fixture.getShape()
     const targetShape = targetFeature.fixture.getShape()
     if (myShape instanceof CircleShape && targetShape instanceof CircleShape) {
-      const direction = directionFromTo(myPosition, targetPosition)
-      const rightDirection = rotate(direction, 0.5 * Math.PI)
-      const rightSelfPosition = Vec2.combine(1, myPosition, myShape.getRadius(), rightDirection)
-      const rightTargetPosition = Vec2.combine(1, targetPosition, targetShape.getRadius(), rightDirection)
-      lines.push(new Line({ a: rightSelfPosition, b: rightTargetPosition }))
-      const leftDirection = rotate(direction, -0.5 * Math.PI)
-      const leftSelfPosition = Vec2.combine(1, myPosition, myShape.getRadius(), leftDirection)
-      const leftTargetPosition = Vec2.combine(1, targetPosition, targetShape.getRadius(), leftDirection)
-      lines.push(new Line({ a: leftSelfPosition, b: leftTargetPosition }))
+      return this.checkCircleToCircle(this, targetFeature, myShape, targetShape)
     }
-    return lines.some(line => this.isClear(line.a, line.b, targetFeature.id))
+    if (myShape instanceof CircleShape && targetShape instanceof PolygonShape) {
+      return this.checkCircleToPolygon(this, targetFeature, myShape, targetShape)
+    }
+    // if (myShape instanceof PolygonShape && targetShape instanceof PolygonShape) {
+    //   return this.checkPolygonToPolygon(this, targetFeature, myShape, targetShape)
+    // }
+    return true
   }
 }
