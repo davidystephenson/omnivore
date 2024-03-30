@@ -3,8 +3,6 @@ import { Color } from '../../shared/color'
 import { Feature } from './feature'
 import { Player } from '../actor/player'
 
-console.log('Feature (mouth)', Feature)
-
 export class Mouth extends Feature {
   radius: number
   actor: Player
