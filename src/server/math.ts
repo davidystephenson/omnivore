@@ -28,3 +28,16 @@ export function getCompass (vector: Vec2): Vec2 {
   const sign = vector.y > 0 ? 1 : -1
   return Vec2(0, sign)
 }
+
+export function getNearestIndex (fromPoint: Vec2, toPoints: Vec2[]): number {
+  let nearestIndex = 2
+  let minDistance = Vec2.distance(fromPoint, toPoints[nearestIndex])
+  toPoints.forEach((toPoint, index) => {
+    const distance = Vec2.distance(fromPoint, toPoint)
+    if (distance < minDistance) {
+      nearestIndex = index
+      minDistance = distance
+    }
+  })
+  return nearestIndex
+}
