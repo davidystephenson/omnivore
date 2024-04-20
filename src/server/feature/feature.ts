@@ -3,7 +3,6 @@ import { Color } from '../../shared/color'
 import { Actor } from '../actor/actor'
 // import { DebugLine } from '../../shared/debugLine'
 import { Rope } from '../../shared/rope'
-import { DebugLine } from '../../shared/debugLine'
 import { SIGHT } from '../../shared/sight'
 import { directionFromTo, getNearestIndex, range, rotate } from '../math'
 import { Line } from '../../shared/line'
@@ -57,14 +56,6 @@ export class Feature {
         featuresInRange.push(feature)
       }
     })
-    /*
-    this.actor.stage.runner.getBodies().forEach(body => {
-      const feature = body.getUserData() as Feature
-      if (feature.label === 'barrier') return
-      // const featureAABB = feature.fixture.getAABB()
-      featuresInRange.push(feature)
-    })
-    */
     this.actor.stage.world.queryAABB(visionBox, fixture => {
       const feature = fixture.getUserData() as Feature
       if (feature.label === 'barrier') return true
@@ -88,7 +79,7 @@ export class Feature {
     this.actor.stage.world.rayCast(startPoint, targetPoint, (fixture, point, normal, fraction) => {
       const collideFeature = fixture.getUserData() as Feature
       const isTarget = collideFeature.id === targetId
-      const isMouth = collideFeature.label === 'mouth'
+      const isMouth = collideFeature.label === 'mouth' || collideFeature.label === 'egg'
       if (isTarget || isMouth) return 1
       clear = false
       return 0
@@ -104,11 +95,10 @@ export class Feature {
         green: 0,
         blue: 0
       })
-    void new DebugLine({
+    this.actor.stage.addDebugLine({
       a: startPoint,
       b: targetPoint,
-      color,
-      stage: this.actor.stage
+      color
     })
     return clear
   }
@@ -132,22 +122,24 @@ export class Feature {
   checkCircleToPolygon (fromFeature: Feature, toFeature: Feature, fromCircle: CircleShape, toPolygon: PolygonShape): Boolean {
     const lines: Line[] = []
     const fromCenterPosition = fromFeature.body.getPosition()
-    const toCenterPosition = toFeature.body.getPosition()
-    const toVertices = toPolygon.m_vertices.map(vertex => Vec2.add(toCenterPosition, vertex))
-    const nearestIndex = getNearestIndex(fromCenterPosition, toVertices)
+    const toPoints = toPolygon.m_vertices.map(vertex => {
+      return toFeature.body.getWorldPoint(vertex)
+    })
+    const nearestIndex = getNearestIndex(fromCenterPosition, toPoints)
     const toPositions = [
-      toVertices[nearestIndex > 0 ? nearestIndex - 1 : toVertices.length - 1],
-      toVertices[nearestIndex],
-      toVertices[nearestIndex < toVertices.length - 1 ? nearestIndex + 1 : 0]
+      toPoints[nearestIndex > 0 ? nearestIndex - 1 : toPoints.length - 1],
+      toPoints[nearestIndex],
+      toPoints[nearestIndex < toPoints.length - 1 ? nearestIndex + 1 : 0]
     ]
+    const spacing = 5 // 0.6
     range(0, 1).forEach(i => {
       const j = i + 1
       const point1 = toPositions[i]
       lines.push(new Line({ a: fromCenterPosition, b: point1 }))
       const point2 = toPositions[j]
       const distance = Vec2.distance(point1, point2)
-      if (distance <= 0.6) return false
-      const segmentCount = Math.ceil(distance / 0.6)
+      if (distance <= spacing) return false
+      const segmentCount = 2 // Math.ceil(distance / spacing)
       const segmentLength = distance / segmentCount
       const segmentDirection = directionFromTo(point1, point2)
       range(0, segmentCount - 1).forEach(i => {
@@ -162,49 +154,69 @@ export class Feature {
         lines.push(new Line({ a: fromLeftPosition, b: toPosition }))
       })
     })
-    lines.forEach(line => { this.isClear(line.a, line.b, toFeature.id) })
+    lines.forEach(line => this.isClear(line.a, line.b, toFeature.id))
     return lines.some(line => this.isClear(line.a, line.b, toFeature.id))
   }
 
   checkPolygonToPolygon (fromFeature: Feature, toFeature: Feature, fromPolygon: PolygonShape, toPolygon: PolygonShape): Boolean {
     const lines: Line[] = []
     const fromCenterPosition = fromFeature.body.getPosition()
-    const fromPoints = fromPolygon.m_vertices.map(vertex => Vec2.add(fromCenterPosition, vertex))
+    const fromPoints = fromPolygon.m_vertices.map(vertex => {
+      return fromFeature.body.getWorldPoint(vertex)
+    })
     const toCenterPosition = toFeature.body.getPosition()
-    const toPoints = toPolygon.m_vertices.map(vertex => Vec2.add(toCenterPosition, vertex))
-    range(0, fromPoints.length - 1).forEach(i => {
-      const j = (i + 1) % fromPoints.length
-      const point1 = fromPoints[i]
-      const point2 = fromPoints[j]
+    const toPoints = toPolygon.m_vertices.map(vertex => {
+      return toFeature.body.getWorldPoint(vertex)
+    })
+    const nearestFromIndex = getNearestIndex(toCenterPosition, fromPoints)
+    const fromPositions = [
+      fromPoints[nearestFromIndex > 0 ? nearestFromIndex - 1 : toPoints.length - 1],
+      fromPoints[nearestFromIndex],
+      fromPoints[nearestFromIndex < toPoints.length - 1 ? nearestFromIndex + 1 : 0]
+    ]
+    const nearestToIndex = getNearestIndex(fromCenterPosition, toPoints)
+    const toPositions = [
+      toPoints[nearestToIndex > 0 ? nearestToIndex - 1 : toPoints.length - 1],
+      toPoints[nearestToIndex],
+      toPoints[nearestToIndex < toPoints.length - 1 ? nearestToIndex + 1 : 0]
+    ]
+    const spacing = 5 // 0.6
+    range(0, 1).forEach(i => {
+      const j = i + 1
+      const point1 = fromPositions[i]
+      const point2 = fromPositions[j]
       const distance = Vec2.distance(point1, point2)
-      if (distance <= 0.6) return false
-      const segmentCount = Math.ceil(distance / 0.6)
+      if (distance <= spacing) return false
+      const segmentCount = Math.ceil(distance / spacing)
       const segmentLength = distance / segmentCount
       const segmentDirection = directionFromTo(point1, point2)
       range(0, segmentCount - 1).forEach(i => {
         const intermediatePoint = Vec2.combine(1, point1, i * segmentLength, segmentDirection)
-        fromPoints.push(intermediatePoint)
+        fromPositions.push(intermediatePoint)
       })
     })
-    range(0, toPoints.length - 1).forEach(i => {
+    /*
+    range(0, 1).forEach(i => {
       const j = (i + 1) % toPoints.length
-      const point1 = toPoints[i]
-      const point2 = toPoints[j]
+      const point1 = toPositions[i]
+      const point2 = toPositions[j]
       const distance = Vec2.distance(point1, point2)
-      if (distance <= 0.6) return false
-      const segmentCount = Math.ceil(distance / 0.6)
+      if (distance <= spacing) return false
+      const segmentCount = Math.ceil(distance / spacing)
       const segmentLength = distance / segmentCount
       const segmentDirection = directionFromTo(point1, point2)
       range(0, segmentCount - 1).forEach(i => {
         const intermediatePoint = Vec2.combine(1, point1, i * segmentLength, segmentDirection)
-        toPoints.push(intermediatePoint)
+        toPositions.push(intermediatePoint)
       })
     })
-    fromPoints.forEach(fromPoint => {
-      toPoints.forEach(toPoint => {
+    */
+    fromPositions.forEach(fromPoint => {
+      toPositions.forEach(toPoint => {
         lines.push(new Line({ a: fromPoint, b: toPoint }))
       })
     })
+    lines.forEach(line => this.isClear(line.a, line.b, toFeature.id))
     return lines.some(line => this.isClear(line.a, line.b, toFeature.id))
   }
 
