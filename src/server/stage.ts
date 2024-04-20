@@ -8,6 +8,8 @@ import { Feature } from './feature/feature'
 import { Mouth } from './feature/mouth'
 import { Barrier } from './feature/barrier'
 import { Killing } from './killing'
+import { Color } from '../shared/color'
+import { DebugLine } from '../shared/debugLine'
 
 export class Stage {
   world: World
@@ -38,7 +40,21 @@ export class Stage {
     */
 
     // void new Brick({ stage: this, halfWidth: 1, halfHeight: 2, position: Vec2(0, 0) })
-    void new Brick({ stage: this, halfWidth: 1, halfHeight: 10, position: Vec2(3, 0) })
+    void new Brick({ stage: this, halfWidth: 10, halfHeight: 10, position: Vec2(12, 0) })
+  }
+
+  addDebugLine (props: {
+    a: Vec2
+    b: Vec2
+    color: Color
+  }): DebugLine {
+    const debugLine = new DebugLine({
+      a: props.a,
+      b: props.b,
+      color: props.color
+    })
+    this.runner.debugLines.push(debugLine)
+    return debugLine
   }
 
   addPlayer (props: { position: Vec2 }): Player {
@@ -121,7 +137,7 @@ export class Stage {
       const feature = pair[0]
       const otherFeature = pair[1]
       if (feature.label === 'egg' && otherFeature.label === 'mouth') contact.setEnabled(false)
-      if (feature.label === 'egg' && otherFeature.label === 'crate') contact.setEnabled(false)
+      // if (feature.label === 'egg' && otherFeature.label === 'crate') contact.setEnabled(false)
     })
   }
 }
