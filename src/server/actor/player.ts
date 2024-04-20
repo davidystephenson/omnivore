@@ -14,7 +14,7 @@ interface Branch {
 }
 
 export class Player extends Actor {
-  eye: Egg | Mouth
+  mouth: Mouth
   mouths: Mouth[] = []
   north = Vec2(0, 1)
   spawnPosition: Vec2
@@ -22,7 +22,7 @@ export class Player extends Actor {
   tree: Branch
   featuresInVision: Feature[] = []
   readyToHatch = false
-  hatched = false
+  hatched = true
 
   constructor (props: {
     stage: Stage
@@ -30,73 +30,12 @@ export class Player extends Actor {
   }) {
     super({ stage: props.stage, label: 'player' })
     this.spawnPosition = props.position
-
     this.tree = {
-      radius: 0.3,
+      radius: 3,
       angle: 0,
-      branches: [
-        {
-          angle: 0,
-          radius: 1,
-          branches: [
-            // { angle: 0, radius: 0.3, branches: [] },
-            // { angle: 0.25, radius: 0.3, branches: [] },
-            // { angle: 0, radius: 0.3, branches: [] }
-          ]
-        }
-        // {
-        //   angle: 0.3,
-        //   radius: 0.3,
-        //   branches: [
-        //     { angle: 0.25, radius: 0.3, branches: [] },
-        //     {
-        //       angle: 0.3,
-        //       radius: 0.3,
-        //       branches: [
-        //         {
-        //           angle: 0.5,
-        //           radius: 0.3,
-        //           branches: [
-        //             { angle: 0.5, radius: 0.3, branches: [] }
-        //           ]
-        //         }
-        //       ]
-        //     },
-        //     { angle: 0.75, radius: 0.3, branches: [] }
-        //   ]
-        // }
-      ]
+      branches: []
     }
-
-    const circles: CircleShape[] = []
-    this.addCircles({ branch: this.tree, circles })
-    const top = Math.max(...circles.map(circle => circle.getCenter().y + circle.getRadius()))
-    const bottom = Math.min(...circles.map(circle => circle.getCenter().y - circle.getRadius()))
-    const right = Math.max(...circles.map(circle => circle.getCenter().x + circle.getRadius()))
-    const left = Math.min(...circles.map(circle => circle.getCenter().x - circle.getRadius()))
-    const position = Vec2(0.5 * right + 0.5 * left, 0.5 * top + 0.5 * bottom)
-    const hx = 0.5 * (right - left)
-    const hy = 0.5 * (top - bottom)
-    this.eye = new Egg({ actor: this, position, hx, hy })
-
-    setTimeout(() => { this.readyToHatch = true }, 0)
-  }
-
-  hatch = (): void => {
-    // if(this.eye.body.getContactList() != null)
-    this.hatched = true
-    this.stage.destructionQueue.push(this.eye.body)
-    this.spawnPosition = this.eye.body.getPosition()
-    this.eye = this.grow({ branch: this.tree })
-    this.eye.borderWidth = 0.2
-  }
-
-  getOffset (props: { parent: Mouth, branch: Branch }): Vec2 {
-    const parentPosition = props.parent.body.getPosition()
-    const distance = props.parent.radius + props.branch.radius + this.gap
-    const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * props.branch.angle)
-    const offsetPosition = Vec2.add(parentPosition, offset)
-    return offsetPosition
+    this.mouth = this.grow({ branch: this.tree })
   }
 
   addCircles (props: {
@@ -123,25 +62,7 @@ export class Player extends Actor {
     }
   }
 
-  grow (props: {
-    branch: Branch
-    parent?: Mouth
-  }): Mouth {
-    const position = props.parent == null
-      ? this.spawnPosition
-      : this.getOffset({ parent: props.parent, branch: props.branch })
-    const mouth = this.createMouth({
-      position,
-      cell: props.parent,
-      radius: props.branch.radius
-    })
-    for (const childBranch of props.branch.branches) {
-      this.grow({ branch: childBranch, parent: mouth })
-    }
-    return mouth
-  }
-
-  createMouth (props: {
+  addMouth (props: {
     position: Vec2
     cell?: Mouth
     radius?: number
@@ -168,14 +89,62 @@ export class Player extends Actor {
     return mouth
   }
 
+  getEgg (): Egg {
+    const circles: CircleShape[] = []
+    this.addCircles({ branch: this.tree, circles })
+    const top = Math.max(...circles.map(circle => circle.getCenter().y + circle.getRadius()))
+    const bottom = Math.min(...circles.map(circle => circle.getCenter().y - circle.getRadius()))
+    const right = Math.max(...circles.map(circle => circle.getCenter().x + circle.getRadius()))
+    const left = Math.min(...circles.map(circle => circle.getCenter().x - circle.getRadius()))
+    const position = Vec2(0.5 * right + 0.5 * left, 0.5 * top + 0.5 * bottom)
+    const hx = 0.5 * (right - left)
+    const hy = 0.5 * (top - bottom)
+    return new Egg({ actor: this, position, hx, hy })
+  }
+
+  getOffset (props: { parent: Mouth, branch: Branch }): Vec2 {
+    const parentPosition = props.parent.body.getPosition()
+    const distance = props.parent.radius + props.branch.radius + this.gap
+    const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * props.branch.angle)
+    const offsetPosition = Vec2.add(parentPosition, offset)
+    return offsetPosition
+  }
+
+  hatch = (): void => {
+    // if(this.eye.body.getContactList() != null)
+    this.hatched = true
+    this.stage.destructionQueue.push(this.mouth.body)
+    this.spawnPosition = this.mouth.body.getPosition()
+    this.mouth = this.grow({ branch: this.tree })
+    this.mouth.borderWidth = 0.2
+  }
+
   flee (): void { }
+
+  grow (props: {
+    branch: Branch
+    parent?: Mouth
+  }): Mouth {
+    const position = props.parent == null
+      ? this.spawnPosition
+      : this.getOffset({ parent: props.parent, branch: props.branch })
+    const mouth = this.addMouth({
+      position,
+      cell: props.parent,
+      radius: props.branch.radius
+    })
+    for (const childBranch of props.branch.branches) {
+      this.grow({ branch: childBranch, parent: mouth })
+    }
+    return mouth
+  }
 
   onStep (): void {
     super.onStep()
-    const featuresInRange = this.eye.getFeaturesInRange()
+    const featuresInRange = this.mouth.getFeaturesInRange()
     this.featuresInVision = featuresInRange.filter(targetFeature => {
-      if (this.eye instanceof Egg) {
-        return this.eye.isFeatureVisible(targetFeature)
+      if (this.mouth instanceof Egg) {
+        return this.mouth.isFeatureVisible(targetFeature)
       }
       return this.mouths.some(mouth => mouth.isFeatureVisible(targetFeature))
     })
@@ -184,7 +153,7 @@ export class Player extends Actor {
   }
 
   respawn (): void {
-    const eyePosition = this.eye.body.getPosition()
+    const eyePosition = this.mouth.body.getPosition()
     this.invincibleTime = 5
     const noise = Vec2(0.1 * Math.random(), 0.1 * Math.random())
     this.features.forEach(feature => {
