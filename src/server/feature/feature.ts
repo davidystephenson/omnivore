@@ -23,6 +23,7 @@ export class Feature {
   deathPosition = Vec2(0, 0)
   health = 1
   maximumHealth = 1
+  radius = 0
 
   constructor (props: {
     bodyDef: BodyDef
@@ -121,40 +122,76 @@ export class Feature {
 
   checkCircleToPolygon (fromFeature: Feature, toFeature: Feature, fromCircle: CircleShape, toPolygon: PolygonShape): Boolean {
     const lines: Line[] = []
-    const fromCenterPosition = fromFeature.body.getPosition()
-    const toPoints = toPolygon.m_vertices.map(vertex => {
+    const globalFromCenter = fromFeature.body.getPosition()
+    const localFromCenter = toFeature.body.getLocalPoint(globalFromCenter)
+    const radius = fromCircle.getRadius()
+    const toVisibleCorners = toPolygon.m_vertices.filter(vertex => {
+      const y = Math.sign(vertex.y) * localFromCenter.y + radius
+      const x = Math.sign(vertex.x) * localFromCenter.x + radius
+      const visibleY = y >= Math.abs(vertex.y)
+      const visibleX = x >= Math.abs(vertex.x)
+      return visibleX || visibleY
+    }).map(vertex => {
       return toFeature.body.getWorldPoint(vertex)
     })
-    const nearestIndex = getNearestIndex(fromCenterPosition, toPoints)
-    const toPositions = [
-      toPoints[nearestIndex > 0 ? nearestIndex - 1 : toPoints.length - 1],
-      toPoints[nearestIndex],
-      toPoints[nearestIndex < toPoints.length - 1 ? nearestIndex + 1 : 0]
-    ]
-    const spacing = 5 // 0.6
-    range(0, 1).forEach(i => {
+    function getCorners (): Vec2[] {
+      if (toVisibleCorners.length < 3) return toVisibleCorners
+      if (toVisibleCorners.length === 3) {
+        const nearestFromIndex = getNearestIndex(globalFromCenter, toVisibleCorners)
+        if (nearestFromIndex === 0) {
+          return [toVisibleCorners[1], toVisibleCorners[0], toVisibleCorners[2]]
+        }
+        if (nearestFromIndex === 1) return toVisibleCorners
+        if (nearestFromIndex === 2) {
+          return [toVisibleCorners[0], toVisibleCorners[2], toVisibleCorners[1]]
+        }
+        throw new Error(`Invalid nearestFromIndex: ${nearestFromIndex}`)
+      }
+      const midpoints = range(0, 2).map(i => {
+        const point1 = toVisibleCorners[i]
+        const point2 = toVisibleCorners[i + 1]
+        return Vec2.combine(0.5, point1, 0.5, point2)
+      })
+      const nearestMidpointIndex = getNearestIndex(globalFromCenter, midpoints)
+      if (nearestMidpointIndex === 0) {
+        const indices = [3, 0, 1, 2]
+        return indices.map(i => toVisibleCorners[i])
+      }
+      if (nearestMidpointIndex === 1) {
+        const indices = [0, 1, 2, 3]
+        return indices.map(i => toVisibleCorners[i])
+      }
+      if (nearestMidpointIndex === 2) {
+        const indices = [1, 2, 3, 0]
+        return indices.map(i => toVisibleCorners[i])
+      }
+      const indices = [2, 3, 0, 1]
+      return indices.map(i => toVisibleCorners[i])
+    }
+    const corners = getCorners()
+    const spacing = 1 // 0.6
+    range(0, corners.length - 2).forEach(i => {
       const j = i + 1
-      const point1 = toPositions[i]
-      lines.push(new Line({ a: fromCenterPosition, b: point1 }))
-      const point2 = toPositions[j]
+      const point1 = corners[i]
+      lines.push(new Line({ a: globalFromCenter, b: point1 }))
+      const point2 = corners[j]
       const distance = Vec2.distance(point1, point2)
       if (distance <= spacing) return false
-      const segmentCount = 2 // Math.ceil(distance / spacing)
+      const segmentCount = Math.ceil(distance / spacing)
       const segmentLength = distance / segmentCount
       const segmentDirection = directionFromTo(point1, point2)
-      range(0, segmentCount - 1).forEach(i => {
+      range(0, segmentCount).forEach(i => {
         const toPosition = Vec2.combine(1, point1, i * segmentLength, segmentDirection)
-        const direction = directionFromTo(fromCenterPosition, toPosition)
+        const direction = directionFromTo(globalFromCenter, toPosition)
         const rightDirection = rotate(direction, 0.5 * Math.PI)
         const leftDirection = rotate(direction, -0.5 * Math.PI)
-        const fromRightPosition = Vec2.combine(1, fromCenterPosition, fromCircle.getRadius(), rightDirection)
-        const fromLeftPosition = Vec2.combine(1, fromCenterPosition, fromCircle.getRadius(), leftDirection)
-        lines.push(new Line({ a: fromCenterPosition, b: toPosition }))
+        const fromRightPosition = Vec2.combine(1, globalFromCenter, fromCircle.getRadius(), rightDirection)
+        const fromLeftPosition = Vec2.combine(1, globalFromCenter, fromCircle.getRadius(), leftDirection)
+        lines.push(new Line({ a: globalFromCenter, b: toPosition }))
         lines.push(new Line({ a: fromRightPosition, b: toPosition }))
         lines.push(new Line({ a: fromLeftPosition, b: toPosition }))
       })
     })
-    lines.forEach(line => this.isClear(line.a, line.b, toFeature.id))
     return lines.some(line => this.isClear(line.a, line.b, toFeature.id))
   }
 
@@ -232,9 +269,6 @@ export class Feature {
     }
     if (myShape instanceof CircleShape && targetShape instanceof PolygonShape) {
       return this.checkCircleToPolygon(this, targetFeature, myShape, targetShape)
-    }
-    if (myShape instanceof PolygonShape && targetShape instanceof PolygonShape) {
-      return this.checkPolygonToPolygon(this, targetFeature, myShape, targetShape)
     }
     return true
   }

@@ -50,7 +50,7 @@ export class Runner {
       elements: filteredElements,
       ropes: this.getRopes(props.player),
       debugLines: this.debugLines,
-      id: props.player.eye.id
+      id: props.player.mouth.id
     })
     return summary
   }
