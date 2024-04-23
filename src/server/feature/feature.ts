@@ -104,6 +104,13 @@ export class Feature {
     return clear
   }
 
+  isVisible (startPoint: Vec2, targetPoint: Vec2, targetId?: number, debug?: boolean): boolean {
+    const inRange = this.isPointInRange(targetPoint)
+    if (!inRange) return false
+    const clear = this.isClear(startPoint, targetPoint, targetId, debug)
+    return clear
+  }
+
   checkCircleToCircle (fromFeature: Feature, toFeature: Feature, fromCircle: CircleShape, toCircle: CircleShape): Boolean {
     const myPosition = fromFeature.body.getPosition()
     const targetPosition = toFeature.body.getPosition()
@@ -117,7 +124,7 @@ export class Feature {
     const leftSelfPosition = Vec2.combine(1, myPosition, fromCircle.getRadius(), leftDirection)
     const leftTargetPosition = Vec2.combine(1, targetPosition, toCircle.getRadius(), leftDirection)
     lines.push(new Line({ a: leftSelfPosition, b: leftTargetPosition }))
-    return lines.some(line => this.isClear(line.a, line.b, toFeature.id))
+    return lines.some(line => this.isVisible(line.a, line.b, toFeature.id))
   }
 
   checkCircleToPolygon (fromFeature: Feature, toFeature: Feature, fromCircle: CircleShape, toPolygon: PolygonShape): Boolean {
@@ -192,7 +199,7 @@ export class Feature {
         lines.push(new Line({ a: fromLeftPosition, b: toPosition }))
       })
     })
-    return lines.some(line => this.isClear(line.a, line.b, toFeature.id))
+    return lines.some(line => this.isVisible(line.a, line.b, toFeature.id))
   }
 
   checkPolygonToPolygon (fromFeature: Feature, toFeature: Feature, fromPolygon: PolygonShape, toPolygon: PolygonShape): Boolean {
@@ -253,8 +260,8 @@ export class Feature {
         lines.push(new Line({ a: fromPoint, b: toPoint }))
       })
     })
-    lines.forEach(line => this.isClear(line.a, line.b, toFeature.id))
-    return lines.some(line => this.isClear(line.a, line.b, toFeature.id))
+    lines.forEach(line => this.isVisible(line.a, line.b, toFeature.id))
+    return lines.some(line => this.isVisible(line.a, line.b, toFeature.id))
   }
 
   isFeatureVisible (targetFeature: Feature): Boolean {

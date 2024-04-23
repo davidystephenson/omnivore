@@ -31,7 +31,7 @@ export class Player extends Actor {
     super({ stage: props.stage, label: 'player' })
     this.spawnPosition = props.position
     this.tree = {
-      radius: 3,
+      radius: 1,
       angle: 0,
       branches: []
     }

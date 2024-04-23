@@ -39,6 +39,16 @@ export class Stage {
     this.addWall({ halfWidth: 1, halfHeight: 15, position: Vec2(-20, 0) })
     */
 
+    this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, 9.9) })
+    this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, 7.7) })
+    this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, 5.5) })
+    this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, 3.3) })
+    this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, 1.1) })
+    this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, -1.1) })
+    this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, -3.3) })
+    this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, -5.5) })
+    this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, -7.7) })
+    this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, -9.9) })
     void new Brick({ stage: this, halfWidth: 1, halfHeight: 10, position: Vec2(-12, 0) })
     void new Brick({ stage: this, halfWidth: 1, halfHeight: 2, position: Vec2(0, 0) })
     void new Brick({ stage: this, halfWidth: 10, halfHeight: 10, position: Vec2(12, 0) })
