@@ -144,9 +144,9 @@ export class Player extends Actor {
     const featuresInRange = this.mouth.getFeaturesInRange()
     this.featuresInVision = featuresInRange.filter(targetFeature => {
       if (this.mouth instanceof Egg) {
-        return this.mouth.isFeatureVisible(targetFeature)
+        return this.stage.vision.isFeatureVisible(this.mouth, targetFeature)
       }
-      return this.mouths.some(mouth => mouth.isFeatureVisible(targetFeature))
+      return this.mouths.some(mouth => this.stage.vision.isFeatureVisible(mouth, targetFeature))
     })
     if (!this.hatched) this.flee()
     if (this.readyToHatch && !this.hatched) this.hatch()

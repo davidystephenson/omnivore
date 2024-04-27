@@ -10,10 +10,12 @@ import { Barrier } from './feature/barrier'
 import { Killing } from './killing'
 import { Color } from '../shared/color'
 import { DebugLine } from '../shared/debugLine'
+import { Vision } from './vision'
 
 export class Stage {
   world: World
   runner: Runner
+  vision: Vision
   destructionQueue: Body[] = []
   respawnQueue: Player[] = []
   killingQueue: Killing[] = []
@@ -24,6 +26,7 @@ export class Stage {
     this.world.on('pre-solve', contact => this.preSolve(contact))
     this.world.on('begin-contact', contact => this.beginContact(contact))
     this.runner = new Runner({ stage: this })
+    this.vision = new Vision({ stage: this })
 
     // outer walls
     this.addWall({ halfWidth: 50, halfHeight: 1, position: Vec2(0, 50) })
@@ -49,9 +52,9 @@ export class Stage {
     this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, -5.5) })
     this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, -7.7) })
     this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, -9.9) })
-    void new Brick({ stage: this, halfWidth: 1, halfHeight: 10, position: Vec2(-12, 0) })
-    void new Brick({ stage: this, halfWidth: 1, halfHeight: 2, position: Vec2(0, 0) })
-    void new Brick({ stage: this, halfWidth: 10, halfHeight: 10, position: Vec2(12, 0) })
+    // void new Brick({ stage: this, halfWidth: 1, halfHeight: 10, position: Vec2(-12, 0) })
+    // void new Brick({ stage: this, halfWidth: 1, halfHeight: 2, position: Vec2(0, 0) })
+    void new Brick({ stage: this, halfWidth: 2, halfHeight: 10, position: Vec2(12, 0) })
   }
 
   addDebugLine (props: {
