@@ -1,63 +1,33 @@
-import { AABB, Body, BodyDef, Fixture, FixtureDef, CircleShape, Vec2, PolygonShape } from 'planck'
-import { Color } from '../../shared/color'
-import { Actor } from '../actor/actor'
-// import { DebugLine } from '../../shared/debugLine'
-import { Rope } from '../../shared/rope'
-import { SIGHT } from '../../shared/sight'
-import { directionFromTo, getNearestIndex, range, rotate } from '../math'
-import { Line } from '../../shared/line'
 
-let actorCount = 0
+import { SIGHT } from '../shared/sight'
+import { Feature } from './feature/feature'
+import { Vec2, AABB, CircleShape, PolygonShape } from 'planck'
+import { Stage } from './stage'
+import { Color } from '../shared/color'
+import { getNearestIndex, normalize, rotate } from './math'
 
-export class Feature {
-  body: Body
-  fixture: Fixture
-  force = Vec2(0, 0)
-  label = 'default'
-  actor: Actor
-  id: number
-  borderWidth: number
-  color: Color
-  ropes: Rope[] = []
-  spawnPosition = Vec2(0, 0)
-  deathPosition = Vec2(0, 0)
-  health = 1
-  maximumHealth = 1
-  radius = 0
+export class Vision {
+  stage: Stage
 
   constructor (props: {
-    bodyDef: BodyDef
-    fixtureDef: FixtureDef
-    label?: string
-    actor: Actor
-    color: Color
-    borderWidth?: number
+    stage: Stage
   }) {
-    this.actor = props.actor
-    this.body = this.actor.stage.world.createBody(props.bodyDef)
-    this.body.setUserData(this)
-    this.label = props.label ?? this.label
-    this.fixture = this.body.createFixture(props.fixtureDef)
-    this.fixture.setUserData(this)
-    this.color = props.color
-    this.borderWidth = props.borderWidth ?? 0.1
-    actorCount += 1
-    this.id = actorCount
+    this.stage = props.stage
   }
 
-  getFeaturesInRange (): Feature[] {
+  static getFeaturesInRange (source: Feature): Feature[] {
     const featuresInRange: Feature[] = []
-    const position = this.body.getPosition()
+    const position = source.body.getPosition()
     const upper = Vec2.add(position, SIGHT)
     const lower = Vec2.sub(position, SIGHT)
     const visionBox = new AABB(lower, upper)
-    this.actor.stage.runner.getBodies().forEach(body => {
+    source.actor.stage.runner.getBodies().forEach(body => {
       const feature = body.getUserData() as Feature
       if (feature.label === 'barrier') {
         featuresInRange.push(feature)
       }
     })
-    this.actor.stage.world.queryAABB(visionBox, fixture => {
+    source.actor.stage.world.queryAABB(visionBox, fixture => {
       const feature = fixture.getUserData() as Feature
       if (feature.label === 'barrier') return true
       featuresInRange.push(feature)
@@ -66,26 +36,24 @@ export class Feature {
     return featuresInRange
   }
 
-  isPointInRange (point: Vec2): boolean {
-    const position = this.body.getPosition()
-    const upper = Vec2.add(position, SIGHT)
-    const lower = Vec2.sub(position, SIGHT)
-    const xInside = lower.x <= point.x && point.x <= upper.x
-    const yInside = lower.y <= point.y && point.x <= upper.y
+  isPointInRange (sourcePoint: Vec2, targetPoint: Vec2): boolean {
+    const upper = Vec2.add(sourcePoint, SIGHT)
+    const lower = Vec2.sub(sourcePoint, SIGHT)
+    const xInside = lower.x <= targetPoint.x && targetPoint.x <= upper.x
+    const yInside = lower.y <= targetPoint.y && targetPoint.x <= upper.y
     return xInside && yInside
   }
 
-  isClear (startPoint: Vec2, targetPoint: Vec2, targetId?: number, debug?: boolean): boolean {
+  isClear (startPoint: Vec2, targetPoint: Vec2, excludeId?: number, debug?: boolean): boolean {
     let clear = true
-    this.actor.stage.world.rayCast(startPoint, targetPoint, (fixture, point, normal, fraction) => {
+    this.stage.world.rayCast(startPoint, targetPoint, (fixture, point, normal, fraction) => {
       const collideFeature = fixture.getUserData() as Feature
-      const isTarget = collideFeature.id === targetId
+      const excluded = collideFeature.id === excludeId
       const isMouth = collideFeature.label === 'mouth' || collideFeature.label === 'egg'
-      if (isTarget || isMouth) return 1
+      if (excluded || isMouth) return 1
       clear = false
       return 0
     })
-    /*
     const color = clear
       ? new Color({
         red: 0,
@@ -97,22 +65,22 @@ export class Feature {
         green: 0,
         blue: 0
       })
-    this.actor.stage.addDebugLine({
+    this.stage.addDebugLine({
       a: startPoint,
       b: targetPoint,
       color
     })
-    */
     return clear
   }
 
-  isVisible (startPoint: Vec2, targetPoint: Vec2, targetId?: number, debug?: boolean): boolean {
-    const inRange = this.isPointInRange(targetPoint)
+  isVisible (sourcePoint: Vec2, targetPoint: Vec2, excludeId?: number, debug?: boolean): boolean {
+    const inRange = this.isPointInRange(sourcePoint, targetPoint)
     if (!inRange) return false
-    const clear = this.isClear(startPoint, targetPoint, targetId, debug)
+    const clear = this.isClear(sourcePoint, targetPoint, excludeId, debug)
     return clear
   }
 
+  /*
   checkCircleToCircle (fromFeature: Feature, toFeature: Feature, fromCircle: CircleShape, toCircle: CircleShape): Boolean {
     const myPosition = fromFeature.body.getPosition()
     const targetPosition = toFeature.body.getPosition()
@@ -128,8 +96,40 @@ export class Feature {
     lines.push(new Line({ a: leftSelfPosition, b: leftTargetPosition }))
     return lines.some(line => this.isVisible(line.a, line.b, toFeature.id))
   }
+  */
 
-  checkCircleToPolygon (fromFeature: Feature, toFeature: Feature, fromCircle: CircleShape, toPolygon: PolygonShape): Boolean {
+  getNearestSide (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): Vec2[] {
+    const targetCorners = targetPolygon.m_vertices.map(v => targetFeature.body.getWorldPoint(v))
+    const nearestCornerIndex = getNearestIndex(sourcePoint, targetCorners)
+    const nearestCorner = targetCorners[nearestCornerIndex]
+    const cornerA = targetCorners[(nearestCornerIndex + 1) % 4]
+    const cornerB = targetCorners[nearestCornerIndex > 0 ? nearestCornerIndex - 1 : 3]
+    const directionA = normalize(Vec2.sub(cornerA, nearestCorner))
+    const directionB = normalize(Vec2.sub(cornerB, nearestCorner))
+    const pointA = Vec2.add(nearestCorner, directionA)
+    const pointB = Vec2.add(nearestCorner, directionB)
+    const distanceA = Vec2.distance(pointA, sourcePoint)
+    const distanceB = Vec2.distance(pointB, sourcePoint)
+    const otherCorner = distanceA < distanceB ? cornerA : cornerB
+    return [nearestCorner, otherCorner]
+  }
+
+  checkCircleToPolygon (sourceFeature: Feature, targetFeature: Feature, sourceCircle: CircleShape, targetPolygon: PolygonShape): Boolean {
+    const sourceCenter = sourceFeature.body.getWorldCenter()
+    const nearestSide = this.getNearestSide(sourceCenter, targetFeature, targetPolygon)
+    const nearestCorner = nearestSide[0]
+    const otherCorner = nearestSide[1]
+    const sideDirection = Vec2.sub(nearestSide[1], nearestSide[0])
+    const perpDirection = rotate(sideDirection, Math.PI / 2)
+    const numerator = Vec2.crossVec2Vec2(Vec2.sub(sourceCenter, nearestCorner), perpDirection)
+    const denominator = Vec2.crossVec2Vec2(sideDirection, perpDirection)
+    const sideLength = Vec2.distance(nearestCorner, otherCorner)
+    const nearestWeight = Math.max(0, Math.min(sideLength, numerator / denominator))
+    console.log('nearestWeight', nearestWeight)
+    const nearestPoint = Vec2.combine(1, nearestCorner, nearestWeight, sideDirection)
+    this.isClear(sourceCenter, nearestPoint)
+    return true
+    /*
     const lines: Line[] = []
     const globalFromCenter = fromFeature.body.getPosition()
     const localFromCenter = toFeature.body.getLocalPoint(globalFromCenter)
@@ -202,82 +202,22 @@ export class Feature {
       })
     })
     return lines.some(line => this.isVisible(line.a, line.b, toFeature.id))
-  }
-
-  checkPolygonToPolygon (fromFeature: Feature, toFeature: Feature, fromPolygon: PolygonShape, toPolygon: PolygonShape): Boolean {
-    const lines: Line[] = []
-    const fromCenterPosition = fromFeature.body.getPosition()
-    const fromPoints = fromPolygon.m_vertices.map(vertex => {
-      return fromFeature.body.getWorldPoint(vertex)
-    })
-    const toCenterPosition = toFeature.body.getPosition()
-    const toPoints = toPolygon.m_vertices.map(vertex => {
-      return toFeature.body.getWorldPoint(vertex)
-    })
-    const nearestFromIndex = getNearestIndex(toCenterPosition, fromPoints)
-    const fromPositions = [
-      fromPoints[nearestFromIndex > 0 ? nearestFromIndex - 1 : toPoints.length - 1],
-      fromPoints[nearestFromIndex],
-      fromPoints[nearestFromIndex < toPoints.length - 1 ? nearestFromIndex + 1 : 0]
-    ]
-    const nearestToIndex = getNearestIndex(fromCenterPosition, toPoints)
-    const toPositions = [
-      toPoints[nearestToIndex > 0 ? nearestToIndex - 1 : toPoints.length - 1],
-      toPoints[nearestToIndex],
-      toPoints[nearestToIndex < toPoints.length - 1 ? nearestToIndex + 1 : 0]
-    ]
-    const spacing = 5 // 0.6
-    range(0, 1).forEach(i => {
-      const j = i + 1
-      const point1 = fromPositions[i]
-      const point2 = fromPositions[j]
-      const distance = Vec2.distance(point1, point2)
-      if (distance <= spacing) return false
-      const segmentCount = Math.ceil(distance / spacing)
-      const segmentLength = distance / segmentCount
-      const segmentDirection = directionFromTo(point1, point2)
-      range(0, segmentCount - 1).forEach(i => {
-        const intermediatePoint = Vec2.combine(1, point1, i * segmentLength, segmentDirection)
-        fromPositions.push(intermediatePoint)
-      })
-    })
-    /*
-    range(0, 1).forEach(i => {
-      const j = (i + 1) % toPoints.length
-      const point1 = toPositions[i]
-      const point2 = toPositions[j]
-      const distance = Vec2.distance(point1, point2)
-      if (distance <= spacing) return false
-      const segmentCount = Math.ceil(distance / spacing)
-      const segmentLength = distance / segmentCount
-      const segmentDirection = directionFromTo(point1, point2)
-      range(0, segmentCount - 1).forEach(i => {
-        const intermediatePoint = Vec2.combine(1, point1, i * segmentLength, segmentDirection)
-        toPositions.push(intermediatePoint)
-      })
-    })
     */
-    fromPositions.forEach(fromPoint => {
-      toPositions.forEach(toPoint => {
-        lines.push(new Line({ a: fromPoint, b: toPoint }))
-      })
-    })
-    lines.forEach(line => this.isVisible(line.a, line.b, toFeature.id))
-    return lines.some(line => this.isVisible(line.a, line.b, toFeature.id))
   }
 
-  isFeatureVisible (targetFeature: Feature): Boolean {
+  isFeatureVisible (sourceFeature: Feature, targetFeature: Feature): Boolean {
     if (targetFeature.label === 'barrier') {
       return true
     }
-    if (targetFeature.actor.id === this.actor.id) return true
-    const myShape = this.fixture.getShape()
+    if (targetFeature.actor.id === sourceFeature.actor.id) return true
+    const sourceShape = sourceFeature.fixture.getShape()
     const targetShape = targetFeature.fixture.getShape()
-    if (myShape instanceof CircleShape && targetShape instanceof CircleShape) {
-      return this.checkCircleToCircle(this, targetFeature, myShape, targetShape)
+    if (sourceShape instanceof CircleShape && targetShape instanceof CircleShape) {
+      // return this.checkCircleToCircle(this, targetFeature, sourceShape, targetShape)
+      return true
     }
-    if (myShape instanceof CircleShape && targetShape instanceof PolygonShape) {
-      return this.checkCircleToPolygon(this, targetFeature, myShape, targetShape)
+    if (sourceShape instanceof CircleShape && targetShape instanceof PolygonShape) {
+      return this.checkCircleToPolygon(sourceFeature, targetFeature, sourceShape, targetShape)
     }
     return true
   }
