@@ -85,24 +85,24 @@ export class Feature {
       clear = false
       return 0
     })
-    /*
-    const color = clear
-      ? new Color({
-        red: 0,
-        green: 255,
-        blue: 0
+    if (debug === true) {
+      const color = clear
+        ? new Color({
+          red: 0,
+          green: 255,
+          blue: 0
+        })
+        : new Color({
+          red: 255,
+          green: 0,
+          blue: 0
+        })
+      this.actor.stage.addDebugLine({
+        a: startPoint,
+        b: targetPoint,
+        color
       })
-      : new Color({
-        red: 255,
-        green: 0,
-        blue: 0
-      })
-    this.actor.stage.addDebugLine({
-      a: startPoint,
-      b: targetPoint,
-      color
-    })
-    */
+    }
     return clear
   }
 
@@ -113,7 +113,7 @@ export class Feature {
     return clear
   }
 
-  checkCircleToCircle (fromFeature: Feature, toFeature: Feature, fromCircle: CircleShape, toCircle: CircleShape): Boolean {
+  checkCircleToCircle (fromFeature: Feature, toFeature: Feature, fromCircle: CircleShape, toCircle: CircleShape): boolean {
     const myPosition = fromFeature.body.getPosition()
     const targetPosition = toFeature.body.getPosition()
     const lines: Line[] = [new Line({ a: myPosition, b: targetPosition })]
@@ -129,7 +129,7 @@ export class Feature {
     return lines.some(line => this.isVisible(line.a, line.b, toFeature.id))
   }
 
-  checkCircleToPolygon (fromFeature: Feature, toFeature: Feature, fromCircle: CircleShape, toPolygon: PolygonShape): Boolean {
+  checkCircleToPolygon (fromFeature: Feature, toFeature: Feature, fromCircle: CircleShape, toPolygon: PolygonShape): boolean {
     const lines: Line[] = []
     const globalFromCenter = fromFeature.body.getPosition()
     const localFromCenter = toFeature.body.getLocalPoint(globalFromCenter)
@@ -204,7 +204,7 @@ export class Feature {
     return lines.some(line => this.isVisible(line.a, line.b, toFeature.id))
   }
 
-  checkPolygonToPolygon (fromFeature: Feature, toFeature: Feature, fromPolygon: PolygonShape, toPolygon: PolygonShape): Boolean {
+  checkPolygonToPolygon (fromFeature: Feature, toFeature: Feature, fromPolygon: PolygonShape, toPolygon: PolygonShape): boolean {
     const lines: Line[] = []
     const fromCenterPosition = fromFeature.body.getPosition()
     const fromPoints = fromPolygon.m_vertices.map(vertex => {
@@ -266,7 +266,7 @@ export class Feature {
     return lines.some(line => this.isVisible(line.a, line.b, toFeature.id))
   }
 
-  isFeatureVisible (targetFeature: Feature): Boolean {
+  isFeatureVisible (targetFeature: Feature): boolean {
     if (targetFeature.label === 'barrier') {
       return true
     }
