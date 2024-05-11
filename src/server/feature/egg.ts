@@ -16,7 +16,8 @@ export class Egg extends Chunk {
       actor: props.actor,
       shape: new Box(props.hx, props.hy),
       color: new Color({ red: 255, green: 255, blue: 255 }),
-      label: 'egg'
+      label: 'egg',
+      name: 'rectangle'
     })
     this.actor = props.actor
   }

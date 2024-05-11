@@ -15,9 +15,13 @@ io.on('connection', socket => {
     if (controls.up) y += 1
     if (controls.down) y -= 1
     if (controls.left) x -= 1
-    if (controls.right) x += 1
+    if (controls.right) {
+      x += 1
+      stage.runner.paused = false
+    }
     if (controls.select) {
-      player.mouth.body.setPosition(Vec2(0, 0))
+      // player.mouth.body.setPosition(Vec2(0, 0))
+      stage.runner.paused = true
     }
     const direction = Vec2(x, y)
     direction.normalize()

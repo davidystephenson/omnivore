@@ -11,6 +11,7 @@ import { Killing } from './killing'
 import { Color } from '../shared/color'
 import { DebugLine } from '../shared/debugLine'
 import { Vision } from './vision'
+import { Puppet } from './actor/puppet'
 
 export class Stage {
   world: World
@@ -42,6 +43,17 @@ export class Stage {
     this.addWall({ halfWidth: 1, halfHeight: 15, position: Vec2(-20, 0) })
     */
 
+    const vertices: [Vec2, Vec2, Vec2] = [
+      Vec2(10, 25),
+      Vec2(10, 15),
+      Vec2(-10, 0)
+    ]
+    void new Puppet({
+      stage: this,
+      vertices,
+      position: Vec2(0, 5)
+    })
+
     this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, 9.9) })
     this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, 7.7) })
     this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, 5.5) })
@@ -52,8 +64,9 @@ export class Stage {
     this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, -5.5) })
     this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, -7.7) })
     this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, -9.9) })
-    // void new Brick({ stage: this, halfWidth: 1, halfHeight: 10, position: Vec2(-12, 0) })
-    // void new Brick({ stage: this, halfWidth: 1, halfHeight: 2, position: Vec2(0, 0) })
+    void new Brick({ stage: this, halfWidth: 1, halfHeight: 10, position: Vec2(-12, 0) })
+    void new Brick({ stage: this, halfWidth: 1, halfHeight: 2, position: Vec2(0, 0) })
+    void new Brick({ stage: this, halfWidth: 2, halfHeight: 10, position: Vec2(6, 0) })
     void new Brick({ stage: this, halfWidth: 2, halfHeight: 10, position: Vec2(12, 0) })
   }
 
