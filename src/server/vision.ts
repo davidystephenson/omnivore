@@ -128,7 +128,26 @@ export class Vision {
     return lines.some(line => this.isVisible(line.a, line.b, targetFeature.id))
   }
 
+  getVisibleCorners (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): Vec2[] {
+    const targetLocalSourcePoint = targetFeature.body.getLocalPoint(sourcePoint)
+    const visibleCorners = targetPolygon.m_vertices.filter(vertex => {
+      const y = Math.sign(vertex.y) * targetLocalSourcePoint.y
+      const x = Math.sign(vertex.x) * targetLocalSourcePoint.x
+      const visibleY = y >= Math.abs(vertex.y)
+      const visibleX = x >= Math.abs(vertex.x)
+      return visibleX || visibleY
+    }).map(vertex => {
+      return targetFeature.body.getWorldPoint(vertex)
+    })
+    return visibleCorners
+  }
+
   getBetweenPolygon (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): PolygonShape {
+    const visibleCorners = this.getVisibleCorners(sourcePoint, targetFeature, targetPolygon)
+    if (visibleCorners.length === 2) {
+      const vertices = [sourcePoint, visibleCorners[0], visibleCorners[1]]
+      return new PolygonShape(vertices)
+    }
     const targetCorners = targetPolygon.m_vertices.map(v => targetFeature.body.getWorldPoint(v))
     const nearestCornerIndex = getNearestIndex(sourcePoint, targetCorners)
     const cornerA = targetCorners[(nearestCornerIndex + 1) % targetCorners.length]
