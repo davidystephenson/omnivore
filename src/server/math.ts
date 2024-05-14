@@ -1,4 +1,4 @@
-import { Vec2 } from 'planck'
+import { AABB, Vec2 } from 'planck'
 
 export function range (a: number, b: number): number[] {
   return [...Array(b - a + 1).keys()].map(i => a + i)
@@ -40,4 +40,16 @@ export function getNearestIndex (fromPoint: Vec2, toPoints: Vec2[]): number {
     }
   })
   return nearestIndex
+}
+
+export function getIntersectionBox (a: AABB, b: AABB): AABB {
+  const lower = Vec2(Math.max(a.lowerBound.x, b.lowerBound.x), Math.max(a.lowerBound.y, b.lowerBound.y))
+  const upper = Vec2(Math.min(a.upperBound.x, b.upperBound.x), Math.min(a.upperBound.y, b.upperBound.y))
+  return new AABB(lower, upper)
+}
+
+export function getUnionBox (a: AABB, b: AABB): AABB {
+  const lower = Vec2(Math.min(a.lowerBound.x, b.lowerBound.x), Math.min(a.lowerBound.y, b.lowerBound.y))
+  const upper = Vec2(Math.max(a.upperBound.x, b.upperBound.x), Math.max(a.upperBound.y, b.upperBound.y))
+  return new AABB(lower, upper)
 }

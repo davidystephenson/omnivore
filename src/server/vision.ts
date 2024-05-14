@@ -4,7 +4,7 @@ import { Feature } from './feature/feature'
 import { Vec2, AABB, CircleShape, PolygonShape } from 'planck'
 import { Stage } from './stage'
 import { Color } from '../shared/color'
-import { directionFromTo, getNearestIndex, normalize, range, rotate } from './math'
+import { directionFromTo, getIntersectionBox, getNearestIndex, getUnionBox, normalize, range, rotate } from './math'
 import { Line } from '../shared/line'
 import { Chunk } from './feature/chunk'
 
@@ -17,25 +17,34 @@ export class Vision {
     this.stage = props.stage
   }
 
-  static getFeaturesInRange (source: Feature): Feature[] {
-    const featuresInRange: Feature[] = []
+  getSightBox (source: Feature): AABB {
     const position = source.body.getPosition()
     const upper = Vec2.add(position, SIGHT)
     const lower = Vec2.sub(position, SIGHT)
-    const visionBox = new AABB(lower, upper)
-    source.actor.stage.runner.getBodies().forEach(body => {
-      const feature = body.getUserData() as Feature
-      if (feature.label === 'barrier') {
-        featuresInRange.push(feature)
-      }
-    })
-    source.actor.stage.world.queryAABB(visionBox, fixture => {
+    const sightBox = new AABB(lower, upper)
+    return sightBox
+  }
+
+  getFeaturesInBox (box: AABB): Feature[] {
+    const featuresInBox: Feature[] = []
+    this.stage.world.queryAABB(box, fixture => {
       const feature = fixture.getUserData() as Feature
-      if (feature.label === 'barrier') return true
-      featuresInRange.push(feature)
+      featuresInBox.push(feature)
       return true
     })
-    return featuresInRange
+    return featuresInBox
+  }
+
+  getFeaturesInRange (source: Feature): Feature[] {
+    const sightBox = this.getSightBox(source)
+    const featuresInBox = this.getFeaturesInBox(sightBox)
+    this.stage.runner.getBodies().forEach(body => {
+      const feature = body.getUserData() as Feature
+      if (feature.label === 'barrier') {
+        featuresInBox.push(feature)
+      }
+    })
+    return featuresInBox
   }
 
   isPointInRange (sourcePoint: Vec2, targetPoint: Vec2): boolean {
@@ -119,6 +128,15 @@ export class Vision {
     return lines.some(line => this.isVisible(line.a, line.b, targetFeature.id))
   }
 
+  getBetweenPolygon (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): PolygonShape {
+    const targetCorners = targetPolygon.m_vertices.map(v => targetFeature.body.getWorldPoint(v))
+    const nearestCornerIndex = getNearestIndex(sourcePoint, targetCorners)
+    const cornerA = targetCorners[(nearestCornerIndex + 1) % targetCorners.length]
+    const cornerB = targetCorners[nearestCornerIndex > 0 ? nearestCornerIndex - 1 : 2]
+    const vertices = [sourcePoint, cornerA, cornerB]
+    return new PolygonShape(vertices)
+  }
+
   getNearestSide (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): Vec2[] {
     const targetCorners = targetPolygon.m_vertices.map(v => targetFeature.body.getWorldPoint(v))
     const nearestCornerIndex = getNearestIndex(sourcePoint, targetCorners)
@@ -150,6 +168,35 @@ export class Vision {
   }
 
   checkCircleToRectangle (sourceFeature: Feature, targetFeature: Feature, sourceCircle: CircleShape, targetPolygon: PolygonShape): boolean {
+    const sourceCenter = sourceFeature.body.getPosition()
+    const betweenPolygon = this.getBetweenPolygon(sourceCenter, targetFeature, targetPolygon)
+    const color = new Color({ red: 255, green: 0, blue: 0 })
+    this.stage.addDebugPolygon({ polygon: betweenPolygon, color })
+    /*
+    const sourceBox = sourceFeature.fixture.getAABB(0)
+    const targetBox = targetFeature.fixture.getAABB(0)
+    const sightBox = this.getSightBox(sourceFeature)
+    const betweenBox = getIntersectionBox(sightBox, getUnionBox(sourceBox, targetBox))
+    const color = new Color({ red: 0, green: 255, blue: 0 })
+    this.stage.addDebugBox({ box: betweenBox, color })
+    const betweenFeatures = this.getFeaturesInBox(betweenBox).filter(feature => {
+      const exclude = [sourceFeature.id, targetFeature.id].includes(feature.id)
+      return !exclude
+    })
+    betweenFeatures.forEach(feature => {
+      const shape = feature.fixture.getShape()
+      if (!(shape instanceof PolygonShape)) {
+        return
+      }
+      const vertices = shape.m_vertices.map(vertex => feature.body.getWorldPoint(vertex))
+      vertices.forEach(vertex => {
+        const color = new Color({ red: 255, green: 0, blue: 0 })
+        this.stage.addDebugLine({ a: sourceCenter, b: vertex, color })
+      })
+    })
+    */
+    return true
+    /*
     const sourceCenter = sourceFeature.body.getWorldCenter()
     const nearestPoint = this.getNearestPoint(sourceCenter, targetFeature, targetPolygon)
     const nearestVisible = this.isVisible(sourceCenter, nearestPoint, targetFeature.id)
@@ -228,12 +275,13 @@ export class Vision {
       })
     })
     return lines.some(line => this.isVisible(line.a, line.b, targetFeature.id))
+    */
   }
 
   checkCircleToTriangle (sourceFeature: Feature, targetFeature: Feature, sourceCircle: CircleShape, targetPolygon: PolygonShape): boolean {
     const sourceCenter = sourceFeature.body.getPosition()
     const nearestPoint = this.getNearestPoint(sourceCenter, targetFeature, targetPolygon)
-    const nearestVisible = this.isVisible(sourceCenter, nearestPoint, targetFeature.id, true)
+    const nearestVisible = this.isVisible(sourceCenter, nearestPoint, targetFeature.id)
     if (nearestVisible) return true
     const lines: Line[] = []
     const targetCorners = targetPolygon.m_vertices.map(vertex => {
