@@ -1,4 +1,4 @@
-import { World, Vec2, Contact, Body } from 'planck'
+import { World, Vec2, Contact, Body, AABB, PolygonShape } from 'planck'
 import { Runner } from './runner'
 import { Player } from './actor/player'
 import { Wall } from './actor/wall'
@@ -12,6 +12,7 @@ import { Color } from '../shared/color'
 import { DebugLine } from '../shared/debugLine'
 import { Vision } from './vision'
 import { Puppet } from './actor/puppet'
+import { range } from './math'
 
 export class Stage {
   world: World
@@ -44,14 +45,14 @@ export class Stage {
     */
 
     const vertices: [Vec2, Vec2, Vec2] = [
-      Vec2(10, 25),
       Vec2(10, 15),
-      Vec2(-10, 0)
+      Vec2(10, 5),
+      Vec2(-10, -10)
     ]
     void new Puppet({
       stage: this,
       vertices,
-      position: Vec2(0, 5)
+      position: Vec2(0, 20)
     })
 
     this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, 9.9) })
@@ -64,10 +65,10 @@ export class Stage {
     this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, -5.5) })
     this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, -7.7) })
     this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, -9.9) })
-    void new Brick({ stage: this, halfWidth: 1, halfHeight: 10, position: Vec2(-12, 0) })
+    // void new Brick({ stage: this, halfWidth: 1, halfHeight: 10, position: Vec2(-12, 0) })
     void new Brick({ stage: this, halfWidth: 1, halfHeight: 2, position: Vec2(0, 0) })
     void new Brick({ stage: this, halfWidth: 2, halfHeight: 10, position: Vec2(6, 0) })
-    void new Brick({ stage: this, halfWidth: 2, halfHeight: 10, position: Vec2(12, 0) })
+    void new Brick({ stage: this, halfWidth: 2, halfHeight: 10, position: Vec2(20, 0) })
   }
 
   addDebugLine (props: {
@@ -82,6 +83,34 @@ export class Stage {
     })
     this.runner.debugLines.push(debugLine)
     return debugLine
+  }
+
+  addDebugBox (props: {
+    box: AABB
+    color: Color
+  }): void {
+    const upper = props.box.upperBound.clone()
+    const lower = props.box.lowerBound.clone()
+    const point1 = upper
+    const point2 = Vec2(lower.x, upper.y)
+    const point3 = lower
+    const point4 = Vec2(upper.x, lower.y)
+    this.addDebugLine({ a: point1, b: point2, color: props.color })
+    this.addDebugLine({ a: point2, b: point3, color: props.color })
+    this.addDebugLine({ a: point3, b: point4, color: props.color })
+    this.addDebugLine({ a: point4, b: point1, color: props.color })
+  }
+
+  addDebugPolygon (props: {
+    polygon: PolygonShape
+    color: Color
+  }): void {
+    range(0, props.polygon.m_vertices.length - 1).forEach(i => {
+      const j = (i + 1) % props.polygon.m_vertices.length
+      const point1 = props.polygon.m_vertices[i]
+      const point2 = props.polygon.m_vertices[j]
+      this.addDebugLine({ a: point1, b: point2, color: props.color })
+    })
   }
 
   addPlayer (props: { position: Vec2 }): Player {
