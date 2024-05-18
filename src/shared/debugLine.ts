@@ -1,8 +1,8 @@
 import { Vec2 } from 'planck'
 import { Color } from './color'
-import { Line } from './line'
+import { LineFigure } from './lineFigure'
 
-export class DebugLine extends Line {
+export class DebugLine extends LineFigure {
   color: Color
 
   constructor (props: {

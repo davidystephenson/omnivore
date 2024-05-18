@@ -1,4 +1,4 @@
-import { World, Vec2, Contact, Body, AABB, PolygonShape } from 'planck'
+import { World, Vec2, Contact, Body, AABB, PolygonShape, CircleShape } from 'planck'
 import { Runner } from './runner'
 import { Player } from './actor/player'
 import { Wall } from './actor/wall'
@@ -13,6 +13,7 @@ import { DebugLine } from '../shared/debugLine'
 import { Vision } from './vision'
 import { Puppet } from './actor/puppet'
 import { range } from './math'
+import { DebugCircle } from '../shared/debugCircle'
 
 export class Stage {
   world: World
@@ -44,16 +45,24 @@ export class Stage {
     this.addWall({ halfWidth: 1, halfHeight: 15, position: Vec2(-20, 0) })
     */
 
-    const vertices: [Vec2, Vec2, Vec2] = [
-      Vec2(10, 15),
-      Vec2(10, 5),
-      Vec2(-10, -10)
-    ]
-    void new Puppet({
-      stage: this,
-      vertices,
-      position: Vec2(0, 20)
-    })
+    // void new Puppet({
+    //   stage: this,
+    //   vertices: [
+    //     Vec2(10, 15),
+    //     Vec2(10, 5),
+    //     Vec2(-10, -10)
+    //   ],
+    //   position: Vec2(0, 20)
+    // })
+    // void new Puppet({
+    //   stage: this,
+    //   vertices: [
+    //     Vec2(2, 3),
+    //     Vec2(2, 1),
+    //     Vec2(-2, -2)
+    //   ],
+    //   position: Vec2(0, 5)
+    // })
 
     this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, 9.9) })
     this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, 7.7) })
@@ -66,12 +75,14 @@ export class Stage {
     this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, -7.7) })
     this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(-14, -9.9) })
     // void new Brick({ stage: this, halfWidth: 1, halfHeight: 10, position: Vec2(-12, 0) })
-    void new Brick({ stage: this, halfWidth: 1, halfHeight: 2, position: Vec2(0, 0) })
-    void new Brick({ stage: this, halfWidth: 2, halfHeight: 10, position: Vec2(6, 0) })
-    void new Brick({ stage: this, halfWidth: 2, halfHeight: 10, position: Vec2(20, 0) })
+    void new Brick({ stage: this, halfWidth: 1, halfHeight: 2, position: Vec2(-5, 0) })
+    // this.addWall({ halfWidth: 0.5, halfHeight: 3, position: Vec2(-2, 0) })
+    void new Brick({ stage: this, halfWidth: 2, halfHeight: 1, position: Vec2(2, 3) })
+    void new Brick({ stage: this, halfWidth: 1, halfHeight: 10, position: Vec2(5, -0) })
+    void new Brick({ stage: this, halfWidth: 1, halfHeight: 3, position: Vec2(7, 0) })
   }
 
-  addDebugLine (props: {
+  debugLine (props: {
     a: Vec2
     b: Vec2
     color: Color
@@ -85,7 +96,20 @@ export class Stage {
     return debugLine
   }
 
-  addDebugBox (props: {
+  debugCircle (props: {
+    circle: CircleShape
+    color: Color
+  }): DebugCircle {
+    const debugCircle = new DebugCircle({
+      position: props.circle.getCenter(),
+      radius: props.circle.getRadius(),
+      color: props.color
+    })
+    this.runner.debugCircles.push(debugCircle)
+    return debugCircle
+  }
+
+  debugBox (props: {
     box: AABB
     color: Color
   }): void {
@@ -95,13 +119,13 @@ export class Stage {
     const point2 = Vec2(lower.x, upper.y)
     const point3 = lower
     const point4 = Vec2(upper.x, lower.y)
-    this.addDebugLine({ a: point1, b: point2, color: props.color })
-    this.addDebugLine({ a: point2, b: point3, color: props.color })
-    this.addDebugLine({ a: point3, b: point4, color: props.color })
-    this.addDebugLine({ a: point4, b: point1, color: props.color })
+    this.debugLine({ a: point1, b: point2, color: props.color })
+    this.debugLine({ a: point2, b: point3, color: props.color })
+    this.debugLine({ a: point3, b: point4, color: props.color })
+    this.debugLine({ a: point4, b: point1, color: props.color })
   }
 
-  addDebugPolygon (props: {
+  debugPolygon (props: {
     polygon: PolygonShape
     color: Color
   }): void {
@@ -109,7 +133,7 @@ export class Stage {
       const j = (i + 1) % props.polygon.m_vertices.length
       const point1 = props.polygon.m_vertices[i]
       const point2 = props.polygon.m_vertices[j]
-      this.addDebugLine({ a: point1, b: point2, color: props.color })
+      this.debugLine({ a: point1, b: point2, color: props.color })
     })
   }
 
