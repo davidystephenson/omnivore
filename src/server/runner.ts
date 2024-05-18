@@ -6,6 +6,7 @@ import { Summary } from '../shared/summary'
 import { Player } from './actor/player'
 import { Rope } from '../shared/rope'
 import { DebugLine } from '../shared/debugLine'
+import { DebugCircle } from '../shared/debugCircle'
 
 export class Runner {
   stage: Stage
@@ -15,6 +16,7 @@ export class Runner {
   worldTime = 0
   elements: Element[]
   debugLines: DebugLine[] = []
+  debugCircles: DebugCircle[] = []
 
   constructor (props: {
     stage: Stage
@@ -37,6 +39,7 @@ export class Runner {
     this.stage.world.step(stepSize)
     this.elements = this.getElements()
     this.debugLines = []
+    this.debugCircles = []
     this.stage.onStep()
     this.elements = this.getElements()
   }
@@ -50,6 +53,7 @@ export class Runner {
       elements: filteredElements,
       ropes: this.getRopes(props.player),
       debugLines: this.debugLines,
+      debugCircles: this.debugCircles,
       id: props.player.mouth.id
     })
     return summary

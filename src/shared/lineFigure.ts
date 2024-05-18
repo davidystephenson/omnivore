@@ -1,6 +1,6 @@
 import { Vec2 } from 'planck'
 
-export class Line {
+export class LineFigure {
   a: Vec2
   b: Vec2
 

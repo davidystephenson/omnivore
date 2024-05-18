@@ -5,7 +5,7 @@ import { Actor } from '../actor/actor'
 import { Rope } from '../../shared/rope'
 import { SIGHT } from '../../shared/sight'
 import { directionFromTo, getNearestIndex, range, rotate } from '../math'
-import { Line } from '../../shared/line'
+import { LineFigure } from '../../shared/lineFigure'
 
 let actorCount = 0
 
@@ -97,7 +97,7 @@ export class Feature {
           green: 0,
           blue: 0
         })
-      this.actor.stage.addDebugLine({
+      this.actor.stage.debugLine({
         a: startPoint,
         b: targetPoint,
         color
@@ -116,21 +116,21 @@ export class Feature {
   checkCircleToCircle (fromFeature: Feature, toFeature: Feature, fromCircle: CircleShape, toCircle: CircleShape): boolean {
     const myPosition = fromFeature.body.getPosition()
     const targetPosition = toFeature.body.getPosition()
-    const lines: Line[] = [new Line({ a: myPosition, b: targetPosition })]
+    const lines: LineFigure[] = [new LineFigure({ a: myPosition, b: targetPosition })]
     const direction = directionFromTo(myPosition, targetPosition)
     const rightDirection = rotate(direction, 0.5 * Math.PI)
     const rightSelfPosition = Vec2.combine(1, myPosition, fromCircle.getRadius(), rightDirection)
     const rightTargetPosition = Vec2.combine(1, targetPosition, toCircle.getRadius(), rightDirection)
-    lines.push(new Line({ a: rightSelfPosition, b: rightTargetPosition }))
+    lines.push(new LineFigure({ a: rightSelfPosition, b: rightTargetPosition }))
     const leftDirection = rotate(direction, -0.5 * Math.PI)
     const leftSelfPosition = Vec2.combine(1, myPosition, fromCircle.getRadius(), leftDirection)
     const leftTargetPosition = Vec2.combine(1, targetPosition, toCircle.getRadius(), leftDirection)
-    lines.push(new Line({ a: leftSelfPosition, b: leftTargetPosition }))
+    lines.push(new LineFigure({ a: leftSelfPosition, b: leftTargetPosition }))
     return lines.some(line => this.isVisible(line.a, line.b, toFeature.id))
   }
 
   checkCircleToPolygon (fromFeature: Feature, toFeature: Feature, fromCircle: CircleShape, toPolygon: PolygonShape): boolean {
-    const lines: Line[] = []
+    const lines: LineFigure[] = []
     const globalFromCenter = fromFeature.body.getPosition()
     const localFromCenter = toFeature.body.getLocalPoint(globalFromCenter)
     const radius = fromCircle.getRadius()
@@ -182,7 +182,7 @@ export class Feature {
     range(0, corners.length - 2).forEach(i => {
       const j = i + 1
       const point1 = corners[i]
-      lines.push(new Line({ a: globalFromCenter, b: point1 }))
+      lines.push(new LineFigure({ a: globalFromCenter, b: point1 }))
       const point2 = corners[j]
       const distance = Vec2.distance(point1, point2)
       if (distance <= spacing) return false
@@ -196,16 +196,16 @@ export class Feature {
         const leftDirection = rotate(direction, -0.5 * Math.PI)
         const fromRightPosition = Vec2.combine(1, globalFromCenter, fromCircle.getRadius(), rightDirection)
         const fromLeftPosition = Vec2.combine(1, globalFromCenter, fromCircle.getRadius(), leftDirection)
-        lines.push(new Line({ a: globalFromCenter, b: toPosition }))
-        lines.push(new Line({ a: fromRightPosition, b: toPosition }))
-        lines.push(new Line({ a: fromLeftPosition, b: toPosition }))
+        lines.push(new LineFigure({ a: globalFromCenter, b: toPosition }))
+        lines.push(new LineFigure({ a: fromRightPosition, b: toPosition }))
+        lines.push(new LineFigure({ a: fromLeftPosition, b: toPosition }))
       })
     })
     return lines.some(line => this.isVisible(line.a, line.b, toFeature.id))
   }
 
   checkPolygonToPolygon (fromFeature: Feature, toFeature: Feature, fromPolygon: PolygonShape, toPolygon: PolygonShape): boolean {
-    const lines: Line[] = []
+    const lines: LineFigure[] = []
     const fromCenterPosition = fromFeature.body.getPosition()
     const fromPoints = fromPolygon.m_vertices.map(vertex => {
       return fromFeature.body.getWorldPoint(vertex)
@@ -259,7 +259,7 @@ export class Feature {
     */
     fromPositions.forEach(fromPoint => {
       toPositions.forEach(toPoint => {
-        lines.push(new Line({ a: fromPoint, b: toPoint }))
+        lines.push(new LineFigure({ a: fromPoint, b: toPoint }))
       })
     })
     lines.forEach(line => this.isVisible(line.a, line.b, toFeature.id))

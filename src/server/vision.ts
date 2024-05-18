@@ -1,12 +1,13 @@
 
 import { SIGHT } from '../shared/sight'
 import { Feature } from './feature/feature'
-import { Vec2, AABB, CircleShape, PolygonShape } from 'planck'
+import { Vec2, AABB, CircleShape, PolygonShape, testOverlap, Transform, Shape, Fixture } from 'planck'
 import { Stage } from './stage'
 import { Color } from '../shared/color'
-import { directionFromTo, getIntersectionBox, getNearestIndex, getUnionBox, normalize, range, rotate } from './math'
-import { Line } from '../shared/line'
+import { directionFromTo, getNearestIndex, normalize, range, rotate } from './math'
+import { LineFigure } from '../shared/lineFigure'
 import { Chunk } from './feature/chunk'
+import { RayCastHit } from '../shared/rayCastHit'
 
 export class Vision {
   stage: Stage
@@ -33,6 +34,22 @@ export class Vision {
       return true
     })
     return featuresInBox
+  }
+
+  getFeaturesInShape (shape: Shape): Feature[] {
+    const featuresInShape: Feature[] = []
+    const origin = new Transform()
+    this.stage.runner.getBodies().forEach(body => {
+      const feature = body.getUserData() as Feature
+      const featureShape = feature.fixture.getShape()
+      // Use Plank's "Distance" function instead of "testOverlap"
+      // https://piqnt.com/planck.js/docs/collision#distance
+      // overlap should only occur if distance is sufficiently negative
+      const overlap = testOverlap(shape, 0, featureShape, 0, origin, body.getTransform())
+      if (overlap) featuresInShape.push(feature)
+      return true
+    })
+    return featuresInShape
   }
 
   getFeaturesInRange (source: Feature): Feature[] {
@@ -77,7 +94,7 @@ export class Vision {
           green: 0,
           blue: 0
         })
-      this.stage.addDebugLine({
+      this.stage.debugLine({
         a: sourcePoint,
         b: targetPoint,
         color
@@ -95,7 +112,7 @@ export class Vision {
           green: 0,
           blue: 255
         })
-        this.stage.addDebugLine({
+        this.stage.debugLine({
           a: sourcePoint,
           b: targetPoint,
           color
@@ -115,16 +132,16 @@ export class Vision {
   ): boolean {
     const myPosition = sourceFeature.body.getPosition()
     const targetPosition = targetFeature.body.getPosition()
-    const lines: Line[] = [new Line({ a: myPosition, b: targetPosition })]
+    const lines: LineFigure[] = [new LineFigure({ a: myPosition, b: targetPosition })]
     const direction = directionFromTo(myPosition, targetPosition)
     const rightDirection = rotate(direction, 0.5 * Math.PI)
     const rightSelfPosition = Vec2.combine(1, myPosition, sourceCircle.getRadius(), rightDirection)
     const rightTargetPosition = Vec2.combine(1, targetPosition, targetCircle.getRadius(), rightDirection)
-    lines.push(new Line({ a: rightSelfPosition, b: rightTargetPosition }))
+    lines.push(new LineFigure({ a: rightSelfPosition, b: rightTargetPosition }))
     const leftDirection = rotate(direction, -0.5 * Math.PI)
     const leftSelfPosition = Vec2.combine(1, myPosition, sourceCircle.getRadius(), leftDirection)
     const leftTargetPosition = Vec2.combine(1, targetPosition, targetCircle.getRadius(), leftDirection)
-    lines.push(new Line({ a: leftSelfPosition, b: leftTargetPosition }))
+    lines.push(new LineFigure({ a: leftSelfPosition, b: leftTargetPosition }))
     return lines.some(line => this.isVisible(line.a, line.b, targetFeature.id))
   }
 
@@ -142,18 +159,19 @@ export class Vision {
     return visibleCorners
   }
 
-  getBetweenPolygon (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): PolygonShape {
+  // Currently only for rectangles. Extend this to work for triangles as well.
+  getBetweenVertices (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): Vec2[] {
     const visibleCorners = this.getVisibleCorners(sourcePoint, targetFeature, targetPolygon)
     if (visibleCorners.length === 2) {
       const vertices = [sourcePoint, visibleCorners[0], visibleCorners[1]]
-      return new PolygonShape(vertices)
+      return vertices
     }
     const targetCorners = targetPolygon.m_vertices.map(v => targetFeature.body.getWorldPoint(v))
     const nearestCornerIndex = getNearestIndex(sourcePoint, targetCorners)
     const cornerA = targetCorners[(nearestCornerIndex + 1) % targetCorners.length]
-    const cornerB = targetCorners[nearestCornerIndex > 0 ? nearestCornerIndex - 1 : 2]
+    const cornerB = targetCorners[nearestCornerIndex > 0 ? nearestCornerIndex - 1 : targetCorners.length - 1]
     const vertices = [sourcePoint, cornerA, cornerB]
-    return new PolygonShape(vertices)
+    return vertices
   }
 
   getNearestSide (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): Vec2[] {
@@ -186,115 +204,62 @@ export class Vision {
     return nearestPoint
   }
 
+  rayCast (point1: Vec2, point2: Vec2): RayCastHit[] {
+    const hits: RayCastHit[] = []
+    this.stage.world.rayCast(point1, point2, function (fixture: Fixture, point: Vec2): number {
+      const feature = fixture.getUserData() as Feature
+      hits.push(new RayCastHit({ feature, point }))
+      return -1
+    })
+    hits.sort((hit1, hit2) => {
+      const distance1 = Vec2.distance(point1, hit1.point)
+      const distance2 = Vec2.distance(point1, hit2.point)
+      return distance1 - distance2
+    })
+    return hits
+  }
+
   checkCircleToRectangle (sourceFeature: Feature, targetFeature: Feature, sourceCircle: CircleShape, targetPolygon: PolygonShape): boolean {
     const sourceCenter = sourceFeature.body.getPosition()
-    const betweenPolygon = this.getBetweenPolygon(sourceCenter, targetFeature, targetPolygon)
+    const betweenVertices = this.getBetweenVertices(sourceCenter, targetFeature, targetPolygon)
+    const betweenPolygon = new PolygonShape(betweenVertices)
     const color = new Color({ red: 255, green: 0, blue: 0 })
-    this.stage.addDebugPolygon({ polygon: betweenPolygon, color })
-    /*
-    const sourceBox = sourceFeature.fixture.getAABB(0)
-    const targetBox = targetFeature.fixture.getAABB(0)
-    const sightBox = this.getSightBox(sourceFeature)
-    const betweenBox = getIntersectionBox(sightBox, getUnionBox(sourceBox, targetBox))
-    const color = new Color({ red: 0, green: 255, blue: 0 })
-    this.stage.addDebugBox({ box: betweenBox, color })
-    const betweenFeatures = this.getFeaturesInBox(betweenBox).filter(feature => {
-      const exclude = [sourceFeature.id, targetFeature.id].includes(feature.id)
-      return !exclude
-    })
-    betweenFeatures.forEach(feature => {
+    this.stage.debugPolygon({ polygon: betweenPolygon, color })
+    const featuresInShape = this.getFeaturesInShape(betweenPolygon)
+    const obstructions = featuresInShape.filter(feature => {
       const shape = feature.fixture.getShape()
-      if (!(shape instanceof PolygonShape)) {
-        return
-      }
-      const vertices = shape.m_vertices.map(vertex => feature.body.getWorldPoint(vertex))
-      vertices.forEach(vertex => {
+      if (shape instanceof CircleShape) return false
+      return feature.id !== sourceFeature.id && feature.id !== targetFeature.id && feature.id
+    })
+    if (obstructions.length === 0) return true
+    let visible = false
+    obstructions.forEach(obstruction => {
+      const shape = obstruction.fixture.getShape()
+      if (!(shape instanceof PolygonShape)) return
+      const featureBetweenVertices = this.getBetweenVertices(sourceCenter, obstruction, shape)
+      const outerCorners = featureBetweenVertices.slice(1).filter(corner => {
+        return this.isClear(sourceCenter, corner, obstruction.id)
+      })
+      console.log('outerCorners.length', outerCorners.length)
+      outerCorners.forEach(corner => {
+        const circle = new CircleShape(corner, 0.2)
         const color = new Color({ red: 255, green: 0, blue: 0 })
-        this.stage.addDebugLine({ a: sourceCenter, b: vertex, color })
+        this.stage.debugCircle({ circle, color })
+      })
+      outerCorners.forEach(corner => {
+        const rayLength = 2 * SIGHT.x
+        const rayDirection = directionFromTo(sourceCenter, corner)
+        const rayEndPoint = Vec2.combine(1, sourceCenter, rayLength, rayDirection)
+        const color = new Color({ red: 255, green: 255, blue: 0 })
+        this.stage.debugLine({ a: sourceCenter, b: rayEndPoint, color })
+        const rayCastHits = this.rayCast(sourceCenter, rayEndPoint).filter(hit => {
+          return hit.feature.id !== obstruction.id
+        })
+        if (rayCastHits.length === 0) return
+        if (rayCastHits[0].feature.id === targetFeature.id) visible = true
       })
     })
-    */
-    return true
-    /*
-    const sourceCenter = sourceFeature.body.getWorldCenter()
-    const nearestPoint = this.getNearestPoint(sourceCenter, targetFeature, targetPolygon)
-    const nearestVisible = this.isVisible(sourceCenter, nearestPoint, targetFeature.id)
-    if (nearestVisible) {
-      return true
-    }
-    const lines: Line[] = []
-    const globalFromCenter = sourceFeature.body.getPosition()
-    const localFromCenter = targetFeature.body.getLocalPoint(globalFromCenter)
-    const radius = sourceCircle.getRadius()
-    const toVisibleCorners = targetPolygon.m_vertices.filter(vertex => {
-      const y = Math.sign(vertex.y) * localFromCenter.y + radius
-      const x = Math.sign(vertex.x) * localFromCenter.x + radius
-      const visibleY = y >= Math.abs(vertex.y)
-      const visibleX = x >= Math.abs(vertex.x)
-      return visibleX || visibleY
-    }).map(vertex => {
-      return targetFeature.body.getWorldPoint(vertex)
-    })
-    function getCorners (): Vec2[] {
-      if (toVisibleCorners.length < 3) return toVisibleCorners
-      if (toVisibleCorners.length === 3) {
-        const nearestFromIndex = getNearestIndex(globalFromCenter, toVisibleCorners)
-        if (nearestFromIndex === 0) {
-          return [toVisibleCorners[1], toVisibleCorners[0], toVisibleCorners[2]]
-        }
-        if (nearestFromIndex === 1) return toVisibleCorners
-        if (nearestFromIndex === 2) {
-          return [toVisibleCorners[0], toVisibleCorners[2], toVisibleCorners[1]]
-        }
-        throw new Error(`Invalid nearestFromIndex: ${nearestFromIndex}`)
-      }
-      const midpoints = range(0, 2).map(i => {
-        const point1 = toVisibleCorners[i]
-        const point2 = toVisibleCorners[i + 1]
-        return Vec2.combine(0.5, point1, 0.5, point2)
-      })
-      const nearestMidpointIndex = getNearestIndex(globalFromCenter, midpoints)
-      if (nearestMidpointIndex === 0) {
-        const indices = [3, 0, 1, 2]
-        return indices.map(i => toVisibleCorners[i])
-      }
-      if (nearestMidpointIndex === 1) {
-        const indices = [0, 1, 2, 3]
-        return indices.map(i => toVisibleCorners[i])
-      }
-      if (nearestMidpointIndex === 2) {
-        const indices = [1, 2, 3, 0]
-        return indices.map(i => toVisibleCorners[i])
-      }
-      const indices = [2, 3, 0, 1]
-      return indices.map(i => toVisibleCorners[i])
-    }
-    const corners = getCorners()
-    const spacing = 1 // 0.6
-    range(0, corners.length - 2).forEach(i => {
-      const j = i + 1
-      const point1 = corners[i]
-      lines.push(new Line({ a: globalFromCenter, b: point1 }))
-      const point2 = corners[j]
-      const distance = Vec2.distance(point1, point2)
-      if (distance <= spacing) return false
-      const segmentCount = Math.ceil(distance / spacing)
-      const segmentLength = distance / segmentCount
-      const segmentDirection = directionFromTo(point1, point2)
-      range(0, segmentCount).forEach(i => {
-        const toPosition = Vec2.combine(1, point1, i * segmentLength, segmentDirection)
-        const direction = directionFromTo(globalFromCenter, toPosition)
-        const rightDirection = rotate(direction, 0.5 * Math.PI)
-        const leftDirection = rotate(direction, -0.5 * Math.PI)
-        const fromRightPosition = Vec2.combine(1, globalFromCenter, sourceCircle.getRadius(), rightDirection)
-        const fromLeftPosition = Vec2.combine(1, globalFromCenter, sourceCircle.getRadius(), leftDirection)
-        lines.push(new Line({ a: globalFromCenter, b: toPosition }))
-        lines.push(new Line({ a: fromRightPosition, b: toPosition }))
-        lines.push(new Line({ a: fromLeftPosition, b: toPosition }))
-      })
-    })
-    return lines.some(line => this.isVisible(line.a, line.b, targetFeature.id))
-    */
+    return visible
   }
 
   checkCircleToTriangle (sourceFeature: Feature, targetFeature: Feature, sourceCircle: CircleShape, targetPolygon: PolygonShape): boolean {
@@ -302,7 +267,7 @@ export class Vision {
     const nearestPoint = this.getNearestPoint(sourceCenter, targetFeature, targetPolygon)
     const nearestVisible = this.isVisible(sourceCenter, nearestPoint, targetFeature.id)
     if (nearestVisible) return true
-    const lines: Line[] = []
+    const lines: LineFigure[] = []
     const targetCorners = targetPolygon.m_vertices.map(vertex => {
       return targetFeature.body.getWorldPoint(vertex)
     })
@@ -310,7 +275,7 @@ export class Vision {
     range(0, targetCorners.length - 1).forEach(i => {
       const j = (i + 1) % targetCorners.length
       const point1 = targetCorners[i]
-      lines.push(new Line({ a: sourceCenter, b: point1 }))
+      lines.push(new LineFigure({ a: sourceCenter, b: point1 }))
       const point2 = targetCorners[j]
       const distance = Vec2.distance(point1, point2)
       if (distance <= spacing) return false
@@ -326,9 +291,9 @@ export class Vision {
         const leftDirection = rotate(direction, -0.5 * Math.PI)
         const fromRightPosition = Vec2.combine(1, sourceCenter, sourceCircle.getRadius(), rightDirection)
         const fromLeftPosition = Vec2.combine(1, sourceCenter, sourceCircle.getRadius(), leftDirection)
-        lines.push(new Line({ a: sourceCenter, b: toPosition }))
-        lines.push(new Line({ a: fromRightPosition, b: toPosition }))
-        lines.push(new Line({ a: fromLeftPosition, b: toPosition }))
+        lines.push(new LineFigure({ a: sourceCenter, b: toPosition }))
+        lines.push(new LineFigure({ a: fromRightPosition, b: toPosition }))
+        lines.push(new LineFigure({ a: fromLeftPosition, b: toPosition }))
       })
     })
     return lines.some(line => this.isVisible(line.a, line.b, targetFeature.id))

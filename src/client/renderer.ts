@@ -4,12 +4,14 @@ import { Summary } from '../shared/summary'
 import { Rope } from '../shared/rope'
 import { SIGHT } from '../shared/sight'
 import { DebugLine } from '../shared/debugLine'
+import { DebugCircle } from '../shared/debugCircle'
 
 export class Renderer {
   lerp = 0.5
   elements = new Map<number, Element>()
   ropes: Rope[] = []
   debugLines: DebugLine[] = []
+  debugCircles: DebugCircle[] = []
   canvas: HTMLCanvasElement
   context: CanvasRenderingContext2D
   id: number = 0
@@ -69,6 +71,14 @@ export class Renderer {
       this.context.moveTo(debugLine.a.x, debugLine.a.y)
       this.context.lineTo(debugLine.b.x, debugLine.b.y)
       this.context.stroke()
+    })
+    this.debugCircles.forEach(debugCircle => {
+      this.followCamera()
+      this.context.lineWidth = 0.05
+      this.context.fillStyle = `rgba(${debugCircle.color.red}, ${debugCircle.color.green}, ${debugCircle.color.blue}, ${debugCircle.color.alpha})`
+      this.context.beginPath()
+      this.context.arc(debugCircle.position.x, debugCircle.position.y, debugCircle.radius, 0, 2 * Math.PI)
+      this.context.fill()
     })
   }
 
@@ -152,6 +162,7 @@ export class Renderer {
     this.elements = newElements
     this.ropes = summary.ropes
     this.debugLines = summary.debugLines
+    this.debugCircles = summary.debugCircles
     this.id = summary.id
   }
 }
