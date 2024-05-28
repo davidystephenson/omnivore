@@ -28,7 +28,7 @@ export class Mouth extends Feature {
       },
       label: 'mouth',
       actor: props.actor,
-      color: new Color({ red: 0, green: 128, blue: 0 })
+      color: Color.GREEN
     })
     this.actor = props.actor
     this.radius = radius

@@ -14,7 +14,7 @@ export class Crate extends Chunk {
       position: props.position,
       actor: props.actor,
       shape: new BoxShape(props.halfWidth, props.halfHeight),
-      color: new Color({ red: 0, green: 255, blue: 255 }),
+      color: Color.CYAN,
       label: 'crate',
       name: 'rectangle'
     })
