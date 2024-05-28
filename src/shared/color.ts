@@ -1,18 +1,28 @@
 export class Color {
-  red: number
-  green: number
+  alpha: number
   blue: number
-  alpha = 1
+  green: number
+  red: number
+
+  static BLACK = new Color({ red: 0, green: 0, blue: 0 })
+  static BLUE = new Color({ red: 0, green: 0, blue: 255 })
+  static CYAN = new Color({ red: 0, green: 255, blue: 255 })
+  static GREEN = new Color({ red: 0, green: 128, blue: 0 })
+  static LIME = new Color({ red: 0, green: 255, blue: 0 })
+  static MAGENTA = new Color({ red: 255, green: 0, blue: 255 })
+  static RED = new Color({ red: 255, green: 0, blue: 0 })
+  static YELLOW = new Color({ red: 255, green: 255, blue: 0 })
+  static WHITE = new Color({ red: 255, green: 255, blue: 255 })
 
   constructor (props: {
-    red: number
-    green: number
-    blue: number
     alpha?: number
+    blue: number
+    green: number
+    red: number
   }) {
-    this.red = props.red
-    this.green = props.green
+    this.alpha = props.alpha ?? 1
     this.blue = props.blue
-    this.alpha = props.alpha ?? this.alpha
+    this.green = props.green
+    this.red = props.red
   }
 }

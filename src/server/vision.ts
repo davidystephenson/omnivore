@@ -1,7 +1,7 @@
 
 import { SIGHT } from '../shared/sight'
 import { Feature } from './feature/feature'
-import { Vec2, AABB, CircleShape, PolygonShape, testOverlap, Transform, Shape, Fixture } from 'planck'
+import { Vec2, AABB, CircleShape, PolygonShape, testOverlap, Transform, Shape, Fixture, DistanceInput, SimplexCache, DistanceOutput, Distance, Vec3 } from 'planck'
 import { Stage } from './stage'
 import { Color } from '../shared/color'
 import { directionFromTo, getNearestIndex, normalize, range, rotate } from './math'
@@ -36,6 +36,40 @@ export class Vision {
     return featuresInBox
   }
 
+  getShapeDistance (transformA: Transform, transformB: Transform, shapeA: Shape, shapeB: Shape): number {
+    const input = new DistanceInput()
+    input.proxyA.set(shapeA, 0)
+    input.proxyB.set(shapeB, 0)
+    input.transformA.set(transformA)
+    input.transformB.set(transformB)
+    input.useRadii = false
+    const cache = new SimplexCache()
+    const output = new DistanceOutput()
+    Distance(output, cache, input)
+    const circleA = new CircleShape(output.pointA, 0.3)
+    const circleB = new CircleShape(output.pointB, 0.2)
+    this.stage.debugCircle({ circle: circleA, color: Color.YELLOW })
+    this.stage.debugCircle({ circle: circleB, color: Color.MAGENTA })
+    return output.distance
+  }
+
+  getSimplexWeights (corners: Vec2[], point: Vec2): number[] {
+    if (corners.length !== 3) throw new Error(`getSimplexWeights: corners.length = ${corners.length} !== 3`)
+    corners.forEach((corner, index) => {
+      const otherCornerA = corners[index + 1]
+      const otherCornerB = corners[index + 2]
+      const oppositeVector = Vec2.sub(otherCornerB, otherCornerA)
+      const oppositeDirection = normalize(oppositeVector)
+      const perpDirection = rotate(oppositeDirection, Math.PI / 2)
+      const perpPoint = Vec2.add(corner, perpDirection)
+      // FIND THE INTERSECTION POINT
+
+      // MORE IN PROGRESS
+    })
+    // MORE IN PROGRESS
+    return []
+  }
+
   getFeaturesInShape (shape: Shape): Feature[] {
     const featuresInShape: Feature[] = []
     const origin = new Transform()
@@ -46,7 +80,7 @@ export class Vision {
       // https://piqnt.com/planck.js/docs/collision#distance
       // overlap should only occur if distance is sufficiently negative
       const overlap = testOverlap(shape, 0, featureShape, 0, origin, body.getTransform())
-      if (overlap) featuresInShape.push(feature)
+      if (overlap) { featuresInShape.push(feature) }
       return true
     })
     return featuresInShape
@@ -83,17 +117,7 @@ export class Vision {
       return 0
     })
     if (debug === true) {
-      const color = clear
-        ? new Color({
-          red: 0,
-          green: 255,
-          blue: 0
-        })
-        : new Color({
-          red: 255,
-          green: 0,
-          blue: 0
-        })
+      const color = clear ? Color.LIME : Color.RED
       this.stage.debugLine({
         a: sourcePoint,
         b: targetPoint,
@@ -107,15 +131,10 @@ export class Vision {
     const inRange = this.isPointInRange(sourcePoint, targetPoint)
     if (!inRange) {
       if (debug === true) {
-        const color = new Color({
-          red: 0,
-          green: 0,
-          blue: 255
-        })
         this.stage.debugLine({
           a: sourcePoint,
           b: targetPoint,
-          color
+          color: Color.BLUE
         })
       }
       return false
@@ -190,6 +209,15 @@ export class Vision {
     return [nearestCorner, otherCorner]
   }
 
+  getLineLineIntersection (a: Vec2, b: Vec2, c: Vec2, d: Vec2): Vec2 {
+    const direction1 = Vec2.sub(b, a)
+    const direction2 = Vec2.sub(d, c)
+    // compute the intersection
+    // https://mjoldfield.com/atelier/2016/04/intersect-2d.html
+
+    return Vec2.zero()
+  }
+
   getNearestPoint (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): Vec2 {
     const nearestSide = this.getNearestSide(sourcePoint, targetFeature, targetPolygon)
     const nearestCorner = nearestSide[0]
@@ -223,13 +251,20 @@ export class Vision {
     const sourceCenter = sourceFeature.body.getPosition()
     const betweenVertices = this.getBetweenVertices(sourceCenter, targetFeature, targetPolygon)
     const betweenPolygon = new PolygonShape(betweenVertices)
-    const color = new Color({ red: 255, green: 0, blue: 0 })
-    this.stage.debugPolygon({ polygon: betweenPolygon, color })
+    this.stage.debugPolygon({ polygon: betweenPolygon, color: Color.RED })
     const featuresInShape = this.getFeaturesInShape(betweenPolygon)
     const obstructions = featuresInShape.filter(feature => {
       const shape = feature.fixture.getShape()
       if (shape instanceof CircleShape) return false
       return feature.id !== sourceFeature.id && feature.id !== targetFeature.id && feature.id
+    })
+    this.stage.actors.forEach(actor => {
+      actor.features.forEach(feature => {
+        const indentityTransform = Transform.identity()
+        const obstructionTransform = feature.body.getTransform()
+        const obstructionShape = feature.fixture.getShape()
+        const distance = this.getShapeDistance(indentityTransform, obstructionTransform, betweenPolygon, obstructionShape)
+      })
     })
     if (obstructions.length === 0) return true
     let visible = false
@@ -240,18 +275,15 @@ export class Vision {
       const outerCorners = featureBetweenVertices.slice(1).filter(corner => {
         return this.isClear(sourceCenter, corner, obstruction.id)
       })
-      console.log('outerCorners.length', outerCorners.length)
       outerCorners.forEach(corner => {
         const circle = new CircleShape(corner, 0.2)
-        const color = new Color({ red: 255, green: 0, blue: 0 })
-        this.stage.debugCircle({ circle, color })
+        this.stage.debugCircle({ circle, color: Color.RED })
       })
       outerCorners.forEach(corner => {
         const rayLength = 2 * SIGHT.x
         const rayDirection = directionFromTo(sourceCenter, corner)
         const rayEndPoint = Vec2.combine(1, sourceCenter, rayLength, rayDirection)
-        const color = new Color({ red: 255, green: 255, blue: 0 })
-        this.stage.debugLine({ a: sourceCenter, b: rayEndPoint, color })
+        this.stage.debugLine({ a: sourceCenter, b: rayEndPoint, color: Color.YELLOW })
         const rayCastHits = this.rayCast(sourceCenter, rayEndPoint).filter(hit => {
           return hit.feature.id !== obstruction.id
         })

@@ -13,7 +13,7 @@ export class Triangle extends Chunk {
       position: props.position,
       actor: props.actor,
       shape: new PolygonShape(props.vertices),
-      color: new Color({ red: 0, green: 255, blue: 255 }),
+      color: Color.CYAN,
       label: 'crate',
       name: 'triangle'
     })

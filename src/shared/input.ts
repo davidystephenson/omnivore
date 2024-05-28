@@ -15,12 +15,10 @@ const keysToControl = {
 } as const
 
 type ControlKey = keyof typeof keysToControl
-function isControlKey (key: string): key is ControlKey {
-  return key in keysToControl
-}
 
 type Control = typeof keysToControl[ControlKey]
 export type Controls = Record<Control, boolean>
+const unsafeKeys: Partial<Record<string, Control>> = keysToControl
 
 export class Input {
   controls: Controls = {
@@ -35,11 +33,15 @@ export class Input {
     key: string
     value: boolean
   }): void {
-    if (isControlKey(props.key)) {
-      const control = keysToControl[props.key]
-      this.controls[control] = props.value
-    } else {
+    const control = unsafeKeys[props.key]
+    if (control == null) {
       console.warn('Uncontrolled key:', props.key)
+    } else {
+      this.controls[control] = props.value
     }
   }
 }
+
+const X = Input
+const x = new X()
+console.log(x.controls)
