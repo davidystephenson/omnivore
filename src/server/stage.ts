@@ -14,7 +14,7 @@ import { Vision } from './vision'
 // import { Puppet } from './actor/puppet'
 import { range } from './math'
 import { DebugCircle } from '../shared/debugCircle'
-import SIGHT from '../shared/sight'
+import { SIGHT_HALF_WIDTH } from '../shared/sight'
 
 export class Stage {
   world: World
@@ -65,17 +65,17 @@ export class Stage {
     //   position: Vec2(0, 5)
     // })
 
-    this.addWall({ halfWidth: SIGHT.x - 1.1, halfHeight: 1, position: Vec2(-14, 9.9) })
-    this.addWall({ halfWidth: SIGHT.x - 1.1, halfHeight: 1, position: Vec2(-14, 7.7) })
-    this.addWall({ halfWidth: SIGHT.x - 1.1, halfHeight: 1, position: Vec2(-14, 5.5) })
-    this.addWall({ halfWidth: SIGHT.x - 1.1, halfHeight: 1, position: Vec2(-14, 3.3) })
-    this.addWall({ halfWidth: SIGHT.x - 1.1, halfHeight: 1, position: Vec2(-14, 1.1) })
-    this.addWall({ halfWidth: SIGHT.x - 1.1, halfHeight: 1, position: Vec2(-14, -1.1) })
-    this.addWall({ halfWidth: SIGHT.x - 1.1, halfHeight: 1, position: Vec2(-14, -3.3) })
-    this.addWall({ halfWidth: SIGHT.x - 1.1, halfHeight: 1, position: Vec2(-14, -5.5) })
-    this.addWall({ halfWidth: SIGHT.x - 1.1, halfHeight: 1, position: Vec2(-14, -7.7) })
-    this.addWall({ halfWidth: SIGHT.x - 1.1, halfHeight: 1, position: Vec2(-14, -9.9) })
-    void new Brick({ stage: this, halfWidth: 1, halfHeight: 10, position: Vec2(-14 + SIGHT.x - 0.1, 0) })
+    this.addWall({ halfWidth: SIGHT_HALF_WIDTH - 1.1, halfHeight: 1, position: Vec2(-14, 9.9) })
+    this.addWall({ halfWidth: SIGHT_HALF_WIDTH - 1.1, halfHeight: 1, position: Vec2(-14, 7.7) })
+    this.addWall({ halfWidth: SIGHT_HALF_WIDTH - 1.1, halfHeight: 1, position: Vec2(-14, 5.5) })
+    this.addWall({ halfWidth: SIGHT_HALF_WIDTH - 1.1, halfHeight: 1, position: Vec2(-14, 3.3) })
+    this.addWall({ halfWidth: SIGHT_HALF_WIDTH - 1.1, halfHeight: 1, position: Vec2(-14, 1.1) })
+    this.addWall({ halfWidth: SIGHT_HALF_WIDTH - 1.1, halfHeight: 1, position: Vec2(-14, -1.1) })
+    this.addWall({ halfWidth: SIGHT_HALF_WIDTH - 1.1, halfHeight: 1, position: Vec2(-14, -3.3) })
+    this.addWall({ halfWidth: SIGHT_HALF_WIDTH - 1.1, halfHeight: 1, position: Vec2(-14, -5.5) })
+    this.addWall({ halfWidth: SIGHT_HALF_WIDTH - 1.1, halfHeight: 1, position: Vec2(-14, -7.7) })
+    this.addWall({ halfWidth: SIGHT_HALF_WIDTH - 1.1, halfHeight: 1, position: Vec2(-14, -9.9) })
+    void new Brick({ stage: this, halfWidth: 1, halfHeight: 10, position: Vec2(-14 + SIGHT_HALF_WIDTH - 0.1, 0) })
     // void new Brick({ stage: this, halfWidth: 1, halfHeight: 2, position: Vec2(-5, 0) })
     // this.addWall({ halfWidth: 0.5, halfHeight: 3, position: Vec2(-2, 0) })
     // void new Brick({ stage: this, halfWidth: 2, halfHeight: 1, position: Vec2(2, 3) })
