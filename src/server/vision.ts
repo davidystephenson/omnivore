@@ -1,7 +1,7 @@
 
 import { SIGHT } from '../shared/sight'
 import { Feature } from './feature/feature'
-import { Vec2, AABB, CircleShape, PolygonShape, testOverlap, Transform, Shape, Fixture, DistanceInput, SimplexCache, DistanceOutput, Distance, Vec3 } from 'planck'
+import { Vec2, AABB, CircleShape, PolygonShape, testOverlap, Transform, Shape, Fixture, DistanceInput, SimplexCache, DistanceOutput, Distance, Vec2Value } from 'planck'
 import { Stage } from './stage'
 import { Color } from '../shared/color'
 import { directionFromTo, getNearestIndex, normalize, range, rotate } from './math'
@@ -53,21 +53,23 @@ export class Vision {
     return output.distance
   }
 
-  getSimplexWeights (corners: Vec2[], point: Vec2): number[] {
+  getSimplexWeights (corners: Vec2[], point: Vec2Value): number[] {
     if (corners.length !== 3) throw new Error(`getSimplexWeights: corners.length = ${corners.length} !== 3`)
-    corners.forEach((corner, index) => {
-      const otherCornerA = corners[index + 1]
-      const otherCornerB = corners[index + 2]
+    const weights = corners.map((corner, index) => {
+      const otherCornerA = corners[(index + 1) % 3]
+      const otherCornerB = corners[(index + 2) % 3]
       const oppositeVector = Vec2.sub(otherCornerB, otherCornerA)
       const oppositeDirection = normalize(oppositeVector)
       const perpDirection = rotate(oppositeDirection, Math.PI / 2)
       const perpPoint = Vec2.add(corner, perpDirection)
-      // FIND THE INTERSECTION POINT
-
-      // MORE IN PROGRESS
+      const intersection = this.getLineLineIntersection(otherCornerA, otherCornerB, corner, perpPoint)
+      const perpVector = Vec2.sub(intersection, corner)
+      const pointVector = Vec2.sub(point, corner)
+      const depth = Vec2.dot(perpVector, pointVector) / Vec2.dot(perpVector, perpVector)
+      const weight = 1 - depth
+      return weight
     })
-    // MORE IN PROGRESS
-    return []
+    return weights
   }
 
   getFeaturesInShape (shape: Shape): Feature[] {
@@ -76,9 +78,6 @@ export class Vision {
     this.stage.runner.getBodies().forEach(body => {
       const feature = body.getUserData() as Feature
       const featureShape = feature.fixture.getShape()
-      // Use Plank's "Distance" function instead of "testOverlap"
-      // https://piqnt.com/planck.js/docs/collision#distance
-      // overlap should only occur if distance is sufficiently negative
       const overlap = testOverlap(shape, 0, featureShape, 0, origin, body.getTransform())
       if (overlap) { featuresInShape.push(feature) }
       return true
@@ -106,13 +105,13 @@ export class Vision {
     return xInside && yInside
   }
 
-  isClear (sourcePoint: Vec2, targetPoint: Vec2, excludeId?: number, debug?: boolean): boolean {
+  isClear (sourcePoint: Vec2, targetPoint: Vec2, excludeIds?: number[], debug?: boolean): boolean {
     let clear = true
     this.stage.world.rayCast(sourcePoint, targetPoint, (fixture, point, normal, fraction) => {
       const collideFeature = fixture.getUserData() as Feature
-      const excluded = collideFeature.id === excludeId
+      const excluded = excludeIds?.includes(collideFeature.id)
       const isMouth = collideFeature.label === 'mouth' || collideFeature.label === 'egg'
-      if (excluded || isMouth) return 1
+      if (excluded === true || isMouth) return 1
       clear = false
       return 0
     })
@@ -127,7 +126,7 @@ export class Vision {
     return clear
   }
 
-  isVisible (sourcePoint: Vec2, targetPoint: Vec2, excludeId?: number, debug?: boolean): boolean {
+  isVisible (sourcePoint: Vec2, targetPoint: Vec2, excludeIds?: number[], debug?: boolean): boolean {
     const inRange = this.isPointInRange(sourcePoint, targetPoint)
     if (!inRange) {
       if (debug === true) {
@@ -139,7 +138,7 @@ export class Vision {
       }
       return false
     }
-    const clear = this.isClear(sourcePoint, targetPoint, excludeId, debug)
+    const clear = this.isClear(sourcePoint, targetPoint, excludeIds, debug)
     return clear
   }
 
@@ -161,10 +160,10 @@ export class Vision {
     const leftSelfPosition = Vec2.combine(1, myPosition, sourceCircle.getRadius(), leftDirection)
     const leftTargetPosition = Vec2.combine(1, targetPosition, targetCircle.getRadius(), leftDirection)
     lines.push(new LineFigure({ a: leftSelfPosition, b: leftTargetPosition }))
-    return lines.some(line => this.isVisible(line.a, line.b, targetFeature.id))
+    return lines.some(line => this.isVisible(line.a, line.b, [targetFeature.id]))
   }
 
-  getVisibleCorners (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): Vec2[] {
+  getNearSideCorners (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): Vec2[] {
     const targetLocalSourcePoint = targetFeature.body.getLocalPoint(sourcePoint)
     const visibleCorners = targetPolygon.m_vertices.filter(vertex => {
       const y = Math.sign(vertex.y) * targetLocalSourcePoint.y
@@ -180,16 +179,23 @@ export class Vision {
 
   // Currently only for rectangles. Extend this to work for triangles as well.
   getBetweenVertices (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): Vec2[] {
-    const visibleCorners = this.getVisibleCorners(sourcePoint, targetFeature, targetPolygon)
-    if (visibleCorners.length === 2) {
-      const vertices = [sourcePoint, visibleCorners[0], visibleCorners[1]]
-      return vertices
+    const nearSideCorners = this.getNearSideCorners(sourcePoint, targetFeature, targetPolygon)
+    let cornerA = Vec2.zero()
+    let cornerB = Vec2.zero()
+    if (nearSideCorners.length === 2) {
+      cornerA = nearSideCorners[0]
+      cornerB = nearSideCorners[1]
+    } else {
+      const targetCorners = targetPolygon.m_vertices.map(v => targetFeature.body.getWorldPoint(v))
+      const nearestCornerIndex = getNearestIndex(sourcePoint, targetCorners)
+      cornerA = targetCorners[(nearestCornerIndex + 1) % targetCorners.length]
+      cornerB = targetCorners[nearestCornerIndex > 0 ? nearestCornerIndex - 1 : targetCorners.length - 1]
     }
-    const targetCorners = targetPolygon.m_vertices.map(v => targetFeature.body.getWorldPoint(v))
-    const nearestCornerIndex = getNearestIndex(sourcePoint, targetCorners)
-    const cornerA = targetCorners[(nearestCornerIndex + 1) % targetCorners.length]
-    const cornerB = targetCorners[nearestCornerIndex > 0 ? nearestCornerIndex - 1 : targetCorners.length - 1]
-    const vertices = [sourcePoint, cornerA, cornerB]
+    const directionA = directionFromTo(cornerA, sourcePoint)
+    const directionB = directionFromTo(cornerB, sourcePoint)
+    const trimCornerA = Vec2.combine(1, cornerA, 0.00, directionA)
+    const trimCornerB = Vec2.combine(1, cornerB, 0.00, directionB)
+    const vertices = [sourcePoint, trimCornerA, trimCornerB]
     return vertices
   }
 
@@ -210,12 +216,14 @@ export class Vision {
   }
 
   getLineLineIntersection (a: Vec2, b: Vec2, c: Vec2, d: Vec2): Vec2 {
-    const direction1 = Vec2.sub(b, a)
-    const direction2 = Vec2.sub(d, c)
     // compute the intersection
     // https://mjoldfield.com/atelier/2016/04/intersect-2d.html
-
-    return Vec2.zero()
+    const vector1 = Vec2.sub(b, a)
+    const vector2 = Vec2.sub(d, c)
+    const weight1 = Vec2.cross(d, c) / Vec2.cross(vector1, vector2)
+    const weight2 = Vec2.cross(b, a) / Vec2.cross(vector1, vector2)
+    const intersection = Vec2.combine(weight1, vector1, weight2, vector2)
+    return intersection
   }
 
   getNearestPoint (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): Vec2 {
@@ -249,31 +257,45 @@ export class Vision {
 
   checkCircleToRectangle (sourceFeature: Feature, targetFeature: Feature, sourceCircle: CircleShape, targetPolygon: PolygonShape): boolean {
     const sourceCenter = sourceFeature.body.getPosition()
-    const betweenVertices = this.getBetweenVertices(sourceCenter, targetFeature, targetPolygon)
+    const sourcePoints = [sourceCenter]
+    targetPolygon.m_vertices.forEach(corner => {
+      const toCenter = directionFromTo(corner, sourceCenter)
+      const perpDirA = rotate(toCenter, +0.5 * Math.PI)
+      const perpDirB = rotate(toCenter, -0.5 * Math.PI)
+      sourcePoints.push(Vec2.combine(1, sourceCenter, 1, perpDirA))
+      sourcePoints.push(Vec2.combine(1, sourceCenter, 1, perpDirB))
+    })
+    return sourcePoints.some(sourcePoint => {
+      return this.checkPointToRectangle(sourcePoint, sourceFeature, targetFeature, targetPolygon)
+    })
+  }
+
+  checkPointToRectangle (
+    sourcePoint: Vec2,
+    sourceFeature: Feature,
+    targetFeature: Feature,
+    targetPolygon: PolygonShape
+  ): boolean {
+    const betweenVertices = this.getBetweenVertices(sourcePoint, targetFeature, targetPolygon)
+    const clearCorner1 = this.isVisible(sourcePoint, betweenVertices[1], [sourceFeature.id, targetFeature.id], true)
+    const clearCorner2 = this.isVisible(sourcePoint, betweenVertices[2], [sourceFeature.id, targetFeature.id], true)
     const betweenPolygon = new PolygonShape(betweenVertices)
     this.stage.debugPolygon({ polygon: betweenPolygon, color: Color.RED })
+    if (clearCorner1 || clearCorner2) return true
     const featuresInShape = this.getFeaturesInShape(betweenPolygon)
     const obstructions = featuresInShape.filter(feature => {
       const shape = feature.fixture.getShape()
       if (shape instanceof CircleShape) return false
       return feature.id !== sourceFeature.id && feature.id !== targetFeature.id && feature.id
     })
-    this.stage.actors.forEach(actor => {
-      actor.features.forEach(feature => {
-        const indentityTransform = Transform.identity()
-        const obstructionTransform = feature.body.getTransform()
-        const obstructionShape = feature.fixture.getShape()
-        const distance = this.getShapeDistance(indentityTransform, obstructionTransform, betweenPolygon, obstructionShape)
-      })
-    })
     if (obstructions.length === 0) return true
     let visible = false
     obstructions.forEach(obstruction => {
       const shape = obstruction.fixture.getShape()
       if (!(shape instanceof PolygonShape)) return
-      const featureBetweenVertices = this.getBetweenVertices(sourceCenter, obstruction, shape)
+      const featureBetweenVertices = this.getBetweenVertices(sourcePoint, obstruction, shape)
       const outerCorners = featureBetweenVertices.slice(1).filter(corner => {
-        return this.isClear(sourceCenter, corner, obstruction.id)
+        return this.isClear(sourcePoint, corner, [obstruction.id, targetFeature.id])
       })
       outerCorners.forEach(corner => {
         const circle = new CircleShape(corner, 0.2)
@@ -281,14 +303,31 @@ export class Vision {
       })
       outerCorners.forEach(corner => {
         const rayLength = 2 * SIGHT.x
-        const rayDirection = directionFromTo(sourceCenter, corner)
-        const rayEndPoint = Vec2.combine(1, sourceCenter, rayLength, rayDirection)
-        this.stage.debugLine({ a: sourceCenter, b: rayEndPoint, color: Color.YELLOW })
-        const rayCastHits = this.rayCast(sourceCenter, rayEndPoint).filter(hit => {
+        const rayDirection = directionFromTo(sourcePoint, corner)
+        const rayEndPoint = Vec2.combine(1, sourcePoint, rayLength, rayDirection)
+        this.stage.debugLine({ a: sourcePoint, b: rayEndPoint, color: Color.YELLOW })
+        const rayCastHits = this.rayCast(sourcePoint, rayEndPoint).filter(hit => {
           return hit.feature.id !== obstruction.id
         })
         if (rayCastHits.length === 0) return
         if (rayCastHits[0].feature.id === targetFeature.id) visible = true
+        const worldCorners = shape.m_vertices.map(corner => {
+          return obstruction.body.getWorldPoint(corner)
+        })
+        worldCorners.forEach((cornerA, i) => {
+          const cornerB = worldCorners[(i + 1) % worldCorners.length]
+          const rayDir = directionFromTo(cornerA, cornerB)
+          const rayEndA = Vec2.combine(1, cornerA, +SIGHT.x, rayDir)
+          const rayEndB = Vec2.combine(1, cornerB, -SIGHT.x, rayDir)
+          const hitsA = this.rayCast(cornerA, rayEndA)
+          const hitsB = this.rayCast(cornerB, rayEndB)
+          if (hitsA.length > 0 && hitsB.length > 0) {
+            const hitFeatures = [hitsA[0].feature, hitsB[0].feature]
+            const hitSource = hitFeatures.includes(sourceFeature)
+            const hitTarget = hitFeatures.includes(targetFeature)
+            if (hitSource && hitTarget) visible = true
+          }
+        })
       })
     })
     return visible
@@ -297,7 +336,7 @@ export class Vision {
   checkCircleToTriangle (sourceFeature: Feature, targetFeature: Feature, sourceCircle: CircleShape, targetPolygon: PolygonShape): boolean {
     const sourceCenter = sourceFeature.body.getPosition()
     const nearestPoint = this.getNearestPoint(sourceCenter, targetFeature, targetPolygon)
-    const nearestVisible = this.isVisible(sourceCenter, nearestPoint, targetFeature.id)
+    const nearestVisible = this.isVisible(sourceCenter, nearestPoint, [targetFeature.id])
     if (nearestVisible) return true
     const lines: LineFigure[] = []
     const targetCorners = targetPolygon.m_vertices.map(vertex => {
@@ -328,7 +367,7 @@ export class Vision {
         lines.push(new LineFigure({ a: fromLeftPosition, b: toPosition }))
       })
     })
-    return lines.some(line => this.isVisible(line.a, line.b, targetFeature.id))
+    return lines.some(line => this.isVisible(line.a, line.b, [targetFeature.id]))
   }
 
   isFeatureVisible (sourceFeature: Feature, targetFeature: Feature): boolean {
