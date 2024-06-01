@@ -11,7 +11,8 @@ const keysToControl = {
   ArrowDown: 'down',
   ArrowLeft: 'left',
   ArrowRight: 'right',
-  ' ': 'select'
+  ' ': 'select',
+  '\\': 'cancel'
 } as const
 
 type ControlKey = keyof typeof keysToControl
@@ -26,7 +27,8 @@ export class Input {
     down: false,
     left: false,
     right: false,
-    select: false
+    select: false,
+    cancel: false
   }
 
   take (props: {
@@ -41,7 +43,3 @@ export class Input {
     }
   }
 }
-
-const X = Input
-const x = new X()
-console.log(x.controls)

@@ -18,6 +18,10 @@ window.onkeyup = function (event: KeyboardEvent) {
     value: false
   })
 }
+window.onwheel = function (event: WheelEvent) {
+  renderer.camera.zoom -= 0.005 * event.deltaY
+  console.log('renderer.camera.zoom', renderer.camera.zoom)
+}
 let lastSummary: Summary
 window.onmousedown = (event: MouseEvent) => {
   console.log('lastSummary', lastSummary)
