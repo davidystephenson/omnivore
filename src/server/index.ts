@@ -5,6 +5,8 @@ import { Controls } from '../shared/input'
 
 const stage = new Stage()
 
+const FORCE_SCALE = 5
+
 io.on('connection', socket => {
   console.log('connection:', socket.id)
   socket.emit('connected')
@@ -27,7 +29,7 @@ io.on('connection', socket => {
     }
     const direction = Vec2(x, y)
     direction.normalize()
-    const force = Vec2.mul(direction, 20)
+    const force = Vec2.mul(direction, FORCE_SCALE)
     if (player.mouths.length === 0) {
       player.mouth.force = Vec2.mul(force, player.mouth.body.getMass())
     }
