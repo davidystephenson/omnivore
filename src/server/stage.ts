@@ -65,6 +65,8 @@ export class Stage {
     //   position: Vec2(0, 5)
     // })
 
+    const brickX = -14 + SIGHT_HALF_WIDTH - 0.1
+    const propHalfWidth = SIGHT_HALF_WIDTH - 5
     const wallHalfWidth = SIGHT_HALF_WIDTH - 1.1
     this.addWallGroup({
       halfWidth: wallHalfWidth,
@@ -73,23 +75,222 @@ export class Stage {
       count: 10,
       gap: 0.1
     })
-    const brickX = -14 + SIGHT_HALF_WIDTH - 0.1
-    void new Brick({ stage: this, halfWidth: 1, halfHeight: 10, position: Vec2(brickX, 15) })
-    const puppetHalfWidth = SIGHT_HALF_WIDTH - 1.5
-    const puppetX = brickX + 1.25 + puppetHalfWidth
-    void new Puppet({
-      stage: this,
+    this.addBrick({ halfHeight: 10, halfWidth: 1, position: Vec2(brickX, 15) })
+    const rightPropX = brickX + 1.25 + propHalfWidth
+    this.addPuppet({
       vertices: [
-        Vec2(puppetHalfWidth, 2),
-        Vec2(-puppetHalfWidth, 0),
-        Vec2(puppetHalfWidth, -2)
+        Vec2(propHalfWidth, 15),
+        Vec2(-propHalfWidth, 0),
+        Vec2(propHalfWidth, -15)
       ],
-      position: Vec2(puppetX, 15)
+      position: Vec2(rightPropX, 15)
     })
+
+    this.addWall({
+      halfWidth: 1,
+      halfHeight: 15,
+      position: Vec2(-14, -20)
+    })
+    this.addBrick({ halfHeight: 10, halfWidth: 1, position: Vec2(brickX, -20) })
+    this.addBrickGroup({
+      count: 10,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: propHalfWidth,
+      position: Vec2(rightPropX, -20)
+    })
+
+    const leftPropX = brickX - 1.25 - propHalfWidth
+
+    this.addBrick({
+      angle: Math.PI * 0.9,
+      halfHeight: 15,
+      halfWidth: 1,
+      position: Vec2(leftPropX, -55)
+    })
+    this.addBrick({
+      halfHeight: 10,
+      halfWidth: 1,
+      position: Vec2(brickX, -55)
+    })
+    this.addBrickGroup({
+      angle: Math.PI * 0.75,
+      count: 10,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: propHalfWidth,
+      position: Vec2(rightPropX, -55)
+    })
+
+    this.addWallGroup({
+      count: 10,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: 1,
+      position: Vec2(-20, -86)
+    })
+    this.addWallGroup({
+      count: 10,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: 1,
+      position: Vec2(-14, -85)
+    })
+    this.addBrick({
+      halfHeight: 10,
+      halfWidth: 1,
+      position: Vec2(brickX, -85)
+    })
+    this.addBrickGroup({
+      angle: Math.PI * 0.75,
+      count: 4,
+      gap: 1,
+      halfHeight: 0.9,
+      halfWidth: propHalfWidth,
+      position: Vec2(rightPropX, -90)
+    })
+
+    this.addBrickGroup({
+      count: 10,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: 1,
+      position: Vec2(-14, -120)
+    })
+    this.addBrickGroup({
+      count: 10,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: 1,
+      position: Vec2(-10, -120)
+    })
+    this.addBrick({
+      halfHeight: 10,
+      halfWidth: 1,
+      position: Vec2(brickX, -120)
+    })
+
     // void new Brick({ stage: this, halfWidth: 1, halfHeight: 2, position: Vec2(-5, 0) })
     // this.addWall({ halfWidth: 0.5, halfHeight: 3, position: Vec2(-2, 0) })
     // void new Brick({ stage: this, halfWidth: 2, halfHeight: 1, position: Vec2(2, 3) })
     // this.addWall({ halfWidth: 1, halfHeight: 6, position: Vec2(5, 3) })
+  }
+
+  addBrick (props: {
+    angle?: number
+    halfHeight: number
+    halfWidth: number
+    position: Vec2
+  }): Brick {
+    const brick = new Brick({ stage: this, ...props })
+    return brick
+  }
+
+  addPlayer (props: { position: Vec2 }): Player {
+    const player = new Player({ stage: this, ...props })
+    return player
+  }
+
+  addPuppet (props: {
+    vertices: [Vec2, Vec2, Vec2]
+    position: Vec2
+  }): Puppet {
+    const puppet = new Puppet({ stage: this, ...props })
+    return puppet
+  }
+
+  addWall (props: { halfWidth: number, halfHeight: number, position: Vec2 }): Wall {
+    const wall = new Wall({ stage: this, ...props })
+    return wall
+  }
+
+  addBrickGroup (props: {
+    angle?: number
+    count: number
+    gap: number
+    halfHeight: number
+    halfWidth: number
+    position: Vec2
+  }): void {
+    const brickRange = range(0, props.count)
+    const indexOffset = (props.count - 1) / 2
+    const height = props.halfHeight * 2
+    const offsetHeight = height + props.gap
+    brickRange.forEach(index => {
+      const offsetIndex = index - indexOffset
+      const offset = offsetHeight * offsetIndex
+      const position = props.position.clone()
+      position.y += offset
+      this.addBrick({
+        angle: props.angle,
+        halfHeight: props.halfHeight,
+        halfWidth: props.halfWidth,
+        position
+      })
+    })
+  }
+
+  addWallGroup (props: {
+    count: number
+    gap: number
+    halfHeight: number
+    halfWidth: number
+    position: Vec2
+  }): void {
+    const wallRange = range(0, props.count)
+    const indexOffset = (props.count - 1) / 2
+    const height = props.halfHeight * 2
+    const offsetHeight = height + props.gap
+    wallRange.forEach(index => {
+      const offsetIndex = index - indexOffset
+      const offset = offsetHeight * offsetIndex
+      const position = props.position.clone()
+      position.y += offset
+      this.addWall({ halfWidth: props.halfWidth, halfHeight: props.halfHeight, position })
+    })
+  }
+
+  beginContact (contact: Contact): void {
+    const fixtureA = contact.getFixtureA()
+    const fixtureB = contact.getFixtureB()
+    const featureA = fixtureA.getBody().getUserData() as Feature
+    const featureB = fixtureB.getBody().getUserData() as Feature
+    const mouthyA = featureA instanceof Mouth
+    const mouthyB = featureB instanceof Mouth
+    const mouthy = mouthyA || mouthyB
+    if (!mouthy) return
+    const wallyA = featureA instanceof Barrier
+    const wallyB = featureB instanceof Barrier
+    const wally = wallyA || wallyB
+    if (wally) return
+    if (featureA.actor === featureB.actor) return
+    const pairs = [
+      [featureA, featureB],
+      [featureB, featureA]
+    ]
+    pairs.forEach(pair => {
+      const feature = pair[0]
+      const otherFeature = pair[1]
+      if (!(otherFeature.actor instanceof Player) && feature.actor instanceof Player) return
+      if (feature.actor.invincibleTime === 0) {
+        feature.health -= feature instanceof Mouth ? 0.2 : 0.5
+        feature.color.alpha = featureA.health
+      }
+      if (feature.health <= 0) {
+        if (feature.actor instanceof Player) {
+          this.respawnQueue.push(feature.actor)
+          const killing = new Killing({
+            victim: feature as Mouth,
+            stage: this,
+            killer: otherFeature as Mouth
+          })
+          this.killingQueue.push(killing)
+        } else {
+          this.destructionQueue.push(feature.body)
+          this.actors.delete(feature.actor.id)
+        }
+      }
+    })
   }
 
   debugLine (props: {
@@ -147,36 +348,6 @@ export class Stage {
     })
   }
 
-  addPlayer (props: { position: Vec2 }): Player {
-    const player = new Player({ stage: this, ...props })
-    return player
-  }
-
-  addWall (props: { halfWidth: number, halfHeight: number, position: Vec2 }): Wall {
-    const wall = new Wall({ stage: this, ...props })
-    return wall
-  }
-
-  addWallGroup (props: {
-    halfWidth: number
-    halfHeight: number
-    position: Vec2
-    count: number
-    gap: number
-  }): void {
-    const wallRange = range(0, props.count)
-    const indexOffset = (props.count - 1) / 2
-    const height = props.halfHeight * 2
-    const offsetHeight = height + props.gap
-    wallRange.forEach(index => {
-      const offsetIndex = index - indexOffset
-      const offset = offsetHeight * offsetIndex
-      const position = props.position.clone()
-      position.y += offset
-      this.addWall({ halfWidth: props.halfWidth, halfHeight: props.halfHeight, position })
-    })
-  }
-
   onStep (): void {
     this.actors.forEach(actor => actor.onStep())
     this.destructionQueue.forEach(body => {
@@ -189,49 +360,6 @@ export class Stage {
     this.killingQueue = []
     this.respawnQueue = []
     this.destructionQueue = []
-  }
-
-  beginContact (contact: Contact): void {
-    const fixtureA = contact.getFixtureA()
-    const fixtureB = contact.getFixtureB()
-    const featureA = fixtureA.getBody().getUserData() as Feature
-    const featureB = fixtureB.getBody().getUserData() as Feature
-    const mouthyA = featureA instanceof Mouth
-    const mouthyB = featureB instanceof Mouth
-    const mouthy = mouthyA || mouthyB
-    if (!mouthy) return
-    const wallyA = featureA instanceof Barrier
-    const wallyB = featureB instanceof Barrier
-    const wally = wallyA || wallyB
-    if (wally) return
-    if (featureA.actor === featureB.actor) return
-    const pairs = [
-      [featureA, featureB],
-      [featureB, featureA]
-    ]
-    pairs.forEach(pair => {
-      const feature = pair[0]
-      const otherFeature = pair[1]
-      if (!(otherFeature.actor instanceof Player) && feature.actor instanceof Player) return
-      if (feature.actor.invincibleTime === 0) {
-        feature.health -= feature instanceof Mouth ? 0.2 : 0.5
-        feature.color.alpha = featureA.health
-      }
-      if (feature.health <= 0) {
-        if (feature.actor instanceof Player) {
-          this.respawnQueue.push(feature.actor)
-          const killing = new Killing({
-            victim: feature as Mouth,
-            stage: this,
-            killer: otherFeature as Mouth
-          })
-          this.killingQueue.push(killing)
-        } else {
-          this.destructionQueue.push(feature.body)
-          this.actors.delete(feature.actor.id)
-        }
-      }
-    })
   }
 
   preSolve (contact: Contact): void {
