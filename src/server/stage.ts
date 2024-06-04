@@ -68,107 +68,180 @@ export class Stage {
     const brickX = -14 + SIGHT_HALF_WIDTH - 0.1
     const propHalfWidth = SIGHT_HALF_WIDTH - 5
     const wallHalfWidth = SIGHT_HALF_WIDTH - 1.1
-    this.addWallGroup({
-      halfWidth: wallHalfWidth,
-      halfHeight: 1,
-      position: Vec2(-14, 15),
-      count: 10,
-      gap: 0.1
-    })
-    this.addBrick({ halfHeight: 10, halfWidth: 1, position: Vec2(brickX, 15) })
     const rightPropX = brickX + 1.25 + propHalfWidth
-    this.addPuppet({
-      vertices: [
-        Vec2(propHalfWidth, 15),
-        Vec2(-propHalfWidth, 0),
-        Vec2(propHalfWidth, -15)
-      ],
-      position: Vec2(rightPropX, 15)
-    })
-
-    this.addWall({
-      halfWidth: 1,
-      halfHeight: 15,
-      position: Vec2(-14, -20)
-    })
-    this.addBrick({ halfHeight: 10, halfWidth: 1, position: Vec2(brickX, -20) })
-    this.addBrickGroup({
-      count: 10,
-      gap: 0.1,
-      halfHeight: 1,
-      halfWidth: propHalfWidth,
-      position: Vec2(rightPropX, -20)
-    })
-
     const leftPropX = brickX - 1.25 - propHalfWidth
+    this.addBrick({ halfHeight: 10, halfWidth: 1, position: Vec2(brickX, 15) })
+    // Wall Group
+    // this.addWalls({
+    //   halfWidth: wallHalfWidth,
+    //   halfHeight: 1,
+    //   position: Vec2(-14, 15),
+    //   count: 10,
+    //   gap: 0.1
+    // })
 
-    this.addBrick({
-      angle: Math.PI * 0.9,
-      halfHeight: 15,
-      halfWidth: 1,
-      position: Vec2(leftPropX, -55)
-    })
-    this.addBrick({
-      halfHeight: 10,
-      halfWidth: 1,
-      position: Vec2(brickX, -55)
-    })
-    this.addBrickGroup({
-      angle: Math.PI * 0.75,
-      count: 10,
-      gap: 0.1,
-      halfHeight: 1,
-      halfWidth: propHalfWidth,
-      position: Vec2(rightPropX, -55)
-    })
+    // Big puppet
+    // this.addPuppet({
+    //   vertices: [
+    //     Vec2(propHalfWidth, 15),
+    //     Vec2(-propHalfWidth, 0),
+    //     Vec2(propHalfWidth, -15)
+    //   ],
+    //   position: Vec2(rightPropX, 15)
+    // })
 
-    this.addWallGroup({
-      count: 10,
-      gap: 0.1,
-      halfHeight: 1,
-      halfWidth: 1,
-      position: Vec2(-20, -86)
-    })
-    this.addWallGroup({
-      count: 10,
-      gap: 0.1,
-      halfHeight: 1,
-      halfWidth: 1,
-      position: Vec2(-14, -85)
-    })
-    this.addBrick({
-      halfHeight: 10,
-      halfWidth: 1,
-      position: Vec2(brickX, -85)
-    })
-    this.addBrickGroup({
-      angle: Math.PI * 0.75,
-      count: 4,
-      gap: 1,
-      halfHeight: 0.9,
-      halfWidth: propHalfWidth,
-      position: Vec2(rightPropX, -90)
-    })
+    // Big wall
+    // this.addWall({
+    //   halfWidth: 1,
+    //   halfHeight: 15,
+    //   position: Vec2(-14, -20)
+    // })
 
-    this.addBrickGroup({
-      count: 10,
-      gap: 0.1,
-      halfHeight: 1,
-      halfWidth: 1,
-      position: Vec2(-14, -120)
-    })
-    this.addBrickGroup({
-      count: 10,
-      gap: 0.1,
-      halfHeight: 1,
-      halfWidth: 1,
-      position: Vec2(-10, -120)
-    })
-    this.addBrick({
-      halfHeight: 10,
-      halfWidth: 1,
-      position: Vec2(brickX, -120)
-    })
+    // Wide bricks
+    // this.addBricks({
+    //   count: 10,
+    //   gap: 0.1,
+    //   halfHeight: 1,
+    //   halfWidth: propHalfWidth,
+    //   position: Vec2(rightPropX, -20)
+    // })
+
+    // Big brick
+    // this.addBrick({
+    //   angle: Math.PI * 0.9,
+    //   halfHeight: 15,
+    //   halfWidth: 1,
+    //   position: Vec2(leftPropX, -55)
+    // })
+
+    // Angled bricks
+    // this.addBricks({
+    //   angle: Math.PI * 0.75,
+    //   count: 10,
+    //   gap: 0.1,
+    //   halfHeight: 1,
+    //   halfWidth: propHalfWidth,
+    //   position: Vec2(rightPropX, -55)
+    // })
+
+    // Misaligned walls
+    // this.addWalls({
+    //   count: 10,
+    //   gap: 0.1,
+    //   halfHeight: 1,
+    //   halfWidth: 1,
+    //   position: Vec2(-20, -86)
+    // })
+    // this.addWalls({
+    //   count: 10,
+    //   gap: 0.1,
+    //   halfHeight: 1,
+    //   halfWidth: 1,
+    //   position: Vec2(-14, -85)
+    // })
+
+    // Misaligned bricks
+    // this.addBrick({
+    //   halfHeight: 10,
+    //   halfWidth: 1,
+    //   position: Vec2(brickX, -85)
+    // })
+    // this.addBricks({
+    //   angle: Math.PI * 0.75,
+    //   count: 4,
+    //   gap: 1,
+    //   halfHeight: 0.9,
+    //   halfWidth: propHalfWidth,
+    //   position: Vec2(rightPropX, -90)
+    // })
+
+    // Aligned walls
+    // this.addWalls({
+    //   count: 10,
+    //   gap: 0.1,
+    //   halfHeight: 1,
+    //   halfWidth: 1,
+    //   position: Vec2(-14, 15)
+    // })
+    // this.addWalls({
+    //   count: 10,
+    //   gap: 0.1,
+    //   halfHeight: 1,
+    //   halfWidth: 1,
+    //   position: Vec2(-10, 15)
+    // })
+
+    // Aligned bricks
+    // this.addBricks({
+    //   count: 10,
+    //   gap: 0.1,
+    //   halfHeight: 1,
+    //   halfWidth: 1,
+    //   position: Vec2(rightPropX - 5, 15)
+    // })
+    // this.addBricks({
+    //   count: 10,
+    //   gap: 0.1,
+    //   halfHeight: 1,
+    //   halfWidth: 1,
+    //   position: Vec2(rightPropX, 15)
+    // })
+
+    // Aligned puppets
+    // this.addPuppets({
+    //   count: 10,
+    //   spacing: 2.5,
+    //   vertices: [
+    //     Vec2(-propHalfWidth, 1),
+    //     Vec2(propHalfWidth, 0),
+    //     Vec2(-propHalfWidth, -1)
+    //   ],
+    //   position: Vec2(leftPropX, 15)
+    // })
+    // this.addPuppets({
+    //   count: 10,
+    //   spacing: 2.5,
+    //   vertices: [
+    //     Vec2(propHalfWidth, 1),
+    //     Vec2(-propHalfWidth, 0),
+    //     Vec2(propHalfWidth, -1)
+    //   ],
+    //   position: Vec2(leftPropX, 16.25)
+    // })
+
+    // Misaligned puppets
+    // this.addPuppets({
+    //   count: 2,
+    //   spacing: 10.1,
+    //   vertices: [
+    //     Vec2(-1, 5),
+    //     Vec2(1, 0),
+    //     Vec2(-1, -5)
+    //   ],
+    //   position: Vec2(leftPropX - 5, 15)
+    // })
+    // this.addPuppets({
+    //   count: 2,
+    //   spacing: 10.1,
+    //   vertices: [
+    //     Vec2(-1, 5),
+    //     Vec2(1, 0),
+    //     Vec2(-1, -5)
+    //   ],
+    //   position: Vec2(leftPropX, 16.5)
+    // })
+
+    // Puppet Group
+    // this.addPuppets({
+    //   count: 10,
+    //   spacing: 2.1,
+    //   vertices: [
+    //     Vec2(-propHalfWidth, 1),
+    //     Vec2(propHalfWidth, 0),
+    //     Vec2(-propHalfWidth, -1)
+    //   ],
+    //   position: Vec2(rightPropX, 15)
+    // })
 
     // void new Brick({ stage: this, halfWidth: 1, halfHeight: 2, position: Vec2(-5, 0) })
     // this.addWall({ halfWidth: 0.5, halfHeight: 3, position: Vec2(-2, 0) })
@@ -199,12 +272,29 @@ export class Stage {
     return puppet
   }
 
+  addPuppets (props: {
+    count: number
+    spacing: number
+    vertices: [Vec2, Vec2, Vec2]
+    position: Vec2
+  }): void {
+    const puppetRange = range(1, props.count)
+    const indexOffset = (props.count - 1) / 2
+    puppetRange.forEach(index => {
+      const offsetIndex = index - indexOffset
+      const offset = props.spacing * offsetIndex
+      const position = props.position.clone()
+      position.y += offset
+      this.addPuppet({ vertices: props.vertices, position })
+    })
+  }
+
   addWall (props: { halfWidth: number, halfHeight: number, position: Vec2 }): Wall {
     const wall = new Wall({ stage: this, ...props })
     return wall
   }
 
-  addBrickGroup (props: {
+  addBricks (props: {
     angle?: number
     count: number
     gap: number
@@ -212,7 +302,7 @@ export class Stage {
     halfWidth: number
     position: Vec2
   }): void {
-    const brickRange = range(0, props.count)
+    const brickRange = range(1, props.count)
     const indexOffset = (props.count - 1) / 2
     const height = props.halfHeight * 2
     const offsetHeight = height + props.gap
@@ -230,14 +320,14 @@ export class Stage {
     })
   }
 
-  addWallGroup (props: {
+  addWalls (props: {
     count: number
     gap: number
     halfHeight: number
     halfWidth: number
     position: Vec2
   }): void {
-    const wallRange = range(0, props.count)
+    const wallRange = range(1, props.count)
     const indexOffset = (props.count - 1) / 2
     const height = props.halfHeight * 2
     const offsetHeight = height + props.gap
