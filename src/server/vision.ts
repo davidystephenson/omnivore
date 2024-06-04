@@ -277,10 +277,10 @@ export class Vision {
     targetPolygon: PolygonShape
   ): boolean {
     const betweenVertices = this.getBetweenVertices(sourcePoint, targetFeature, targetPolygon)
-    const clearCorner1 = this.isVisible(sourcePoint, betweenVertices[1], [sourceFeature.id, targetFeature.id], true)
-    const clearCorner2 = this.isVisible(sourcePoint, betweenVertices[2], [sourceFeature.id, targetFeature.id], true)
+    const clearCorner1 = this.isVisible(sourcePoint, betweenVertices[1], [sourceFeature.id, targetFeature.id])
+    const clearCorner2 = this.isVisible(sourcePoint, betweenVertices[2], [sourceFeature.id, targetFeature.id])
     const betweenPolygon = new PolygonShape(betweenVertices)
-    this.stage.debugPolygon({ polygon: betweenPolygon, color: Color.RED })
+    // this.stage.debugPolygon({ polygon: betweenPolygon, color: Color.RED })
     if (clearCorner1 || clearCorner2) return true
     const featuresInShape = this.getFeaturesInShape(betweenPolygon)
     const obstructions = featuresInShape.filter(feature => {
@@ -305,7 +305,7 @@ export class Vision {
         const rayLength = 2 * SIGHT.x
         const rayDirection = directionFromTo(sourcePoint, corner)
         const rayEndPoint = Vec2.combine(1, sourcePoint, rayLength, rayDirection)
-        this.stage.debugLine({ a: sourcePoint, b: rayEndPoint, color: Color.YELLOW })
+        // this.stage.debugLine({ a: sourcePoint, b: rayEndPoint, color: Color.YELLOW })
         const rayCastHits = this.rayCast(sourcePoint, rayEndPoint).filter(hit => {
           return hit.feature.id !== obstruction.id
         })
