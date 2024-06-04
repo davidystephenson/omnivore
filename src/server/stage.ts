@@ -70,7 +70,7 @@ export class Stage {
     const wallHalfWidth = SIGHT_HALF_WIDTH - 1.1
     const rightPropX = brickX + 1.25 + propHalfWidth
     const leftPropX = brickX - 1.25 - propHalfWidth
-    this.addBrick({ halfHeight: 10, halfWidth: 1, position: Vec2(brickX, 15) })
+    this.addBrick({ halfHeight: 10, halfWidth: 1, position: Vec2(brickX, 16) })
     // Wall Group
     // this.addWalls({
     //   halfWidth: wallHalfWidth,
@@ -172,20 +172,20 @@ export class Stage {
     // })
 
     // Aligned bricks
-    // this.addBricks({
-    //   count: 10,
-    //   gap: 0.1,
-    //   halfHeight: 1,
-    //   halfWidth: 1,
-    //   position: Vec2(rightPropX - 5, 15)
-    // })
-    // this.addBricks({
-    //   count: 10,
-    //   gap: 0.1,
-    //   halfHeight: 1,
-    //   halfWidth: 1,
-    //   position: Vec2(rightPropX, 15)
-    // })
+    this.addBricks({
+      count: 10,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: 1,
+      position: Vec2(rightPropX - 5, 16)
+    })
+    this.addBricks({
+      count: 10,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: 1,
+      position: Vec2(rightPropX, 16)
+    })
 
     // Aligned puppets
     // this.addPuppets({
@@ -303,7 +303,7 @@ export class Stage {
     position: Vec2
   }): void {
     const brickRange = range(1, props.count)
-    const indexOffset = (props.count - 1) / 2
+    const indexOffset = (props.count) / 2
     const height = props.halfHeight * 2
     const offsetHeight = height + props.gap
     brickRange.forEach(index => {
@@ -328,7 +328,7 @@ export class Stage {
     position: Vec2
   }): void {
     const wallRange = range(1, props.count)
-    const indexOffset = (props.count - 1) / 2
+    const indexOffset = (props.count) / 2
     const height = props.halfHeight * 2
     const offsetHeight = height + props.gap
     wallRange.forEach(index => {
