@@ -2,11 +2,11 @@ import { Vec2 } from 'planck'
 import { Feature } from '../server/feature/feature'
 
 export class RayCastHit {
-  feature: Feature
+  feature?: Feature
   point: Vec2
 
   constructor (props: {
-    feature: Feature
+    feature?: Feature
     point: Vec2
   }) {
     this.feature = props.feature
