@@ -8,10 +8,6 @@ import { directionFromTo, getNearestIndex, normalize, range, rotate } from './ma
 import { LineFigure } from '../shared/lineFigure'
 import { Chunk } from './feature/chunk'
 import { RayCastHit } from '../shared/rayCastHit'
-import { Brick } from './actor/brick'
-import { Wall } from './actor/wall'
-import { Mouth } from './feature/mouth'
-import { Crate } from './feature/crate'
 
 export class Vision {
   stage: Stage
@@ -279,7 +275,6 @@ export class Vision {
   getFirstHit (rayStart: Vec2, direction: Vec2): RayCastHit {
     const rayEnd = Vec2.combine(1, rayStart, SIGHT.x, direction)
     const hits = this.rayCast(rayStart, rayEnd)
-    const hitLabels = hits.map(hit => hit.feature?.label)
     const legitHits = hits.filter(hit => {
       if (hit.feature == null) return false
       const shape = hit.feature.fixture.getShape()
@@ -316,7 +311,7 @@ export class Vision {
     const clearCorner1 = this.isVisible(sourcePoint, betweenVertices[1], [sourceFeature.id, targetFeature.id])
     const clearCorner2 = this.isVisible(sourcePoint, betweenVertices[2], [sourceFeature.id, targetFeature.id])
     const betweenPolygon = new PolygonShape(betweenVertices)
-    this.stage.debugPolygon({ polygon: betweenPolygon, color: Color.RED })
+    // this.stage.debugPolygon({ polygon: betweenPolygon, color: Color.RED })
     if (clearCorner1 || clearCorner2) return true
     const featuresInShape = this.getFeaturesInShape(betweenPolygon)
     const obstructions = featuresInShape.filter(feature => {
@@ -334,13 +329,13 @@ export class Vision {
         return this.isClear(sourcePoint, corner, [obstruction.id, targetFeature.id])
       })
       outerCorners.forEach(corner => {
-        const circle = new CircleShape(corner, 0.2)
-        this.stage.debugCircle({ circle, color: Color.RED })
+        // const circle = new CircleShape(corner, 0.2)
+        // this.stage.debugCircle({ circle, color: Color.RED })
       })
       outerCorners.forEach(corner => {
         const rayDirection = directionFromTo(sourcePoint, corner)
         const firstHit = this.getFirstHit(sourcePoint, rayDirection)
-        this.stage.debugLine({ a: sourcePoint, b: firstHit.point, color: Color.YELLOW })
+        // this.stage.debugLine({ a: sourcePoint, b: firstHit.point, color: Color.YELLOW })
         if (firstHit.feature != null && firstHit.feature.id === targetFeature.id) visible = true
         const worldCorners = shape.m_vertices.map(corner => {
           return obstruction.body.getWorldPoint(corner)

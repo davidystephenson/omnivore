@@ -117,11 +117,21 @@ export class Stage {
     // Angled bricks
     // this.addBricks({
     //   angle: Math.PI * 0.75,
+    //   count: 5,
+    //   gap: 1,
+    //   halfHeight: 1,
+    //   halfWidth: propHalfWidth,
+    //   position: Vec2(rightPropX, 15)
+    // })
+
+    // Tight Angled bricks
+    // this.addBricks({
+    //   angle: Math.PI * 0.75,
     //   count: 10,
     //   gap: 0.1,
     //   halfHeight: 1,
     //   halfWidth: propHalfWidth,
-    //   position: Vec2(rightPropX, -55)
+    //   position: Vec2(rightPropX, 15)
     // })
 
     // Misaligned walls
@@ -130,29 +140,30 @@ export class Stage {
     //   gap: 0.1,
     //   halfHeight: 1,
     //   halfWidth: 1,
-    //   position: Vec2(-20, -86)
+    //   position: Vec2(-20, 16)
     // })
     // this.addWalls({
     //   count: 10,
     //   gap: 0.1,
     //   halfHeight: 1,
     //   halfWidth: 1,
-    //   position: Vec2(-14, -85)
+    //   position: Vec2(-14, 15)
     // })
 
     // Misaligned bricks
-    // this.addBrick({
-    //   halfHeight: 10,
+    // this.addBricks({
+    //   count: 10,
+    //   gap: 0.1,
+    //   halfHeight: 1,
     //   halfWidth: 1,
-    //   position: Vec2(brickX, -85)
+    //   position: Vec2(rightPropX, 15)
     // })
     // this.addBricks({
-    //   angle: Math.PI * 0.75,
-    //   count: 4,
-    //   gap: 1,
-    //   halfHeight: 0.9,
-    //   halfWidth: propHalfWidth,
-    //   position: Vec2(rightPropX, -90)
+    //   count: 10,
+    //   gap: 0.1,
+    //   halfHeight: 1,
+    //   halfWidth: 1,
+    //   position: Vec2(rightPropX - 5, 16)
     // })
 
     // Aligned walls
@@ -172,42 +183,42 @@ export class Stage {
     // })
 
     // Aligned bricks
-    this.addBricks({
-      count: 10,
-      gap: 0.1,
-      halfHeight: 1,
-      halfWidth: 1,
-      position: Vec2(rightPropX - 5, 16)
-    })
-    this.addBricks({
-      count: 10,
-      gap: 0.1,
-      halfHeight: 1,
-      halfWidth: 1,
-      position: Vec2(rightPropX, 16)
-    })
+    // this.addBricks({
+    //   count: 10,
+    //   gap: 0.1,
+    //   halfHeight: 1,
+    //   halfWidth: 1,
+    //   position: Vec2(leftPropX, 16)
+    // })
+    // this.addBricks({
+    //   count: 10,
+    //   gap: 0.1,
+    //   halfHeight: 1,
+    //   halfWidth: 1,
+    //   position: Vec2(leftPropX + 5, 16)
+    // })
 
     // Aligned puppets
-    // this.addPuppets({
-    //   count: 10,
-    //   spacing: 2.5,
-    //   vertices: [
-    //     Vec2(-propHalfWidth, 1),
-    //     Vec2(propHalfWidth, 0),
-    //     Vec2(-propHalfWidth, -1)
-    //   ],
-    //   position: Vec2(leftPropX, 15)
-    // })
-    // this.addPuppets({
-    //   count: 10,
-    //   spacing: 2.5,
-    //   vertices: [
-    //     Vec2(propHalfWidth, 1),
-    //     Vec2(-propHalfWidth, 0),
-    //     Vec2(propHalfWidth, -1)
-    //   ],
-    //   position: Vec2(leftPropX, 16.25)
-    // })
+    this.addPuppets({
+      count: 10,
+      spacing: 2.5,
+      vertices: [
+        Vec2(-propHalfWidth, 0.9),
+        Vec2(propHalfWidth, 0),
+        Vec2(-propHalfWidth, -0.9)
+      ],
+      position: Vec2(leftPropX, 15)
+    })
+    this.addPuppets({
+      count: 10,
+      spacing: 2.5,
+      vertices: [
+        Vec2(propHalfWidth, 0.9),
+        Vec2(-propHalfWidth, 0),
+        Vec2(propHalfWidth, -0.9)
+      ],
+      position: Vec2(leftPropX, 16.25)
+    })
 
     // Misaligned puppets
     // this.addPuppets({
