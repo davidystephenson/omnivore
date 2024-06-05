@@ -200,24 +200,24 @@ export class Stage {
 
     // Aligned puppets
     this.addPuppets({
-      count: 10,
-      spacing: 2.5,
+      count: 20,
+      spacing: 2,
       vertices: [
-        Vec2(-propHalfWidth, 0.9),
+        Vec2(-propHalfWidth, 0.8),
         Vec2(propHalfWidth, 0),
-        Vec2(-propHalfWidth, -0.9)
+        Vec2(-propHalfWidth, -0.8)
       ],
       position: Vec2(leftPropX, 15)
     })
     this.addPuppets({
-      count: 10,
-      spacing: 2.5,
+      count: 20,
+      spacing: 2,
       vertices: [
-        Vec2(propHalfWidth, 0.9),
+        Vec2(propHalfWidth, 0.8),
         Vec2(-propHalfWidth, 0),
-        Vec2(propHalfWidth, -0.9)
+        Vec2(propHalfWidth, -0.8)
       ],
-      position: Vec2(leftPropX, 16.25)
+      position: Vec2(leftPropX, 16)
     })
 
     // Misaligned puppets
