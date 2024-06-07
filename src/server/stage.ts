@@ -70,7 +70,15 @@ export class Stage {
     const wallHalfWidth = SIGHT_HALF_WIDTH - 1.1
     const rightPropX = brickX + 1.25 + propHalfWidth
     const leftPropX = brickX - 1.25 - propHalfWidth
-    this.addBrick({ halfHeight: 10, halfWidth: 1, position: Vec2(brickX, 16) })
+    // this.addBrick({ halfHeight: 10, halfWidth: 1, position: Vec2(brickX, 16) })
+    this.addPuppet({
+      vertices: [
+        Vec2(-1, 5),
+        Vec2(1, 5),
+        Vec2(0, -5),
+      ],
+      position: Vec2(brickX, 15)
+    })
     // Wall Group
     // this.addWalls({
     //   halfWidth: wallHalfWidth,
@@ -111,7 +119,7 @@ export class Stage {
     //   angle: Math.PI * 0.9,
     //   halfHeight: 15,
     //   halfWidth: 1,
-    //   position: Vec2(leftPropX, -55)
+    //   position: Vec2(leftPropX, 15)
     // })
 
     // Angled bricks
@@ -183,42 +191,42 @@ export class Stage {
     // })
 
     // Aligned bricks
-    // this.addBricks({
-    //   count: 10,
-    //   gap: 0.1,
-    //   halfHeight: 1,
-    //   halfWidth: 1,
-    //   position: Vec2(leftPropX, 16)
-    // })
-    // this.addBricks({
-    //   count: 10,
-    //   gap: 0.1,
-    //   halfHeight: 1,
-    //   halfWidth: 1,
-    //   position: Vec2(leftPropX + 5, 16)
-    // })
-
-    // Aligned puppets
-    this.addPuppets({
-      count: 20,
-      spacing: 2,
-      vertices: [
-        Vec2(-propHalfWidth, 0.8),
-        Vec2(propHalfWidth, 0),
-        Vec2(-propHalfWidth, -0.8)
-      ],
-      position: Vec2(leftPropX, 15)
-    })
-    this.addPuppets({
-      count: 20,
-      spacing: 2,
-      vertices: [
-        Vec2(propHalfWidth, 0.8),
-        Vec2(-propHalfWidth, 0),
-        Vec2(propHalfWidth, -0.8)
-      ],
+    this.addBricks({
+      count: 10,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: 1,
       position: Vec2(leftPropX, 16)
     })
+    this.addBricks({
+      count: 10,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: 1,
+      position: Vec2(leftPropX + 5, 16)
+    })
+
+    // Aligned puppets
+    // this.addPuppets({
+    //   count: 20,
+    //   spacing: 2,
+    //   vertices: [
+    //     Vec2(-propHalfWidth, 0.8),
+    //     Vec2(propHalfWidth, 0),
+    //     Vec2(-propHalfWidth, -0.8)
+    //   ],
+    //   position: Vec2(leftPropX, 15)
+    // })
+    // this.addPuppets({
+    //   count: 20,
+    //   spacing: 2,
+    //   vertices: [
+    //     Vec2(propHalfWidth, 0.8),
+    //     Vec2(-propHalfWidth, 0),
+    //     Vec2(propHalfWidth, -0.8)
+    //   ],
+    //   position: Vec2(leftPropX, 16)
+    // })
 
     // Misaligned puppets
     // this.addPuppets({
