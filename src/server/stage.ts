@@ -69,7 +69,7 @@ export class Stage {
     const propHalfWidth = SIGHT_HALF_WIDTH - 5
     // const wallHalfWidth = SIGHT_HALF_WIDTH - 1.1
     const rightPropX = brickX + 1.25 + propHalfWidth
-    // const leftPropX = brickX - 1.25 - propHalfWidth
+    const leftPropX = brickX - 1.25 - propHalfWidth
     // this.addBrick({ halfHeight: 10, halfWidth: 1, position: Vec2(brickX, 16) })
     // this.addPuppet({
     //   vertices: [
@@ -102,11 +102,11 @@ export class Stage {
     // })
 
     // Big wall
-    // this.addWall({
-    //   halfWidth: 5,
-    //   halfHeight: 5,
-    //   position: Vec2(-10, 15)
-    // })
+    this.addWall({
+      halfWidth: 5,
+      halfHeight: 5,
+      position: Vec2(-10, 15)
+    })
 
     // Wide bricks
     // this.addBricks({
@@ -126,24 +126,24 @@ export class Stage {
     // })
 
     // Angled bricks
-    this.addBricks({
-      angle: Math.PI * 0.75,
-      count: 10,
-      gap: 0.5,
-      halfHeight: 0.5,
-      halfWidth: propHalfWidth,
-      position: Vec2(rightPropX, 10)
-    })
-
-    // Tight Angled bricks
     // this.addBricks({
-    //   angle: Math.PI * 0.6,
+    //   angle: Math.PI * 0.75,
     //   count: 10,
-    //   gap: 0.1,
-    //   halfHeight: 1,
-    //   halfWidth: propHalfWidth,
+    //   gap: 0.5,
+    //   halfHeight: 0.5,
+    //   halfWidth: propHalfWidth - 3,
     //   position: Vec2(rightPropX, 10)
     // })
+
+    // Tight Angled bricks
+    this.addBricks({
+      angle: Math.PI * 0.6,
+      count: 10,
+      gap: 0.1,
+      halfHeight: 0.5,
+      halfWidth: propHalfWidth - 3,
+      position: Vec2(rightPropX - 2, 10)
+    })
 
     // Misaligned walls
     // this.addWalls({
@@ -178,25 +178,20 @@ export class Stage {
     // })
 
     // Aligned walls
-    // this.addBrick({
-    //   halfHeight: 5,
+    // this.addWalls({
+    //   count: 8,
+    //   gap: 0.1,
+    //   halfHeight: 0.5,
     //   halfWidth: 0.5,
-    //   position: Vec2(-12, 15)
+    //   position: Vec2(-10, 15)
     // })
-    this.addWalls({
-      count: 8,
-      gap: 0.1,
-      halfHeight: 0.5,
-      halfWidth: 0.5,
-      position: Vec2(-10, 15)
-    })
-    this.addWalls({
-      count: 8,
-      gap: 0.1,
-      halfHeight: 0.5,
-      halfWidth: 0.5,
-      position: Vec2(-5, 15)
-    })
+    // this.addWalls({
+    //   count: 8,
+    //   gap: 0.1,
+    //   halfHeight: 0.5,
+    //   halfWidth: 0.5,
+    //   position: Vec2(-5, 15)
+    // })
 
     // Aligned bricks
     // this.addBricks({
