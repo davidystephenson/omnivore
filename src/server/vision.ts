@@ -372,43 +372,6 @@ export class Vision {
     return visible
   }
 
-  checkCircleToTriangle (sourceFeature: Feature, targetFeature: Feature, sourceCircle: CircleShape, targetPolygon: PolygonShape): boolean {
-    const sourceCenter = sourceFeature.body.getPosition()
-    const nearestPoint = this.getNearestPoint(sourceCenter, targetFeature, targetPolygon)
-    const nearestVisible = this.isVisible(sourceCenter, nearestPoint, [targetFeature.id])
-    if (nearestVisible) return true
-    const lines: LineFigure[] = []
-    const targetCorners = targetPolygon.m_vertices.map(vertex => {
-      return targetFeature.body.getWorldPoint(vertex)
-    })
-    const spacing = 1 // 0.6
-    range(0, targetCorners.length - 1).forEach(i => {
-      const j = (i + 1) % targetCorners.length
-      const point1 = targetCorners[i]
-      lines.push(new LineFigure({ a: sourceCenter, b: point1 }))
-      const point2 = targetCorners[j]
-      const distance = Vec2.distance(point1, point2)
-      if (distance <= spacing) return false
-      const segmentCount = Math.ceil(distance / spacing)
-      const segmentLength = distance / segmentCount
-      const segmentDirection = directionFromTo(point1, point2)
-      range(0, segmentCount).forEach(i => {
-        const toPosition = Vec2.combine(1, point1, i * segmentLength, segmentDirection)
-        const inRange = this.isPointInRange(sourceCenter, toPosition)
-        if (!inRange) return
-        const direction = directionFromTo(sourceCenter, toPosition)
-        const rightDirection = rotate(direction, 0.5 * Math.PI)
-        const leftDirection = rotate(direction, -0.5 * Math.PI)
-        const fromRightPosition = Vec2.combine(1, sourceCenter, sourceCircle.getRadius(), rightDirection)
-        const fromLeftPosition = Vec2.combine(1, sourceCenter, sourceCircle.getRadius(), leftDirection)
-        lines.push(new LineFigure({ a: sourceCenter, b: toPosition }))
-        lines.push(new LineFigure({ a: fromRightPosition, b: toPosition }))
-        lines.push(new LineFigure({ a: fromLeftPosition, b: toPosition }))
-      })
-    })
-    return lines.some(line => this.isVisible(line.a, line.b, [targetFeature.id]))
-  }
-
   isFeatureVisible (sourceFeature: Feature, targetFeature: Feature): boolean {
     if (targetFeature.label === 'barrier') {
       return true
