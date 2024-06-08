@@ -240,21 +240,6 @@ export class Vision {
     return nearestPoint
   }
 
-  rayCast (point1: Vec2, point2: Vec2): RayCastHit[] {
-    const hits: RayCastHit[] = []
-    this.stage.world.rayCast(point1, point2, function (fixture: Fixture, point: Vec2): number {
-      const feature = fixture.getUserData() as Feature
-      hits.push(new RayCastHit({ feature, point }))
-      return -1
-    })
-    hits.sort((hit1, hit2) => {
-      const distance1 = Vec2.distance(point1, hit1.point)
-      const distance2 = Vec2.distance(point1, hit2.point)
-      return distance1 - distance2
-    })
-    return hits
-  }
-
   checkCircleToRectangle (sourceFeature: Feature, targetFeature: Feature, sourceCircle: CircleShape, targetPolygon: PolygonShape): boolean {
     const sourceCenter = sourceFeature.body.getPosition()
     const sourcePoints = [sourceCenter]
@@ -268,13 +253,32 @@ export class Vision {
     })
     */
     return sourcePoints.some(sourcePoint => {
-      return this.checkPointToRectangle(sourcePoint, sourceFeature, targetFeature, targetPolygon)
+      return this.checkPointToPolygon(sourcePoint, sourceFeature, targetFeature, targetPolygon)
     })
   }
 
-  getFirstHit (rayStart: Vec2, direction: Vec2): RayCastHit {
-    const rayEnd = Vec2.combine(1, rayStart, SIGHT.x, direction)
-    const hits = this.rayCast(rayStart, rayEnd)
+  rayCast (point1: Vec2, point2: Vec2, excludeIds?: number[]): RayCastHit[] {
+    const hits: RayCastHit[] = []
+    this.stage.world.rayCast(point1, point2, function (fixture: Fixture, point: Vec2): number {
+      const feature = fixture.getUserData() as Feature
+      if (excludeIds?.includes(feature.id) === true) {
+        return -1
+      }
+      hits.push(new RayCastHit({ feature, point }))
+      return -1
+    })
+    hits.sort((hit1, hit2) => {
+      const distance1 = Vec2.distance(point1, hit1.point)
+      const distance2 = Vec2.distance(point1, hit2.point)
+      return distance1 - distance2
+    })
+    return hits
+  }
+
+  getFirstHit (rayStart: Vec2, direction: Vec2, excludeIds?: number[]): RayCastHit {
+    // TODO Optimize
+    const rayEnd = Vec2.combine(1, rayStart, 2 * SIGHT.x, direction)
+    const hits = this.rayCast(rayStart, rayEnd, excludeIds)
     const legitHits = hits.filter(hit => {
       if (hit.feature == null) return false
       const shape = hit.feature.fixture.getShape()
@@ -301,17 +305,19 @@ export class Vision {
     return legitHits.length > 0 ? legitHits[0] : new RayCastHit({ feature: undefined, point: rayEnd })
   }
 
-  checkPointToRectangle (
+  checkPointToPolygon (
     sourcePoint: Vec2,
     sourceFeature: Feature,
     targetFeature: Feature,
     targetPolygon: PolygonShape
   ): boolean {
+    const debug = false
     const betweenVertices = this.getBetweenVertices(sourcePoint, targetFeature, targetPolygon)
     const clearCorner1 = this.isVisible(sourcePoint, betweenVertices[1], [sourceFeature.id, targetFeature.id])
     const clearCorner2 = this.isVisible(sourcePoint, betweenVertices[2], [sourceFeature.id, targetFeature.id])
+    const targetCorners = [betweenVertices[1], betweenVertices[2]]
     const betweenPolygon = new PolygonShape(betweenVertices)
-    // this.stage.debugPolygon({ polygon: betweenPolygon, color: Color.RED })
+    if (debug) this.stage.debugPolygon({ polygon: betweenPolygon, color: Color.RED })
     if (clearCorner1 || clearCorner2) return true
     const featuresInShape = this.getFeaturesInShape(betweenPolygon)
     const obstructions = featuresInShape.filter(feature => {
@@ -329,13 +335,13 @@ export class Vision {
         return this.isClear(sourcePoint, corner, [obstruction.id, targetFeature.id])
       })
       outerCorners.forEach(corner => {
-        // const circle = new CircleShape(corner, 0.2)
-        // this.stage.debugCircle({ circle, color: Color.RED })
+        const circle = new CircleShape(corner, 0.2)
+        if (debug) this.stage.debugCircle({ circle, color: Color.RED })
       })
       outerCorners.forEach(corner => {
         const rayDirection = directionFromTo(sourcePoint, corner)
         const firstHit = this.getFirstHit(sourcePoint, rayDirection)
-        // this.stage.debugLine({ a: sourcePoint, b: firstHit.point, color: Color.YELLOW })
+        if (debug) this.stage.debugLine({ a: sourcePoint, b: firstHit.point, color: Color.YELLOW })
         if (firstHit.feature != null && firstHit.feature.id === targetFeature.id) visible = true
         const worldCorners = shape.m_vertices.map(corner => {
           return obstruction.body.getWorldPoint(corner)
@@ -346,14 +352,20 @@ export class Vision {
           const rayDirB = directionFromTo(cornerA, cornerB)
           const firstHitA = this.getFirstHit(cornerA, rayDirA)
           const firstHitB = this.getFirstHit(cornerB, rayDirB)
-          // this.stage.debugLine({ a: cornerA, b: firstHitA.point, color: Color.LIME })
-          // this.stage.debugLine({ a: cornerB, b: firstHitB.point, color: Color.LIME })
+          if (debug) this.stage.debugLine({ a: cornerA, b: firstHitA.point, color: Color.LIME })
+          if (debug) this.stage.debugLine({ a: cornerB, b: firstHitB.point, color: Color.LIME })
           if (firstHitA.feature != null && firstHitB.feature != null) {
             const hitFeatures = [firstHitA.feature, firstHitB.feature]
             const hitSource = hitFeatures.includes(sourceFeature)
             const hitTarget = hitFeatures.includes(targetFeature)
             if (hitSource && hitTarget) visible = true
           }
+          targetCorners.forEach(targetCorner => {
+            const rayDir = directionFromTo(targetCorner, cornerA)
+            const firstHit = this.getFirstHit(targetCorner, rayDir)
+            if (debug) this.stage.debugLine({ a: targetCorner, b: firstHit.point, color: Color.YELLOW })
+            if (firstHit.feature?.id === sourceFeature.id) visible = true
+          })
         })
       })
     })
@@ -411,13 +423,11 @@ export class Vision {
       if (targetFeature instanceof Chunk) {
         if (targetFeature.name === 'rectangle') {
           const rectangleVisible = this.checkCircleToRectangle(sourceFeature, targetFeature, sourceShape, targetShape)
-          if (!rectangleVisible) {
-            // this.stage.runner.paused = true
-          }
           return rectangleVisible
         }
         if (targetFeature.name === 'triangle') {
-          return this.checkCircleToTriangle(sourceFeature, targetFeature, sourceShape, targetShape)
+          const triangleVisible = this.checkCircleToRectangle(sourceFeature, targetFeature, sourceShape, targetShape)
+          return triangleVisible
         }
       }
       throw new Error('The PolygonShape is not from a Chunk')
