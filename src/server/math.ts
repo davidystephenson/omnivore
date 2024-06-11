@@ -53,3 +53,20 @@ export function getUnionBox (a: AABB, b: AABB): AABB {
   const upper = Vec2(Math.max(a.upperBound.x, b.upperBound.x), Math.max(a.upperBound.y, b.upperBound.y))
   return new AABB(lower, upper)
 }
+
+export function whichMax (array: number[]): number {
+  let indexMax = 0
+  let valueMax = array[0]
+  array.forEach((value, index) => {
+    if (value > valueMax) {
+      indexMax = index
+      valueMax = value
+    }
+  })
+  return indexMax
+}
+
+export function whichMin (array: number[]): number {
+  const negArray = array.map(x => -x)
+  return whichMax(negArray)
+}

@@ -9,7 +9,7 @@ export class Actor {
   stage: Stage
   label: string
   id: number
-  invincibleTime = 5
+  invincibleTime = 0
 
   constructor (props: {
     stage: Stage
@@ -23,6 +23,7 @@ export class Actor {
   }
 
   onStep (): void {
+    this.features.forEach(feature => feature.onStep())
     // this.invincibleTime = Math.max(0, this.invincibleTime - this.stage.runner.timeStep)
   }
 }

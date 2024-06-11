@@ -281,4 +281,6 @@ export class Feature {
     }
     return true
   }
+
+  onStep (): void {}
 }

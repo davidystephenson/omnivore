@@ -8,7 +8,7 @@ export class Puppet extends Actor {
 
   constructor (props: {
     stage: Stage
-    vertices: [Vec2, Vec2, Vec2]
+    vertices: Vec2[] // [Vec2, Vec2, Vec2]
     position: Vec2
   }) {
     super({ stage: props.stage, label: 'puppet' })

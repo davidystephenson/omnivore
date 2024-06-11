@@ -66,10 +66,10 @@ export class Stage {
     // })
 
     const brickX = -14 + SIGHT_HALF_WIDTH - 0.1
-    const propHalfWidth = SIGHT_HALF_WIDTH - 5
+    // const propHalfWidth = SIGHT_HALF_WIDTH - 5
     // const wallHalfWidth = SIGHT_HALF_WIDTH - 1.1
-    const rightPropX = brickX + 1.25 + propHalfWidth
-    const leftPropX = brickX - 1.25 - propHalfWidth
+    // const rightPropX = brickX + 1.25 + propHalfWidth
+    // const leftPropX = brickX - 1.25 - propHalfWidth
     // this.addBrick({ halfHeight: 10, halfWidth: 1, position: Vec2(brickX, 16) })
     // this.addPuppet({
     //   vertices: [
@@ -136,14 +136,14 @@ export class Stage {
     // })
 
     // Tight Angled bricks
-    this.addBricks({
-      angle: Math.PI * 0.6,
-      count: 10,
-      gap: 0.1,
-      halfHeight: 0.5,
-      halfWidth: propHalfWidth - 3,
-      position: Vec2(rightPropX - 2, 10)
-    })
+    // this.addBricks({
+    //   angle: Math.PI * 0.6,
+    //   count: 10,
+    //   gap: 0.1,
+    //   halfHeight: 0.5,
+    //   halfWidth: propHalfWidth - 3,
+    //   position: Vec2(rightPropX - 2, 10)
+    // })
 
     // Misaligned walls
     // this.addWalls({
@@ -385,7 +385,7 @@ export class Stage {
       const otherFeature = pair[1]
       if (!(otherFeature.actor instanceof Player) && feature.actor instanceof Player) return
       if (feature.actor.invincibleTime === 0) {
-        feature.health -= feature instanceof Mouth ? 0.2 : 0.5
+        feature.health -= 0.5
         feature.color.alpha = featureA.health
       }
       if (feature.health <= 0) {
