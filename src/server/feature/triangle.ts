@@ -7,7 +7,7 @@ export class Triangle extends Chunk {
   constructor (props: {
     position: Vec2
     actor: Actor
-    vertices: [Vec2, Vec2, Vec2]
+    vertices: Vec2[]// [Vec2, Vec2, Vec2]
   }) {
     super({
       position: props.position,

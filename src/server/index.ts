@@ -26,6 +26,7 @@ io.on('connection', socket => {
     }
     if (controls.cancel) {
       stage.runner.paused = false
+      player.mouth.health = 1
     }
     const direction = Vec2(x, y)
     direction.normalize()

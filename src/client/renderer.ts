@@ -137,7 +137,7 @@ export class Renderer {
       context.clip()
       const borderColor = element.borderColor
       this.context.strokeStyle = `rgba(${borderColor.red},${borderColor.green},${borderColor.blue},${borderColor.alpha})`
-      this.context.lineWidth = 2 * element.borderWidth
+      this.context.lineWidth = 5 * element.borderWidth
       context.beginPath()
       context.arc(element.circle.center.x, element.circle.center.y, element.circle.radius, 0, 2 * Math.PI)
       context.stroke()

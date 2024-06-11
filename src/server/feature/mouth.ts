@@ -33,4 +33,12 @@ export class Mouth extends Feature {
     this.actor = props.actor
     this.radius = radius
   }
+
+  onStep (): void {
+    this.health -= 0.003
+    if (this.health <= 0) {
+      this.actor.stage.respawnQueue.push(this.actor)
+      // TODO Spawn a box
+    }
+  }
 }

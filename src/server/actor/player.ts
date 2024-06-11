@@ -154,7 +154,7 @@ export class Player extends Actor {
 
   respawn (): void {
     const eyePosition = this.mouth.body.getPosition()
-    this.invincibleTime = 5
+    this.invincibleTime = 0
     const noise = Vec2(0.1 * Math.random(), 0.1 * Math.random())
     this.features.forEach(feature => {
       feature.health = 1
