@@ -78,7 +78,7 @@ export class Starvation extends Death {
       //   localPuppetCorners[1],
       //   localPuppetCorners[2]
       // ]
-      void new Puppet({ stage: this.stage, vertices: localPuppetCorners, position: puppetCenter })
+      // void new Puppet({ stage: this.stage, vertices: brickCorners, position: puppetCenter })
     }
   }
 }

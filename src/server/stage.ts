@@ -14,7 +14,7 @@ import { Vision } from './vision'
 import { Puppet } from './actor/puppet'
 import { range } from './math'
 import { DebugCircle } from '../shared/debugCircle'
-import { SIGHT_HALF_WIDTH } from '../shared/sight'
+// import { SIGHT_HALF_WIDTH } from '../shared/sight'
 import { Starvation } from './starvation'
 
 export class Stage {
@@ -56,8 +56,8 @@ export class Stage {
     this.addWall({ halfWidth: 1, halfHeight: 50, position: Vec2(-50, 0) })
 
     // inner walls
-    this.addWall({ halfWidth: 30, halfHeight: 5, position: Vec2(0, 10) })
-    this.addWall({ halfWidth: 30, halfHeight: 5, position: Vec2(0, -10) })
+    // this.addWall({ halfWidth: 30, halfHeight: 5, position: Vec2(0, 10) })
+    // this.addWall({ halfWidth: 30, halfHeight: 5, position: Vec2(0, -10) })
     // this.addWall({ halfWidth: 15, halfHeight: 15, position: Vec2(20, 0) })
     // this.addWall({ halfWidth: 15, halfHeight: 15, position: Vec2(-20, 0) })
     this.addBrick({ halfWidth: 40, halfHeight: 10, position: Vec2(0, 35) })
@@ -82,7 +82,7 @@ export class Stage {
     //   position: Vec2(0, 5)
     // })
 
-    const brickX = -14 + SIGHT_HALF_WIDTH - 0.1
+    // const brickX = -14 + SIGHT_HALF_WIDTH - 0.1
     // const propHalfWidth = SIGHT_HALF_WIDTH - 5
     // const wallHalfWidth = SIGHT_HALF_WIDTH - 1.1
     // const rightPropX = brickX + 1.25 + propHalfWidth
@@ -96,9 +96,9 @@ export class Stage {
     //   ],
     //   position: Vec2(brickX, 15)
     // })
-    // this.addPlayer({
-    //   position: Vec2(brickX, 15)
-    // })
+    this.addPlayer({
+      position: Vec2(-10, 0)
+    })
     // Wall Group
     // this.addWalls({
     //   halfWidth: wallHalfWidth,
@@ -119,11 +119,11 @@ export class Stage {
     // })
 
     // Big wall
-    this.addWall({
-      halfWidth: 5,
-      halfHeight: 5,
-      position: Vec2(-10, 15)
-    })
+    // this.addWall({
+    //   halfWidth: 5,
+    //   halfHeight: 5,
+    //   position: Vec2(-10, 15)
+    // })
 
     // Wide bricks
     // this.addBricks({
@@ -422,6 +422,21 @@ export class Stage {
     })
   }
 
+  debug (props: {
+    interval?: number
+  } & (
+    { message: string | number, messages?: undefined } |
+    { message?: undefined, messages: Array<string | number> }
+  )): void {
+    const message = props.message ?? props.messages.join(' ')
+    const interval = props.interval ?? 300
+    const remainder = this.debugInterval % interval
+    const debugging = remainder === 0
+    if (debugging) {
+      console.debug(message)
+    }
+  }
+
   debugLine (props: {
     a: Vec2
     b: Vec2
@@ -477,7 +492,14 @@ export class Stage {
     })
   }
 
-  debug (message: string | number, interval: number = 60): void {
+  log (props: {
+    interval?: number
+  } & (
+    { message: string | number, messages?: undefined } |
+    { message?: undefined, messages: Array<string | number> }
+  )): void {
+    const message = props.message ?? props.messages.join(' ')
+    const interval = props.interval ?? 300
     const remainder = this.debugInterval % interval
     const debugging = remainder === 0
     if (debugging) {
@@ -498,6 +520,9 @@ export class Stage {
     })
     this.killingQueue = []
     this.starvationQueue = []
+    this.log({
+      messages: ['this.respawnQueue.length', this.respawnQueue.length]
+    })
     this.respawnQueue = this.respawnQueue.filter(player => {
       const respawned = player.respawn()
       return !respawned

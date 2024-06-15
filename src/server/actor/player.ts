@@ -15,6 +15,7 @@ interface Branch {
 }
 
 export class Player extends Actor {
+  dead = false
   membrane: Membrane
   membranes: Membrane[] = []
   north = Vec2(0, 1)
@@ -179,15 +180,19 @@ export class Player extends Actor {
       const circle = new CircleShape(spawnPoint, this.getRadius())
       return this.stage.getFeaturesInShape(circle).length === 0
     })
-    this.stage.debug(`clearSpawnPoints.length: ${clearSpawnPoints.length}`)
+    this.stage.log({
+      messages: ['clearSpawnPoints.length', clearSpawnPoints.length]
+    })
     if (clearSpawnPoints.length === 0) {
       return false
     }
     const spawnPoint = choose(clearSpawnPoints)
     this.spawnPosition = spawnPoint
     this.membrane = this.grow({ branch: this.tree })
-    this.stage.runner.paused = true
-    this.stage.debug(this.stage.runner.getBodies().length)
+    this.stage.log({
+      message: this.stage.runner.getBodies().length
+    })
+    this.dead = false
     return true
   }
 
@@ -203,5 +208,6 @@ export class Player extends Actor {
       stage: this.stage,
       victim: props.membrane
     }))
+    this.dead = true
   }
 }
