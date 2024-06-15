@@ -3,9 +3,10 @@ import { Color } from '../../shared/color'
 import { Feature } from './feature'
 import { Player } from '../actor/player'
 
-export class Mouth extends Feature {
-  radius: number
+export class Membrane extends Feature {
   actor: Player
+  destroyed = false
+  radius: number
   constructor (props: {
     position: Vec2
     actor: Player
@@ -26,7 +27,7 @@ export class Mouth extends Feature {
         restitution: 0,
         friction: 0
       },
-      label: 'mouth',
+      label: 'membrane',
       actor: props.actor,
       color: Color.GREEN
     })
@@ -34,11 +35,16 @@ export class Mouth extends Feature {
     this.radius = radius
   }
 
+  destroy (): void {
+    this.destroyed = true
+  }
+
   onStep (): void {
-    this.health -= 0.003
-    if (this.health <= 0) {
-      this.actor.stage.respawnQueue.push(this.actor)
-      // TODO Spawn a box
+    const seconds = 10
+    this.health -= 1 / (60 * seconds)
+    console.log('this.health', this.health)
+    if (this.health <= 0 && !this.destroyed) {
+      this.actor.starve({ membrane: this })
     }
   }
 }

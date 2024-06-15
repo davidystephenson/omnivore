@@ -21,20 +21,22 @@ io.on('connection', socket => {
       x += 1
     }
     if (controls.select) {
-      // player.mouth.body.setPosition(Vec2(0, 0))
+      // player.membrane.body.setPosition(Vec2(0, 0))
       stage.runner.paused = true
     }
     if (controls.cancel) {
       stage.runner.paused = false
-      player.mouth.health = 1
+      player.membrane.health = 1
     }
     const direction = Vec2(x, y)
     direction.normalize()
     const force = Vec2.mul(direction, FORCE_SCALE)
-    if (player.mouths.length === 0) {
-      player.mouth.force = Vec2.mul(force, player.mouth.body.getMass())
+    if (player.membranes.length === 0) {
+      player.membrane.force = Vec2.mul(force, player.membrane.body.getMass())
     }
-    player.mouths.forEach(mouth => { mouth.force = Vec2.mul(force, mouth.body.getMass()) })
+    player.membranes.forEach(membrane => {
+      membrane.force = Vec2.mul(force, membrane.body.getMass())
+    })
     const summary = stage.runner.getSummary({ player })
     socket.emit('serverUpdateClient', summary)
   })

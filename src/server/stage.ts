@@ -1,11 +1,11 @@
-import { World, Vec2, Contact, Body, AABB, PolygonShape, CircleShape } from 'planck'
+import { World, Vec2, Contact, Body, AABB, PolygonShape, CircleShape, Shape, Transform, testOverlap } from 'planck'
 import { Runner } from './runner'
 import { Player } from './actor/player'
 import { Wall } from './actor/wall'
 import { Actor } from './actor/actor'
 import { Brick } from './actor/brick'
 import { Feature } from './feature/feature'
-import { Mouth } from './feature/mouth'
+import { Membrane } from './feature/membrane'
 import { Barrier } from './feature/barrier'
 import { Killing } from './killing'
 import { Color } from '../shared/color'
@@ -15,6 +15,7 @@ import { Puppet } from './actor/puppet'
 import { range } from './math'
 import { DebugCircle } from '../shared/debugCircle'
 import { SIGHT_HALF_WIDTH } from '../shared/sight'
+import { Starvation } from './starvation'
 
 export class Stage {
   world: World
@@ -23,7 +24,10 @@ export class Stage {
   destructionQueue: Body[] = []
   respawnQueue: Player[] = []
   killingQueue: Killing[] = []
+  starvationQueue: Starvation[] = []
   actors = new Map<number, Actor>()
+  spawnPoints: Vec2[]
+  debugInterval: number = 0
 
   constructor () {
     this.world = new World({ gravity: Vec2(0, 0) })
@@ -32,19 +36,32 @@ export class Stage {
     this.runner = new Runner({ stage: this })
     this.vision = new Vision({ stage: this })
 
+    const xMin = -50
+    const xMax = 50
+    const yMin = -50
+    const yMax = 50
+    const steps = 10
+    this.spawnPoints = range(0, steps).flatMap(i =>
+      range(0, steps).map(j => {
+        const x = xMin + i / steps * (xMax - xMin)
+        const y = yMin + j / steps * (yMax - yMin)
+        return Vec2(x, y)
+      })
+    )
+
     // outer walls
-    // this.addWall({ halfWidth: 50, halfHeight: 1, position: Vec2(0, 50) })
-    // this.addWall({ halfWidth: 50, halfHeight: 1, position: Vec2(0, -50) })
-    // this.addWall({ halfWidth: 1, halfHeight: 50, position: Vec2(50, 0) })
-    // this.addWall({ halfWidth: 1, halfHeight: 50, position: Vec2(-50, 0) })
+    this.addWall({ halfWidth: 50, halfHeight: 1, position: Vec2(0, 50) })
+    this.addWall({ halfWidth: 50, halfHeight: 1, position: Vec2(0, -50) })
+    this.addWall({ halfWidth: 1, halfHeight: 50, position: Vec2(50, 0) })
+    this.addWall({ halfWidth: 1, halfHeight: 50, position: Vec2(-50, 0) })
 
     // inner walls
-    /*
-    this.addWall({ halfWidth: 10, halfHeight: 1, position: Vec2(0, 10) })
-    this.addWall({ halfWidth: 10, halfHeight: 1, position: Vec2(0, -10) })
-    this.addWall({ halfWidth: 1, halfHeight: 15, position: Vec2(20, 0) })
-    this.addWall({ halfWidth: 1, halfHeight: 15, position: Vec2(-20, 0) })
-    */
+    this.addWall({ halfWidth: 30, halfHeight: 5, position: Vec2(0, 10) })
+    this.addWall({ halfWidth: 30, halfHeight: 5, position: Vec2(0, -10) })
+    // this.addWall({ halfWidth: 15, halfHeight: 15, position: Vec2(20, 0) })
+    // this.addWall({ halfWidth: 15, halfHeight: 15, position: Vec2(-20, 0) })
+    this.addBrick({ halfWidth: 40, halfHeight: 10, position: Vec2(0, 35) })
+    this.addBrick({ halfWidth: 40, halfHeight: 10, position: Vec2(0, -35) })
 
     // void new Puppet({
     //   stage: this,
@@ -79,9 +96,9 @@ export class Stage {
     //   ],
     //   position: Vec2(brickX, 15)
     // })
-    this.addPlayer({
-      position: Vec2(brickX, 15)
-    })
+    // this.addPlayer({
+    //   position: Vec2(brickX, 15)
+    // })
     // Wall Group
     // this.addWalls({
     //   halfWidth: wallHalfWidth,
@@ -367,10 +384,10 @@ export class Stage {
     const fixtureB = contact.getFixtureB()
     const featureA = fixtureA.getBody().getUserData() as Feature
     const featureB = fixtureB.getBody().getUserData() as Feature
-    const mouthyA = featureA instanceof Mouth
-    const mouthyB = featureB instanceof Mouth
-    const mouthy = mouthyA || mouthyB
-    if (!mouthy) return
+    const mebranyA = featureA instanceof Membrane
+    const membranyB = featureB instanceof Membrane
+    const membrany = mebranyA || membranyB
+    if (!membrany) return
     const wallyA = featureA instanceof Barrier
     const wallyB = featureB instanceof Barrier
     const wally = wallyA || wallyB
@@ -392,9 +409,9 @@ export class Stage {
         if (feature.actor instanceof Player) {
           this.respawnQueue.push(feature.actor)
           const killing = new Killing({
-            victim: feature as Mouth,
+            victim: feature as Membrane,
             stage: this,
-            killer: otherFeature as Mouth
+            killer: otherFeature as Membrane
           })
           this.killingQueue.push(killing)
         } else {
@@ -460,17 +477,31 @@ export class Stage {
     })
   }
 
+  debug (message: string | number, interval: number = 60): void {
+    const remainder = this.debugInterval % interval
+    const debugging = remainder === 0
+    if (debugging) {
+      console.debug(message)
+    }
+  }
+
   onStep (): void {
+    this.debugInterval += 1
     this.actors.forEach(actor => actor.onStep())
     this.destructionQueue.forEach(body => {
       this.world.destroyBody(body)
     })
-    this.respawnQueue.forEach(player => {
-      player.respawn()
-    })
     this.killingQueue.forEach(killing => killing.execute())
+    this.starvationQueue.forEach(starvation => {
+      starvation.execute()
+      this.respawnQueue.push(starvation.victim.actor)
+    })
     this.killingQueue = []
-    this.respawnQueue = []
+    this.starvationQueue = []
+    this.respawnQueue = this.respawnQueue.filter(player => {
+      const respawned = player.respawn()
+      return !respawned
+    })
     this.destructionQueue = []
   }
 
@@ -486,8 +517,21 @@ export class Stage {
     pairs.forEach(pair => {
       const feature = pair[0]
       const otherFeature = pair[1]
-      if (feature.label === 'egg' && otherFeature.label === 'mouth') contact.setEnabled(false)
+      if (feature.label === 'egg' && otherFeature.label === 'membrane') contact.setEnabled(false)
       // if (feature.label === 'egg' && otherFeature.label === 'crate') contact.setEnabled(false)
     })
+  }
+
+  getFeaturesInShape (shape: Shape): Feature[] {
+    const featuresInShape: Feature[] = []
+    const origin = new Transform()
+    this.runner.getBodies().forEach(body => {
+      const feature = body.getUserData() as Feature
+      const featureShape = feature.fixture.getShape()
+      const overlap = testOverlap(shape, 0, featureShape, 0, origin, body.getTransform())
+      if (overlap) { featuresInShape.push(feature) }
+      return true
+    })
+    return featuresInShape
   }
 }

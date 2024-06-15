@@ -1,15 +1,15 @@
 import { AABB, Vec2 } from 'planck'
 import { SIGHT } from '../shared/sight'
-import { Mouth } from './feature/mouth'
+import { Membrane } from './feature/membrane'
 import { getCompass, whichMax } from './math'
 import { Stage } from './stage'
 import { Puppet } from './actor/puppet'
 import { Death } from './death'
 
 export class Killing extends Death {
-  killer: Mouth
+  killer: Membrane
 
-  constructor (props: { killer: Mouth, stage: Stage, victim: Mouth }) {
+  constructor (props: { killer: Membrane, stage: Stage, victim: Membrane }) {
     super({ stage: props.stage, victim: props.victim })
     this.killer = props.killer
   }

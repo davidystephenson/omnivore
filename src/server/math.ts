@@ -70,3 +70,7 @@ export function whichMin (array: number[]): number {
   const negArray = array.map(x => -x)
   return whichMax(negArray)
 }
+
+export function choose<type> (array: type[]): type {
+  return array[Math.floor(Math.random() * array.length)]
+}
