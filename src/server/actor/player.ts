@@ -1,11 +1,12 @@
 import { CircleShape, RopeJoint, Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Actor } from './actor'
-import { Mouth } from '../feature/mouth'
-import { rotate } from '../math'
+import { Membrane } from '../feature/membrane'
+import { choose, rotate } from '../math'
 import { Egg } from '../feature/egg'
 import { Feature } from '../feature/feature'
 import { Rope } from '../../shared/rope'
+import { Starvation } from '../starvation'
 
 interface Branch {
   angle: number
@@ -14,8 +15,8 @@ interface Branch {
 }
 
 export class Player extends Actor {
-  mouth: Mouth
-  mouths: Mouth[] = []
+  membrane: Membrane
+  membranes: Membrane[] = []
   north = Vec2(0, 1)
   spawnPosition: Vec2
   gap = 0.5
@@ -35,7 +36,7 @@ export class Player extends Actor {
       angle: 0,
       branches: []
     }
-    this.mouth = this.grow({ branch: this.tree })
+    this.membrane = this.grow({ branch: this.tree })
   }
 
   addCircles (props: {
@@ -62,17 +63,17 @@ export class Player extends Actor {
     }
   }
 
-  addMouth (props: {
+  addMembrane (props: {
     position: Vec2
-    cell?: Mouth
+    cell?: Membrane
     radius?: number
-  }): Mouth {
-    const mouth = new Mouth({ position: props.position, actor: this, radius: props.radius })
+  }): Membrane {
+    const membrane = new Membrane({ position: props.position, actor: this, radius: props.radius })
     if (props.cell != null) {
       const maxLength = Vec2.distance(props.position, props.cell.body.getPosition())
       const joint = new RopeJoint({
         bodyA: props.cell.body,
-        bodyB: mouth.body,
+        bodyB: membrane.body,
         localAnchorA: Vec2(0, 0),
         localAnchorB: Vec2(0, 0),
         collideConnected: true,
@@ -81,12 +82,28 @@ export class Player extends Actor {
       this.joints.push(joint)
       const rope = new Rope({ joint })
       props.cell.ropes.push(rope)
-      mouth.ropes.push(rope)
+      membrane.ropes.push(rope)
       this.stage.world.createJoint(joint)
     }
-    this.mouths.push(mouth)
-    this.features.push(mouth)
-    return mouth
+    this.membranes.push(membrane)
+    this.features.push(membrane)
+    return membrane
+  }
+
+  destroyMembrane (props: {
+    membrane: Membrane
+  }): void {
+    // this.membranes = this.membranes.filter(membrane => membrane !== props.membrane)
+    this.membranes = this.membranes.filter(membrane => {
+      const destroyed = membrane === props.membrane
+      if (destroyed) {
+        membrane.destroy()
+        return false
+      }
+      return true
+    })
+    this.features = this.features.filter(feature => feature !== props.membrane)
+    this.stage.world.destroyBody(props.membrane.body)
   }
 
   getEgg (): Egg {
@@ -102,7 +119,7 @@ export class Player extends Actor {
     return new Egg({ actor: this, position, hx, hy })
   }
 
-  getOffset (props: { parent: Mouth, branch: Branch }): Vec2 {
+  getOffset (props: { parent: Membrane, branch: Branch }): Vec2 {
     const parentPosition = props.parent.body.getPosition()
     const distance = props.parent.radius + props.branch.radius + this.gap
     const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * props.branch.angle)
@@ -110,61 +127,81 @@ export class Player extends Actor {
     return offsetPosition
   }
 
+  getRadius (): number {
+    return this.membrane.radius
+  }
+
   hatch = (): void => {
     // if(this.eye.body.getContactList() != null)
     this.hatched = true
-    this.stage.destructionQueue.push(this.mouth.body)
-    this.spawnPosition = this.mouth.body.getPosition()
-    this.mouth = this.grow({ branch: this.tree })
-    this.mouth.borderWidth = 0.2
+    this.stage.destructionQueue.push(this.membrane.body)
+    this.spawnPosition = this.membrane.body.getPosition()
+    this.membrane = this.grow({ branch: this.tree })
+    this.membrane.borderWidth = 0.2
   }
 
   flee (): void { }
 
   grow (props: {
     branch: Branch
-    parent?: Mouth
-  }): Mouth {
+    parent?: Membrane
+  }): Membrane {
     const position = props.parent == null
       ? this.spawnPosition
       : this.getOffset({ parent: props.parent, branch: props.branch })
-    const mouth = this.addMouth({
+    const membrane = this.addMembrane({
       position,
       cell: props.parent,
       radius: props.branch.radius
     })
     for (const childBranch of props.branch.branches) {
-      this.grow({ branch: childBranch, parent: mouth })
+      this.grow({ branch: childBranch, parent: membrane })
     }
-    return mouth
+    return membrane
   }
 
   onStep (): void {
     super.onStep()
-    const featuresInRange = this.mouth.getFeaturesInRange()
+    const featuresInRange = this.membrane.getFeaturesInRange()
     this.featuresInVision = featuresInRange.filter(targetFeature => {
-      if (this.mouth instanceof Egg) {
-        return this.stage.vision.isFeatureVisible(this.mouth, targetFeature)
+      if (this.membrane instanceof Egg) {
+        return this.stage.vision.isFeatureVisible(this.membrane, targetFeature)
       }
-      return this.mouths.some(mouth => this.stage.vision.isFeatureVisible(mouth, targetFeature))
+      return this.membranes.some(membrane => this.stage.vision.isFeatureVisible(membrane, targetFeature))
     })
     if (!this.hatched) this.flee()
     if (this.readyToHatch && !this.hatched) this.hatch()
   }
 
-  respawn (): void {
-    const eyePosition = this.mouth.body.getPosition()
+  respawn (): boolean {
     this.invincibleTime = 0
-    const noise = Vec2(0.1 * Math.random(), 0.1 * Math.random())
-    this.features.forEach(feature => {
-      feature.health = 1
-      const featurePosition = feature.body.getPosition()
-      const relativePosition = Vec2.sub(featurePosition, eyePosition)
-      feature.deathPosition = Vec2.clone(featurePosition)
-      feature.spawnPosition = Vec2.add(relativePosition, noise)
+    const clearSpawnPoints = this.stage.spawnPoints.filter(spawnPoint => {
+      const circle = new CircleShape(spawnPoint, this.getRadius())
+      return this.stage.getFeaturesInShape(circle).length === 0
     })
+    this.stage.debug(`clearSpawnPoints.length: ${clearSpawnPoints.length}`)
+    if (clearSpawnPoints.length === 0) {
+      return false
+    }
+    const spawnPoint = choose(clearSpawnPoints)
+    this.spawnPosition = spawnPoint
+    this.membrane = this.grow({ branch: this.tree })
+    this.stage.runner.paused = true
+    this.stage.debug(this.stage.runner.getBodies().length)
+    return true
+  }
+
+  starve (props: {
+    membrane: Membrane
+  }): void {
     this.features.forEach(feature => {
-      feature.body.setPosition(feature.spawnPosition)
+      if (feature instanceof Membrane) {
+        this.destroyMembrane({ membrane: feature })
+      }
     })
+    this.stage.starvationQueue.push(new Starvation({
+      stage: this.stage,
+      victim: props.membrane
+    }))
   }
 }

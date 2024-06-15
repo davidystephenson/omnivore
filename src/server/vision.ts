@@ -1,7 +1,7 @@
 
 import { SIGHT } from '../shared/sight'
 import { Feature } from './feature/feature'
-import { Vec2, CircleShape, PolygonShape, testOverlap, Transform, Shape, Fixture } from 'planck'
+import { Vec2, CircleShape, PolygonShape, Fixture } from 'planck'
 import { Stage } from './stage'
 import { Color } from '../shared/color'
 import { directionFromTo, getNearestIndex, normalize, rotate } from './math'
@@ -14,19 +14,6 @@ export class Vision {
     stage: Stage
   }) {
     this.stage = props.stage
-  }
-
-  getFeaturesInShape (shape: Shape): Feature[] {
-    const featuresInShape: Feature[] = []
-    const origin = new Transform()
-    this.stage.runner.getBodies().forEach(body => {
-      const feature = body.getUserData() as Feature
-      const featureShape = feature.fixture.getShape()
-      const overlap = testOverlap(shape, 0, featureShape, 0, origin, body.getTransform())
-      if (overlap) { featuresInShape.push(feature) }
-      return true
-    })
-    return featuresInShape
   }
 
   isPointInRange (sourcePoint: Vec2, targetPoint: Vec2): boolean {
@@ -42,8 +29,8 @@ export class Vision {
     this.stage.world.rayCast(sourcePoint, targetPoint, (fixture, point, normal, fraction) => {
       const collideFeature = fixture.getUserData() as Feature
       const excluded = excludeIds?.includes(collideFeature.id)
-      const isMouth = collideFeature.label === 'mouth' || collideFeature.label === 'egg'
-      if (excluded === true || isMouth) return 1
+      const membrany = collideFeature.label === 'membrane' || collideFeature.label === 'egg'
+      if (excluded === true || membrany) return 1
       clear = false
       return 0
     })
@@ -204,7 +191,7 @@ export class Vision {
   }
 
   getObstructions (polygon: PolygonShape, sourceId: number, targetId: number): Feature[] {
-    const featuresInShape = this.getFeaturesInShape(polygon)
+    const featuresInShape = this.stage.getFeaturesInShape(polygon)
     const obstructions = featuresInShape.filter(feature => {
       const shape = feature.fixture.getShape()
       if (shape instanceof CircleShape) return false

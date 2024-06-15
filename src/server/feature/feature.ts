@@ -79,9 +79,9 @@ export class Feature {
     let clear = true
     this.actor.stage.world.rayCast(startPoint, targetPoint, (fixture, point, normal, fraction) => {
       const collideFeature = fixture.getUserData() as Feature
-      const isTarget = collideFeature.id === targetId
-      const isMouth = collideFeature.label === 'mouth' || collideFeature.label === 'egg'
-      if (isTarget || isMouth) return 1
+      const targety = collideFeature.id === targetId
+      const membrany = collideFeature.label === 'membrane' || collideFeature.label === 'egg'
+      if (targety || membrany) return 1
       clear = false
       return 0
     })

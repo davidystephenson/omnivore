@@ -1,12 +1,12 @@
 import { AABB, Fixture, Vec2 } from 'planck'
-import { Mouth } from './feature/mouth'
+import { Membrane } from './feature/membrane'
 import { Stage } from './stage'
 
 export class Death {
   stage: Stage
-  victim: Mouth
+  victim: Membrane
 
-  constructor (props: { stage: Stage, victim: Mouth }) {
+  constructor (props: { stage: Stage, victim: Membrane }) {
     this.stage = props.stage
     this.victim = props.victim
   }
