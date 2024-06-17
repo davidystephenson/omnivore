@@ -1,10 +1,10 @@
 import { Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Actor } from './actor'
-import { Barrier } from '../feature/barrier'
+import { Structure } from '../feature/structure'
 
 export class Wall extends Actor {
-  barrier: Barrier
+  barrier: Structure
   constructor (props: {
     stage: Stage
     halfWidth: number
@@ -12,7 +12,7 @@ export class Wall extends Actor {
     position: Vec2
   }) {
     super({ stage: props.stage, label: 'wall' })
-    this.barrier = new Barrier({
+    this.barrier = new Structure({
       position: props.position,
       halfHeight: props.halfHeight,
       halfWidth: props.halfWidth,
