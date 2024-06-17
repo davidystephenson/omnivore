@@ -8,10 +8,10 @@ import { Feature } from '../feature/feature'
 import { Rope } from '../../shared/rope'
 import { Starvation } from '../starvation'
 
-interface Branch {
+interface Tree {
   angle: number
   radius: number
-  branches: Branch[]
+  branches: Tree[]
 }
 
 export class Player extends Actor {
@@ -21,7 +21,7 @@ export class Player extends Actor {
   north = Vec2(0, 1)
   spawnPosition: Vec2
   gap = 0.5
-  tree: Branch
+  tree: Tree
   featuresInVision: Feature[] = []
   readyToHatch = false
   hatched = true
@@ -41,7 +41,7 @@ export class Player extends Actor {
   }
 
   addCircles (props: {
-    branch: Branch
+    branch: Tree
     circles: CircleShape[]
     parentPosition?: Vec2
     parentRadius?: number
@@ -120,7 +120,7 @@ export class Player extends Actor {
     return new Egg({ actor: this, position, hx, hy })
   }
 
-  getOffset (props: { parent: Membrane, branch: Branch }): Vec2 {
+  getOffset (props: { parent: Membrane, branch: Tree }): Vec2 {
     const parentPosition = props.parent.body.getPosition()
     const distance = props.parent.radius + props.branch.radius + this.gap
     const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * props.branch.angle)
@@ -144,7 +144,7 @@ export class Player extends Actor {
   flee (): void { }
 
   grow (props: {
-    branch: Branch
+    branch: Tree
     parent?: Membrane
   }): Membrane {
     const position = props.parent == null
@@ -181,7 +181,8 @@ export class Player extends Actor {
       return this.stage.getFeaturesInShape(circle).length === 0
     })
     this.stage.log({
-      messages: ['clearSpawnPoints.length', clearSpawnPoints.length]
+      key: 'clearSpawnPoints.length',
+      value: clearSpawnPoints.length
     })
     if (clearSpawnPoints.length === 0) {
       return false
@@ -190,7 +191,8 @@ export class Player extends Actor {
     this.spawnPosition = spawnPoint
     this.membrane = this.grow({ branch: this.tree })
     this.stage.log({
-      message: this.stage.runner.getBodies().length
+      key: 'bodies.length',
+      value: this.stage.runner.getBodies().length
     })
     this.dead = false
     return true
