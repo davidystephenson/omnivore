@@ -18,7 +18,6 @@ import { Starvation } from './starvation'
 
 interface DebugPair {
   key: string
-  interval?: number
   value: string | number | Array<string | number>
 }
 interface DebugFrames { frames: number, seconds?: undefined }
