@@ -6,7 +6,7 @@ import { Actor } from './actor/actor'
 import { Brick } from './actor/brick'
 import { Feature } from './feature/feature'
 import { Membrane } from './feature/membrane'
-import { Barrier } from './feature/barrier'
+import { Structure } from './feature/structure'
 import { Killing } from './killing'
 import { Color } from '../shared/color'
 import { DebugLine } from '../shared/debugLine'
@@ -28,28 +28,35 @@ type DebugTime = DebugFrames | DebugSeconds | DebugUntimed
 type DebugProps = DebugPair & DebugTime
 
 export class Stage {
-  world: World
-  runner: Runner
-  vision: Vision
-  destructionQueue: Body[] = []
-  respawnQueue: Player[] = []
-  killingQueue: Killing[] = []
-  starvationQueue: Starvation[] = []
   actors = new Map<number, Actor>()
-  spawnPoints: Vec2[]
   debugIntervals: Record<string, number> = {}
+  destructionQueue: Body[] = []
+  halfHeight: number
+  halfWidth: number
+  killingQueue: Killing[] = []
+  respawnQueue: Player[] = []
+  runner: Runner
+  spawnPoints: Vec2[]
+  starvationQueue: Starvation[] = []
+  vision: Vision
+  world: World
 
-  constructor () {
+  constructor (props?: {
+    halfHeight?: number
+    halfWidth?: number
+  }) {
+    this.halfHeight = props?.halfHeight ?? 50
+    this.halfWidth = props?.halfWidth ?? 50
     this.world = new World({ gravity: Vec2(0, 0) })
     this.world.on('pre-solve', contact => this.preSolve(contact))
     this.world.on('begin-contact', contact => this.beginContact(contact))
     this.runner = new Runner({ stage: this })
     this.vision = new Vision({ stage: this })
 
-    const xMin = -50
-    const xMax = 50
-    const yMin = -50
-    const yMax = 50
+    const xMin = -this.halfWidth
+    const xMax = this.halfWidth
+    const yMin = -this.halfHeight
+    const yMax = this.halfHeight
     const steps = 10
     this.spawnPoints = range(0, steps).flatMap(i =>
       range(0, steps).map(j => {
@@ -58,12 +65,6 @@ export class Stage {
         return Vec2(x, y)
       })
     )
-
-    // outer walls
-    this.addWall({ halfWidth: 50, halfHeight: 1, position: Vec2(0, 50) })
-    this.addWall({ halfWidth: 50, halfHeight: 1, position: Vec2(0, -50) })
-    this.addWall({ halfWidth: 1, halfHeight: 50, position: Vec2(50, 0) })
-    this.addWall({ halfWidth: 1, halfHeight: 50, position: Vec2(-50, 0) })
   }
 
   addBrick (props: {
@@ -166,8 +167,8 @@ export class Stage {
     const membranyB = featureB instanceof Membrane
     const membrany = mebranyA || membranyB
     if (!membrany) return
-    const wallyA = featureA instanceof Barrier
-    const wallyB = featureB instanceof Barrier
+    const wallyA = featureA instanceof Structure
+    const wallyB = featureB instanceof Structure
     const wally = wallyA || wallyB
     if (wally) return
     if (featureA.actor === featureB.actor) return

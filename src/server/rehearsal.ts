@@ -1,7 +1,7 @@
 import { Vec2 } from 'planck'
-import { Stage } from './stage'
+import { Walled } from './walled'
 
-export class Rehearsal extends Stage {
+export class Rehearsal extends Walled {
   constructor () {
     super()
 

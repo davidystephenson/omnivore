@@ -3,7 +3,7 @@ import { Color } from '../../shared/color'
 import { Actor } from '../actor/actor'
 import { Feature } from './feature'
 
-export class Barrier extends Feature {
+export class Structure extends Feature {
   constructor (props: {
     position: Vec2
     actor: Actor
