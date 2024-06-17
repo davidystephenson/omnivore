@@ -17,6 +17,17 @@ import { DebugCircle } from '../shared/debugCircle'
 // import { SIGHT_HALF_WIDTH } from '../shared/sight'
 import { Starvation } from './starvation'
 
+interface DebugPair {
+  key: string
+  interval?: number
+  value: string | number | Array<string | number>
+}
+interface DebugFrames { frames: number, seconds?: undefined }
+interface DebugSeconds { frames?: undefined, seconds: number }
+interface DebugUntimed { frames?: undefined, seconds?: undefined }
+type DebugTime = DebugFrames | DebugSeconds | DebugUntimed
+type DebugProps = DebugPair & DebugTime
+
 export class Stage {
   world: World
   runner: Runner
@@ -27,7 +38,7 @@ export class Stage {
   starvationQueue: Starvation[] = []
   actors = new Map<number, Actor>()
   spawnPoints: Vec2[]
-  debugInterval: number = 0
+  debugIntervals: Record<string, number> = {}
 
   constructor () {
     this.world = new World({ gravity: Vec2(0, 0) })
@@ -422,18 +433,25 @@ export class Stage {
     })
   }
 
-  debug (props: {
-    interval?: number
-  } & (
-    { message: string | number, messages?: undefined } |
-    { message?: undefined, messages: Array<string | number> }
-  )): void {
-    const message = props.message ?? props.messages.join(' ')
-    const interval = props.interval ?? 300
-    const remainder = this.debugInterval % interval
+  debug (props: DebugProps): void {
+    const message = Array.isArray(props.value)
+      ? props.value.join(' ')
+      : props.value
+    const interval = props.frames == null
+      ? props.seconds == null
+        ? 300
+        : props.seconds * 60
+      : props.frames
+    const debugInterval = this.debugIntervals[props.key]
+    if (debugInterval == null) {
+      this.debugIntervals[props.key] = 0
+      console.debug(props.key, message)
+      return
+    }
+    const remainder = debugInterval % interval
     const debugging = remainder === 0
     if (debugging) {
-      console.debug(message)
+      console.debug(props.key, message)
     }
   }
 
@@ -492,23 +510,27 @@ export class Stage {
     })
   }
 
-  log (props: {
-    interval?: number
-  } & (
-    { message: string | number, messages?: undefined } |
-    { message?: undefined, messages: Array<string | number> }
-  )): void {
-    const message = props.message ?? props.messages.join(' ')
-    const interval = props.interval ?? 300
-    const remainder = this.debugInterval % interval
-    const debugging = remainder === 0
-    if (debugging) {
-      console.debug(message)
-    }
+  getFeaturesInShape (shape: Shape): Feature[] {
+    const featuresInShape: Feature[] = []
+    const origin = new Transform()
+    this.runner.getBodies().forEach(body => {
+      const feature = body.getUserData() as Feature
+      const featureShape = feature.fixture.getShape()
+      const overlap = testOverlap(shape, 0, featureShape, 0, origin, body.getTransform())
+      if (overlap) { featuresInShape.push(feature) }
+      return true
+    })
+    return featuresInShape
+  }
+
+  log (props: DebugProps): void {
+    this.debug(props)
   }
 
   onStep (): void {
-    this.debugInterval += 1
+    for (const key in this.debugIntervals) {
+      this.debugIntervals[key] += 1
+    }
     this.actors.forEach(actor => actor.onStep())
     this.destructionQueue.forEach(body => {
       this.world.destroyBody(body)
@@ -521,7 +543,8 @@ export class Stage {
     this.killingQueue = []
     this.starvationQueue = []
     this.log({
-      messages: ['this.respawnQueue.length', this.respawnQueue.length]
+      key: 'this.respawnQueue.length',
+      value: this.respawnQueue.length
     })
     this.respawnQueue = this.respawnQueue.filter(player => {
       const respawned = player.respawn()
@@ -545,18 +568,5 @@ export class Stage {
       if (feature.label === 'egg' && otherFeature.label === 'membrane') contact.setEnabled(false)
       // if (feature.label === 'egg' && otherFeature.label === 'crate') contact.setEnabled(false)
     })
-  }
-
-  getFeaturesInShape (shape: Shape): Feature[] {
-    const featuresInShape: Feature[] = []
-    const origin = new Transform()
-    this.runner.getBodies().forEach(body => {
-      const feature = body.getUserData() as Feature
-      const featureShape = feature.fixture.getShape()
-      const overlap = testOverlap(shape, 0, featureShape, 0, origin, body.getTransform())
-      if (overlap) { featuresInShape.push(feature) }
-      return true
-    })
-    return featuresInShape
   }
 }
