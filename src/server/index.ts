@@ -1,9 +1,9 @@
-import { Stage } from './stage'
 import { io } from './server'
 import { Vec2 } from 'planck'
 import { Controls } from '../shared/input'
+import { Rehearsal } from './rehearsal'
 
-const stage = new Stage()
+const stage = new Rehearsal()
 
 const FORCE_SCALE = 5
 
