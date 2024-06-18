@@ -15,24 +15,15 @@ import { Puppet } from './actor/puppet'
 import { range } from './math'
 import { DebugCircle } from '../shared/debugCircle'
 import { Starvation } from './starvation'
-
-interface DebugPair {
-  key: string
-  value: string | number | Array<string | number>
-}
-interface DebugFrames { frames: number, seconds?: undefined }
-interface DebugSeconds { frames?: undefined, seconds: number }
-interface DebugUntimed { frames?: undefined, seconds?: undefined }
-type DebugTime = DebugFrames | DebugSeconds | DebugUntimed
-type DebugProps = DebugPair & DebugTime
+import { LogProps, Logger } from './logger'
 
 export class Stage {
   actors = new Map<number, Actor>()
-  debugIntervals: Record<string, number> = {}
   destructionQueue: Body[] = []
   halfHeight: number
   halfWidth: number
   killingQueue: Killing[] = []
+  logger: Logger
   respawnQueue: Player[] = []
   runner: Runner
   spawnPoints: Vec2[]
@@ -44,11 +35,13 @@ export class Stage {
     halfHeight?: number
     halfWidth?: number
   }) {
-    this.halfHeight = props?.halfHeight ?? 50
-    this.halfWidth = props?.halfWidth ?? 50
     this.world = new World({ gravity: Vec2(0, 0) })
     this.world.on('pre-solve', contact => this.preSolve(contact))
     this.world.on('begin-contact', contact => this.beginContact(contact))
+
+    this.halfHeight = props?.halfHeight ?? 50
+    this.halfWidth = props?.halfWidth ?? 50
+    this.logger = new Logger()
     this.runner = new Runner({ stage: this })
     this.vision = new Vision({ stage: this })
 
@@ -200,26 +193,8 @@ export class Stage {
     })
   }
 
-  debug (props: DebugProps): void {
-    const message = Array.isArray(props.value)
-      ? props.value.join(' ')
-      : props.value
-    const interval = props.frames == null
-      ? props.seconds == null
-        ? 300
-        : props.seconds * 60
-      : props.frames
-    const debugInterval = this.debugIntervals[props.key]
-    if (debugInterval == null) {
-      this.debugIntervals[props.key] = 0
-      console.debug(props.key, message)
-      return
-    }
-    const remainder = debugInterval % interval
-    const debugging = remainder === 0
-    if (debugging) {
-      console.debug(props.key, message)
-    }
+  debug (props: LogProps): void {
+    this.logger.debug(props)
   }
 
   debugLine (props: {
@@ -277,6 +252,29 @@ export class Stage {
     })
   }
 
+  getCaller (): string {
+    const error = new Error()
+    if (error.stack == null) {
+      throw new Error('There is no stack')
+    }
+    const lines = error.stack?.split('\n')
+    const line = lines.find(line => {
+      const functionName = line.split(' ')[5]
+      if (functionName == null) return false
+      const functionMethod = functionName.split('.')[1]
+      const debugMethods = ['debug', 'debugLog', 'log', 'getCallKey']
+      const debugLine = debugMethods.includes(functionMethod)
+      return !debugLine
+    })
+    if (line == null) {
+      throw new Error('There is no line')
+    }
+    const functionName = line.split(' ')[5]
+    const lineNumber = line.split(':')[1]
+    const key = `${functionName}:${lineNumber}`
+    return key
+  }
+
   getFeaturesInShape (shape: Shape): Feature[] {
     const featuresInShape: Feature[] = []
     const origin = new Transform()
@@ -290,13 +288,13 @@ export class Stage {
     return featuresInShape
   }
 
-  log (props: DebugProps): void {
+  log (props: LogProps): void {
     this.debug(props)
   }
 
   onStep (): void {
-    for (const key in this.debugIntervals) {
-      this.debugIntervals[key] += 1
+    for (const key in this.logger.intervals) {
+      this.logger.intervals[key] += 1
     }
     this.actors.forEach(actor => actor.onStep())
     this.destructionQueue.forEach(body => {
@@ -310,8 +308,7 @@ export class Stage {
     this.killingQueue = []
     this.starvationQueue = []
     this.log({
-      key: 'this.respawnQueue.length',
-      value: this.respawnQueue.length
+      value: ['this.respawnQueue.length:', this.respawnQueue.length]
     })
     this.respawnQueue = this.respawnQueue.filter(player => {
       const respawned = player.respawn()

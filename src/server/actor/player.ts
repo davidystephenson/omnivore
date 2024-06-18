@@ -181,8 +181,7 @@ export class Player extends Actor {
       return this.stage.getFeaturesInShape(circle).length === 0
     })
     this.stage.log({
-      key: 'clearSpawnPoints.length',
-      value: clearSpawnPoints.length
+      value: ['clearSpawnPoints.length:', clearSpawnPoints.length]
     })
     if (clearSpawnPoints.length === 0) {
       return false
@@ -191,8 +190,7 @@ export class Player extends Actor {
     this.spawnPosition = spawnPoint
     this.membrane = this.grow({ branch: this.tree })
     this.stage.log({
-      key: 'bodies.length',
-      value: this.stage.runner.getBodies().length
+      value: ['bodies.length:', this.stage.runner.getBodies().length]
     })
     this.dead = false
     return true
