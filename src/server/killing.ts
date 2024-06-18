@@ -12,18 +12,24 @@ export class Killing extends Death {
 
   constructor (props: { killer: Membrane, stage: Stage, victim: Membrane }) {
     super({ stage: props.stage, victim: props.victim })
+    this.stage.destructionQueue.push(props.victim.body)
     this.killer = props.killer
+    this.victim.actor.dead = true
+    this.victim.deathPosition = this.victim.body.getPosition()
   }
 
   execute (props?: {
     debug?: boolean
   }): void {
     if (props?.debug === true) {
-      console.debug('Killing.execute', this.killer, this.victim)
+      console.debug('Killing.execute')
     }
     const killerPosition = this.killer.body.getPosition()
-    const brickDirection = getCompass(Vec2.sub(killerPosition, this.victim.deathPosition))
-    const brickLookDistance = brickDirection.x !== 0 ? SIGHT.x : SIGHT.y
+    const brickDirection = getCompass(Vec2.sub(this.victim.deathPosition, killerPosition))
+    console.log({
+      value: `brickDirection: ${String(brickDirection)}`
+    })
+    const brickLookDistance = (brickDirection.x !== 0 ? SIGHT.x : SIGHT.y) - this.killer.radius
     const sideLookDistance = brickDirection.x !== 0 ? SIGHT.y : SIGHT.x
     const base = Vec2.combine(1, killerPosition, this.killer.radius, brickDirection)
     const sideDirections = [
@@ -59,16 +65,17 @@ export class Killing extends Death {
     const localPuppetCorners = localBrickCorners.filter((corner, index) => {
       return index !== nearestIndex
     })
-    console.log('localBrickCorners', localBrickCorners)
-    console.log('localPuppetCorners', localPuppetCorners)
+    // console.log('localBrickCorners', localBrickCorners)
+    // console.log('localPuppetCorners', localPuppetCorners)
     if (Math.min(halfWidth, halfHeight) > 0) {
-      if (props?.debug === true) {
-        console.debug('Killing.execute new Brick', { halfWidth, halfHeight, brickPosition })
-      }
-      console.log('halfWidth', halfWidth)
-      console.log('halfHeight', halfHeight)
+      // if (props?.debug === true) {
+      //   console.debug('Killing.execute new Brick', { halfWidth, halfHeight, brickPosition })
+      // }
+      // console.log('halfWidth', halfWidth)
+      // console.log('halfHeight', halfHeight)
       void new Brick({ stage: this.stage, halfWidth, halfHeight, position: brickPosition })
       // void new Puppet({ stage: this.stage, vertices: brickCorners, position: brickPosition })
+      this.stage.respawnQueue.push(this.victim.actor)
     }
   }
 }

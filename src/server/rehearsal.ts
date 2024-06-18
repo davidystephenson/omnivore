@@ -10,8 +10,8 @@ export class Rehearsal extends Walled {
     // this.addWall({ halfWidth: 30, halfHeight: 5, position: Vec2(0, -10) })
     // this.addWall({ halfWidth: 15, halfHeight: 15, position: Vec2(20, 0) })
     // this.addWall({ halfWidth: 15, halfHeight: 15, position: Vec2(-20, 0) })
-    this.addBrick({ halfWidth: 40, halfHeight: 10, position: Vec2(0, 35) })
-    this.addBrick({ halfWidth: 40, halfHeight: 10, position: Vec2(0, -35) })
+    // this.addBrick({ halfWidth: 40, halfHeight: 10, position: Vec2(0, 35) })
+    // this.addBrick({ halfWidth: 40, halfHeight: 10, position: Vec2(0, -35) })
 
     this.addPlayer({
       position: Vec2(-10, 0)

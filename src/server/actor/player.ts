@@ -180,18 +180,12 @@ export class Player extends Actor {
       const circle = new CircleShape(spawnPoint, this.getRadius())
       return this.stage.getFeaturesInShape(circle).length === 0
     })
-    this.stage.log({
-      value: ['clearSpawnPoints.length:', clearSpawnPoints.length]
-    })
     if (clearSpawnPoints.length === 0) {
       return false
     }
     const spawnPoint = choose(clearSpawnPoints)
     this.spawnPosition = spawnPoint
     this.membrane = this.grow({ branch: this.tree })
-    this.stage.log({
-      value: ['bodies.length:', this.stage.runner.getBodies().length]
-    })
     this.dead = false
     return true
   }
