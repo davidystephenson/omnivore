@@ -39,8 +39,8 @@ export class Stage {
     this.world.on('pre-solve', contact => this.preSolve(contact))
     this.world.on('begin-contact', contact => this.beginContact(contact))
 
-    this.halfHeight = props?.halfHeight ?? 50
-    this.halfWidth = props?.halfWidth ?? 50
+    this.halfHeight = props?.halfHeight ?? 20
+    this.halfWidth = props?.halfWidth ?? 20
     this.logger = new Logger()
     this.runner = new Runner({ stage: this })
     this.vision = new Vision({ stage: this })
@@ -168,28 +168,45 @@ export class Stage {
       [featureA, featureB],
       [featureB, featureA]
     ]
+    const now = Date.now()
     pairs.forEach(pair => {
       const feature = pair[0]
       const otherFeature = pair[1]
-      if (!(otherFeature.actor instanceof Player) && feature.actor instanceof Player) return
+      if (
+        !(feature instanceof Membrane) ||
+        !(otherFeature instanceof Membrane) ||
+        feature.actor.dead ||
+        otherFeature.actor.dead
+      ) {
+        return
+      }
       if (feature.actor.invincibleTime === 0) {
         feature.health -= 0.5
         feature.color.alpha = featureA.health
       }
       if (feature.health <= 0) {
-        if (feature.actor instanceof Player) {
-          this.respawnQueue.push(feature.actor)
-          const killing = new Killing({
-            victim: feature as Membrane,
-            stage: this,
-            killer: otherFeature as Membrane
-          })
-          this.killingQueue.push(killing)
-        } else {
-          this.destructionQueue.push(feature.body)
-          this.actors.delete(feature.actor.id)
-        }
+        this.log({
+          value: ['new Killing', now]
+        })
+        const killing = new Killing({
+          victim: feature,
+          stage: this,
+          killer: otherFeature
+        })
+        this.killingQueue.push(killing)
       }
+      // if (feature.actor instanceof Player) {
+      //   this.respawnQueue.push(feature.actor)
+      //   const killing = new Killing({
+      //     victim: feature as Membrane,
+      //     stage: this,
+      //     killer: otherFeature as Membrane
+      //   })
+      //   this.killingQueue.push(killing)
+      // } else {
+      //   this.destructionQueue.push(feature.body)
+      //   this.actors.delete(feature.actor.id)
+      // }
     })
   }
 
@@ -252,29 +269,6 @@ export class Stage {
     })
   }
 
-  getCaller (): string {
-    const error = new Error()
-    if (error.stack == null) {
-      throw new Error('There is no stack')
-    }
-    const lines = error.stack?.split('\n')
-    const line = lines.find(line => {
-      const functionName = line.split(' ')[5]
-      if (functionName == null) return false
-      const functionMethod = functionName.split('.')[1]
-      const debugMethods = ['debug', 'debugLog', 'log', 'getCallKey']
-      const debugLine = debugMethods.includes(functionMethod)
-      return !debugLine
-    })
-    if (line == null) {
-      throw new Error('There is no line')
-    }
-    const functionName = line.split(' ')[5]
-    const lineNumber = line.split(':')[1]
-    const key = `${functionName}:${lineNumber}`
-    return key
-  }
-
   getFeaturesInShape (shape: Shape): Feature[] {
     const featuresInShape: Feature[] = []
     const origin = new Transform()
@@ -294,22 +288,27 @@ export class Stage {
 
   onStep (): void {
     for (const key in this.logger.intervals) {
-      this.logger.intervals[key] += 1
+      const interval = this.logger.intervals[key]
+      if (interval > 300) {
+        const { [key]: _, ...intervals } = this.logger.intervals
+        this.logger.intervals = intervals
+      } else {
+        this.logger.intervals[key] += 1
+      }
     }
     this.actors.forEach(actor => actor.onStep())
     this.destructionQueue.forEach(body => {
       this.world.destroyBody(body)
     })
-    this.killingQueue.forEach(killing => killing.execute())
+    this.killingQueue.forEach(killing => {
+      killing.execute()
+    })
     this.starvationQueue.forEach(starvation => {
       starvation.execute()
       this.respawnQueue.push(starvation.victim.actor)
     })
     this.killingQueue = []
     this.starvationQueue = []
-    this.log({
-      value: ['this.respawnQueue.length:', this.respawnQueue.length]
-    })
     this.respawnQueue = this.respawnQueue.filter(player => {
       const respawned = player.respawn()
       return !respawned

@@ -68,7 +68,8 @@ export class Logger {
       throw new Error('There is no line')
     }
     const functionName = line.split(' ')[5]
-    const lineNumber = line.split(':')[1]
+    const colonParts = line.split(':')
+    const lineNumber = colonParts[2]
     const key = `${functionName}:${lineNumber}`
     return key
   }
