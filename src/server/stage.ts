@@ -252,29 +252,6 @@ export class Stage {
     })
   }
 
-  getCaller (): string {
-    const error = new Error()
-    if (error.stack == null) {
-      throw new Error('There is no stack')
-    }
-    const lines = error.stack?.split('\n')
-    const line = lines.find(line => {
-      const functionName = line.split(' ')[5]
-      if (functionName == null) return false
-      const functionMethod = functionName.split('.')[1]
-      const debugMethods = ['debug', 'debugLog', 'log', 'getCallKey']
-      const debugLine = debugMethods.includes(functionMethod)
-      return !debugLine
-    })
-    if (line == null) {
-      throw new Error('There is no line')
-    }
-    const functionName = line.split(' ')[5]
-    const lineNumber = line.split(':')[1]
-    const key = `${functionName}:${lineNumber}`
-    return key
-  }
-
   getFeaturesInShape (shape: Shape): Feature[] {
     const featuresInShape: Feature[] = []
     const origin = new Transform()

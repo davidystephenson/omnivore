@@ -60,16 +60,20 @@ export class Logger {
       const functionName = line.split(' ')[5]
       if (functionName == null) return false
       const functionMethod = functionName.split('.')[1]
-      const debugMethods = ['debug', 'debugLog', 'log', 'getCaller']
+      const debugMethods = ['debug', 'debugLog', 'log', 'getCallKey']
       const debugLine = debugMethods.includes(functionMethod)
       return !debugLine
     })
     if (line == null) {
       throw new Error('There is no line')
     }
+    const fileName = line.split(' ')[4]
     const functionName = line.split(' ')[5]
+    const functionParts = functionName.split('.')
+    const lastFunctionIndex = functionParts.length - 1
+    const methodName = functionParts[lastFunctionIndex]
     const lineNumber = line.split(':')[1]
-    const key = `${functionName}:${lineNumber}`
+    const key = `${fileName}:${methodName}:${lineNumber}`
     return key
   }
 }
