@@ -8,7 +8,9 @@ const stage = new Rehearsal()
 const FORCE_SCALE = 5
 
 io.on('connection', socket => {
-  console.log('connection:', socket.id)
+  stage.log({
+    value: ['connection:', socket.id]
+  })
   socket.emit('connected')
   const player = stage.addPlayer({ position: Vec2(0, 0) })
   socket.on('controls', (controls: Controls) => {
@@ -41,7 +43,9 @@ io.on('connection', socket => {
     socket.emit('serverUpdateClient', summary)
   })
   socket.on('disconnect', () => {
-    console.log('disconnect:', socket.id)
+    stage.log({
+      value: ['disconnect:', socket.id]
+    })
     player.features.forEach(feature => {
       stage.world.destroyBody(feature.body)
     })
