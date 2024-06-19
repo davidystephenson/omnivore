@@ -40,7 +40,7 @@ export class Logger {
   debug <Value> (props: LogProps<Value>): void {
     const caller = this.getCaller()
     const message = this.stringify({ value: props.value })
-    const interval = props.frames == null
+    const frames = props.frames == null
       ? props.seconds == null
         ? 300
         : props.seconds * 60
@@ -48,7 +48,7 @@ export class Logger {
 
     const key = props.key ?? caller
     const debugInterval = this.intervals[key] ?? (
-      this.intervals[key] = { frame: 0, frames: interval }
+      this.intervals[key] = { frame: 0, frames }
     )
     const debugging = debugInterval.frame === 0
     if (debugging) {
