@@ -40,7 +40,7 @@ export class Membrane extends Feature {
   }
 
   onStep (): void {
-    const seconds = 60
+    // const seconds = 60
     // this.health -= 1 / (60 * seconds)
     // if (this.health <= 0 && !this.destroyed && !this.actor.dead) {
     //   this.actor.starve({ membrane: this })
