@@ -21,7 +21,6 @@ export class Runner {
   constructor (props: {
     stage: Stage
   }) {
-    console.log('runner')
     this.stage = props.stage
     this.elements = this.getElements()
     setInterval(() => this.step(), 1000 * this.timeStep)
