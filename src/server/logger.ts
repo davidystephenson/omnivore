@@ -14,27 +14,11 @@ interface Interval {
 
 export class Logger {
   intervals: Record<string, Interval> = {}
+  windowed: boolean
 
-  stringify <Value> (props: {
-    value: Value
-  }): string {
-    if (typeof props.value === 'string') {
-      return props.value
-    }
-    if (Array.isArray(props.value)) {
-      const strings = props.value.map(value => {
-        return this.stringify({ value })
-      })
-      const joined = strings.join(' ')
-      return joined
-    }
-    try {
-      const string = JSON.stringify(props.value)
-      return string
-    } catch (error) {
-      const string = String(props.value)
-      return string
-    }
+  constructor () {
+    this.windowed = process.platform === 'win32'
+    console.log('windowed', this.windowed)
   }
 
   debug <Value> (props: LogProps<Value>): void {
@@ -69,14 +53,13 @@ export class Logger {
 
   getCaller (): string {
     const line = this.getLine()
-    const slashParts = line.split('/')
+    const slashParts = this.getSlashParts({ line })
     const lastSlashIndex = slashParts.length - 1
     const lastSlashPart = slashParts[lastSlashIndex]
     const slashColonParts = lastSlashPart.split(':')
     const file = slashColonParts[0]
     const method = this.getMethod({ line })
-    const colonParts = line.split(':')
-    const number = colonParts[1]
+    const number = this.getNumber({ line })
     const key = `${file}:${method}:${number}`
 
     return key
@@ -88,17 +71,14 @@ export class Logger {
       throw new Error('There is no stack')
     }
     const lines = error.stack?.split('\n')
-    const sources = lines.filter(line => {
-      const sourced = line.includes('omnivore/src')
-      return sourced
-    })
+    const sources = this.getSources({ lines })
     if (sources.length === 0) {
       return lines[0]
     }
     const internals = ['log', 'debug', 'getCaller', 'getLine']
     const externals = sources.filter(line => {
-      const name = this.getMethod({ line })
-      const internal = internals.includes(name)
+      const method = this.getMethod({ line })
+      const internal = internals.includes(method)
       return !internal
     })
     if (externals.length === 0) {
@@ -129,6 +109,35 @@ export class Logger {
     return lastPart
   }
 
+  getNumber (props: {
+    line: string
+  }): string {
+    const colonParts = props.line.split(':')
+    console.log('colonParts', colonParts)
+    const index = this.windowed ? 2 : 1
+    const number = colonParts[index]
+    return number
+  }
+
+  getSlashParts(props: {
+    line: string
+  }): string[] {
+    const slash = this.windowed ? '\\' : '/'
+    const slashParts = props.line.split(slash)
+    return slashParts
+  }
+
+  getSources(props: {
+    lines: string[]
+  }): string[] {
+    const source = this.windowed ? 'omnivore\\src' : 'omnivore/src'
+    const sources = props.lines.filter(line => {
+      const sourced = line.includes(source)
+      return sourced
+    })
+    return sources
+  }
+
   onStep (): void {
     for (const key in this.intervals) {
       const interval = this.intervals[key]
@@ -141,6 +150,28 @@ export class Logger {
           interval.frame = 0
         }
       }
+    }
+  }
+
+  stringify <Value> (props: {
+    value: Value
+  }): string {
+    if (typeof props.value === 'string') {
+      return props.value
+    }
+    if (Array.isArray(props.value)) {
+      const strings = props.value.map(value => {
+        return this.stringify({ value })
+      })
+      const joined = strings.join(' ')
+      return joined
+    }
+    try {
+      const string = JSON.stringify(props.value)
+      return string
+    } catch (error) {
+      const string = String(props.value)
+      return string
     }
   }
 }
