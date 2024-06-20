@@ -88,7 +88,6 @@ export class Renderer {
     const vmin = Math.min(this.canvas.width, this.canvas.height)
     this.context.scale(0.03 * vmin, -0.03 * vmin)
     const cameraScale = Math.exp(0.1 * this.camera.zoom)
-    // console.log('cameraScale', cameraScale)
     this.context.scale(cameraScale, cameraScale)
     this.context.translate(-this.camera.position.x, -this.camera.position.y)
   }

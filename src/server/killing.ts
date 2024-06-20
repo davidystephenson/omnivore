@@ -65,14 +65,14 @@ export class Killing extends Death {
     const localPuppetCorners = localBrickCorners.filter((corner, index) => {
       return index !== nearestIndex
     })
-    // console.log('localBrickCorners', localBrickCorners)
-    // console.log('localPuppetCorners', localPuppetCorners)
+    // this.stage.log('localBrickCorners', localBrickCorners)
+    // this.stage.log('localPuppetCorners', localPuppetCorners)
     if (Math.min(halfWidth, halfHeight) > 0) {
       // if (props?.debug === true) {
       //   console.debug('Killing.execute new Brick', { halfWidth, halfHeight, brickPosition })
       // }
-      // console.log('halfWidth', halfWidth)
-      // console.log('halfHeight', halfHeight)
+      // this.stage.log('halfWidth', halfWidth)
+      // this.stage.log('halfHeight', halfHeight)
       void new Brick({ stage: this.stage, halfWidth, halfHeight, position: brickPosition })
       // void new Puppet({ stage: this.stage, vertices: brickCorners, position: brickPosition })
       this.stage.respawnQueue.push(this.victim.actor)
