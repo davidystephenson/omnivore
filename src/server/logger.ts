@@ -48,7 +48,7 @@ export class Logger {
     message?: string | number
   }): void {
     const caller = `[${props.caller}]`
-    console.debug(props.message, caller)
+    console.debug(caller, props.message)
   }
 
   getCaller (): string {
@@ -113,13 +113,12 @@ export class Logger {
     line: string
   }): string {
     const colonParts = props.line.split(':')
-    console.log('colonParts', colonParts)
     const index = this.windowed ? 2 : 1
     const number = colonParts[index]
     return number
   }
 
-  getSlashParts(props: {
+  getSlashParts (props: {
     line: string
   }): string[] {
     const slash = this.windowed ? '\\' : '/'
@@ -127,7 +126,7 @@ export class Logger {
     return slashParts
   }
 
-  getSources(props: {
+  getSources (props: {
     lines: string[]
   }): string[] {
     const source = this.windowed ? 'omnivore\\src' : 'omnivore/src'
