@@ -18,7 +18,6 @@ export class Logger {
 
   constructor () {
     this.windowed = process.platform === 'win32'
-    console.log('windowed', this.windowed)
   }
 
   debug <Value> (props: LogProps<Value>): void {
