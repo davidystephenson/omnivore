@@ -3,7 +3,6 @@ import { SIGHT } from '../shared/sight'
 import { Membrane } from './feature/membrane'
 import { getCompass, whichMax } from './math'
 import { Stage } from './stage'
-import { Puppet } from './actor/puppet'
 import { Death } from './death'
 import { Brick } from './actor/brick'
 
@@ -73,7 +72,13 @@ export class Killing extends Death {
       // }
       // this.stage.log('halfWidth', halfWidth)
       // this.stage.log('halfHeight', halfHeight)
+
       void new Brick({ stage: this.stage, halfWidth, halfHeight, position: brickPosition })
+      // const upper = Vec2.add(brickPosition, Vec2(+halfWidth, +halfHeight))
+      // const lower = Vec2.add(brickPosition, Vec2(-halfWidth, -halfHeight))
+      // const brickBox = new AABB(lower, upper)
+      // this.stage.virtualBoxes.push(brickBox)
+
       // void new Puppet({ stage: this.stage, vertices: brickCorners, position: brickPosition })
       this.stage.respawnQueue.push(this.victim.actor)
     }
