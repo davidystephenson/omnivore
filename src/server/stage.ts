@@ -30,6 +30,7 @@ export class Stage {
   starvationQueue: Starvation[] = []
   vision: Vision
   world: World
+  virtualBoxes: AABB[] = []
 
   constructor (props?: {
     halfHeight?: number
@@ -305,8 +306,13 @@ export class Stage {
       const respawned = player.respawn()
       return !respawned
     })
-
+    if (this.respawnQueue.length > 0) {
+      this.log({ value: ['respawnQueue.length', this.respawnQueue.length] })
+    }
     this.destructionQueue = []
+    this.virtualBoxes.forEach(box => {
+      this.debugBox({ box, color: Color.RED })
+    })
   }
 
   preSolve (contact: Contact): void {
