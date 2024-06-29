@@ -3,16 +3,13 @@ import { Color } from '../../shared/color'
 import { Feature } from './feature'
 import { Actor } from '../actor/actor'
 
-export class Chunk extends Feature {
-  name: 'triangle' | 'rectangle'
-
+export class Prop extends Feature {
   constructor (props: {
     position: Vec2
     actor: Actor
     shape: Shape
     label: string
     color: Color
-    name: 'triangle' | 'rectangle'
   }) {
     super({
       bodyDef: {
@@ -32,6 +29,5 @@ export class Chunk extends Feature {
       actor: props.actor,
       color: props.color
     })
-    this.name = props.name
   }
 }

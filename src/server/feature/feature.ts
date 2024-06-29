@@ -3,7 +3,7 @@ import { Color } from '../../shared/color'
 import { Actor } from '../actor/actor'
 // import { DebugLine } from '../../shared/debugLine'
 import { Rope } from '../../shared/rope'
-import { SIGHT } from '../../shared/sight'
+import { HALF_SIGHT } from '../../shared/sight'
 import { directionFromTo, getNearestIndex, range, rotate } from '../math'
 import { LineFigure } from '../../shared/lineFigure'
 
@@ -48,18 +48,18 @@ export class Feature {
   getFeaturesInRange (): Feature[] {
     const featuresInRange: Feature[] = []
     const position = this.body.getPosition()
-    const upper = Vec2.add(position, SIGHT)
-    const lower = Vec2.sub(position, SIGHT)
+    const upper = Vec2.add(position, HALF_SIGHT)
+    const lower = Vec2.sub(position, HALF_SIGHT)
     const visionBox = new AABB(lower, upper)
     this.actor.stage.runner.getBodies().forEach(body => {
       const feature = body.getUserData() as Feature
-      if (feature.label === 'barrier') {
+      if (feature.label === 'structure') {
         featuresInRange.push(feature)
       }
     })
     this.actor.stage.world.queryAABB(visionBox, fixture => {
       const feature = fixture.getUserData() as Feature
-      if (feature.label === 'barrier') return true
+      if (feature.label === 'structure') return true
       featuresInRange.push(feature)
       return true
     })
@@ -68,8 +68,8 @@ export class Feature {
 
   isPointInRange (point: Vec2): boolean {
     const position = this.body.getPosition()
-    const upper = Vec2.add(position, SIGHT)
-    const lower = Vec2.sub(position, SIGHT)
+    const upper = Vec2.add(position, HALF_SIGHT)
+    const lower = Vec2.sub(position, HALF_SIGHT)
     const xInside = lower.x <= point.x && point.x <= upper.x
     const yInside = lower.y <= point.y && point.x <= upper.y
     return xInside && yInside
@@ -267,7 +267,7 @@ export class Feature {
   }
 
   isFeatureVisible (targetFeature: Feature): boolean {
-    if (targetFeature.label === 'barrier') {
+    if (targetFeature.label === 'structure') {
       return true
     }
     if (targetFeature.actor.id === this.actor.id) return true

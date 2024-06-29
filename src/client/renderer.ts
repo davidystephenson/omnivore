@@ -2,7 +2,7 @@ import { Vec2 } from 'planck'
 import { Element } from '../shared/element'
 import { Summary } from '../shared/summary'
 import { Rope } from '../shared/rope'
-import { SIGHT } from '../shared/sight'
+import { HALF_SIGHT } from '../shared/sight'
 import { DebugLine } from '../shared/debugLine'
 import { DebugCircle } from '../shared/debugCircle'
 
@@ -41,10 +41,10 @@ export class Renderer {
     this.context.fillStyle = 'rgba(50,50,50,1)'
     this.context.lineWidth = 0.4
     this.context.beginPath()
-    this.context.moveTo(-SIGHT.x, SIGHT.y)
-    this.context.lineTo(-SIGHT.x, -SIGHT.y)
-    this.context.lineTo(SIGHT.x, -SIGHT.y)
-    this.context.lineTo(SIGHT.x, SIGHT.y)
+    this.context.moveTo(-HALF_SIGHT.x, HALF_SIGHT.y)
+    this.context.lineTo(-HALF_SIGHT.x, -HALF_SIGHT.y)
+    this.context.lineTo(HALF_SIGHT.x, -HALF_SIGHT.y)
+    this.context.lineTo(HALF_SIGHT.x, HALF_SIGHT.y)
     this.context.closePath()
     this.context.fill()
     this.ropes.forEach(rope => {

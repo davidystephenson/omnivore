@@ -21,7 +21,7 @@ export class Structure extends Feature {
         restitution: 0,
         friction: 0
       },
-      label: 'barrier',
+      label: 'structure',
       actor: props.actor,
       color: Color.BLUE
     })
