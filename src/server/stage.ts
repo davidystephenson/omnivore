@@ -1,6 +1,6 @@
 import { World, Vec2, Contact, Body, AABB, PolygonShape, CircleShape, Shape, Transform, testOverlap } from 'planck'
 import { Runner } from './runner'
-import { Player } from './actor/player'
+import { Organism } from './actor/organism'
 import { Wall } from './actor/wall'
 import { Actor } from './actor/actor'
 import { Brick } from './actor/brick'
@@ -24,7 +24,7 @@ export class Stage {
   halfWidth: number
   killingQueue: Killing[] = []
   logger: Logger
-  respawnQueue: Player[] = []
+  respawnQueue: Organism[] = []
   runner: Runner
   spawnPoints: Vec2[]
   starvationQueue: Starvation[] = []
@@ -32,16 +32,16 @@ export class Stage {
   world: World
   virtualBoxes: AABB[] = []
 
-  constructor (props?: {
-    halfHeight?: number
-    halfWidth?: number
+  constructor (props: {
+    halfHeight: number
+    halfWidth: number
   }) {
     this.world = new World({ gravity: Vec2(0, 0) })
     this.world.on('pre-solve', contact => this.preSolve(contact))
     this.world.on('begin-contact', contact => this.beginContact(contact))
 
-    this.halfHeight = props?.halfHeight ?? 20
-    this.halfWidth = props?.halfWidth ?? 20
+    this.halfHeight = props.halfHeight
+    this.halfWidth = props.halfWidth
     this.logger = new Logger()
     this.runner = new Runner({ stage: this })
     this.vision = new Vision({ stage: this })
@@ -70,9 +70,9 @@ export class Stage {
     return brick
   }
 
-  addPlayer (props: { position: Vec2 }): Player {
-    const player = new Player({ stage: this, ...props })
-    return player
+  addOrganism (props: { playing?: boolean, position: Vec2 }): Organism {
+    const organism = new Organism({ stage: this, ...props })
+    return organism
   }
 
   addPuppet (props: {
@@ -196,22 +196,10 @@ export class Stage {
         })
         this.killingQueue.push(killing)
       }
-      // if (feature.actor instanceof Player) {
-      //   this.respawnQueue.push(feature.actor)
-      //   const killing = new Killing({
-      //     victim: feature as Membrane,
-      //     stage: this,
-      //     killer: otherFeature as Membrane
-      //   })
-      //   this.killingQueue.push(killing)
-      // } else {
-      //   this.destructionQueue.push(feature.body)
-      //   this.actors.delete(feature.actor.id)
-      // }
     })
   }
 
-  debug <Value> (props: LogProps<Value>): void {
+  debug<Value>(props: LogProps<Value>): void {
     this.logger.debug(props)
   }
 
@@ -283,7 +271,7 @@ export class Stage {
     return featuresInShape
   }
 
-  log <Value> (props: LogProps<Value>): void {
+  log<Value>(props: LogProps<Value>): void {
     this.debug(props)
   }
 
@@ -298,12 +286,11 @@ export class Stage {
     })
     this.starvationQueue.forEach(starvation => {
       starvation.execute()
-      this.respawnQueue.push(starvation.victim.actor)
     })
     this.killingQueue = []
     this.starvationQueue = []
-    this.respawnQueue = this.respawnQueue.filter(player => {
-      const respawned = player.respawn()
+    this.respawnQueue = this.respawnQueue.filter(organism => {
+      const respawned = organism.respawn()
       return !respawned
     })
     if (this.respawnQueue.length > 0) {

@@ -12,7 +12,10 @@ io.on('connection', socket => {
     value: ['connection:', socket.id]
   })
   socket.emit('connected')
-  const player = stage.addPlayer({ position: Vec2(0, 0) })
+  const organism = stage.addOrganism({
+    playing: true,
+    position: Vec2(0, 0)
+  })
   socket.on('controls', (controls: Controls) => {
     let x = 0
     let y = 0
@@ -23,32 +26,31 @@ io.on('connection', socket => {
       x += 1
     }
     if (controls.select) {
-      // player.membrane.body.setPosition(Vec2(0, 0))
       stage.runner.paused = true
     }
     if (controls.cancel) {
       stage.runner.paused = false
-      player.membrane.health = 1
+      organism.membrane.health = 1
     }
     const direction = Vec2(x, y)
     direction.normalize()
     const force = Vec2.mul(direction, FORCE_SCALE)
-    if (player.membranes.length === 0) {
-      player.membrane.force = Vec2.mul(force, player.membrane.body.getMass())
+    if (organism.membranes.length === 0) {
+      organism.membrane.force = Vec2.mul(force, organism.membrane.body.getMass())
     }
-    player.membranes.forEach(membrane => {
+    organism.membranes.forEach(membrane => {
       membrane.force = Vec2.mul(force, membrane.body.getMass())
     })
-    const summary = stage.runner.getSummary({ player })
+    const summary = stage.runner.getSummary({ organism })
     socket.emit('serverUpdateClient', summary)
   })
   socket.on('disconnect', () => {
     stage.log({
       value: ['disconnect:', socket.id]
     })
-    player.features.forEach(feature => {
+    organism.features.forEach(feature => {
       stage.world.destroyBody(feature.body)
     })
-    stage.actors.delete(player.id)
+    stage.actors.delete(organism.id)
   })
 })

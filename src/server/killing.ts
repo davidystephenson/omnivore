@@ -4,7 +4,7 @@ import { Membrane } from './feature/membrane'
 import { getCompass, whichMax } from './math'
 import { Stage } from './stage'
 import { Death } from './death'
-import { Brick } from './actor/brick'
+import { Puppet } from './actor/puppet'
 
 export class Killing extends Death {
   killer: Membrane
@@ -64,22 +64,8 @@ export class Killing extends Death {
     const localPuppetCorners = localBrickCorners.filter((corner, index) => {
       return index !== nearestIndex
     })
-    // this.stage.log('localBrickCorners', localBrickCorners)
-    // this.stage.log('localPuppetCorners', localPuppetCorners)
     if (Math.min(halfWidth, halfHeight) > 0) {
-      // if (props?.debug === true) {
-      //   console.debug('Killing.execute new Brick', { halfWidth, halfHeight, brickPosition })
-      // }
-      // this.stage.log('halfWidth', halfWidth)
-      // this.stage.log('halfHeight', halfHeight)
-
-      void new Brick({ stage: this.stage, halfWidth, halfHeight, position: brickPosition })
-      // const upper = Vec2.add(brickPosition, Vec2(+halfWidth, +halfHeight))
-      // const lower = Vec2.add(brickPosition, Vec2(-halfWidth, -halfHeight))
-      // const brickBox = new AABB(lower, upper)
-      // this.stage.virtualBoxes.push(brickBox)
-
-      // void new Puppet({ stage: this.stage, vertices: brickCorners, position: brickPosition })
+      void new Puppet({ stage: this.stage, vertices: localPuppetCorners, position: brickPosition })
       this.stage.respawnQueue.push(this.victim.actor)
     }
   }

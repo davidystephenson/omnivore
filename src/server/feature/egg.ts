@@ -1,12 +1,12 @@
 import { Vec2, Box } from 'planck'
 import { Color } from '../../shared/color'
-import { Player } from '../actor/player'
+import { Organism } from '../actor/organism'
 import { Chunk } from './chunk'
 
 export class Egg extends Chunk {
-  actor: Player
+  actor: Organism
   constructor (props: {
-    actor: Player
+    actor: Organism
     position: Vec2
     hx: number
     hy: number

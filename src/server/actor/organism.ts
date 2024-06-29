@@ -14,23 +14,26 @@ interface Tree {
   branches: Tree[]
 }
 
-export class Player extends Actor {
+export class Organism extends Actor {
   dead = false
+  featuresInVision: Feature[] = []
+  gap = 0.5
+  hatched = true
   membrane: Membrane
   membranes: Membrane[] = []
   north = Vec2(0, 1)
-  spawnPosition: Vec2
-  gap = 0.5
-  tree: Tree
-  featuresInVision: Feature[] = []
+  playing = false
   readyToHatch = false
-  hatched = true
+  spawnPosition: Vec2
+  tree: Tree
 
   constructor (props: {
     stage: Stage
     position: Vec2
+    playing?: boolean
   }) {
-    super({ stage: props.stage, label: 'player' })
+    super({ stage: props.stage, label: 'organism' })
+    this.playing = props.playing ?? this.playing
     this.spawnPosition = props.position
     this.tree = {
       radius: 3,

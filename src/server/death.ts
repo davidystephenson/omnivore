@@ -1,7 +1,6 @@
 import { AABB, Fixture, Vec2 } from 'planck'
 import { Membrane } from './feature/membrane'
 import { Stage } from './stage'
-import { Feature } from './feature/feature'
 
 export class Death {
   stage: Stage
