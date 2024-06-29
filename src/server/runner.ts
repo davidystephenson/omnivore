@@ -3,7 +3,7 @@ import { Stage } from './stage'
 import { Element } from '../shared/element'
 import { Feature } from './feature/feature'
 import { Summary } from '../shared/summary'
-import { Player } from './actor/player'
+import { Organism } from './actor/organism'
 import { Rope } from '../shared/rope'
 import { DebugLine } from '../shared/debugLine'
 import { DebugCircle } from '../shared/debugCircle'
@@ -44,16 +44,16 @@ export class Runner {
   }
 
   getSummary (props: {
-    player: Player
+    organism: Organism
   }): Summary {
-    const idsInVision = props.player.featuresInVision.map(feature => feature.id)
+    const idsInVision = props.organism.featuresInVision.map(feature => feature.id)
     const filteredElements = this.elements.filter(element => idsInVision.includes(element.id))
     const summary = new Summary({
       elements: filteredElements,
-      ropes: this.getRopes(props.player),
+      ropes: this.getRopes(props.organism),
       debugLines: this.debugLines,
       debugCircles: this.debugCircles,
-      id: props.player.membrane.id
+      id: props.organism.membrane.id
     })
     return summary
   }
@@ -72,9 +72,9 @@ export class Runner {
     return elements
   }
 
-  getRopes (player: Player): Rope[] {
+  getRopes (organism: Organism): Rope[] {
     const ropes: Rope[] = []
-    player.featuresInVision.forEach(feature => {
+    organism.featuresInVision.forEach(feature => {
       feature.ropes.forEach(rope => {
         ropes.push(rope)
       })

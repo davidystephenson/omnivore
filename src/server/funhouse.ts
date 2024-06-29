@@ -4,7 +4,10 @@ import { Stage } from './stage'
 
 export class Funhouse extends Stage {
   constructor () {
-    super()
+    super({
+      halfHeight: 50,
+      halfWidth: 50
+    })
 
     const brickX = -14 + SIGHT_HALF_WIDTH - 0.1
     // const propHalfWidth = SIGHT_HALF_WIDTH - 5

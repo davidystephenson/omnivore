@@ -1,15 +1,15 @@
 import { Vec2, Circle } from 'planck'
 import { Color } from '../../shared/color'
 import { Feature } from './feature'
-import { Player } from '../actor/player'
+import { Organism } from '../actor/organism'
 
 export class Membrane extends Feature {
-  actor: Player
+  actor: Organism
   destroyed = false
   radius: number
   constructor (props: {
     position: Vec2
-    actor: Player
+    actor: Organism
     radius?: number
   }) {
     const radius = props.radius ?? 1
@@ -40,10 +40,17 @@ export class Membrane extends Feature {
   }
 
   onStep (): void {
-    // const seconds = 60
-    // this.health -= 1 / (60 * seconds)
-    // if (this.health <= 0 && !this.destroyed && !this.actor.dead) {
-    //   this.actor.starve({ membrane: this })
-    // }
+    if (
+      !this.actor.playing &&
+      this.health > 0 &&
+      !this.destroyed &&
+      !this.actor.dead
+    ) {
+      const seconds = 60
+      this.health -= 1 / (10 * seconds)
+      if (this.health <= 0) {
+        this.actor.starve({ membrane: this })
+      }
+    }
   }
 }
