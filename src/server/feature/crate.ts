@@ -1,9 +1,9 @@
 import { Vec2, BoxShape } from 'planck'
 import { Color } from '../../shared/color'
 import { Actor } from '../actor/actor'
-import { Chunk } from './chunk'
+import { Prop } from './prop'
 
-export class Crate extends Chunk {
+export class Crate extends Prop {
   constructor (props: {
     actor: Actor
     angle?: number
@@ -17,8 +17,7 @@ export class Crate extends Chunk {
       actor: props.actor,
       shape,
       color: Color.CYAN,
-      label: 'crate',
-      name: 'rectangle'
+      label: 'crate'
     })
   }
 }

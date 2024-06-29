@@ -16,6 +16,7 @@ import { range } from './math'
 import { DebugCircle } from '../shared/debugCircle'
 import { Starvation } from './starvation'
 import { LogProps, Logger } from './logger'
+import { Navigation } from './navigation'
 
 export class Stage {
   actors = new Map<number, Actor>()
@@ -29,8 +30,10 @@ export class Stage {
   spawnPoints: Vec2[]
   starvationQueue: Starvation[] = []
   vision: Vision
+  walls: Wall[] = []
   world: World
   virtualBoxes: AABB[] = []
+  navigation: Navigation
 
   constructor (props: {
     halfHeight: number
@@ -43,6 +46,7 @@ export class Stage {
     this.halfHeight = props.halfHeight
     this.halfWidth = props.halfWidth
     this.logger = new Logger()
+    this.navigation = new Navigation({ stage: this })
     this.runner = new Runner({ stage: this })
     this.vision = new Vision({ stage: this })
 
@@ -102,6 +106,7 @@ export class Stage {
 
   addWall (props: { halfWidth: number, halfHeight: number, position: Vec2 }): Wall {
     const wall = new Wall({ stage: this, ...props })
+    this.walls.push(wall)
     return wall
   }
 
@@ -278,6 +283,7 @@ export class Stage {
   onStep (): void {
     this.logger.onStep()
     this.actors.forEach(actor => actor.onStep())
+    this.navigation.onStep()
     this.destructionQueue.forEach(body => {
       this.world.destroyBody(body)
     })

@@ -41,6 +41,7 @@ export class Membrane extends Feature {
 
   onStep (): void {
     if (
+      false &&
       !this.actor.playing &&
       this.health > 0 &&
       !this.destroyed &&

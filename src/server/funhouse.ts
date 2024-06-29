@@ -1,5 +1,5 @@
 import { Vec2 } from 'planck'
-import { SIGHT_HALF_WIDTH } from '../shared/sight'
+import { HALF_SIGHT_WIDTH } from '../shared/sight'
 import { Stage } from './stage'
 
 export class Funhouse extends Stage {
@@ -9,7 +9,7 @@ export class Funhouse extends Stage {
       halfWidth: 50
     })
 
-    const brickX = -14 + SIGHT_HALF_WIDTH - 0.1
+    const brickX = -14 + HALF_SIGHT_WIDTH - 0.1
     // const propHalfWidth = SIGHT_HALF_WIDTH - 5
     // const wallHalfWidth = SIGHT_HALF_WIDTH - 1.1
     // const rightPropX = brickX + 1.25 + propHalfWidth

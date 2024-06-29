@@ -36,7 +36,7 @@ export class Organism extends Actor {
     this.playing = props.playing ?? this.playing
     this.spawnPosition = props.position
     this.tree = {
-      radius: 3,
+      radius: 1,
       angle: 0,
       branches: []
     }

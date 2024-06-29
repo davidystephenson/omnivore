@@ -1,21 +1,20 @@
 import { Vec2, PolygonShape } from 'planck'
 import { Color } from '../../shared/color'
 import { Actor } from '../actor/actor'
-import { Chunk } from './chunk'
+import { Prop } from './prop'
 
-export class Triangle extends Chunk {
+export class Sculpture extends Prop {
   constructor (props: {
     position: Vec2
     actor: Actor
-    vertices: Vec2[]// [Vec2, Vec2, Vec2]
+    vertices: Vec2[]
   }) {
     super({
       position: props.position,
       actor: props.actor,
       shape: new PolygonShape(props.vertices),
       color: Color.CYAN,
-      label: 'crate',
-      name: 'triangle'
+      label: 'crate'
     })
   }
 }
