@@ -40,6 +40,15 @@ io.on('connection', socket => {
     }
     organism.membranes.forEach(membrane => {
       membrane.force = Vec2.mul(force, membrane.body.getMass())
+      // Version A (Wins the race)
+      // mass 5, speed 1 = 5
+      // mass 1, speed 5 = 5
+      // mass 1, speed 5 = 5
+
+      // Version B
+      // mass 5, speed 1 = 5
+      // mass 5, speed 1 = 5
+      // mass 1, speed 5 = 5
     })
     const summary = stage.runner.getSummary({ organism })
     socket.emit('serverUpdateClient', summary)
