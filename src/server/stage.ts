@@ -306,6 +306,16 @@ export class Stage {
     this.virtualBoxes.forEach(box => {
       this.debugBox({ box, color: Color.RED })
     })
+    const radius = 1.0
+    const radiusWaypoints = this.navigation.radiiWaypoints.get(radius)
+    if (radiusWaypoints == null) return
+    radiusWaypoints.forEach(waypoint => {
+      const neighbors = waypoint.neighbors.get(radius)
+      if (neighbors == null) return
+      neighbors.forEach(neighbor => {
+        this.debugLine({ a: waypoint.position, b: neighbor.position, color: Color.WHITE })
+      })
+    })
   }
 
   preSolve (contact: Contact): void {
