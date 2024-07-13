@@ -212,11 +212,13 @@ export class Stage {
     a: Vec2
     b: Vec2
     color: Color
+    width?: number
   }): DebugLine {
     const debugLine = new DebugLine({
       a: props.a,
       b: props.b,
-      color: props.color
+      color: props.color,
+      width: props.width
     })
     this.runner.debugLines.push(debugLine)
     return debugLine
@@ -282,8 +284,8 @@ export class Stage {
 
   onStep (): void {
     this.logger.onStep()
-    this.actors.forEach(actor => actor.onStep())
     this.navigation.onStep()
+    this.actors.forEach(actor => actor.onStep())
     this.destructionQueue.forEach(body => {
       this.world.destroyBody(body)
     })
@@ -305,16 +307,6 @@ export class Stage {
     this.destructionQueue = []
     this.virtualBoxes.forEach(box => {
       this.debugBox({ box, color: Color.RED })
-    })
-    const radius = 1.0
-    const radiusWaypoints = this.navigation.radiiWaypoints.get(radius)
-    if (radiusWaypoints == null) return
-    radiusWaypoints.forEach(waypoint => {
-      const neighbors = waypoint.neighbors.get(radius)
-      if (neighbors == null) return
-      neighbors.forEach(neighbor => {
-        this.debugLine({ a: waypoint.position, b: neighbor.position, color: Color.WHITE })
-      })
     })
   }
 

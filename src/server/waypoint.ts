@@ -6,7 +6,8 @@ export class Waypoint {
   position: Vec2
   id: number
   neighbors = new Map<number, Waypoint[]>()
-  distances = new Map<number, number>()
+  pathDistances = new Map<number, number[]>()
+  distances: number[] = []
   radius: number
 
   constructor (props: {
