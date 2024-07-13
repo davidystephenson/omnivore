@@ -7,6 +7,7 @@ import { Egg } from '../feature/egg'
 import { Feature } from '../feature/feature'
 import { Rope } from '../../shared/rope'
 import { Starvation } from '../starvation'
+import { Color } from '../../shared/color'
 
 interface Tree {
   angle: number
@@ -166,6 +167,14 @@ export class Organism extends Actor {
 
   onStep (): void {
     super.onStep()
+    if (this.playing) {
+      const position = this.membrane.body.getPosition()
+      const endPoint = Vec2(0, 0)
+      const target = this.stage.navigation.navigate(this.membrane, endPoint)
+      const circle = new CircleShape(endPoint, 0.5)
+      this.stage.debugCircle({ circle, color: Color.RED })
+      this.stage.debugLine({ a: position, b: target, color: Color.WHITE, width: 0.1 })
+    }
     const featuresInRange = this.membrane.getFeaturesInRange()
     this.featuresInVision = featuresInRange.filter(targetFeature => {
       if (this.membrane instanceof Egg) {
