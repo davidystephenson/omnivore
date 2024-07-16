@@ -15,12 +15,13 @@ export class Navigation {
     y: HALF_SIGHT.y
   }
 
-  static radii = [0.6, 0.7, 0.8, 0.9, 1.0]
+  static radii = [1.0] // [0.6, 0.7, 0.8, 0.9, 1.0]
 
   stage: Stage
   waypoints = new Map<number, Waypoint>()
   gridWaypoints: Waypoint[] = []
   wallWaypoints: Waypoint[] = []
+  cornerWaypoints: Waypoint[] = []
   radiiWaypoints = new Map<number, Waypoint[]>()
 
   constructor (props: {
@@ -29,32 +30,57 @@ export class Navigation {
     this.stage = props.stage
   }
 
-  navigate (membrane: Membrane, end: Vec2): Vec2 {
+  navigateFromMembrane (membrane: Membrane, end: Vec2): Vec2 {
     const start = membrane.body.getPosition()
+    const target = this.navigate(start, end, membrane.radius)
+    if (target instanceof Waypoint) return target.position
+    return target
+  }
+
+  navigateFromWaypoint (waypoint: Waypoint, end: Vec2): Waypoint | Vec2 {
+    const start = waypoint.position
+    const target = this.navigate(start, end, waypoint.radius)
+    return target
+  }
+
+  getPath (start: Vec2, end: Vec2, radius: number): Vec2[] {
+    const path = [start]
+    let nextPoint: Waypoint | Vec2 = this.navigate(path[path.length - 1], end, radius)
+    if (!(nextPoint instanceof Waypoint)) path.push(nextPoint)
+    while (nextPoint instanceof Waypoint) {
+      if (nextPoint instanceof Waypoint) {
+        path.push(nextPoint.position)
+        nextPoint = this.navigate(path[path.length - 1], end, radius)
+        if (!(nextPoint instanceof Waypoint)) path.push(nextPoint)
+      }
+    }
+    return path
+  }
+
+  navigate (start: Vec2, end: Vec2, radius: number): Waypoint | Vec2 {
     const open = this.isOpen({
       fromPosition: start,
       toPosition: end,
-      radius: membrane.radius
+      radius
     })
     if (open) {
       return end
     }
-    this.stage.log({ value: 'blocked' })
-    const startNeighbors = this.getNeighbors(start, membrane.radius)
-    const endNeighbors = this.getNeighbors(end, membrane.radius)
+    const startNeighbors = this.getNeighbors(start, radius)
+    const endNeighbors = this.getNeighbors(end, radius)
     let minDistance = Infinity
-    let target = end
+    let target = startNeighbors[0]
     startNeighbors.forEach(startNeighbor => {
       endNeighbors.forEach(endNeighbor => {
         const startToNeighbor = Vec2.distance(start, startNeighbor.position)
-        const neighborToEnd = Vec2.distance(start, endNeighbor.position)
-        const pathDistances = startNeighbor.pathDistances.get(membrane.radius)
+        const neighborToEnd = Vec2.distance(end, endNeighbor.position)
+        const pathDistances = startNeighbor.pathDistances.get(radius)
         if (pathDistances == null) throw new Error('Missing path distances')
         const waypointDistance = pathDistances[endNeighbor.id]
         const distance = startToNeighbor + waypointDistance + neighborToEnd
         if (distance < minDistance) {
           minDistance = distance
-          target = startNeighbor.position
+          target = startNeighbor
         }
       })
     })
@@ -162,6 +188,7 @@ export class Navigation {
     const validWaypoints = this.radiiWaypoints.get(radius)
     if (validWaypoints == null) return []
     const neighbors = validWaypoints.filter(otherWaypoint => {
+      if (Vec2.distance(position, otherWaypoint.position) === 0) return false
       return this.isOpen({
         fromPosition: position,
         toPosition: otherWaypoint.position,
@@ -180,23 +207,27 @@ export class Navigation {
       range(0, yCount).forEach(j => {
         const x = i * xStep - this.stage.halfWidth
         const y = j * yStep - this.stage.halfHeight
-        const waypoint = this.addWaypoint(Vec2(x, y))
-        this.gridWaypoints.push(waypoint)
+        this.addWaypoint(Vec2(x, y), 'grid')
       })
     })
     this.stage.walls.forEach(wall => this.addWallWaypoints(wall))
     Navigation.radii.forEach(radius => {
       const cornerX = this.stage.halfWidth - radius
       const cornerY = this.stage.halfHeight - radius
-      this.addWaypoint(Vec2(+cornerX, +cornerY), radius)
-      this.addWaypoint(Vec2(+cornerX, -cornerY), radius)
-      this.addWaypoint(Vec2(-cornerX, +cornerY), radius)
-      this.addWaypoint(Vec2(-cornerX, -cornerY), radius)
+      this.addWaypoint(Vec2(+cornerX, +cornerY), 'corner', radius)
+      this.addWaypoint(Vec2(+cornerX, -cornerY), 'corner', radius)
+      this.addWaypoint(Vec2(-cornerX, +cornerY), 'corner', radius)
+      this.addWaypoint(Vec2(-cornerX, -cornerY), 'corner', radius)
     })
     Navigation.radii.forEach(radius => {
       const waypointArray = [...this.waypoints.values()]
       const validWaypoints = waypointArray.filter(waypoint => waypoint.radius >= radius)
       this.radiiWaypoints.set(radius, validWaypoints)
+    })
+    this.waypoints.forEach(waypoint => {
+      if (waypoint.category === 'grid') this.gridWaypoints.push(waypoint)
+      if (waypoint.category === 'wall') this.wallWaypoints.push(waypoint)
+      if (waypoint.category === 'corner') this.cornerWaypoints.push(waypoint)
     })
   }
 
@@ -213,9 +244,9 @@ export class Navigation {
         Math.sign(corner.y - wall.position.y)
       ))
       Navigation.radii.forEach(radius => {
-        const offset = Math.sqrt(2) * radius
+        const offset = Math.sqrt(2) * radius + 0.1
         const position = Vec2.combine(1, corner, offset, direction)
-        this.stage.navigation.addWaypoint(position, radius)
+        this.stage.navigation.addWaypoint(position, 'wall', radius)
       })
     })
     range(1, corners.length).forEach(index => {
@@ -232,25 +263,40 @@ export class Navigation {
         const point = Vec2.combine(weight, start, 1 - weight, end)
         Navigation.radii.forEach(radius => {
           const position = Vec2.combine(1, point, radius, away)
-          const waypoint = this.addWaypoint(position, radius)
-          this.wallWaypoints.push(waypoint)
+          this.addWaypoint(position, 'wall', radius)
         })
       })
     })
   }
 
-  addWaypoint (position: Vec2, radius?: number): Waypoint {
+  addWaypoint (position: Vec2, category: string, radius?: number): Waypoint {
     const rad = radius ?? Math.max(...Navigation.radii)
-    return new Waypoint({ position, navigation: this, radius: rad })
+    return new Waypoint({ position, navigation: this, radius: rad, category })
   }
 
   onStep (): void {
-    // this.waypoints.forEach(waypoint => {
-    //   this.stage.debugCircle({
-    //     circle: new Circle(waypoint.position, 0.2),
-    //     color: Color.WHITE
-    //   })
-    // })
+    this.cornerWaypoints.forEach(waypoint => {
+      if (waypoint.radius === 1) {
+        this.stage.debugCircle({
+          circle: new Circle(waypoint.position, 0.2),
+          color: Color.WHITE
+        })
+      }
+    })
+    this.gridWaypoints.forEach(waypoint => {
+      this.stage.debugCircle({
+        circle: new Circle(waypoint.position, 0.2),
+        color: Color.WHITE
+      })
+    })
+    this.wallWaypoints.forEach(waypoint => {
+      if (waypoint.radius === 1) {
+        this.stage.debugCircle({
+          circle: new Circle(waypoint.position, 0.2),
+          color: Color.WHITE
+        })
+      }
+    })
     // const radius = 1.0
     // const radiusWaypoints = this.radiiWaypoints.get(radius)
     // if (radiusWaypoints == null) return

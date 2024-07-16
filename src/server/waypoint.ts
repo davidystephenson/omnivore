@@ -5,6 +5,7 @@ export class Waypoint {
   navigation: Navigation
   position: Vec2
   id: number
+  category: string
   neighbors = new Map<number, Waypoint[]>()
   pathDistances = new Map<number, number[]>()
   distances: number[] = []
@@ -14,7 +15,9 @@ export class Waypoint {
     position: Vec2
     navigation: Navigation
     radius: number
+    category?: string
   }) {
+    this.category = props.category ?? ''
     this.position = props.position
     this.navigation = props.navigation
     this.radius = props.radius
