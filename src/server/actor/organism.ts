@@ -2,7 +2,7 @@ import { CircleShape, RopeJoint, Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Actor } from './actor'
 import { Membrane } from '../feature/membrane'
-import { choose, range, rotate } from '../math'
+import { choose, range, rotate, whichMin } from '../math'
 import { Egg } from '../feature/egg'
 import { Feature } from '../feature/feature'
 import { Rope } from '../../shared/rope'
@@ -27,6 +27,7 @@ export class Organism extends Actor {
   north = Vec2(0, 1)
   playing = false
   debugPath = true
+  radius: number
   readyToHatch = false
   spawnPosition: Vec2
   tree: Tree
@@ -42,14 +43,19 @@ export class Organism extends Actor {
     this.playing = props.playing ?? this.playing
     this.spawnPosition = props.position
     this.tree = {
-      radius: 1,
+      radius: 1.19,
       angle: 0,
       branches: []
     }
     this.membrane = this.grow({ branch: this.tree })
+    const largerRadii = Navigation.radii.filter(rad => rad >= this.tree.radius)
+    const indexOfMinimumValue = whichMin(largerRadii)
+    const validRadius = largerRadii[indexOfMinimumValue]
+    if (validRadius == null) throw new Error('No valid radius found')
+    this.radius = validRadius
     this.stage.navigation.waypoints.forEach(waypoint => {
       const isGrid = waypoint.category === 'grid'
-      const isSmallRadius = waypoint.radius === Math.min(...Navigation.radii)
+      const isSmallRadius = waypoint.radius === validRadius
       if (isGrid || isSmallRadius) {
         const position = waypoint.position
         const id = this.explorationPoints.length
@@ -57,6 +63,7 @@ export class Organism extends Actor {
       }
     })
     this.explorationIds = range(0, this.explorationPoints.length - 1)
+    this.sortExplorationPoints()
   }
 
   explore (): void {
@@ -69,23 +76,25 @@ export class Organism extends Actor {
     const targetVisible = this.stage.vision.isVisible(position, targetPoint.position)
     if (targetVisible) {
       targetPoint.time = Date.now()
-      console.log({ value: ['we see it', targetPoint.time] })
-      const distances = this.explorationIds.map(i => {
-        const point = this.explorationPoints[i]
-        const distance = Vec2.distance(position, point.position)
-        return distance
-      })
-      this.explorationIds.sort((a, b) => {
-        return distances[b] - distances[a]
-      })
-      this.explorationIds.sort((a, b) => {
-        const pointA = this.explorationPoints[a]
-        const pointB = this.explorationPoints[b]
-        return pointA.time - pointB.time
-      })
-      const times = this.explorationIds.map(i => this.explorationPoints[i].time)
-      console.log('times', times)
+      this.sortExplorationPoints()
     }
+  }
+
+  sortExplorationPoints (): void {
+    const position = this.membrane.body.getPosition()
+    const distances = this.explorationIds.map(i => {
+      const point = this.explorationPoints[i]
+      const distance = Vec2.distance(position, point.position)
+      return distance
+    })
+    this.explorationIds.sort((a, b) => {
+      return distances[b] - distances[a]
+    })
+    this.explorationIds.sort((a, b) => {
+      const pointA = this.explorationPoints[a]
+      const pointB = this.explorationPoints[b]
+      return pointA.time - pointB.time
+    })
   }
 
   addCircles (props: {
@@ -214,7 +223,8 @@ export class Organism extends Actor {
     this.explore()
     if (this.debugPath) {
       const start = this.membrane.body.getPosition()
-      const explorationPoint = this.explorationPoints[this.explorationIds[0]]
+      const explorationId = this.explorationIds[0]
+      const explorationPoint = this.explorationPoints[explorationId]
       const end = explorationPoint.position
       const path = this.stage.navigation.getPath(start, end, this.membrane.radius)
       range(0, path.length - 2).forEach(index => {

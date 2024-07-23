@@ -20,16 +20,16 @@ window.onkeyup = function (event: KeyboardEvent) {
 }
 window.onwheel = function (event: WheelEvent) {
   renderer.camera.zoom -= 0.005 * event.deltaY
-  console.log('renderer.camera.zoom', renderer.camera.zoom)
+  console.info('renderer.camera.zoom', renderer.camera.zoom)
 }
 let lastSummary: Summary
 window.onmousedown = (event: MouseEvent) => {
-  console.log('lastSummary', lastSummary)
+  console.info('lastSummary', lastSummary)
 }
 
 const socket = io()
 socket.on('connected', () => {
-  console.log('connected!')
+  console.info('connected!')
 })
 socket.on('serverUpdateClient', (summary: Summary) => {
   lastSummary = summary
