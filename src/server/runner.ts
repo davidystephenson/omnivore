@@ -9,6 +9,7 @@ import { DebugLine } from '../shared/debugLine'
 import { DebugCircle } from '../shared/debugCircle'
 
 export class Runner {
+  // intervalId: NodeJS.Timeout
   stage: Stage
   timeStep = 1 / 60
   timeScale = 1
@@ -23,7 +24,6 @@ export class Runner {
   }) {
     this.stage = props.stage
     this.elements = this.getElements()
-    setInterval(() => this.step(), 1000 * this.timeStep)
   }
 
   step (): void {
