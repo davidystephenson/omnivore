@@ -2,6 +2,7 @@ import { Vec2, Circle } from 'planck'
 import { Color } from '../../shared/color'
 import { Feature } from './feature'
 import { Organism } from '../actor/organism'
+import { Killing } from '../killing'
 
 export class Membrane extends Feature {
   actor: Organism
@@ -41,7 +42,36 @@ export class Membrane extends Feature {
     this.destroyed = true
   }
 
+  handleContacts (): void {
+    const contacts = this.getContacts()
+    contacts.forEach(contact => {
+      const fixtureA = contact.getFixtureA()
+      const fixtureB = contact.getFixtureB()
+      const featureA = fixtureA.getBody().getUserData() as Feature
+      const featureB = fixtureB.getBody().getUserData() as Feature
+      if (featureA.actor === featureB.actor) return
+      const target = featureA.actor === this.actor ? featureB : featureA
+      this.doDamage(target)
+    })
+  }
+
+  doDamage (target: Feature): void {
+    target.health -= 0.5
+    target.color.alpha = target.health
+    if (target.health <= 0) {
+      if (target instanceof Membrane) {
+        const killing = new Killing({
+          victim: target,
+          stage: this.actor.stage,
+          killer: this
+        })
+        this.actor.stage.killingQueue.push(killing)
+      }
+    }
+  }
+
   onStep (): void {
+    this.handleContacts()
     const hunger = false
     if (
       hunger &&
