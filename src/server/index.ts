@@ -5,15 +5,12 @@ import { Rehearsal } from './rehearsal'
 
 const stage = new Rehearsal()
 
-const FORCE_SCALE = 5
-
 io.on('connection', socket => {
   stage.log({
     value: ['connection:', socket.id]
   })
   socket.emit('connected')
-  const organism = stage.addOrganism({
-    playing: true,
+  const organism = stage.addPlayer({
     position: Vec2(0, 0)
   })
   socket.on('controls', (controls: Controls) => {
@@ -34,23 +31,14 @@ io.on('connection', socket => {
     }
     const direction = Vec2(x, y)
     direction.normalize()
-    const force = Vec2.mul(direction, FORCE_SCALE)
     if (organism.membranes.length === 0) {
-      organism.membrane.force = Vec2.mul(force, organism.membrane.body.getMass())
+      throw new Error('This organism has no membranes')
     }
     organism.membranes.forEach(membrane => {
+      const force = Vec2.mul(direction, membrane.FORCE_SCALE)
       membrane.force = Vec2.mul(force, membrane.body.getMass())
-      // Version A (Wins the race)
-      // mass 5, speed 1 = 5
-      // mass 1, speed 5 = 5
-      // mass 1, speed 5 = 5
-
-      // Version B
-      // mass 5, speed 1 = 5
-      // mass 5, speed 1 = 5
-      // mass 1, speed 5 = 5
     })
-    const summary = stage.runner.getSummary({ organism })
+    const summary = stage.runner.getSummary({ player: organism })
     socket.emit('serverUpdateClient', summary)
   })
   socket.on('disconnect', () => {
