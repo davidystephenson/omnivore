@@ -44,6 +44,7 @@ export class Stage {
     this.world = new World({ gravity: Vec2(0, 0) })
     this.world.on('pre-solve', contact => this.preSolve(contact))
     this.world.on('begin-contact', contact => this.beginContact(contact))
+    // this.world.on('end-contact', contact => this.endContact(contact))
 
     this.halfHeight = props.halfHeight
     this.halfWidth = props.halfWidth
@@ -164,51 +165,7 @@ export class Stage {
   }
 
   beginContact (contact: Contact): void {
-    const fixtureA = contact.getFixtureA()
-    const fixtureB = contact.getFixtureB()
-    const featureA = fixtureA.getBody().getUserData() as Feature
-    const featureB = fixtureB.getBody().getUserData() as Feature
-    const mebranyA = featureA instanceof Membrane
-    const membranyB = featureB instanceof Membrane
-    const membrany = mebranyA || membranyB
-    if (!membrany) return
-    const wallyA = featureA instanceof Structure
-    const wallyB = featureB instanceof Structure
-    const wally = wallyA || wallyB
-    if (wally) return
-    if (featureA.actor === featureB.actor) return
-    const pairs = [
-      [featureA, featureB],
-      [featureB, featureA]
-    ]
-    const now = Date.now()
-    pairs.forEach(pair => {
-      const feature = pair[0]
-      const otherFeature = pair[1]
-      if (
-        !(feature instanceof Membrane) ||
-        !(otherFeature instanceof Membrane) ||
-        feature.actor.dead ||
-        otherFeature.actor.dead
-      ) {
-        return
-      }
-      if (feature.actor.invincibleTime === 0) {
-        feature.health -= 0.5
-        feature.color.alpha = featureA.health
-      }
-      if (feature.health <= 0) {
-        this.log({
-          value: ['new Killing', now]
-        })
-        const killing = new Killing({
-          victim: feature,
-          stage: this,
-          killer: otherFeature
-        })
-        this.killingQueue.push(killing)
-      }
-    })
+    //
   }
 
   debug<Value>(props: LogProps<Value>): void {
