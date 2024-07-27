@@ -1,4 +1,4 @@
-import { AABB, Body, BodyDef, Fixture, FixtureDef, CircleShape, Vec2, PolygonShape } from 'planck'
+import { AABB, Body, BodyDef, Fixture, FixtureDef, CircleShape, Vec2, PolygonShape, Contact } from 'planck'
 import { Color } from '../../shared/color'
 import { Actor } from '../actor/actor'
 // import { DebugLine } from '../../shared/debugLine'
@@ -43,6 +43,19 @@ export class Feature {
     this.borderWidth = props.borderWidth ?? 0.1
     actorCount += 1
     this.id = actorCount
+  }
+
+  getContacts (): Contact[] {
+    const contactEdges = []
+    for (
+      let contactEdge = this.body.getContactList();
+      contactEdge != null;
+      contactEdge = contactEdge.next
+    ) {
+      contactEdges.push(contactEdge)
+    }
+    const contacts = contactEdges.map(contactEdge => contactEdge.contact)
+    return contacts
   }
 
   getFeaturesInRange (): Feature[] {
