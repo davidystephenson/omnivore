@@ -66,7 +66,7 @@ export class Runner {
       if (!(feature instanceof Feature)) {
         throw new Error('User data is not a feature')
       }
-      const element = new Element({ feature })
+      const element = new Element({ feature, stage: this.stage })
       elements.push(element)
     })
     return elements

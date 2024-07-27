@@ -37,6 +37,7 @@ export class Renderer {
     if (eye == null) {
       return
     }
+    console.log('this.elements', this.elements)
     this.context.translate(eye.position.x, eye.position.y)
     this.context.fillStyle = 'rgba(50,50,50,1)'
     this.context.lineWidth = 0.4
@@ -97,7 +98,7 @@ export class Renderer {
       const context = this.context
       context.save()
       const color = element.color
-      this.context.fillStyle = `rgba(${color.red},${color.green},${color.blue},${color.alpha})`
+      this.context.fillStyle = `rgba(${color.red},${color.green},${color.blue},${0.5 * color.alpha})`
       context.beginPath()
       element.polygon.vertices.forEach((vertex, i) => {
         const x = vertex.x
