@@ -7,6 +7,8 @@ export class Membrane extends Feature {
   actor: Organism
   destroyed = false
   radius: number
+  FORCE_SCALE = 5
+
   constructor (props: {
     position: Vec2
     actor: Organism
@@ -43,7 +45,6 @@ export class Membrane extends Feature {
     const hunger = false
     if (
       hunger &&
-      !this.actor.playing &&
       this.health > 0 &&
       !this.destroyed &&
       !this.actor.dead

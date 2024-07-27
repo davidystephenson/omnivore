@@ -3,10 +3,10 @@ import { Stage } from './stage'
 import { Element } from '../shared/element'
 import { Feature } from './feature/feature'
 import { Summary } from '../shared/summary'
-import { Organism } from './actor/organism'
 import { Rope } from '../shared/rope'
 import { DebugLine } from '../shared/debugLine'
 import { DebugCircle } from '../shared/debugCircle'
+import { Player } from './actor/player'
 
 export class Runner {
   // intervalId: NodeJS.Timeout
@@ -44,16 +44,16 @@ export class Runner {
   }
 
   getSummary (props: {
-    organism: Organism
+    player: Player
   }): Summary {
-    const idsInVision = props.organism.featuresInVision.map(feature => feature.id)
+    const idsInVision = props.player.featuresInVision.map(feature => feature.id)
     const filteredElements = this.elements.filter(element => idsInVision.includes(element.id))
     const summary = new Summary({
       elements: filteredElements,
-      ropes: this.getRopes(props.organism),
+      ropes: this.getRopes(props.player),
       debugLines: this.debugLines,
       debugCircles: this.debugCircles,
-      id: props.organism.membrane.id
+      id: props.player.membrane.id
     })
     return summary
   }
@@ -72,9 +72,9 @@ export class Runner {
     return elements
   }
 
-  getRopes (organism: Organism): Rope[] {
+  getRopes (player: Player): Rope[] {
     const ropes: Rope[] = []
-    organism.featuresInVision.forEach(feature => {
+    player.featuresInVision.forEach(feature => {
       feature.ropes.forEach(rope => {
         ropes.push(rope)
       })

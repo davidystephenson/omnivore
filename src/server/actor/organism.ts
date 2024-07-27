@@ -7,8 +7,6 @@ import { Egg } from '../feature/egg'
 import { Feature } from '../feature/feature'
 import { Rope } from '../../shared/rope'
 import { Starvation } from '../starvation'
-import { Color } from '../../shared/color'
-import { Navigation } from '../navigation'
 import { ExplorationPoint } from '../explorationPoint'
 
 interface Tree {
@@ -25,7 +23,6 @@ export class Organism extends Actor {
   membrane: Membrane
   membranes: Membrane[] = []
   north = Vec2(0, 1)
-  playing = false
   debugPath = true
   radius: number
   readyToHatch = false
@@ -37,10 +34,8 @@ export class Organism extends Actor {
   constructor (props: {
     stage: Stage
     position: Vec2
-    playing?: boolean
   }) {
     super({ stage: props.stage, label: 'organism' })
-    this.playing = props.playing ?? this.playing
     this.spawnPosition = props.position
     this.tree = {
       radius: 1.19,
@@ -48,7 +43,7 @@ export class Organism extends Actor {
       branches: []
     }
     this.membrane = this.grow({ branch: this.tree })
-    const largerRadii = Navigation.radii.filter(rad => rad >= this.tree.radius)
+    const largerRadii = this.stage.navigation.radii.filter(rad => rad >= this.tree.radius)
     const indexOfMinimumValue = whichMin(largerRadii)
     const validRadius = largerRadii[indexOfMinimumValue]
     if (validRadius == null) throw new Error('No valid radius found')
@@ -221,20 +216,6 @@ export class Organism extends Actor {
   onStep (): void {
     super.onStep()
     this.explore()
-    if (this.debugPath) {
-      const start = this.membrane.body.getPosition()
-      const explorationId = this.explorationIds[0]
-      const explorationPoint = this.explorationPoints[explorationId]
-      const end = explorationPoint.position
-      const path = this.stage.navigation.getPath(start, end, this.membrane.radius)
-      range(0, path.length - 2).forEach(index => {
-        const currentPoint = path[index]
-        const nextPoint = path[index + 1]
-        this.stage.debugLine({ a: currentPoint, b: nextPoint, color: Color.WHITE, width: 0.1 })
-      })
-      const circle = new CircleShape(end, 0.5)
-      this.stage.debugCircle({ circle, color: Color.RED })
-    }
     const featuresInRange = this.membrane.getFeaturesInRange()
     this.featuresInVision = featuresInRange.filter(targetFeature => {
       if (this.membrane instanceof Egg) {

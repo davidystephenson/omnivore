@@ -18,9 +18,9 @@ export class Rehearsal extends Walled {
     // this.addBrick({ halfWidth: 40, halfHeight: 10, position: Vec2(0, 35) })
     // this.addBrick({ halfWidth: 40, halfHeight: 10, position: Vec2(0, -35) })
 
-    // this.addOrganism({
-    //   position: Vec2(-8, 0)
-    // })
+    this.addBot({
+      position: Vec2(-8, 0)
+    })
     // this.addBrick({
     //   halfHeight: 6,
     //   halfWidth: 17,

@@ -17,6 +17,8 @@ import { DebugCircle } from '../shared/debugCircle'
 import { Starvation } from './starvation'
 import { LogProps, Logger } from './logger'
 import { Navigation } from './navigation'
+import { Bot } from './actor/bot'
+import { Player } from './actor/player'
 
 export class Stage {
   actors = new Map<number, Actor>()
@@ -64,6 +66,11 @@ export class Stage {
     )
   }
 
+  addBot (props: { position: Vec2 }): Organism {
+    const organism = new Bot({ stage: this, ...props })
+    return organism
+  }
+
   addBrick (props: {
     angle?: number
     halfHeight: number
@@ -74,8 +81,8 @@ export class Stage {
     return brick
   }
 
-  addOrganism (props: { playing?: boolean, position: Vec2 }): Organism {
-    const organism = new Organism({ stage: this, ...props })
+  addPlayer (props: { position: Vec2 }): Organism {
+    const organism = new Player({ stage: this, ...props })
     return organism
   }
 
