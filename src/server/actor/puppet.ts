@@ -1,10 +1,10 @@
 import { Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Actor } from './actor'
-import { Sculpture } from '../feature/triangle'
+import { Sculpture } from '../feature/sculpture'
 
 export class Puppet extends Actor {
-  triangle: Sculpture
+  sculpture: Sculpture
 
   constructor (props: {
     stage: Stage
@@ -12,13 +12,13 @@ export class Puppet extends Actor {
     position: Vec2
   }) {
     super({ stage: props.stage, label: 'puppet' })
-    this.triangle = new Sculpture({
+    this.sculpture = new Sculpture({
       position: props.position,
       vertices: props.vertices,
       actor: this
     })
     this.invincibleTime = 0.1
-    this.features.push(this.triangle)
+    this.features.push(this.sculpture)
   }
 
   onStep (): void {

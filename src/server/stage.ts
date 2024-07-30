@@ -5,8 +5,6 @@ import { Wall } from './actor/wall'
 import { Actor } from './actor/actor'
 import { Brick } from './actor/brick'
 import { Feature } from './feature/feature'
-import { Membrane } from './feature/membrane'
-import { Structure } from './feature/structure'
 import { Killing } from './killing'
 import { Color } from '../shared/color'
 import { DebugLine } from '../shared/debugLine'
@@ -44,7 +42,7 @@ export class Stage {
     this.world = new World({ gravity: Vec2(0, 0) })
     this.world.on('pre-solve', contact => this.preSolve(contact))
     this.world.on('begin-contact', contact => this.beginContact(contact))
-    // this.world.on('end-contact', contact => this.endContact(contact))
+    this.world.on('end-contact', contact => this.endContact(contact))
 
     this.halfHeight = props.halfHeight
     this.halfWidth = props.halfWidth
@@ -165,7 +163,35 @@ export class Stage {
   }
 
   beginContact (contact: Contact): void {
-    //
+    const fixtureA = contact.getFixtureA()
+    const fixtureB = contact.getFixtureB()
+    const featureA = fixtureA.getBody().getUserData() as Feature
+    const featureB = fixtureB.getBody().getUserData() as Feature
+    const pairs = [
+      [featureA, featureB],
+      [featureB, featureA]
+    ]
+    pairs.forEach(pair => {
+      const feature = pair[0]
+      const otherFeature = pair[1]
+      feature.contacts.push(otherFeature)
+    })
+  }
+
+  endContact (contact: Contact): void {
+    const fixtureA = contact.getFixtureA()
+    const fixtureB = contact.getFixtureB()
+    const featureA = fixtureA.getBody().getUserData() as Feature
+    const featureB = fixtureB.getBody().getUserData() as Feature
+    const pairs = [
+      [featureA, featureB],
+      [featureB, featureA]
+    ]
+    pairs.forEach(pair => {
+      const feature = pair[0]
+      const otherFeature = pair[1]
+      feature.contacts = feature.contacts.filter(contact => contact.id !== otherFeature.id)
+    })
   }
 
   debug<Value>(props: LogProps<Value>): void {

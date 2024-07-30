@@ -1,4 +1,4 @@
-import { AABB, Body, BodyDef, Fixture, FixtureDef, CircleShape, Vec2, PolygonShape, Contact } from 'planck'
+import { AABB, Body, BodyDef, Fixture, FixtureDef, CircleShape, Vec2, PolygonShape } from 'planck'
 import { Color } from '../../shared/color'
 import { Actor } from '../actor/actor'
 // import { DebugLine } from '../../shared/debugLine'
@@ -24,6 +24,7 @@ export class Feature {
   health = 1
   maximumHealth = 1
   radius = 0
+  contacts: Feature[] = []
 
   constructor (props: {
     bodyDef: BodyDef
@@ -43,19 +44,6 @@ export class Feature {
     this.borderWidth = props.borderWidth ?? 0.1
     actorCount += 1
     this.id = actorCount
-  }
-
-  getContacts (): Contact[] {
-    const contactEdges = []
-    for (
-      let contactEdge = this.body.getContactList();
-      contactEdge != null;
-      contactEdge = contactEdge.next
-    ) {
-      contactEdges.push(contactEdge)
-    }
-    const contacts = contactEdges.map(contactEdge => contactEdge.contact)
-    return contacts
   }
 
   getFeaturesInRange (): Feature[] {
@@ -293,6 +281,11 @@ export class Feature {
       return this.checkCircleToPolygon(this, targetFeature, myShape, targetShape)
     }
     return true
+  }
+
+  destroy (): void {
+    this.actor.stage.actors.delete(this.actor.id)
+    this.actor.stage.destructionQueue.push(this.body)
   }
 
   onStep (): void {}
