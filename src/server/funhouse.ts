@@ -1,37 +1,38 @@
 import { Vec2 } from 'planck'
 import { HALF_SIGHT_WIDTH } from '../shared/sight'
-import { Stage } from './stage'
+import { Walled } from '../server/walled'
 
-export class Funhouse extends Stage {
+export class Funhouse extends Walled {
   constructor () {
     super({
       halfHeight: 50,
       halfWidth: 50
     })
 
+    this.navigation.setupWaypoints()
     const brickX = -14 + HALF_SIGHT_WIDTH - 0.1
-    // const propHalfWidth = SIGHT_HALF_WIDTH - 5
-    // const wallHalfWidth = SIGHT_HALF_WIDTH - 1.1
-    // const rightPropX = brickX + 1.25 + propHalfWidth
-    // const leftPropX = brickX - 1.25 - propHalfWidth
-    this.addBrick({ halfHeight: 10, halfWidth: 1, position: Vec2(brickX, 16) })
-    // this.addPuppet({
-    //   vertices: [
-    //     Vec2(-1, 5),
-    //     Vec2(1, 5),
-    //     Vec2(0, -5)
-    //   ],
-    //   position: Vec2(brickX, 15)
-    // })
+    const propHalfWidth = HALF_SIGHT_WIDTH - 5
+    const wallHalfWidth = HALF_SIGHT_WIDTH - 1.1
+    const rightPropX = brickX + 1.25 + propHalfWidth
+    const leftPropX = brickX - 1.25 - propHalfWidth
+    // this.addBrick({ halfHeight: 10, halfWidth: 1, position: Vec2(brickX, 16) })
+    this.addPuppet({
+      vertices: [
+        Vec2(-5, 10),
+        Vec2(5, 10),
+        Vec2(0, -10)
+      ],
+      position: Vec2(brickX, 15)
+    })
 
     // Wall Group
-    // this.addWalls({
-    //   halfWidth: wallHalfWidth,
-    //   halfHeight: 1,
-    //   position: Vec2(-14, 15),
-    //   count: 10,
-    //   gap: 0.1
-    // })
+    this.addWalls({
+      halfWidth: 1,
+      halfHeight: 1,
+      position: Vec2(-10, 15),
+      count: 10,
+      gap: 0.1
+    })
 
     // Big puppet
     // this.addPuppet({
@@ -44,11 +45,11 @@ export class Funhouse extends Stage {
     // })
 
     // Big wall
-    // this.addWall({
-    //   halfWidth: 5,
-    //   halfHeight: 5,
-    //   position: Vec2(-10, 15)
-    // })
+    this.addWall({
+      halfWidth: 5,
+      halfHeight: 10,
+      position: Vec2(10, 15)
+    })
 
     // Wide bricks
     // this.addBricks({
