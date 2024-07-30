@@ -29,6 +29,7 @@ export class Renderer {
   }
 
   render (): void {
+    console.log('render')
     window.requestAnimationFrame(t => this.render())
     this.context.resetTransform()
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
@@ -37,7 +38,6 @@ export class Renderer {
     if (eye == null) {
       return
     }
-    console.log('this.elements', this.elements)
     this.context.translate(eye.position.x, eye.position.y)
     this.context.fillStyle = 'rgba(50,50,50,1)'
     this.context.lineWidth = 0.4

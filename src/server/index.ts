@@ -1,11 +1,11 @@
 import { io } from './server'
 import { Vec2 } from 'planck'
 import { Controls } from '../shared/input'
-// import { Rehearsal } from './rehearsal'
+import { Rehearsal } from './rehearsal'
 import { Tree } from './tree'
-import { Funhouse } from './funhouse'
+// import { Funhouse } from './funhouse'
 
-const stage = new Funhouse()
+const stage = new Rehearsal()
 
 io.on('connection', socket => {
   stage.log({

@@ -1,6 +1,5 @@
 import { Vec2 } from 'planck'
 import { Walled } from './walled'
-import { Tree } from './tree'
 
 export class Rehearsal extends Walled {
   constructor () {
@@ -10,28 +9,36 @@ export class Rehearsal extends Walled {
     })
 
     // inner walls
-    this.addWall({ halfWidth: 30, halfHeight: 5, position: Vec2(0, 15) })
-    this.addWall({ halfWidth: 5, halfHeight: 20, position: Vec2(-30, -10) })
-    this.addWall({ halfWidth: 5, halfHeight: 20, position: Vec2(30, -10) })
+    this.addWall({ halfWidth: 6, halfHeight: 1, position: Vec2(0, 15) })
+    this.addWall({ halfWidth: 1, halfHeight: 3, position: Vec2(-30, -10) })
+    this.addWall({ halfWidth: 1, halfHeight: 1, position: Vec2(30, -10) })
     this.navigation.setupWaypoints()
 
     this.addPuppet({
       vertices: [
-        Vec2(10, 15),
-        Vec2(-10, 0),
-        Vec2(10, -15)
+        Vec2(20, 15),
+        Vec2(-20, 0),
+        Vec2(20, -15)
       ],
-      position: Vec2(25, 25)
+      position: Vec2(0, -15)
     })
-    this.addBrick({ halfWidth: 5, halfHeight: 5, position: Vec2(0, -10) })
+    // this.addPuppet({
+    //   vertices: [
+    //     Vec2(10, 5),
+    //     Vec2(-10, 0),
+    //     Vec2(10, -5)
+    //   ],
+    //   position: Vec2(0, -25)
+    // })
+    // this.addBrick({ halfWidth: 5, halfHeight: 5, position: Vec2(0, -10) })
     // this.addBrick({ halfWidth: 40, halfHeight: 10, position: Vec2(0, -35) })
-    const tree = new Tree({
-      radius: 0.6
-    })
-    this.addBot({
-      position: Vec2(-8, 0),
-      tree
-    })
+    // const tree = new Tree({
+    //   radius: 0.6
+    // })
+    // this.addBot({
+    //   position: Vec2(-8, 0),
+    //   tree
+    // })
     // // this.addBrick({
     // //   halfHeight: 6,
     //   halfWidth: 17,

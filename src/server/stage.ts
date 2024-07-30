@@ -172,15 +172,22 @@ export class Stage {
   beginContact (contact: Contact): void {
     const fixtureA = contact.getFixtureA()
     const fixtureB = contact.getFixtureB()
-    const featureA = fixtureA.getBody().getUserData() as Feature
-    const featureB = fixtureB.getBody().getUserData() as Feature
     const pairs = [
-      [featureA, featureB],
-      [featureB, featureA]
+      [fixtureA, fixtureB],
+      [fixtureB, fixtureA]
     ]
     pairs.forEach(pair => {
-      const feature = pair[0]
-      const otherFeature = pair[1]
+      const fixture = pair[0]
+      const otherFixture = pair[1]
+      const sensorContact = fixture.isSensor() || otherFixture.isSensor()
+      const feature = fixture.getBody().getUserData() as Feature
+      const otherFeature = otherFixture.getBody().getUserData() as Feature
+      if (sensorContact) {
+        if (fixture.isSensor() && !otherFixture.isSensor()) {
+          feature.inRangeFeatures.push(otherFeature)
+        }
+        return
+      }
       feature.contacts.push(otherFeature)
     })
   }
@@ -188,16 +195,19 @@ export class Stage {
   endContact (contact: Contact): void {
     const fixtureA = contact.getFixtureA()
     const fixtureB = contact.getFixtureB()
-    const featureA = fixtureA.getBody().getUserData() as Feature
-    const featureB = fixtureB.getBody().getUserData() as Feature
     const pairs = [
-      [featureA, featureB],
-      [featureB, featureA]
+      [fixtureA, fixtureB],
+      [fixtureB, fixtureA]
     ]
     pairs.forEach(pair => {
-      const feature = pair[0]
-      const otherFeature = pair[1]
+      const fixture = pair[0]
+      const otherFixture = pair[1]
+      const feature = fixture.getBody().getUserData() as Feature
+      const otherFeature = otherFixture.getBody().getUserData() as Feature
       feature.contacts = feature.contacts.filter(contact => contact.id !== otherFeature.id)
+      if (fixture.isSensor() && !otherFixture.isSensor()) {
+        feature.inRangeFeatures = feature.inRangeFeatures.filter(contact => contact.id !== otherFeature.id)
+      }
     })
   }
 

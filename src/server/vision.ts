@@ -287,7 +287,7 @@ export class Vision {
     targetFeature: Feature,
     targetPolygon: PolygonShape
   ): boolean {
-    const debug = false
+    const debug = true
     const betweenVertices = this.getBetweenVertices(sourcePoint, targetFeature, targetPolygon)
     const clearCorner1 = this.isVisible(sourcePoint, betweenVertices[1], [sourceFeature.id, targetFeature.id])
     const clearCorner2 = this.isVisible(sourcePoint, betweenVertices[2], [sourceFeature.id, targetFeature.id])
@@ -331,12 +331,12 @@ export class Vision {
             const hitTarget = hitFeatures.includes(targetFeature)
             if (hitSource && hitTarget) visible = true
           }
-          targetCorners.forEach(targetCorner => {
-            const rayDir = directionFromTo(targetCorner, cornerA)
-            const firstHit = this.getFirstHit(targetCorner, rayDir)
-            if (debug) this.stage.debugLine({ a: targetCorner, b: firstHit.point, color: Color.YELLOW })
-            if (firstHit.feature?.id === sourceFeature.id) visible = true
-          })
+          // targetCorners.forEach(targetCorner => {
+          //   const rayDir = directionFromTo(targetCorner, cornerA)
+          //   const firstHit = this.getFirstHit(targetCorner, rayDir)
+          //   if (debug) this.stage.debugLine({ a: targetCorner, b: firstHit.point, color: Color.WHITE })
+          //   if (firstHit.feature?.id === sourceFeature.id) visible = true
+          // })
         })
       })
     })
