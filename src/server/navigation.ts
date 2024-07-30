@@ -1,4 +1,4 @@
-import { Circle, Vec2 } from 'planck'
+import { Vec2 } from 'planck'
 import { Stage } from './stage'
 import { Waypoint } from './waypoint'
 import { Color } from '../shared/color'
@@ -296,39 +296,29 @@ export class Navigation {
       if (actor instanceof Bot) return
       players.push(actor)
     })
-    const player = players[0]
-    if (player == null) return
-    this.cornerWaypoints.forEach(waypoint => {
-      if (waypoint.radius === player.radius) {
-        this.stage.debugCircle({
-          circle: new Circle(waypoint.position, 0.2),
-          color: Color.WHITE
-        })
-      }
-    })
-    this.gridWaypoints.forEach(waypoint => {
-      this.stage.debugCircle({
-        circle: new Circle(waypoint.position, 0.2),
-        color: Color.WHITE
-      })
-    })
-    this.wallWaypoints.forEach(waypoint => {
-      if (waypoint.radius === player.radius) {
-        this.stage.debugCircle({
-          circle: new Circle(waypoint.position, 0.2),
-          color: Color.WHITE
-        })
-      }
-    })
-    // const radius = 1.0
-    // const radiusWaypoints = this.radiiWaypoints.get(radius)
-    // if (radiusWaypoints == null) return
-    // radiusWaypoints.forEach(waypoint => {
-    //   const neighbors = waypoint.neighbors.get(radius)
-    //   if (neighbors == null) return
-    //   neighbors.forEach(neighbor => {
-    //     this.stage.debugLine({ a: waypoint.position, b: neighbor.position, color: Color.WHITE })
+    // const player = players[0]
+    // if (player == null) return
+    // this.cornerWaypoints.forEach(waypoint => {
+    //   if (waypoint.radius === player.radius) {
+    //     this.stage.debugCircle({
+    //       circle: new Circle(waypoint.position, 0.2),
+    //       color: Color.WHITE
+    //     })
+    //   }
+    // })
+    // this.gridWaypoints.forEach(waypoint => {
+    //   this.stage.debugCircle({
+    //     circle: new Circle(waypoint.position, 0.2),
+    //     color: Color.WHITE
     //   })
+    // })
+    // this.wallWaypoints.forEach(waypoint => {
+    //   if (waypoint.radius === player.radius) {
+    //     this.stage.debugCircle({
+    //       circle: new Circle(waypoint.position, 0.2),
+    //       color: Color.WHITE
+    //     })
+    //   }
     // })
   }
 }

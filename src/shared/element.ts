@@ -2,7 +2,7 @@ import { CircleShape, PolygonShape, Vec2 } from 'planck'
 import { Feature } from '../server/feature/feature'
 import { Color } from './color'
 import { Stage } from '../server/stage'
-import { Sculpture } from '../server/feature/triangle'
+import { Sculpture } from '../server/feature/sculpture'
 
 export class Element {
   angle: number
@@ -28,11 +28,6 @@ export class Element {
     this.angle = props.feature.body.getAngle()
     this.borderColor = props.feature.color
     const healthRatio = props.feature.health / props.feature.maximumHealth
-    if (props.feature instanceof Sculpture) {
-      props.stage.log({ value: ['sculpture health', props.feature.health] })
-      props.stage.log({ value: ['sculpture maximumHealth', props.feature.maximumHealth] })
-      props.stage.log({ value: ['sculpture healthRatio', healthRatio] })
-    }
     this.color = new Color({
       red: props.feature.color.red,
       green: props.feature.color.green,
