@@ -2,6 +2,7 @@ import { io } from './server'
 import { Vec2 } from 'planck'
 import { Controls } from '../shared/input'
 import { Rehearsal } from './rehearsal'
+import { Tree } from './tree'
 
 const stage = new Rehearsal()
 
@@ -10,18 +11,16 @@ io.on('connection', socket => {
     value: ['connection:', socket.id]
   })
   socket.emit('connected')
+  const tree = new Tree({
+    radius: 1.2
+  })
+  stage.log({ value: ['tree:', tree] })
   const organism = stage.addPlayer({
-    position: Vec2(0, 0)
+    position: Vec2(0, 0),
+    tree
   })
   socket.on('controls', (controls: Controls) => {
-    let x = 0
-    let y = 0
-    if (controls.up) y += 1
-    if (controls.down) y -= 1
-    if (controls.left) x -= 1
-    if (controls.right) {
-      x += 1
-    }
+    organism.controls = controls
     if (controls.select) {
       stage.runner.paused = true
     }
@@ -29,15 +28,6 @@ io.on('connection', socket => {
       stage.runner.paused = false
       organism.membrane.health = 1
     }
-    const direction = Vec2(x, y)
-    direction.normalize()
-    if (organism.membranes.length === 0) {
-      throw new Error('This organism has no membranes')
-    }
-    organism.membranes.forEach(membrane => {
-      const force = Vec2.mul(direction, membrane.FORCE_SCALE)
-      membrane.force = Vec2.mul(force, membrane.body.getMass())
-    })
     const summary = stage.runner.getSummary({ player: organism })
     socket.emit('serverUpdateClient', summary)
   })

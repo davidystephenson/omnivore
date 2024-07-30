@@ -2,7 +2,6 @@ import { CircleShape, PolygonShape, Vec2 } from 'planck'
 import { Feature } from '../server/feature/feature'
 import { Color } from './color'
 import { Stage } from '../server/stage'
-import { Sculpture } from '../server/feature/sculpture'
 
 export class Element {
   angle: number

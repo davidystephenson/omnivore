@@ -9,7 +9,7 @@ export class Membrane extends Feature {
   actor: Organism
   destroyed = false
   radius: number
-  FORCE_SCALE = 5
+  forceScale = 1
 
   constructor (props: {
     position: Vec2
