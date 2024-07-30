@@ -1,4 +1,4 @@
-import { AABB, Body, BodyDef, Fixture, FixtureDef, CircleShape, Vec2, PolygonShape } from 'planck'
+import { Body, BodyDef, Fixture, FixtureDef, CircleShape, Vec2, PolygonShape } from 'planck'
 import { Color } from '../../shared/color'
 import { Actor } from '../actor/actor'
 // import { DebugLine } from '../../shared/debugLine'
@@ -24,6 +24,7 @@ export class Feature {
   health = 1
   maximumHealth = 1
   radius = 0
+  inRangeFeatures: Feature[] = []
   contacts: Feature[] = []
 
   constructor (props: {
@@ -48,22 +49,10 @@ export class Feature {
 
   getFeaturesInRange (): Feature[] {
     const featuresInRange: Feature[] = []
-    const position = this.body.getPosition()
-    const upper = Vec2.add(position, HALF_SIGHT)
-    const lower = Vec2.sub(position, HALF_SIGHT)
-    const visionBox = new AABB(lower, upper)
-    this.actor.stage.runner.getBodies().forEach(body => {
-      const feature = body.getUserData() as Feature
-      if (feature.label === 'structure') {
-        featuresInRange.push(feature)
-      }
-    })
-    this.actor.stage.world.queryAABB(visionBox, fixture => {
-      const feature = fixture.getUserData() as Feature
-      if (feature.label === 'structure') return true
-      featuresInRange.push(feature)
-      return true
-    })
+    this.actor.stage.walls.forEach(wall => featuresInRange.push(wall.structure))
+    this.actor.features.forEach(feature => featuresInRange.push(feature))
+    this.inRangeFeatures.forEach(feature => featuresInRange.push(feature))
+    this.actor.stage.log({ value: ['featuresInRange.length', featuresInRange.length] })
     return featuresInRange
   }
 

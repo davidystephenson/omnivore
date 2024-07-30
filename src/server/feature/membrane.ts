@@ -1,15 +1,17 @@
-import { Vec2, Circle } from 'planck'
+import { Vec2, Circle, Box, Fixture } from 'planck'
 import { Color } from '../../shared/color'
 import { Feature } from './feature'
 import { Organism } from '../actor/organism'
 import { Killing } from '../killing'
 import { Structure } from './structure'
+import { HALF_SIGHT } from '../../shared/sight'
 
 export class Membrane extends Feature {
   actor: Organism
   destroyed = false
   radius: number
   forceScale = 1
+  sensor: Fixture
 
   constructor (props: {
     position: Vec2
@@ -37,6 +39,11 @@ export class Membrane extends Feature {
     })
     this.actor = props.actor
     this.radius = radius
+    this.sensor = this.body.createFixture({
+      shape: Box(HALF_SIGHT.x, HALF_SIGHT.y),
+      isSensor: true
+    })
+    this.sensor.setUserData(this)
   }
 
   handleContacts (): void {
@@ -48,7 +55,7 @@ export class Membrane extends Feature {
   }
 
   doDamage (target: Feature): void {
-    target.health -= 0.5
+    target.health -= 0.01
     if (target.health <= 0) {
       if (target instanceof Membrane) {
         const killing = new Killing({

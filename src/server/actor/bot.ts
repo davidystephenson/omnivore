@@ -56,8 +56,6 @@ export class Bot extends Organism {
     const nextPoint = this.stage.navigation.navigate(start, end, this.membrane.radius)
     const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
     const directionToNext = directionFromTo(start, nextPosition)
-    const controlDirection = directionToNext
-    this.stage.log({ value: [controlDirection] })
     this.setControls(directionToNext)
   }
 }
