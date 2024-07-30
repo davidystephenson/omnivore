@@ -1,19 +1,40 @@
 import { CircleShape, Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Organism } from './organism'
-import { directionFromTo, range } from '../math'
+import { angleToDirection, directionFromTo, range, whichMax } from '../math'
 import { Color } from '../../shared/color'
 import { Waypoint } from '../waypoint'
+import { Tree } from '../tree'
 
 export class Bot extends Organism {
   constructor (props: {
     stage: Stage
     position: Vec2
+    tree: Tree
   }) {
     super({
       stage: props.stage,
-      position: props.position
+      position: props.position,
+      tree: props.tree
     })
+    this.membrane.forceScale = 1
+  }
+
+  setControls (direction: Vec2): void {
+    const roundDirs = range(0, 7).map(i => angleToDirection(2 * Math.PI * i / 8))
+    const dotProducts = roundDirs.map(roundDir => Vec2.dot(roundDir, direction))
+    const roundDir = roundDirs[whichMax(dotProducts)]
+    const start = this.membrane.body.getPosition()
+    this.stage.debugLine({
+      a: start,
+      b: Vec2.combine(1, start, 2, roundDir),
+      color: Color.RED,
+      width: 0.2
+    })
+    this.controls.up = roundDir.y > 0
+    this.controls.down = roundDir.y < 0
+    this.controls.left = roundDir.x < 0
+    this.controls.right = roundDir.x > 0
   }
 
   onStep (): void {
@@ -34,8 +55,9 @@ export class Bot extends Organism {
     }
     const nextPoint = this.stage.navigation.navigate(start, end, this.membrane.radius)
     const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
-    const direction = directionFromTo(start, nextPosition)
-    const force = Vec2.mul(direction, this.membrane.FORCE_SCALE)
-    this.membrane.force = Vec2.mul(force, this.membrane.body.getMass())
+    const directionToNext = directionFromTo(start, nextPosition)
+    const controlDirection = directionToNext
+    this.stage.log({ value: [controlDirection] })
+    this.setControls(directionToNext)
   }
 }

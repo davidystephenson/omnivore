@@ -10,6 +10,10 @@ export function normalize (vector: Vec2): Vec2 {
   return normalized
 }
 
+export function angleToDirection (angle: number): Vec2 {
+  return Vec2(Math.cos(angle), Math.sin(angle))
+}
+
 export function directionFromTo (from: Vec2, to: Vec2): Vec2 {
   return normalize(Vec2.sub(to, from))
 }

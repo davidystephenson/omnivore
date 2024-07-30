@@ -8,6 +8,7 @@ import { Feature } from '../feature/feature'
 import { Rope } from '../../shared/rope'
 import { Starvation } from '../starvation'
 import { ExplorationPoint } from '../explorationPoint'
+import { Controls } from '../../shared/input'
 
 interface Tree {
   angle: number
@@ -30,22 +31,31 @@ export class Organism extends Actor {
   tree: Tree
   explorationPoints: ExplorationPoint[] = []
   explorationIds: number[]
+  controls: Controls = {
+    up: false,
+    down: false,
+    left: false,
+    right: false,
+    select: false,
+    cancel: false
+  }
 
   constructor (props: {
     stage: Stage
     position: Vec2
+    tree: Tree
   }) {
     super({ stage: props.stage, label: 'organism' })
     this.spawnPosition = props.position
-    this.tree = {
-      radius: 1.19,
-      angle: 0,
-      branches: []
-    }
+    this.tree = props.tree
     this.membrane = this.grow({ branch: this.tree })
-    const largerRadii = this.stage.navigation.radii.filter(rad => rad >= this.tree.radius)
+    this.stage.log({ value: ['this.membrane.radius', this.membrane.radius] })
+    const largerRadii = this.stage.navigation.radii.filter(radius => radius >= this.membrane.radius)
+    this.stage.log({ value: ['largerRadii', largerRadii] })
     const indexOfMinimumValue = whichMin(largerRadii)
+    this.stage.log({ value: ['indexOfMinimumValue', indexOfMinimumValue] })
     const validRadius = largerRadii[indexOfMinimumValue]
+    this.stage.log({ value: ['validRadius', validRadius] })
     if (validRadius == null) throw new Error('No valid radius found')
     this.radius = validRadius
     this.stage.navigation.waypoints.forEach(waypoint => {
@@ -59,6 +69,25 @@ export class Organism extends Actor {
     })
     this.explorationIds = range(0, this.explorationPoints.length - 1)
     this.sortExplorationPoints()
+  }
+
+  move (): void {
+    let x = 0
+    let y = 0
+    if (this.controls.up) y += 1
+    if (this.controls.down) y -= 1
+    if (this.controls.left) x -= 1
+    if (this.controls.right) {
+      x += 1
+    }
+    const direction = Vec2(x, y)
+    direction.normalize()
+    if (this.membranes.length === 0) {
+      throw new Error('This organism has no membranes')
+    }
+    this.membranes.forEach(membrane => {
+      membrane.force = Vec2.mul(direction, membrane.forceScale * membrane.body.getMass())
+    })
   }
 
   explore (): void {
@@ -225,6 +254,7 @@ export class Organism extends Actor {
     })
     if (!this.hatched) this.flee()
     if (this.readyToHatch && !this.hatched) this.hatch()
+    this.move()
   }
 
   respawn (): boolean {
