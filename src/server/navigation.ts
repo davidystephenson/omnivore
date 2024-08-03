@@ -1,4 +1,4 @@
-import { Vec2 } from 'planck'
+import { Circle, Vec2 } from 'planck'
 import { Stage } from './stage'
 import { Waypoint } from './waypoint'
 import { Color } from '../shared/color'
@@ -296,29 +296,29 @@ export class Navigation {
       if (actor instanceof Bot) return
       players.push(actor)
     })
-    // const player = players[0]
-    // if (player == null) return
-    // this.cornerWaypoints.forEach(waypoint => {
-    //   if (waypoint.radius === player.radius) {
-    //     this.stage.debugCircle({
-    //       circle: new Circle(waypoint.position, 0.2),
-    //       color: Color.WHITE
-    //     })
-    //   }
-    // })
-    // this.gridWaypoints.forEach(waypoint => {
-    //   this.stage.debugCircle({
-    //     circle: new Circle(waypoint.position, 0.2),
-    //     color: Color.WHITE
-    //   })
-    // })
-    // this.wallWaypoints.forEach(waypoint => {
-    //   if (waypoint.radius === player.radius) {
-    //     this.stage.debugCircle({
-    //       circle: new Circle(waypoint.position, 0.2),
-    //       color: Color.WHITE
-    //     })
-    //   }
-    // })
+    const player = players[0]
+    if (player == null) return
+    this.cornerWaypoints.forEach(waypoint => {
+      if (waypoint.radius === player.radius) {
+        this.stage.debugCircle({
+          circle: new Circle(waypoint.position, 0.2),
+          color: Color.WHITE
+        })
+      }
+    })
+    this.gridWaypoints.forEach(waypoint => {
+      this.stage.debugCircle({
+        circle: new Circle(waypoint.position, 0.2),
+        color: Color.WHITE
+      })
+    })
+    this.wallWaypoints.forEach(waypoint => {
+      if (waypoint.radius === player.radius) {
+        this.stage.debugCircle({
+          circle: new Circle(waypoint.position, 0.2),
+          color: Color.WHITE
+        })
+      }
+    })
   }
 }
