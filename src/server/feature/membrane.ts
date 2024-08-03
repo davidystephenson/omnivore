@@ -55,7 +55,8 @@ export class Membrane extends Feature {
   }
 
   doDamage (target: Feature): void {
-    target.health -= 0.01
+    const ratio = this.body.getMass() / target.body.getMass()
+    target.health -= 0.01 * Math.pow(ratio, 3)
     if (target.health <= 0) {
       if (target instanceof Membrane) {
         const killing = new Killing({

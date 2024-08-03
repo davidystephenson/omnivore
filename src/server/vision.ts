@@ -92,8 +92,6 @@ export class Vision {
       })
       return Math.abs(getAngleDifference(angles[0], angles[1]))
     })
-    const pairTurns = pairAngles.map(angle => angle / Math.PI)
-    this.stage.log({ value: ['pairAngles', pairTurns] })
     const widePair = indexPairs[whichMax(pairAngles)]
     const wideVertices = widePair.map(i => targetPolygon.m_vertices[i])
     return wideVertices.map(vertex => targetFeature.body.getWorldPoint(vertex))
@@ -311,7 +309,7 @@ export class Vision {
     targetFeature: Feature,
     targetPolygon: PolygonShape
   ): boolean {
-    const debug = true
+    const debug = false
     const nearestPoint = this.getNearestPoint(sourcePoint, targetFeature, targetPolygon)
     if (debug) {
       this.stage.debugLine({ a: sourcePoint, b: nearestPoint, color: Color.YELLOW })
