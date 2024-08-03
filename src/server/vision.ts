@@ -4,7 +4,7 @@ import { Feature } from './feature/feature'
 import { Vec2, CircleShape, PolygonShape, Fixture } from 'planck'
 import { Stage } from './stage'
 import { Color } from '../shared/color'
-import { directionFromTo, getNearestIndex, normalize, rotate } from './math'
+import { directionFromTo, getAngleDifference, getNearestIndex, normalize, rotate, vecToAngle, whichMax } from './math'
 import { RayCastHit } from '../shared/rayCastHit'
 
 export class Vision {
@@ -64,7 +64,7 @@ export class Vision {
   getNearSideCorners (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): Vec2[] {
     const targetLocalSourcePoint = targetFeature.body.getLocalPoint(sourcePoint)
     if (targetPolygon.m_vertices.length === 4) {
-      const nearCorners = targetPolygon.m_vertices.filter(vertex => {
+      const sideCorners = targetPolygon.m_vertices.filter(vertex => {
         const y = Math.sign(vertex.y) * targetLocalSourcePoint.y
         const x = Math.sign(vertex.x) * targetLocalSourcePoint.x
         const visibleY = y >= Math.abs(vertex.y)
@@ -73,18 +73,30 @@ export class Vision {
       }).map(vertex => {
         return targetFeature.body.getWorldPoint(vertex)
       })
-      return nearCorners
+      return sideCorners
     }
-    const vertexDistances = targetPolygon.m_vertices.map(vertex => {
-      return Vec2.distance(targetLocalSourcePoint, vertex)
+    const vertexIndicies = [0, 1, 2]
+    const indexPairs: number[][] = []
+    vertexIndicies.forEach(i => {
+      vertexIndicies.forEach(j => {
+        if (i < j) {
+          indexPairs.push([i, j])
+        }
+      })
     })
-    const maxDistance = Math.max(...vertexDistances)
-    const localNearVertices = targetPolygon.m_vertices.filter((vertex, i) => {
-      return vertexDistances[i] < maxDistance
+    const pairAngles = indexPairs.map(pair => {
+      const indices = [0, 1].map(i => pair[i])
+      const vertices = indices.map(i => targetPolygon.m_vertices[i])
+      const angles = vertices.map(vertex => {
+        return vecToAngle(directionFromTo(targetLocalSourcePoint, vertex))
+      })
+      return Math.abs(getAngleDifference(angles[0], angles[1]))
     })
-    return localNearVertices.map(vertex => {
-      return targetFeature.body.getWorldPoint(vertex)
-    })
+    const pairTurns = pairAngles.map(angle => angle / Math.PI)
+    this.stage.log({ value: ['pairAngles', pairTurns] })
+    const widePair = indexPairs[whichMax(pairAngles)]
+    const wideVertices = widePair.map(i => targetPolygon.m_vertices[i])
+    return wideVertices.map(vertex => targetFeature.body.getWorldPoint(vertex))
   }
 
   getBetweenVertices (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): Vec2[] {
