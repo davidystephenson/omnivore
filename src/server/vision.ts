@@ -63,16 +63,28 @@ export class Vision {
 
   getNearSideCorners (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): Vec2[] {
     const targetLocalSourcePoint = targetFeature.body.getLocalPoint(sourcePoint)
-    const visibleCorners = targetPolygon.m_vertices.filter(vertex => {
-      const y = Math.sign(vertex.y) * targetLocalSourcePoint.y
-      const x = Math.sign(vertex.x) * targetLocalSourcePoint.x
-      const visibleY = y >= Math.abs(vertex.y)
-      const visibleX = x >= Math.abs(vertex.x)
-      return visibleX || visibleY
-    }).map(vertex => {
+    if (targetPolygon.m_vertices.length === 4) {
+      const nearCorners = targetPolygon.m_vertices.filter(vertex => {
+        const y = Math.sign(vertex.y) * targetLocalSourcePoint.y
+        const x = Math.sign(vertex.x) * targetLocalSourcePoint.x
+        const visibleY = y >= Math.abs(vertex.y)
+        const visibleX = x >= Math.abs(vertex.x)
+        return visibleX || visibleY
+      }).map(vertex => {
+        return targetFeature.body.getWorldPoint(vertex)
+      })
+      return nearCorners
+    }
+    const vertexDistances = targetPolygon.m_vertices.map(vertex => {
+      return Vec2.distance(targetLocalSourcePoint, vertex)
+    })
+    const maxDistance = Math.max(...vertexDistances)
+    const localNearVertices = targetPolygon.m_vertices.filter((vertex, i) => {
+      return vertexDistances[i] < maxDistance
+    })
+    return localNearVertices.map(vertex => {
       return targetFeature.body.getWorldPoint(vertex)
     })
-    return visibleCorners
   }
 
   getBetweenVertices (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): Vec2[] {
@@ -291,7 +303,6 @@ export class Vision {
     const betweenVertices = this.getBetweenVertices(sourcePoint, targetFeature, targetPolygon)
     const clearCorner1 = this.isVisible(sourcePoint, betweenVertices[1], [sourceFeature.id, targetFeature.id])
     const clearCorner2 = this.isVisible(sourcePoint, betweenVertices[2], [sourceFeature.id, targetFeature.id])
-    const targetCorners = [betweenVertices[1], betweenVertices[2]]
     const betweenPolygon = new PolygonShape(betweenVertices)
     if (debug) this.stage.debugPolygon({ polygon: betweenPolygon, color: Color.RED })
     if (clearCorner1 || clearCorner2) return true
@@ -312,6 +323,8 @@ export class Vision {
       outerCorners.forEach(corner => {
         const rayDirection = directionFromTo(sourcePoint, corner)
         const firstHit = this.getFirstHit(sourcePoint, rayDirection)
+        const inRange = this.isPointInRange(sourcePoint, firstHit.point)
+        if (!inRange) return
         if (debug) this.stage.debugLine({ a: sourcePoint, b: firstHit.point, color: Color.YELLOW })
         if (firstHit.feature != null && firstHit.feature.id === targetFeature.id) visible = true
         const worldCorners = shape.m_vertices.map(corner => {

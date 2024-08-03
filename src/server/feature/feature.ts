@@ -52,7 +52,7 @@ export class Feature {
     this.actor.stage.walls.forEach(wall => featuresInRange.push(wall.structure))
     this.actor.features.forEach(feature => featuresInRange.push(feature))
     this.inRangeFeatures.forEach(feature => featuresInRange.push(feature))
-    this.actor.stage.log({ value: ['featuresInRange.length', featuresInRange.length] })
+    // this.actor.stage.log({ value: ['featuresInRange.length', featuresInRange.length] })
     return featuresInRange
   }
 
