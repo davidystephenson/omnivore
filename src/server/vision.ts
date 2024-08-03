@@ -312,6 +312,13 @@ export class Vision {
     targetPolygon: PolygonShape
   ): boolean {
     const debug = true
+    const nearestPoint = this.getNearestPoint(sourcePoint, targetFeature, targetPolygon)
+    if (debug) {
+      this.stage.debugLine({ a: sourcePoint, b: nearestPoint, color: Color.YELLOW })
+    }
+    const nearDir = directionFromTo(sourcePoint, nearestPoint)
+    const nearHit = this.getFirstHit(sourcePoint, nearDir)
+    if (nearHit.feature?.id === targetFeature.id) return true
     const betweenVertices = this.getBetweenVertices(sourcePoint, targetFeature, targetPolygon)
     const clearCorner1 = this.isVisible(sourcePoint, betweenVertices[1], [sourceFeature.id, targetFeature.id])
     const clearCorner2 = this.isVisible(sourcePoint, betweenVertices[2], [sourceFeature.id, targetFeature.id])
