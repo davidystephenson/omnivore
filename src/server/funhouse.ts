@@ -35,21 +35,21 @@ export class Funhouse extends Walled {
     })
 
     // Big puppet
-    // this.addPuppet({
-    //   vertices: [
-    //     Vec2(propHalfWidth, 15),
-    //     Vec2(-propHalfWidth, 0),
-    //     Vec2(propHalfWidth, -15)
-    //   ],
-    //   position: Vec2(rightPropX, 15)
-    // })
+    this.addPuppet({
+      vertices: [
+        Vec2(propHalfWidth, 15),
+        Vec2(-propHalfWidth, 0),
+        Vec2(propHalfWidth, -15)
+      ],
+      position: Vec2(0, -15)
+    })
 
     // Big wall
-    this.addWall({
-      halfWidth: 5,
-      halfHeight: 10,
-      position: Vec2(10, 15)
-    })
+    // this.addWall({
+    //   halfWidth: 5,
+    //   halfHeight: 10,
+    //   position: Vec2(10, 15)
+    // })
 
     // Wide bricks
     // this.addBricks({
