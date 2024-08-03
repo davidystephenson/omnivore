@@ -98,7 +98,7 @@ export class Renderer {
       const context = this.context
       context.save()
       const color = element.color
-      this.context.fillStyle = `rgba(${color.red},${color.green},${color.blue},${0.5 * color.alpha})`
+      this.context.fillStyle = `rgba(${color.red},${color.green},${color.blue},${color.alpha})`
       context.beginPath()
       element.polygon.vertices.forEach((vertex, i) => {
         const x = vertex.x

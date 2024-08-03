@@ -10,6 +10,16 @@ export function normalize (vector: Vec2): Vec2 {
   return normalized
 }
 
+export function getAngleDifference (toAngle: number, fromAngle: number): number {
+  const v = { x: Math.cos(fromAngle), y: Math.sin(fromAngle) }
+  const w = { x: Math.cos(toAngle), y: Math.sin(toAngle) }
+  return Math.atan2(w.y * v.x - w.x * v.y, w.x * v.x + w.y * v.y)
+}
+
+export function vecToAngle (vector: Vec2): number {
+  return Math.atan2(vector.y, vector.x)
+}
+
 export function angleToDirection (angle: number): Vec2 {
   return Vec2(Math.cos(angle), Math.sin(angle))
 }
