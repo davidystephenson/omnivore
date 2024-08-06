@@ -10,7 +10,7 @@ export class Membrane extends Feature {
   actor: Organism
   destroyed = false
   radius: number
-  forceScale = 1
+  acceleration = 1
   sensor: Fixture
 
   constructor (props: {

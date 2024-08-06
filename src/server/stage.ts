@@ -289,10 +289,10 @@ export class Stage {
     this.debug(props)
   }
 
-  onStep (): void {
+  onStep (stepSize: number): void {
     this.logger.onStep()
     this.navigation.onStep()
-    this.actors.forEach(actor => actor.onStep())
+    this.actors.forEach(actor => actor.onStep(stepSize))
     this.destructionQueue.forEach(body => {
       this.world.destroyBody(body)
     })

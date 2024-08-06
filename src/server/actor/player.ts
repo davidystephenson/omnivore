@@ -14,6 +14,6 @@ export class Player extends Organism {
       stage: props.stage,
       tree: props.tree
     })
-    this.membrane.forceScale = 2
+    this.membrane.acceleration = 2
   }
 }
