@@ -21,6 +21,8 @@ import { Tree } from './tree'
 
 export class Stage {
   actors = new Map<number, Actor>()
+  debugBotFlee: boolean
+  debugBotPath: boolean
   destructionQueue: Body[] = []
   halfHeight: number
   halfWidth: number
@@ -37,9 +39,13 @@ export class Stage {
   navigation: Navigation
 
   constructor (props: {
+    debugBotFlee?: boolean
+    debugBotPath?: boolean
     halfHeight: number
     halfWidth: number
   }) {
+    this.debugBotFlee = props.debugBotFlee ?? false
+    this.debugBotPath = props.debugBotPath ?? false
     this.world = new World({ gravity: Vec2(0, 0) })
     this.world.on('pre-solve', contact => this.preSolve(contact))
     this.world.on('begin-contact', contact => this.beginContact(contact))
@@ -69,7 +75,7 @@ export class Stage {
   addBot (props: {
     position: Vec2
     tree: Tree
-  }): Organism {
+  }): Bot {
     const organism = new Bot({ stage: this, ...props })
     return organism
   }
