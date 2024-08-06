@@ -22,7 +22,7 @@ export class Actor {
     this.stage.actors.set(this.id, this)
   }
 
-  onStep (): void {
+  onStep (stepSize: number): void {
     this.features.forEach(feature => feature.onStep())
     // this.invincibleTime = Math.max(0, this.invincibleTime - this.stage.runner.timeStep)
   }

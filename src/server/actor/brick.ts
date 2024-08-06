@@ -25,7 +25,7 @@ export class Brick extends Actor {
     this.features.push(this.crate)
   }
 
-  onStep (): void {
-    super.onStep()
+  onStep (stepSize: number): void {
+    super.onStep(stepSize)
   }
 }

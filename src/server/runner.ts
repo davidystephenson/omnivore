@@ -39,7 +39,7 @@ export class Runner {
     this.elements = this.getElements()
     this.debugLines = []
     this.debugCircles = []
-    this.stage.onStep()
+    this.stage.onStep(stepSize)
     this.elements = this.getElements()
   }
 

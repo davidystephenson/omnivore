@@ -86,22 +86,9 @@ export class Organism extends Actor {
       throw new Error('This organism has no membranes')
     }
     this.membranes.forEach(membrane => {
-      membrane.force = Vec2.mul(direction, membrane.forceScale * membrane.body.getMass())
+      const forceScale = membrane.acceleration * membrane.body.getMass()
+      membrane.force = Vec2.mul(direction, forceScale)
     })
-  }
-
-  explore (): void {
-    const position = this.membrane.body.getPosition()
-    this.explorationPoints.forEach(point => {
-      const visible = this.stage.vision.isVisible(position, point.position)
-      if (visible) point.time = Date.now()
-    })
-    const targetPoint = this.explorationPoints[this.explorationIds[0]]
-    const targetVisible = this.stage.vision.isVisible(position, targetPoint.position)
-    if (targetVisible) {
-      targetPoint.time = Date.now()
-      this.sortExplorationPoints()
-    }
   }
 
   sortExplorationPoints (): void {
@@ -242,9 +229,8 @@ export class Organism extends Actor {
     return membrane
   }
 
-  onStep (): void {
-    super.onStep()
-    this.explore()
+  onStep (stepSize: number): void {
+    super.onStep(stepSize)
     const featuresInRange = this.membrane.getFeaturesInRange()
     this.featuresInVision = featuresInRange.filter(targetFeature => {
       if (this.membrane instanceof Egg) {

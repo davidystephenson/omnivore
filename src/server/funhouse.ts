@@ -1,5 +1,4 @@
 import { Vec2 } from 'planck'
-import { HALF_SIGHT_WIDTH } from '../shared/sight'
 import { Tree } from '../server/tree'
 import { Walled } from '../server/walled'
 
@@ -10,11 +9,6 @@ export class Funhouse extends Walled {
       halfWidth: 50
     })
 
-    const brickX = -14 + HALF_SIGHT_WIDTH - 0.1
-    const propHalfWidth = HALF_SIGHT_WIDTH - 5
-    const wallHalfWidth = HALF_SIGHT_WIDTH - 1.1
-    const rightPropX = brickX + 1.25 + propHalfWidth
-    const leftPropX = brickX - 1.25 - propHalfWidth
     // this.addBrick({ halfHeight: 10, halfWidth: 1, position: Vec2(brickX, 16) })
 
     // Wall Group
@@ -99,9 +93,9 @@ export class Funhouse extends Walled {
     // Big puppet
     this.addPuppet({
       vertices: [
-        Vec2(propHalfWidth, 15),
-        Vec2(-propHalfWidth, 0),
-        Vec2(propHalfWidth, -15)
+        Vec2(5, 15),
+        Vec2(-5, 0),
+        Vec2(5, -15)
       ],
       position: Vec2(0, -25)
     })
@@ -109,7 +103,7 @@ export class Funhouse extends Walled {
       // angle: Math.PI * 0.9,
       halfHeight: 6,
       halfWidth: 1,
-      position: Vec2(leftPropX, 15)
+      position: Vec2(-12, 15)
     })
 
     // Angled bricks

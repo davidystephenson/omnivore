@@ -21,7 +21,7 @@ export class Puppet extends Actor {
     this.features.push(this.sculpture)
   }
 
-  onStep (): void {
-    super.onStep()
+  onStep (stepSize: number): void {
+    super.onStep(stepSize)
   }
 }

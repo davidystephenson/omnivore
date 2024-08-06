@@ -7,6 +7,9 @@ import { Waypoint } from '../waypoint'
 import { Tree } from '../tree'
 
 export class Bot extends Organism {
+  giveUpTime: number
+  giveUpTimer = 0
+
   constructor (props: {
     stage: Stage
     position: Vec2
@@ -17,7 +20,8 @@ export class Bot extends Organism {
       position: props.position,
       tree: props.tree
     })
-    this.membrane.forceScale = 1
+    this.membrane.acceleration = 1
+    this.giveUpTime = 30 / this.membrane.acceleration
   }
 
   setControls (direction: Vec2): void {
@@ -37,8 +41,25 @@ export class Bot extends Organism {
     this.controls.right = roundDir.x > 0
   }
 
-  onStep (): void {
-    super.onStep()
+  explore (stepSize: number): void {
+    this.giveUpTimer += stepSize
+    const position = this.membrane.body.getPosition()
+    this.explorationPoints.forEach(point => {
+      const visible = this.stage.vision.isVisible(position, point.position)
+      if (visible) point.time = Date.now()
+    })
+    const targetPoint = this.explorationPoints[this.explorationIds[0]]
+    const targetVisible = this.stage.vision.isVisible(position, targetPoint.position)
+    if (targetVisible || this.giveUpTimer > this.giveUpTime) {
+      this.giveUpTimer = 0
+      targetPoint.time = Date.now()
+      this.sortExplorationPoints()
+    }
+  }
+
+  onStep (stepSize: number): void {
+    super.onStep(stepSize)
+    this.explore(stepSize)
     const start = this.membrane.body.getPosition()
     const explorationId = this.explorationIds[0]
     const explorationPoint = this.explorationPoints[explorationId]
