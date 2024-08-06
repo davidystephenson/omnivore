@@ -5,6 +5,7 @@ import { Walled } from '../server/walled'
 export class Funhouse extends Walled {
   constructor () {
     super({
+      debugBotFlee: true,
       halfHeight: 50,
       halfWidth: 50
     })

@@ -1,20 +1,18 @@
 import { Circle, CircleShape, Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Organism } from './organism'
-import { angleToDirection, directionFromTo, range, whichMax, whichMin } from '../math'
+import { angleToDirection, directionFromTo, range, rotate, whichMax, whichMin } from '../math'
 import { Color } from '../../shared/color'
 import { Waypoint } from '../waypoint'
 import { Tree } from '../tree'
 import { Membrane } from '../feature/membrane'
 
 export class Bot extends Organism {
-  debug: boolean
   giveUpTime: number
   giveUpTimer = 0
   nearestVisibleEnemy: Membrane | undefined
 
   constructor (props: {
-    debug?: boolean
     stage: Stage
     position: Vec2
     tree: Tree
@@ -24,7 +22,6 @@ export class Bot extends Organism {
       position: props.position,
       tree: props.tree
     })
-    this.debug = props.debug ?? false
     this.membrane.acceleration = 1
     this.giveUpTime = 30 / this.membrane.acceleration
     this.nearestVisibleEnemy = this.getNearestVisibleEnemy()
@@ -56,6 +53,7 @@ export class Bot extends Organism {
     const position = this.membrane.body.getPosition()
     this.explorationPoints.forEach(point => {
       const visible = this.stage.vision.isVisible(position, point.position)
+      point.visible = visible
       if (visible) point.time = Date.now()
     })
     const targetPoint = this.explorationPoints[this.explorationIds[0]]
@@ -83,16 +81,72 @@ export class Bot extends Organism {
     if (enemyMass === myMass) {
       return false
     }
-    const enemyPosition = this.nearestVisibleEnemy.body.getPosition()
-    const myPosition = this.membrane.body.getPosition()
-    const dirToEnemy = directionFromTo(myPosition, enemyPosition)
     if (enemyMass < myMass) {
-      this.setControls(dirToEnemy)
+      this.chase(this.nearestVisibleEnemy)
     } else {
-      const dirFromEnemy = Vec2.mul(dirToEnemy, -1)
-      this.setControls(dirFromEnemy)
+      this.flee(this.nearestVisibleEnemy)
     }
     return true
+  }
+
+  flee (enemy: Membrane): void {
+    const enemyPosition = enemy.body.getPosition()
+    const myPosition = this.membrane.body.getPosition()
+    const dirFromEnemy = directionFromTo(enemyPosition, myPosition)
+    const perps = [
+      rotate(dirFromEnemy, +0.5 * Math.PI),
+      rotate(dirFromEnemy, -0.5 * Math.PI)
+    ]
+    const sidePoints = perps.map(perp => {
+      return Vec2.combine(1, myPosition, this.membrane.radius, perp)
+    })
+    const lookDistance = 4
+    const lookPoints = sidePoints.map(sidePoint => {
+      return Vec2.combine(1, sidePoint, lookDistance, dirFromEnemy)
+    })
+    const rays = sidePoints.map((sidePoint, i) => {
+      return [sidePoint, lookPoints[i]]
+    })
+    const hitArrays = rays.map(ray => {
+      return this.stage.vision.rayCast(ray[0], ray[1])
+    })
+    if (this.stage.debugBotFlee) {
+      hitArrays.forEach((hitArray, i) => {
+        const color = hitArray.length === 0 ? Color.WHITE : Color.RED
+        this.stage.debugLine({
+          a: sidePoints[i],
+          b: lookPoints[i],
+          color,
+          width: 0.2
+        })
+      })
+    }
+    const blocked = hitArrays[0].length > 0 || hitArrays[1].length > 0
+    if (blocked) {
+      const visibleExplorationPoints = this.explorationPoints.filter(point => point.visible)
+      const directions = visibleExplorationPoints.map(point => directionFromTo(myPosition, point.position))
+      const dotProducts = directions.map(direction => Vec2.dot(direction, dirFromEnemy))
+      if (directions.length === 0) return
+      const fleeDir = directions[whichMax(dotProducts)]
+      this.setControls(fleeDir)
+      if (this.stage.debugBotFlee) {
+        this.stage.debugLine({
+          a: myPosition,
+          b: Vec2.combine(1, myPosition, 2, fleeDir),
+          color: Color.GREEN,
+          width: 0.4
+        })
+      }
+      return
+    }
+    this.setControls(dirFromEnemy)
+  }
+
+  chase (enemy: Membrane): void {
+    const enemyPosition = enemy.body.getPosition()
+    const myPosition = this.membrane.body.getPosition()
+    const dirToEnemy = directionFromTo(myPosition, enemyPosition)
+    this.setControls(dirToEnemy)
   }
 
   onStep (stepSize: number): void {
@@ -105,7 +159,7 @@ export class Bot extends Organism {
     const explorationId = this.explorationIds[0]
     const explorationPoint = this.explorationPoints[explorationId]
     const end = explorationPoint.position
-    if (this.debug) {
+    if (this.stage.debugBotPath) {
       const path = this.stage.navigation.getPath(start, end, this.membrane.radius)
       range(0, path.length - 2).forEach(index => {
         const currentPoint = path[index]

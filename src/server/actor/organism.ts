@@ -81,7 +81,7 @@ export class Organism extends Actor {
       throw new Error('This organism has no membranes')
     }
     this.membranes.forEach(membrane => {
-      const forceScale = membrane.acceleration * membrane.body.getMass()
+      const forceScale = membrane.acceleration * membrane.body.getMass() * 5
       membrane.force = Vec2.mul(direction, forceScale)
     })
   }
@@ -204,7 +204,7 @@ export class Organism extends Actor {
     this.membrane.borderWidth = 0.2
   }
 
-  flee (): void { }
+  eggFlee (): void { }
 
   grow (props: {
     branch: Tree
@@ -233,7 +233,7 @@ export class Organism extends Actor {
       }
       return this.membranes.some(membrane => this.stage.vision.isFeatureVisible(membrane, targetFeature))
     })
-    if (!this.hatched) this.flee()
+    if (!this.hatched) this.eggFlee()
     if (this.readyToHatch && !this.hatched) this.hatch()
     this.move()
   }
