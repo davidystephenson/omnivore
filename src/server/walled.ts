@@ -3,11 +3,12 @@ import { Stage } from './stage'
 
 export class Walled extends Stage {
   constructor (props: {
+    debugBotChase?: boolean
     debugBotFlee?: boolean
     halfHeight: number
     halfWidth: number
   }) {
-    super({ debugBotFlee: props.debugBotFlee, halfHeight: props.halfHeight, halfWidth: props.halfWidth })
+    super(props)
     // Right wall
     this.addWall({
       halfWidth: this.halfWidth,
