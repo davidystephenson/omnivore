@@ -5,6 +5,7 @@ import { Organism } from '../actor/organism'
 import { Killing } from '../killing'
 import { Structure } from './structure'
 import { HALF_SIGHT } from '../../shared/sight'
+import { directionFromTo } from '../math'
 
 export class Membrane extends Feature {
   actor: Organism
@@ -51,12 +52,23 @@ export class Membrane extends Feature {
       if (target instanceof Structure) return
       if (target.actor === this.actor) return
       this.doDamage(target)
+      if (target instanceof Membrane) {
+        this.push(target)
+      }
     })
+  }
+
+  push (target: Feature): void {
+    const ratio = this.body.getMass() / target.body.getMass()
+    const forceScale = 100 * ratio
+    const direction = directionFromTo(this.body.getPosition(), target.body.getPosition())
+    const force = Vec2.mul(direction, forceScale)
+    target.body.applyForceToCenter(force)
   }
 
   doDamage (target: Feature): void {
     const ratio = this.body.getMass() / target.body.getMass()
-    target.health -= 0.01 * Math.pow(ratio, 3)
+    target.health -= 0.03 * Math.pow(ratio, 2)
     if (target.health <= 0) {
       if (target instanceof Membrane) {
         const killing = new Killing({

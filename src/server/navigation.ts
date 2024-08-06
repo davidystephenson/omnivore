@@ -17,6 +17,7 @@ export class Navigation {
     y: HALF_SIGHT.y
   }
 
+  debug: boolean
   radii = [1.2, 1.1, 1.0, 0.9, 0.8, 0.7, 0.6]
   stage: Stage
   waypoints = new Map<number, Waypoint>()
@@ -27,8 +28,10 @@ export class Navigation {
   radiiWaypoints = new Map<number, Waypoint[]>()
 
   constructor (props: {
+    debug?: boolean
     stage: Stage
   }) {
+    this.debug = props.debug ?? false
     this.stage = props.stage
   }
 
@@ -298,27 +301,29 @@ export class Navigation {
     })
     const player = players[0]
     if (player == null) return
-    this.cornerWaypoints.forEach(waypoint => {
-      if (waypoint.radius === player.radius) {
-        this.stage.debugCircle({
-          circle: new Circle(waypoint.position, 0.2),
-          color: Color.WHITE
-        })
-      }
-    })
-    this.gridWaypoints.forEach(waypoint => {
-      this.stage.debugCircle({
-        circle: new Circle(waypoint.position, 0.2),
-        color: Color.WHITE
+    if (this.debug) {
+      this.cornerWaypoints.forEach(waypoint => {
+        if (waypoint.radius === player.radius) {
+          this.stage.debugCircle({
+            circle: new Circle(waypoint.position, 0.2),
+            color: Color.WHITE
+          })
+        }
       })
-    })
-    this.wallWaypoints.forEach(waypoint => {
-      if (waypoint.radius === player.radius) {
+      this.gridWaypoints.forEach(waypoint => {
         this.stage.debugCircle({
           circle: new Circle(waypoint.position, 0.2),
           color: Color.WHITE
         })
-      }
-    })
+      })
+      this.wallWaypoints.forEach(waypoint => {
+        if (waypoint.radius === player.radius) {
+          this.stage.debugCircle({
+            circle: new Circle(waypoint.position, 0.2),
+            color: Color.WHITE
+          })
+        }
+      })
+    }
   }
 }

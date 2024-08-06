@@ -1,16 +1,20 @@
-import { CircleShape, Vec2 } from 'planck'
+import { Circle, CircleShape, Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Organism } from './organism'
-import { angleToDirection, directionFromTo, range, whichMax } from '../math'
+import { angleToDirection, directionFromTo, range, whichMax, whichMin } from '../math'
 import { Color } from '../../shared/color'
 import { Waypoint } from '../waypoint'
 import { Tree } from '../tree'
+import { Membrane } from '../feature/membrane'
 
 export class Bot extends Organism {
+  debug: boolean
   giveUpTime: number
   giveUpTimer = 0
+  nearestVisibleEnemy: Membrane | undefined
 
   constructor (props: {
+    debug?: boolean
     stage: Stage
     position: Vec2
     tree: Tree
@@ -20,8 +24,10 @@ export class Bot extends Organism {
       position: props.position,
       tree: props.tree
     })
+    this.debug = props.debug ?? false
     this.membrane.acceleration = 1
     this.giveUpTime = 30 / this.membrane.acceleration
+    this.nearestVisibleEnemy = this.getNearestVisibleEnemy()
   }
 
   setControls (direction: Vec2): void {
@@ -34,6 +40,10 @@ export class Bot extends Organism {
       b: Vec2.combine(1, start, 2, roundDir),
       color: Color.RED,
       width: 0.2
+    })
+    this.stage.debugCircle({
+      circle: new Circle(start, 0.4),
+      color: Color.RED
     })
     this.controls.up = roundDir.y > 0
     this.controls.down = roundDir.y < 0
@@ -57,14 +67,45 @@ export class Bot extends Organism {
     }
   }
 
+  getNearestVisibleEnemy (): Membrane | undefined {
+    const membranes = this.featuresInVision.filter(feature => feature instanceof Membrane)
+    const enemies = membranes.filter(m => m.actor.id !== this.id)
+    if (enemies.length === 0) return undefined
+    const distances = enemies.map(m => Vec2.distance(m.body.getPosition(), this.membrane.body.getPosition()))
+    const nearestEnemy = enemies[whichMin(distances)]
+    return nearestEnemy as Membrane
+  }
+
+  maneuver (): boolean {
+    if (!(this.nearestVisibleEnemy instanceof Membrane)) return false
+    const enemyMass = this.nearestVisibleEnemy.body.getMass()
+    const myMass = this.membrane.body.getMass()
+    if (enemyMass === myMass) {
+      return false
+    }
+    const enemyPosition = this.nearestVisibleEnemy.body.getPosition()
+    const myPosition = this.membrane.body.getPosition()
+    const dirToEnemy = directionFromTo(myPosition, enemyPosition)
+    if (enemyMass < myMass) {
+      this.setControls(dirToEnemy)
+    } else {
+      const dirFromEnemy = Vec2.mul(dirToEnemy, -1)
+      this.setControls(dirFromEnemy)
+    }
+    return true
+  }
+
   onStep (stepSize: number): void {
     super.onStep(stepSize)
     this.explore(stepSize)
+    this.nearestVisibleEnemy = this.getNearestVisibleEnemy()
+    const maneuvered = this.maneuver()
+    if (maneuvered) return
     const start = this.membrane.body.getPosition()
     const explorationId = this.explorationIds[0]
     const explorationPoint = this.explorationPoints[explorationId]
     const end = explorationPoint.position
-    if (this.debugPath) {
+    if (this.debug) {
       const path = this.stage.navigation.getPath(start, end, this.membrane.radius)
       range(0, path.length - 2).forEach(index => {
         const currentPoint = path[index]

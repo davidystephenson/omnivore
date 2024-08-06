@@ -13,7 +13,7 @@ io.on('connection', socket => {
   })
   socket.emit('connected')
   const tree = new Tree({
-    radius: 1.2
+    radius: 1.0
   })
   stage.log({ value: ['tree:', tree] })
   const organism = stage.addPlayer({
