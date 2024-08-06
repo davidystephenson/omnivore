@@ -10,6 +10,7 @@ import { Membrane } from '../feature/membrane'
 export class Bot extends Organism {
   giveUpTime: number
   giveUpTimer = 0
+  chasePoint: Vec2 | undefined
   nearestVisibleEnemy: Membrane | undefined
 
   constructor (props: {
@@ -75,7 +76,9 @@ export class Bot extends Organism {
   }
 
   maneuver (): boolean {
-    if (!(this.nearestVisibleEnemy instanceof Membrane)) return false
+    if (!(this.nearestVisibleEnemy instanceof Membrane)) {
+      return this.checkChasePoint()
+    }
     const enemyMass = this.nearestVisibleEnemy.body.getMass()
     const myMass = this.membrane.body.getMass()
     if (enemyMass === myMass) {
@@ -86,6 +89,31 @@ export class Bot extends Organism {
     } else {
       this.flee(this.nearestVisibleEnemy)
     }
+    return true
+  }
+
+  checkChasePoint (): boolean {
+    const myPosition = this.membrane.body.getPosition()
+    if (this.chasePoint == null) return false
+    const distance = Vec2.distance(myPosition, this.chasePoint)
+    if (distance < this.membrane.radius) {
+      this.chasePoint = undefined
+      return false
+    }
+    if (this.stage.debugBotChase) {
+      const path = this.stage.navigation.getPath(myPosition, this.chasePoint, this.membrane.radius)
+      range(0, path.length - 2).forEach(index => {
+        const currentPoint = path[index]
+        const nextPoint = path[index + 1]
+        this.stage.debugLine({ a: currentPoint, b: nextPoint, color: Color.GREEN, width: 0.2 })
+      })
+      const circle = new CircleShape(this.chasePoint, 0.5)
+      this.stage.debugCircle({ circle, color: Color.GREEN })
+    }
+    const nextPoint = this.stage.navigation.navigate(myPosition, this.chasePoint, this.membrane.radius)
+    const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
+    const direction = directionFromTo(myPosition, nextPosition)
+    this.setControls(direction)
     return true
   }
 
@@ -147,6 +175,7 @@ export class Bot extends Organism {
     const myPosition = this.membrane.body.getPosition()
     const dirToEnemy = directionFromTo(myPosition, enemyPosition)
     this.setControls(dirToEnemy)
+    this.chasePoint = enemyPosition.clone()
   }
 
   onStep (stepSize: number): void {

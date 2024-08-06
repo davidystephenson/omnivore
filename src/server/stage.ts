@@ -21,6 +21,7 @@ import { Tree } from './tree'
 
 export class Stage {
   actors = new Map<number, Actor>()
+  debugBotChase: boolean
   debugBotFlee: boolean
   debugBotPath: boolean
   destructionQueue: Body[] = []
@@ -39,11 +40,13 @@ export class Stage {
   navigation: Navigation
 
   constructor (props: {
+    debugBotChase?: boolean
     debugBotFlee?: boolean
     debugBotPath?: boolean
     halfHeight: number
     halfWidth: number
   }) {
+    this.debugBotChase = props.debugBotChase ?? false
     this.debugBotFlee = props.debugBotFlee ?? false
     this.debugBotPath = props.debugBotPath ?? false
     this.world = new World({ gravity: Vec2(0, 0) })

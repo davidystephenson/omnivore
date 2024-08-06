@@ -5,6 +5,7 @@ import { Walled } from '../server/walled'
 export class Funhouse extends Walled {
   constructor () {
     super({
+      debugBotChase: true,
       debugBotFlee: true,
       halfHeight: 50,
       halfWidth: 50
@@ -207,18 +208,18 @@ export class Funhouse extends Walled {
       position: Vec2(-8, 0),
       tree: smallTree
     })
-    this.addBot({
-      position: Vec2(-13, 0),
-      tree: smallTree
-    })
-    this.addBot({
-      position: Vec2(-18, 0),
-      tree: smallTree
-    })
-    this.addBot({
-      position: Vec2(-23, 0),
-      tree: smallTree
-    })
+    // this.addBot({
+    //   position: Vec2(-13, 0),
+    //   tree: smallTree
+    // })
+    // this.addBot({
+    //   position: Vec2(-18, 0),
+    //   tree: smallTree
+    // })
+    // this.addBot({
+    //   position: Vec2(-23, 0),
+    //   tree: smallTree
+    // })
     const bigTree = new Tree({
       radius: 1.2
     })
@@ -226,17 +227,17 @@ export class Funhouse extends Walled {
       position: Vec2(-5, 0),
       tree: bigTree
     })
-    this.addBot({
-      position: Vec2(-10, 0),
-      tree: bigTree
-    })
-    this.addBot({
-      position: Vec2(-15, 0),
-      tree: bigTree
-    })
-    this.addBot({
-      position: Vec2(-20, 0),
-      tree: bigTree
-    })
+    // this.addBot({
+    //   position: Vec2(-10, 0),
+    //   tree: bigTree
+    // })
+    // this.addBot({
+    //   position: Vec2(-15, 0),
+    //   tree: bigTree
+    // })
+    // this.addBot({
+    //   position: Vec2(-20, 0),
+    //   tree: bigTree
+    // })
   }
 }
