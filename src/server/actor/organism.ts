@@ -24,7 +24,6 @@ export class Organism extends Actor {
   membrane: Membrane
   membranes: Membrane[] = []
   north = Vec2(0, 1)
-  debugPath = true
   radius: number
   readyToHatch = false
   spawnPosition: Vec2
@@ -49,13 +48,9 @@ export class Organism extends Actor {
     this.spawnPosition = props.position
     this.tree = props.tree
     this.membrane = this.grow({ branch: this.tree })
-    this.stage.log({ value: ['this.membrane.radius', this.membrane.radius] })
     const largerRadii = this.stage.navigation.radii.filter(radius => radius >= this.membrane.radius)
-    this.stage.log({ value: ['largerRadii', largerRadii] })
     const indexOfMinimumValue = whichMin(largerRadii)
-    this.stage.log({ value: ['indexOfMinimumValue', indexOfMinimumValue] })
     const validRadius = largerRadii[indexOfMinimumValue]
-    this.stage.log({ value: ['validRadius', validRadius] })
     if (validRadius == null) throw new Error('No valid radius found')
     this.radius = validRadius
     this.stage.navigation.waypoints.forEach(waypoint => {
