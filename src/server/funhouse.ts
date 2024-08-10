@@ -6,7 +6,7 @@ export class Funhouse extends Walled {
   constructor () {
     super({
       debugBotChase: true,
-      debugBotFlee: true,
+      debugBotFlee: false,
       halfHeight: 50,
       halfWidth: 50
     })
@@ -14,12 +14,37 @@ export class Funhouse extends Walled {
     // this.addBrick({ halfHeight: 10, halfWidth: 1, position: Vec2(brickX, 16) })
 
     // Wall Group
-    this.addWalls({
-      halfWidth: 1,
+    // this.addWalls({
+    //   halfWidth: 1,
+    //   halfHeight: 1,
+    //   position: Vec2(-12, 15),
+    //   count: 3,
+    //   gap: 0.1
+    // })
+    this.addWall({
       halfHeight: 1,
-      position: Vec2(-10, 15),
-      count: 10,
-      gap: 0.1
+      halfWidth: 5,
+      position: Vec2(-10, 27)
+    })
+    this.addWall({
+      halfWidth: 1,
+      halfHeight: 5,
+      position: Vec2(-12, 22)
+    })
+    this.addWall({
+      halfWidth: 1,
+      halfHeight: 5,
+      position: Vec2(-8, 22)
+    })
+    this.addWall({
+      halfWidth: 1,
+      halfHeight: 3,
+      position: Vec2(-13, 16)
+    })
+    this.addWall({
+      halfWidth: 1,
+      halfHeight: 3,
+      position: Vec2(-7, 16)
     })
 
     // Big wall
@@ -62,25 +87,25 @@ export class Funhouse extends Walled {
     // })
 
     this.navigation.setupWaypoints()
-    this.addPuppet({
-      vertices: [
-        Vec2(-5, 10),
-        Vec2(5, 10),
-        Vec2(0, -10)
-      ],
-      position: Vec2(0, 15)
-    })
+    // this.addPuppet({
+    //   vertices: [
+    //     Vec2(-5, 10),
+    //     Vec2(5, 10),
+    //     Vec2(0, -10)
+    //   ],
+    //   position: Vec2(0, 15)
+    // })
     // Puppet Group
-    this.addPuppets({
-      count: 10,
-      spacing: 2.1,
-      vertices: [
-        Vec2(-5, 1),
-        Vec2(5, 0),
-        Vec2(-5, -1)
-      ],
-      position: Vec2(15, 15)
-    })
+    // this.addPuppets({
+    //   count: 10,
+    //   spacing: 2.1,
+    //   vertices: [
+    //     Vec2(-5, 1),
+    //     Vec2(5, 0),
+    //     Vec2(-5, -1)
+    //   ],
+    //   position: Vec2(15, 15)
+    // })
     // Wide bricks
     // this.addBricks({
     //   count: 10,
@@ -101,12 +126,12 @@ export class Funhouse extends Walled {
       ],
       position: Vec2(0, -25)
     })
-    this.addBrick({
-      // angle: Math.PI * 0.9,
-      halfHeight: 6,
-      halfWidth: 1,
-      position: Vec2(-12, 15)
-    })
+    // this.addBrick({
+    //   // angle: Math.PI * 0.9,
+    //   halfHeight: 6,
+    //   halfWidth: 1,
+    //   position: Vec2(-12, 15)
+    // })
 
     // Angled bricks
     // this.addBricks({
@@ -205,7 +230,7 @@ export class Funhouse extends Walled {
       radius: 0.6
     })
     this.addBot({
-      position: Vec2(-8, 0),
+      position: Vec2(-10, 15),
       tree: smallTree
     })
     // this.addBot({
@@ -223,8 +248,12 @@ export class Funhouse extends Walled {
     const bigTree = new Tree({
       radius: 1.2
     })
+    // this.addBot({
+    //   position: Vec2(-10, 23),
+    //   tree: bigTree
+    // })
     this.addBot({
-      position: Vec2(-5, 0),
+      position: Vec2(-10, 9),
       tree: bigTree
     })
     // this.addBot({

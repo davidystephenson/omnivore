@@ -12,7 +12,7 @@ export class Runner {
   // intervalId: NodeJS.Timeout
   stage: Stage
   timeStep = 1 / 60
-  timeScale = 1
+  timeScale = 1 // 1
   paused = false
   worldTime = 0
   elements: Element[]
