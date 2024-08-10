@@ -17,7 +17,7 @@ io.on('connection', socket => {
   })
   stage.log({ value: ['tree:', tree] })
   const organism = stage.addPlayer({
-    position: Vec2(0, 0),
+    position: Vec2(20, 0),
     tree
   })
   socket.on('controls', (controls: Controls) => {

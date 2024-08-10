@@ -1,7 +1,7 @@
 import { Circle, CircleShape, Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Organism } from './organism'
-import { angleToDirection, directionFromTo, range, rotate, whichMax, whichMin } from '../math'
+import { directionFromTo, range, rotate, whichMax, whichMin } from '../math'
 import { Color } from '../../shared/color'
 import { Waypoint } from '../waypoint'
 import { Tree } from '../tree'
@@ -25,28 +25,70 @@ export class Bot extends Organism {
     })
     this.membrane.acceleration = 1
     this.giveUpTime = 30 / this.membrane.acceleration
-    this.nearestVisibleEnemy = this.getNearestVisibleEnemy()
+    this.nearestVisibleEnemy = this.getNearestReachableEnemy()
   }
 
   setControls (direction: Vec2): void {
-    const roundDirs = range(0, 7).map(i => angleToDirection(2 * Math.PI * i / 8))
+    const root2over2 = Math.sqrt(2) / 2
+    const roundDirs = [
+      Vec2(+1, +0),
+      Vec2(-1, +0),
+      Vec2(+0, +1),
+      Vec2(+0, -1),
+      Vec2(+root2over2, +root2over2),
+      Vec2(+root2over2, -root2over2),
+      Vec2(-root2over2, +root2over2),
+      Vec2(-root2over2, -root2over2)
+    ]
     const dotProducts = roundDirs.map(roundDir => Vec2.dot(roundDir, direction))
-    const roundDir = roundDirs[whichMax(dotProducts)]
-    const start = this.membrane.body.getPosition()
-    this.stage.debugLine({
-      a: start,
-      b: Vec2.combine(1, start, 2, roundDir),
-      color: Color.RED,
-      width: 0.2
-    })
-    this.stage.debugCircle({
-      circle: new Circle(start, 0.4),
-      color: Color.RED
-    })
+    const whichMaxDot = whichMax(dotProducts)
+    const roundDir = roundDirs[whichMaxDot]
     this.controls.up = roundDir.y > 0
     this.controls.down = roundDir.y < 0
     this.controls.left = roundDir.x < 0
     this.controls.right = roundDir.x > 0
+    this.debugControls()
+  }
+
+  debugControls (): void {
+    const start = this.membrane.body.getPosition()
+    this.stage.debugCircle({
+      circle: new Circle(start, 0.4),
+      color: Color.RED
+    })
+    const length = 1
+    if (this.controls.up) {
+      this.stage.debugLine({
+        a: start,
+        b: Vec2(start.x, start.y + length),
+        color: Color.RED,
+        width: 0.2
+      })
+    }
+    if (this.controls.down) {
+      this.stage.debugLine({
+        a: start,
+        b: Vec2(start.x, start.y - length),
+        color: Color.RED,
+        width: 0.2
+      })
+    }
+    if (this.controls.left) {
+      this.stage.debugLine({
+        a: start,
+        b: Vec2(start.x - length, start.y),
+        color: Color.RED,
+        width: 0.2
+      })
+    }
+    if (this.controls.right) {
+      this.stage.debugLine({
+        a: start,
+        b: Vec2(start.x + length, start.y),
+        color: Color.RED,
+        width: 0.2
+      })
+    }
   }
 
   explore (stepSize: number): void {
@@ -66,16 +108,26 @@ export class Bot extends Organism {
     }
   }
 
-  getNearestVisibleEnemy (): Membrane | undefined {
+  isPointReachable (end: Vec2): boolean {
+    const start = this.membrane.body.getPosition()
+    return this.stage.navigation.isPointReachable(start, end, this.membrane.radius)
+  }
+
+  getNearestReachableEnemy (): Membrane | undefined {
     const membranes = this.featuresInVision.filter(feature => feature instanceof Membrane)
     const enemies = membranes.filter(m => m.actor.id !== this.id)
-    if (enemies.length === 0) return undefined
-    const distances = enemies.map(m => Vec2.distance(m.body.getPosition(), this.membrane.body.getPosition()))
-    const nearestEnemy = enemies[whichMin(distances)]
-    return nearestEnemy as Membrane
+    const reachableEnemies = enemies.filter(enemy => {
+      return this.isPointReachable(enemy.body.getPosition())
+    })
+    if (this.membrane.radius === 1.2) this.stage.log({ value: ['reachableEnemies.length', reachableEnemies.length] })
+    if (reachableEnemies.length === 0) return undefined
+    const distances = reachableEnemies.map(m => Vec2.distance(m.body.getPosition(), this.membrane.body.getPosition()))
+    const nearestReachableEnemy = reachableEnemies[whichMin(distances)]
+    return nearestReachableEnemy as Membrane
   }
 
   maneuver (): boolean {
+    this.nearestVisibleEnemy = this.getNearestReachableEnemy()
     if (!(this.nearestVisibleEnemy instanceof Membrane)) {
       return this.checkChasePoint()
     }
@@ -93,8 +145,16 @@ export class Bot extends Organism {
   }
 
   checkChasePoint (): boolean {
+    this.stage.log({ value: 'checkChasePoint' })
     const myPosition = this.membrane.body.getPosition()
-    if (this.chasePoint == null) return false
+    if (this.chasePoint == null) {
+      return false
+    }
+    const reachable = this.isPointReachable(this.chasePoint)
+    if (!reachable) {
+      this.chasePoint = undefined
+      return false
+    }
     const distance = Vec2.distance(myPosition, this.chasePoint)
     if (distance < this.membrane.radius) {
       this.chasePoint = undefined
@@ -173,6 +233,11 @@ export class Bot extends Organism {
   chase (enemy: Membrane): void {
     const enemyPosition = enemy.body.getPosition()
     const myPosition = this.membrane.body.getPosition()
+    this.stage.debugLine({
+      a: myPosition,
+      b: enemyPosition,
+      color: Color.WHITE
+    })
     const dirToEnemy = directionFromTo(myPosition, enemyPosition)
     this.setControls(dirToEnemy)
     this.chasePoint = enemyPosition.clone()
@@ -181,7 +246,6 @@ export class Bot extends Organism {
   onStep (stepSize: number): void {
     super.onStep(stepSize)
     this.explore(stepSize)
-    this.nearestVisibleEnemy = this.getNearestVisibleEnemy()
     const maneuvered = this.maneuver()
     if (maneuvered) return
     const start = this.membrane.body.getPosition()

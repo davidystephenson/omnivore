@@ -50,21 +50,22 @@ export class Navigation {
 
   getPath (start: Vec2, end: Vec2, radius: number): Vec2[] {
     const largerRadii = this.radii.filter(rad => rad >= radius)
-    const validRadius = largerRadii[whichMin(largerRadii)]
-    const radiusWaypoints = this.radiiWaypoints.get(validRadius)
+    const minimumRadius = largerRadii[whichMin(largerRadii)]
+    const radiusWaypoints = this.radiiWaypoints.get(minimumRadius)
     if (radiusWaypoints == null) throw new Error('Radius out of bounds')
     const path = [start]
     let nextPoint: Waypoint | Vec2 = this.navigate(path[path.length - 1], end, radius)
     if (!(nextPoint instanceof Waypoint)) {
       path.push(nextPoint)
     }
-
     while (nextPoint instanceof Waypoint) {
       path.push(nextPoint.position)
       nextPoint = this.navigate(path[path.length - 1], end, radius)
       if (!(nextPoint instanceof Waypoint)) path.push(nextPoint)
       if (path.length > radiusWaypoints.length) {
-        throw new Error('The path is too long')
+        this.stage.log({ value: 'The path is too long' })
+        return path
+        // throw new Error('The path is too long')
       }
     }
     return path
@@ -84,7 +85,9 @@ export class Navigation {
     const startNeighbors = this.getNeighbors(start, validRadius)
     const endNeighbors = this.getNeighbors(end, validRadius)
     let minDistance = Infinity
-    let target = startNeighbors[0]
+    let target: Waypoint | Vec2 = start
+    let targetPosition = start
+    let targetEndNeighborPosition = start
     startNeighbors.forEach(startNeighbor => {
       endNeighbors.forEach(endNeighbor => {
         const startToNeighbor = Vec2.distance(start, startNeighbor.position)
@@ -96,6 +99,8 @@ export class Navigation {
         if (distance < minDistance) {
           minDistance = distance
           target = startNeighbor
+          targetPosition = target.position
+          targetEndNeighborPosition = endNeighbor.position
         }
       })
     })
@@ -166,6 +171,15 @@ export class Navigation {
     })
   }
 
+  isPointReachable (start: Vec2, end: Vec2, radius: number): boolean {
+    const largerRadii = this.stage.navigation.radii.filter(rad => rad >= radius)
+    const minimumRadius = Math.min(...largerRadii)
+    const nextPoint = this.stage.navigation.navigate(start, end, minimumRadius)
+    const nextPosition = nextPoint instanceof Vec2 ? nextPoint : nextPoint.position
+    const distance = Vec2.distance(start, nextPosition)
+    return distance > 0
+  }
+
   isOpen (props: {
     fromPosition: Vec2
     toPosition: Vec2
@@ -193,24 +207,43 @@ export class Navigation {
           const feature = fixture.getBody().getUserData() as Feature
           if (!(feature instanceof Structure)) return 1
           open = false
-          if (props.debug === true) this.stage.debugLine({ a: start, b: end, color: Color.RED, width: 0.1 })
           return 0
         })
       }
     })
+    if (open && props.debug === true) {
+      range(0, 2).forEach(index => {
+        const start = starts[index]
+        const end = ends[index]
+        this.stage.debugLine({
+          a: start,
+          b: end,
+          color: Color.RED,
+          width: 0.15
+        })
+      })
+    }
     return open
   }
 
-  getNeighbors (position: Vec2, radius: number): Waypoint[] {
+  getNeighbors (position: Vec2, radius: number, debug?: boolean): Waypoint[] {
     const validWaypoints = this.radiiWaypoints.get(radius)
     if (validWaypoints == null) return []
     const neighbors = validWaypoints.filter(otherWaypoint => {
       if (Vec2.distance(position, otherWaypoint.position) === 0) return false
-      return this.isOpen({
+      const open1 = this.isOpen({
+        debug,
         fromPosition: position,
         toPosition: otherWaypoint.position,
         radius
       })
+      const open2 = this.isOpen({
+        debug,
+        fromPosition: otherWaypoint.position,
+        toPosition: position,
+        radius
+      })
+      return open1 && open2
     })
     return neighbors
   }
@@ -301,7 +334,7 @@ export class Navigation {
     })
     const player = players[0]
     if (player == null) return
-    if (this.debug) {
+    if (true) {
       this.cornerWaypoints.forEach(waypoint => {
         if (waypoint.radius === player.radius) {
           this.stage.debugCircle({
