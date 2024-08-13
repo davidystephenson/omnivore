@@ -25,7 +25,7 @@ export class Funhouse extends Walled {
     this.addWall({
       halfHeight: 1,
       halfWidth: 5,
-      position: Vec2(-10, 27)
+      position: Vec2(-10, 29)
     })
     this.addWall({
       halfWidth: 1,
@@ -39,13 +39,13 @@ export class Funhouse extends Walled {
     })
     this.addWall({
       halfWidth: 1,
-      halfHeight: 20,
-      position: Vec2(-13, 16)
+      halfHeight: 10,
+      position: Vec2(-13, 6.9)
     })
     this.addWall({
       halfWidth: 1,
-      halfHeight: 20,
-      position: Vec2(-7, 16)
+      halfHeight: 10,
+      position: Vec2(-7, 6.9)
     })
 
     // Big wall
@@ -227,13 +227,13 @@ export class Funhouse extends Walled {
     //   halfWidth: 1,
     //   position: Vec2(rightPropX - 5, 16)
     // })
-    const smallTree = new Tree({
-      radius: 0.6
-    })
-    this.addBot({
-      position: Vec2(-10, 15),
-      tree: smallTree
-    })
+    // const smallTree = new Tree({
+    //   radius: 0.6
+    // })
+    // this.addBot({
+    //   position: Vec2(-10, 15),
+    //   tree: smallTree
+    // })
     // this.addBot({
     //   position: Vec2(-13, 0),
     //   tree: smallTree

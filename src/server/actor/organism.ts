@@ -228,10 +228,11 @@ export class Organism extends Actor {
     super.onStep(stepSize)
     const featuresInRange = this.membrane.getFeaturesInRange()
     this.featuresInVision = featuresInRange.filter(targetFeature => {
-      if (this.membrane instanceof Egg) {
-        return this.stage.vision.isFeatureVisible(this.membrane, targetFeature)
+      const visible = this.membranes.some(membrane => this.stage.vision.isFeatureVisible(membrane, targetFeature))
+      if (visible && targetFeature.radius > 0 && this.membrane.radius === 1.2) {
+        this.stage.log({ value: ['visible', targetFeature.radius] })
       }
-      return this.membranes.some(membrane => this.stage.vision.isFeatureVisible(membrane, targetFeature))
+      return visible
     })
     if (!this.hatched) this.eggFlee()
     if (this.readyToHatch && !this.hatched) this.hatch()
