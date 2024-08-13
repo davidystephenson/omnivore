@@ -48,7 +48,7 @@ export class Navigation {
     return target
   }
 
-  getPath (start: Vec2, end: Vec2, radius: number): Vec2[] {
+  getPath (start: Vec2, end: Vec2, radius: number, otherRadius?: number): Vec2[] {
     const largerRadii = this.radii.filter(rad => rad >= radius)
     const minimumRadius = largerRadii[whichMin(largerRadii)]
     const radiusWaypoints = this.radiiWaypoints.get(minimumRadius)
@@ -60,7 +60,7 @@ export class Navigation {
     }
     while (nextPoint instanceof Waypoint) {
       path.push(nextPoint.position)
-      nextPoint = this.navigate(path[path.length - 1], end, radius)
+      nextPoint = this.navigate(path[path.length - 1], end, radius, otherRadius)
       if (!(nextPoint instanceof Waypoint)) path.push(nextPoint)
       if (path.length > radiusWaypoints.length) {
         this.stage.log({ value: 'The path is too long' })
@@ -71,13 +71,15 @@ export class Navigation {
     return path
   }
 
-  navigate (start: Vec2, end: Vec2, radius: number): Waypoint | Vec2 {
+  navigate (start: Vec2, end: Vec2, radius: number, otherRadius?: number): Waypoint | Vec2 {
     const largerRadii = this.radii.filter(rad => rad >= radius)
     const validRadius = largerRadii[whichMin(largerRadii)]
     const open = this.isOpen({
       fromPosition: start,
       toPosition: end,
-      radius: validRadius
+      radius: validRadius,
+      otherRadius,
+      debug: true
     })
     if (open) {
       return end
@@ -86,8 +88,6 @@ export class Navigation {
     const endNeighbors = this.getNeighbors(end, validRadius)
     let minDistance = Infinity
     let target: Waypoint | Vec2 = start
-    let targetPosition = start
-    let targetEndNeighborPosition = start
     startNeighbors.forEach(startNeighbor => {
       endNeighbors.forEach(endNeighbor => {
         const startToNeighbor = Vec2.distance(start, startNeighbor.position)
@@ -99,8 +99,6 @@ export class Navigation {
         if (distance < minDistance) {
           minDistance = distance
           target = startNeighbor
-          targetPosition = target.position
-          targetEndNeighborPosition = endNeighbor.position
         }
       })
     })
@@ -171,10 +169,10 @@ export class Navigation {
     })
   }
 
-  isPointReachable (start: Vec2, end: Vec2, radius: number): boolean {
+  isPointReachable (start: Vec2, end: Vec2, radius: number, otherRadius?: number): boolean {
     const largerRadii = this.stage.navigation.radii.filter(rad => rad >= radius)
     const minimumRadius = Math.min(...largerRadii)
-    const nextPoint = this.stage.navigation.navigate(start, end, minimumRadius)
+    const nextPoint = this.stage.navigation.navigate(start, end, minimumRadius, otherRadius)
     const nextPosition = nextPoint instanceof Vec2 ? nextPoint : nextPoint.position
     const distance = Vec2.distance(start, nextPosition)
     return distance > 0
@@ -185,6 +183,7 @@ export class Navigation {
     toPosition: Vec2
     radius: number
     debug?: boolean
+    otherRadius?: number
   }): boolean {
     const direction = directionFromTo(props.fromPosition, props.toPosition)
     const perp = rotate(direction, 0.5 * Math.PI)
@@ -198,6 +197,14 @@ export class Navigation {
       props.toPosition,
       Vec2.combine(1, props.toPosition, +props.radius, perp)
     ]
+    ends[0] = Vec2.combine(1, ends[0], -props.radius, direction)
+    ends[2] = Vec2.combine(1, ends[2], -props.radius, direction)
+    this.stage.log({ value: ['props.otherRadius', props.otherRadius] })
+    if (props.otherRadius != null) {
+      ends[0] = Vec2.combine(1, ends[0], -10 * props.otherRadius, direction)
+      ends[1] = Vec2.combine(1, ends[1], -10 * props.otherRadius, direction)
+      ends[2] = Vec2.combine(1, ends[2], -10 * props.otherRadius, direction)
+    }
     let open = true
     range(0, 2).forEach(index => {
       if (open) {
@@ -211,14 +218,14 @@ export class Navigation {
         })
       }
     })
-    if (open && props.debug === true) {
+    if (open && props.debug === true && props.radius === 1.2) {
       range(0, 2).forEach(index => {
         const start = starts[index]
         const end = ends[index]
         this.stage.debugLine({
           a: start,
           b: end,
-          color: Color.RED,
+          color: Color.CYAN,
           width: 0.15
         })
       })
@@ -334,7 +341,7 @@ export class Navigation {
     })
     const player = players[0]
     if (player == null) return
-    if (true) {
+    if (this.stage.debugWaypoints) {
       this.cornerWaypoints.forEach(waypoint => {
         if (waypoint.radius === player.radius) {
           this.stage.debugCircle({

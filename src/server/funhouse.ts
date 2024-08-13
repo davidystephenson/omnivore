@@ -7,6 +7,7 @@ export class Funhouse extends Walled {
     super({
       debugBotChase: true,
       debugBotFlee: false,
+      debugWaypoints: true,
       halfHeight: 50,
       halfWidth: 50
     })
@@ -38,12 +39,12 @@ export class Funhouse extends Walled {
     })
     this.addWall({
       halfWidth: 1,
-      halfHeight: 3,
+      halfHeight: 20,
       position: Vec2(-13, 16)
     })
     this.addWall({
       halfWidth: 1,
-      halfHeight: 3,
+      halfHeight: 20,
       position: Vec2(-7, 16)
     })
 

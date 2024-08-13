@@ -24,6 +24,7 @@ export class Stage {
   debugBotChase: boolean
   debugBotFlee: boolean
   debugBotPath: boolean
+  debugWaypoints: boolean
   destructionQueue: Body[] = []
   halfHeight: number
   halfWidth: number
@@ -43,12 +44,14 @@ export class Stage {
     debugBotChase?: boolean
     debugBotFlee?: boolean
     debugBotPath?: boolean
+    debugWaypoints?: boolean
     halfHeight: number
     halfWidth: number
   }) {
     this.debugBotChase = props.debugBotChase ?? false
     this.debugBotFlee = props.debugBotFlee ?? false
     this.debugBotPath = props.debugBotPath ?? false
+    this.debugWaypoints = props.debugWaypoints ?? false
     this.world = new World({ gravity: Vec2(0, 0) })
     this.world.on('pre-solve', contact => this.preSolve(contact))
     this.world.on('begin-contact', contact => this.beginContact(contact))
