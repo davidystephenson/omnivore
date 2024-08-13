@@ -197,40 +197,38 @@ export class Navigation {
       props.toPosition,
       Vec2.combine(1, props.toPosition, +props.radius, perp)
     ]
-    ends[0] = Vec2.combine(1, ends[0], -props.radius, direction)
-    ends[2] = Vec2.combine(1, ends[2], -props.radius, direction)
-    this.stage.log({ value: ['props.otherRadius', props.otherRadius] })
     if (props.otherRadius != null) {
-      ends[0] = Vec2.combine(1, ends[0], -10 * props.otherRadius, direction)
-      ends[1] = Vec2.combine(1, ends[1], -10 * props.otherRadius, direction)
-      ends[2] = Vec2.combine(1, ends[2], -10 * props.otherRadius, direction)
+      ends[0] = Vec2.combine(1, ends[0], -props.otherRadius, direction)
+      ends[1] = Vec2.combine(1, ends[1], -props.otherRadius, direction)
+      ends[2] = Vec2.combine(1, ends[2], -props.otherRadius, direction)
     }
-    let open = true
+    const opens = [true, true, true]
     range(0, 2).forEach(index => {
-      if (open) {
-        const start = starts[index]
-        const end = ends[index]
-        this.stage.world.rayCast(start, end, (fixture, point, normal, fraction) => {
-          const feature = fixture.getBody().getUserData() as Feature
-          if (!(feature instanceof Structure)) return 1
-          open = false
-          return 0
-        })
-      }
+      const start = starts[index]
+      const end = ends[index]
+      this.stage.world.rayCast(start, end, (fixture, point, normal, fraction) => {
+        const feature = fixture.getBody().getUserData() as Feature
+        if (!(feature instanceof Structure)) return 1
+        opens[index] = false
+        return 0
+      })
     })
-    if (open && props.debug === true && props.radius === 1.2) {
+    const allOpen = opens.every(x => x)
+    if (props.otherRadius != null && props.radius === 1.2) {
       range(0, 2).forEach(index => {
         const start = starts[index]
         const end = ends[index]
         this.stage.debugLine({
           a: start,
           b: end,
-          color: Color.CYAN,
+          color: opens[index] ? Color.CYAN : Color.RED,
           width: 0.15
         })
       })
+      this.stage.log({ value: `opens: ${JSON.stringify(opens)}` })
+      this.stage.log({ value: `every: ${String(allOpen)}` })
     }
-    return open
+    return allOpen
   }
 
   getNeighbors (position: Vec2, radius: number, debug?: boolean): Waypoint[] {
