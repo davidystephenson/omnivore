@@ -11,7 +11,8 @@ export class Bot extends Organism {
   giveUpTime: number
   giveUpTimer = 0
   chasePoint: Vec2 | undefined
-  nearestVisibleEnemy: Membrane | undefined
+  chaseRadius: number | undefined
+  enemy: Membrane | undefined
 
   constructor (props: {
     stage: Stage
@@ -25,36 +26,61 @@ export class Bot extends Organism {
     })
     this.membrane.acceleration = 1
     this.giveUpTime = 30 / this.membrane.acceleration
-    this.nearestVisibleEnemy = this.getNearestReachableEnemy()
+    this.enemy = this.getNearestReachableEnemy()
   }
 
-  setControls (direction: Vec2): void {
-    const root2over2 = Math.sqrt(2) / 2
-    const roundDirs = [
-      Vec2(+1, +0),
-      Vec2(-1, +0),
-      Vec2(+0, +1),
-      Vec2(+0, -1),
-      Vec2(+root2over2, +root2over2),
-      Vec2(+root2over2, -root2over2),
-      Vec2(-root2over2, +root2over2),
-      Vec2(-root2over2, -root2over2)
-    ]
-    const dotProducts = roundDirs.map(roundDir => Vec2.dot(roundDir, direction))
-    const whichMaxDot = whichMax(dotProducts)
-    const roundDir = roundDirs[whichMaxDot]
-    this.controls.up = roundDir.y > 0
-    this.controls.down = roundDir.y < 0
-    this.controls.left = roundDir.x < 0
-    this.controls.right = roundDir.x > 0
-    this.debugControls()
+  chase (enemy: Membrane): void {
+    const enemyPosition = enemy.body.getPosition()
+    const myPosition = this.membrane.body.getPosition()
+    this.stage.debugLine({
+      a: myPosition,
+      b: enemyPosition,
+      color: Color.WHITE
+    })
+    const dirToEnemy = directionFromTo(myPosition, enemyPosition)
+    this.setControls(dirToEnemy)
+    this.chasePoint = enemyPosition.clone()
+    this.chaseRadius = enemy.radius
+  }
+
+  checkChasePoint (): boolean {
+    if (this.chasePoint == null) {
+      return false
+    }
+    const myPosition = this.membrane.body.getPosition()
+    const chaseRadius = this.chaseRadius ?? 0
+    const reachable = this.isPointReachable(this.chasePoint, chaseRadius)
+    if (!reachable) {
+      this.chasePoint = undefined
+      return false
+    }
+    const distance = Vec2.distance(myPosition, this.chasePoint)
+    if (distance < this.membrane.radius + chaseRadius) {
+      this.chasePoint = undefined
+      return false
+    }
+    if (this.stage.debugBotChase) {
+      const path = this.stage.navigation.getPath(myPosition, this.chasePoint, this.membrane.radius, chaseRadius)
+      const circle = new CircleShape(this.chasePoint, chaseRadius)
+      this.stage.debugCircle({ circle, color: Color.GREEN })
+      range(0, path.length - 2).forEach(index => {
+        const currentPoint = path[index]
+        const nextPoint = path[index + 1]
+        this.stage.debugLine({ a: currentPoint, b: nextPoint, color: Color.GREEN, width: 0.2 })
+      })
+    }
+    const nextPoint = this.stage.navigation.navigate(myPosition, this.chasePoint, this.membrane.radius, chaseRadius)
+    const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
+    const direction = directionFromTo(myPosition, nextPosition)
+    this.setControls(direction)
+    return true
   }
 
   debugControls (): void {
     const start = this.membrane.body.getPosition()
     this.stage.debugCircle({
-      circle: new Circle(start, 0.4),
-      color: Color.RED
+      circle: new Circle(start, this.membrane.radius),
+      color: Color.MAGENTA
     })
     const length = 1
     if (this.controls.up) {
@@ -106,75 +132,6 @@ export class Bot extends Organism {
       targetPoint.time = Date.now()
       this.sortExplorationPoints()
     }
-  }
-
-  isPointReachable (end: Vec2): boolean {
-    const start = this.membrane.body.getPosition()
-    return this.stage.navigation.isPointReachable(start, end, this.membrane.radius)
-  }
-
-  getNearestReachableEnemy (): Membrane | undefined {
-    const membranes = this.featuresInVision.filter(feature => feature instanceof Membrane)
-    const enemies = membranes.filter(m => m.actor.id !== this.id)
-    const reachableEnemies = enemies.filter(enemy => {
-      return this.isPointReachable(enemy.body.getPosition())
-    })
-    if (this.membrane.radius === 1.2) this.stage.log({ value: ['reachableEnemies.length', reachableEnemies.length] })
-    if (reachableEnemies.length === 0) return undefined
-    const distances = reachableEnemies.map(m => Vec2.distance(m.body.getPosition(), this.membrane.body.getPosition()))
-    const nearestReachableEnemy = reachableEnemies[whichMin(distances)]
-    return nearestReachableEnemy as Membrane
-  }
-
-  maneuver (): boolean {
-    this.nearestVisibleEnemy = this.getNearestReachableEnemy()
-    if (!(this.nearestVisibleEnemy instanceof Membrane)) {
-      return this.checkChasePoint()
-    }
-    const enemyMass = this.nearestVisibleEnemy.body.getMass()
-    const myMass = this.membrane.body.getMass()
-    if (enemyMass === myMass) {
-      return false
-    }
-    if (enemyMass < myMass) {
-      this.chase(this.nearestVisibleEnemy)
-    } else {
-      this.flee(this.nearestVisibleEnemy)
-    }
-    return true
-  }
-
-  checkChasePoint (): boolean {
-    this.stage.log({ value: 'checkChasePoint' })
-    const myPosition = this.membrane.body.getPosition()
-    if (this.chasePoint == null) {
-      return false
-    }
-    const reachable = this.isPointReachable(this.chasePoint)
-    if (!reachable) {
-      this.chasePoint = undefined
-      return false
-    }
-    const distance = Vec2.distance(myPosition, this.chasePoint)
-    if (distance < this.membrane.radius) {
-      this.chasePoint = undefined
-      return false
-    }
-    if (this.stage.debugBotChase) {
-      const path = this.stage.navigation.getPath(myPosition, this.chasePoint, this.membrane.radius)
-      range(0, path.length - 2).forEach(index => {
-        const currentPoint = path[index]
-        const nextPoint = path[index + 1]
-        this.stage.debugLine({ a: currentPoint, b: nextPoint, color: Color.GREEN, width: 0.2 })
-      })
-      const circle = new CircleShape(this.chasePoint, 0.5)
-      this.stage.debugCircle({ circle, color: Color.GREEN })
-    }
-    const nextPoint = this.stage.navigation.navigate(myPosition, this.chasePoint, this.membrane.radius)
-    const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
-    const direction = directionFromTo(myPosition, nextPosition)
-    this.setControls(direction)
-    return true
   }
 
   flee (enemy: Membrane): void {
@@ -230,17 +187,39 @@ export class Bot extends Organism {
     this.setControls(dirFromEnemy)
   }
 
-  chase (enemy: Membrane): void {
-    const enemyPosition = enemy.body.getPosition()
-    const myPosition = this.membrane.body.getPosition()
-    this.stage.debugLine({
-      a: myPosition,
-      b: enemyPosition,
-      color: Color.WHITE
+  getNearestReachableEnemy (): Membrane | undefined {
+    const membranes = this.featuresInVision.filter(feature => feature instanceof Membrane)
+    const enemies = membranes.filter(m => m.actor.id !== this.id)
+    const reachableEnemies = enemies.filter(enemy => {
+      return this.isPointReachable(enemy.body.getPosition())
     })
-    const dirToEnemy = directionFromTo(myPosition, enemyPosition)
-    this.setControls(dirToEnemy)
-    this.chasePoint = enemyPosition.clone()
+    if (reachableEnemies.length === 0) return undefined
+    const distances = reachableEnemies.map(m => Vec2.distance(m.body.getPosition(), this.membrane.body.getPosition()))
+    const nearestReachableEnemy = reachableEnemies[whichMin(distances)]
+    return nearestReachableEnemy as Membrane
+  }
+
+  isPointReachable (end: Vec2, otherRadius?: number): boolean {
+    const start = this.membrane.body.getPosition()
+    return this.stage.navigation.isPointReachable(start, end, this.membrane.radius, otherRadius)
+  }
+
+  maneuver (): boolean {
+    this.enemy = this.getNearestReachableEnemy()
+    if (this.enemy == null) {
+      return this.checkChasePoint()
+    }
+    const enemyMass = this.enemy.body.getMass()
+    const myMass = this.membrane.body.getMass()
+    if (enemyMass === myMass) {
+      return false
+    }
+    if (enemyMass < myMass) {
+      this.chase(this.enemy)
+    } else {
+      this.flee(this.enemy)
+    }
+    return true
   }
 
   onStep (stepSize: number): void {
@@ -259,12 +238,34 @@ export class Bot extends Organism {
         const nextPoint = path[index + 1]
         this.stage.debugLine({ a: currentPoint, b: nextPoint, color: Color.WHITE, width: 0.1 })
       })
-      const circle = new CircleShape(end, 0.5)
+      const circle = new CircleShape(end, this.membrane.radius)
       this.stage.debugCircle({ circle, color: Color.RED })
     }
     const nextPoint = this.stage.navigation.navigate(start, end, this.membrane.radius)
     const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
     const directionToNext = directionFromTo(start, nextPosition)
     this.setControls(directionToNext)
+  }
+
+  setControls (direction: Vec2): void {
+    const root2over2 = Math.sqrt(2) / 2
+    const roundDirs = [
+      Vec2(+1, +0),
+      Vec2(-1, +0),
+      Vec2(+0, +1),
+      Vec2(+0, -1),
+      Vec2(+root2over2, +root2over2),
+      Vec2(+root2over2, -root2over2),
+      Vec2(-root2over2, +root2over2),
+      Vec2(-root2over2, -root2over2)
+    ]
+    const dotProducts = roundDirs.map(roundDir => Vec2.dot(roundDir, direction))
+    const whichMaxDot = whichMax(dotProducts)
+    const roundDir = roundDirs[whichMaxDot]
+    this.controls.up = roundDir.y > 0
+    this.controls.down = roundDir.y < 0
+    this.controls.left = roundDir.x < 0
+    this.controls.right = roundDir.x > 0
+    this.debugControls()
   }
 }

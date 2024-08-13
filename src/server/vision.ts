@@ -232,7 +232,7 @@ export class Vision {
     const debug = false
     const sourcePoint = sourceFeature.body.getPosition()
     const targetPoint = targetFeature.body.getPosition()
-    if (this.isVisible(sourcePoint, targetPoint)) return true
+    if (this.isVisible(sourcePoint, targetPoint, undefined, debug)) return true
     const direction = directionFromTo(sourcePoint, targetPoint)
     const rightDirection = rotate(direction, 0.5 * Math.PI)
     const rightSourcePoint = Vec2.combine(1, sourcePoint, sourceCircle.getRadius(), rightDirection)
@@ -240,8 +240,8 @@ export class Vision {
     const leftDirection = rotate(direction, -0.5 * Math.PI)
     const leftSourcePoint = Vec2.combine(1, sourcePoint, sourceCircle.getRadius(), leftDirection)
     const leftTargetPoint = Vec2.combine(1, targetPoint, targetCircle.getRadius(), leftDirection)
-    if (this.isVisible(leftSourcePoint, leftTargetPoint)) return true
-    if (this.isVisible(rightSourcePoint, rightTargetPoint)) return true
+    if (this.isVisible(leftSourcePoint, leftTargetPoint, undefined, debug)) return true
+    if (this.isVisible(rightSourcePoint, rightTargetPoint, undefined, debug)) return true
     const betweenVertices = [
       rightSourcePoint,
       leftSourcePoint,

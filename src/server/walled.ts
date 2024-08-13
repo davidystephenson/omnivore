@@ -5,6 +5,7 @@ export class Walled extends Stage {
   constructor (props: {
     debugBotChase?: boolean
     debugBotFlee?: boolean
+    debugWaypoints?: boolean
     halfHeight: number
     halfWidth: number
   }) {
