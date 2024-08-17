@@ -18,6 +18,7 @@ import { Navigation } from './navigation'
 import { Bot } from './actor/bot'
 import { Player } from './actor/player'
 import { Gene } from './gene'
+import { Tree } from './actor/tree'
 
 export class Stage {
   actors = new Map<number, Actor>()
@@ -127,6 +128,17 @@ export class Stage {
       position.y += offset
       this.addPuppet({ vertices: props.vertices, position })
     })
+  }
+
+  addTree (props: {
+    // vertices: [Vec2, Vec2, Vec2]
+    position: Vec2
+  }): Tree {
+    const puppet = new Tree({
+      stage: this,
+      ...props
+    })
+    return puppet
   }
 
   addWall (props: { halfWidth: number, halfHeight: number, position: Vec2 }): Wall {
