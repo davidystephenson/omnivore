@@ -273,5 +273,8 @@ export class Funhouse extends Walled {
       position: Vec2(-20, 0),
       gene: bigGene
     })
+    this.addTree({
+      position: Vec2(-25, 15)
+    })
   }
 }

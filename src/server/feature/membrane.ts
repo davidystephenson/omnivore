@@ -67,6 +67,7 @@ export class Membrane extends Feature {
   }
 
   doDamage (target: Feature): void {
+    if (target.actor.label === 'tree') this.actor.stage.log({ value: 'tree' })
     const ratio = this.body.getMass() / target.body.getMass()
     target.health -= 0.03 * Math.pow(ratio, 2)
     if (target.health <= 0) {

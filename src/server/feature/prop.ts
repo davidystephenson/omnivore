@@ -9,8 +9,9 @@ export class Prop extends Feature {
     actor: Actor
     shape: Shape
     label: string
-    color: Color
+    color?: Color
   }) {
+    const color = props.color ?? Color.CYAN
     super({
       bodyDef: {
         type: 'dynamic',
@@ -27,7 +28,7 @@ export class Prop extends Feature {
       },
       label: props.label,
       actor: props.actor,
-      color: props.color
+      color
     })
   }
 }
