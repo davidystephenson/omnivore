@@ -24,7 +24,6 @@ export class Bot extends Organism {
       position: props.position,
       tree: props.tree
     })
-    this.membrane.acceleration = 1
     this.giveUpTime = 30 / this.membrane.acceleration
     this.enemy = this.getNearestReachableEnemy()
   }
@@ -34,12 +33,12 @@ export class Bot extends Organism {
     const myPosition = this.membrane.body.getPosition()
     const navPoint = this.stage.navigation.navigate(myPosition, enemyPosition, this.membrane.radius, enemy.radius)
     const navPosition = navPoint instanceof Vec2 ? navPoint : navPoint.position
-    this.stage.debugLine({
-      a: myPosition,
-      b: navPosition,
-      color: Color.WHITE,
-      width: 0.2
-    })
+    // this.stage.debugLine({
+    //   a: myPosition,
+    //   b: navPosition,
+    //   color: Color.WHITE,
+    //   width: 0.2
+    // })
     const dirToEnemy = directionFromTo(myPosition, navPosition)
     this.setControls(dirToEnemy)
     this.chasePoint = enemyPosition.clone()
@@ -73,16 +72,16 @@ export class Bot extends Organism {
       this.chasePoint = undefined
       return false
     }
-    if (this.stage.debugBotChase) {
-      const path = this.stage.navigation.getPath(myPosition, this.chasePoint, this.membrane.radius, chaseRadius)
-      const circle = new CircleShape(this.chasePoint, chaseRadius)
-      this.stage.debugCircle({ circle, color: Color.RED })
-      range(0, path.length - 2).forEach(index => {
-        const currentPoint = path[index]
-        const nextPoint = path[index + 1]
-        this.stage.debugLine({ a: currentPoint, b: nextPoint, color: Color.GREEN, width: 0.2 })
-      })
-    }
+    // if (this.stage.debugBotChase) {
+    //   const path = this.stage.navigation.getPath(myPosition, this.chasePoint, this.membrane.radius, chaseRadius)
+    //   const circle = new CircleShape(this.chasePoint, chaseRadius)
+    //   this.stage.debugCircle({ circle, color: Color.RED })
+    //   // range(0, path.length - 2).forEach(index => {
+    //   //   const currentPoint = path[index]
+    //   //   const nextPoint = path[index + 1]
+    //   //   this.stage.debugLine({ a: currentPoint, b: nextPoint, color: Color.GREEN, width: 0.2 })
+    //   // })
+    // }
     const nextPoint = this.stage.navigation.navigate(myPosition, this.chasePoint, this.membrane.radius, chaseRadius)
     const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
     const direction = directionFromTo(myPosition, nextPosition)
@@ -109,7 +108,7 @@ export class Bot extends Organism {
       this.stage.debugLine({
         a: start,
         b: Vec2(start.x, start.y - length),
-        color: Color.RED,
+        color: Color.MAGENTA,
         width: 0.2
       })
     }
@@ -117,7 +116,7 @@ export class Bot extends Organism {
       this.stage.debugLine({
         a: start,
         b: Vec2(start.x - length, start.y),
-        color: Color.RED,
+        color: Color.MAGENTA,
         width: 0.2
       })
     }
@@ -125,7 +124,7 @@ export class Bot extends Organism {
       this.stage.debugLine({
         a: start,
         b: Vec2(start.x + length, start.y),
-        color: Color.RED,
+        color: Color.MAGENTA,
         width: 0.2
       })
     }
@@ -223,7 +222,6 @@ export class Bot extends Organism {
     if (this.enemy == null) {
       return this.checkChasePoint()
     }
-    this.stage.log({ value: ['this.enemy.radius', this.enemy?.radius] })
     const enemyMass = this.enemy.body.getMass()
     const myMass = this.membrane.body.getMass()
     if (enemyMass === myMass) {
@@ -281,6 +279,6 @@ export class Bot extends Organism {
     this.controls.down = roundDir.y < 0
     this.controls.left = roundDir.x < 0
     this.controls.right = roundDir.x > 0
-    this.debugControls()
+    // this.debugControls()
   }
 }

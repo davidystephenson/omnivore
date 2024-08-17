@@ -229,7 +229,7 @@ export class Vision {
     sourceCircle: CircleShape,
     targetCircle: CircleShape
   ): boolean {
-    const debug = true
+    const debug = false
     const sourcePoint = sourceFeature.body.getPosition()
     const targetPoint = targetFeature.body.getPosition()
     if (this.isVisible(sourcePoint, targetPoint, undefined, debug)) return true
