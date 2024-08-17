@@ -32,12 +32,12 @@ export class Rehearsal extends Walled {
     // })
     // this.addBrick({ halfWidth: 5, halfHeight: 5, position: Vec2(0, -10) })
     // this.addBrick({ halfWidth: 40, halfHeight: 10, position: Vec2(0, -35) })
-    // const tree = new Tree({
+    // const gene = new Gene({
     //   radius: 0.6
     // })
     // this.addBot({
     //   position: Vec2(-8, 0),
-    //   tree
+    //   gene
     // })
     // // this.addBrick({
     // //   halfHeight: 6,
