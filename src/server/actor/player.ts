@@ -1,18 +1,18 @@
 import { Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Organism } from './organism'
-import { Tree } from '../tree'
+import { Gene } from '../gene'
 
 export class Player extends Organism {
   constructor (props: {
     position: Vec2
     stage: Stage
-    tree: Tree
+    gene: Gene
   }) {
     super({
       position: props.position,
       stage: props.stage,
-      tree: props.tree
+      gene: props.gene
     })
   }
 }

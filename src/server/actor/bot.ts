@@ -4,7 +4,7 @@ import { Organism } from './organism'
 import { directionFromTo, range, rotate, whichMax, whichMin } from '../math'
 import { Color } from '../../shared/color'
 import { Waypoint } from '../waypoint'
-import { Tree } from '../tree'
+import { Gene } from '../gene'
 import { Membrane } from '../feature/membrane'
 
 export class Bot extends Organism {
@@ -17,12 +17,12 @@ export class Bot extends Organism {
   constructor (props: {
     stage: Stage
     position: Vec2
-    tree: Tree
+    gene: Gene
   }) {
     super({
       stage: props.stage,
       position: props.position,
-      tree: props.tree
+      gene: props.gene
     })
     this.giveUpTime = 30 / this.membrane.acceleration
     this.enemy = this.getNearestReachableEnemy()
@@ -51,18 +51,18 @@ export class Bot extends Organism {
     }
     const myPosition = this.membrane.body.getPosition()
     const chaseRadius = this.chaseRadius ?? 0
-    const open = this.stage.navigation.isOpen({
-      fromPosition: myPosition,
-      toPosition: this.chasePoint,
-      radius: this.membrane.radius,
-      otherRadius: chaseRadius
-    })
     const reachable = this.isPointReachable(this.chasePoint, chaseRadius)
-    if (this.radius === 1.2) {
-      this.stage.log({ value: ['chaseRadius', chaseRadius] })
-      this.stage.log({ value: ['reachable', reachable] })
-      this.stage.log({ value: ['open', open] })
-    }
+    // const open = this.stage.navigation.isOpen({
+    //   fromPosition: myPosition,
+    //   toPosition: this.chasePoint,
+    //   radius: this.membrane.radius,
+    //   otherRadius: chaseRadius
+    // })
+    // if (this.radius === 1.2) {
+    //   // this.stage.log({ value: ['chaseRadius', chaseRadius] })
+    //   // this.stage.log({ value: ['reachable', reachable] })
+    //   // this.stage.log({ value: ['open', open] })
+    // }
     if (!reachable) {
       this.chasePoint = undefined
       return false
@@ -279,6 +279,6 @@ export class Bot extends Organism {
     this.controls.down = roundDir.y < 0
     this.controls.left = roundDir.x < 0
     this.controls.right = roundDir.x > 0
-    // this.debugControls()
+    this.debugControls()
   }
 }

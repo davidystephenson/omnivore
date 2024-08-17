@@ -1,12 +1,12 @@
-export class Tree {
+export class Gene {
   angle: number
   radius: number
-  branches: Tree[]
+  branches: Gene[]
 
   constructor (props: {
     angle?: number
     radius: number
-    branches?: Tree[]
+    branches?: Gene[]
   }) {
     this.angle = props.angle ?? 0
     this.radius = props.radius

@@ -9,12 +9,7 @@ import { Rope } from '../../shared/rope'
 import { Starvation } from '../starvation'
 import { ExplorationPoint } from '../explorationPoint'
 import { Controls } from '../../shared/input'
-
-interface Tree {
-  angle: number
-  radius: number
-  branches: Tree[]
-}
+import { Gene } from '../gene'
 
 export class Organism extends Actor {
   dead = false
@@ -27,7 +22,7 @@ export class Organism extends Actor {
   radius: number
   readyToHatch = false
   spawnPosition: Vec2
-  tree: Tree
+  gene: Gene
   explorationPoints: ExplorationPoint[] = []
   explorationIds: number[]
   controls: Controls = {
@@ -42,12 +37,12 @@ export class Organism extends Actor {
   constructor (props: {
     stage: Stage
     position: Vec2
-    tree: Tree
+    gene: Gene
   }) {
     super({ stage: props.stage, label: 'organism' })
     this.spawnPosition = props.position
-    this.tree = props.tree
-    this.membrane = this.grow({ branch: this.tree })
+    this.gene = props.gene
+    this.membrane = this.grow({ branch: this.gene })
     const largerRadii = this.stage.navigation.radii.filter(radius => radius >= this.membrane.radius)
     const indexOfMinimumValue = whichMin(largerRadii)
     const validRadius = largerRadii[indexOfMinimumValue]
@@ -104,22 +99,22 @@ export class Organism extends Actor {
   }
 
   addCircles (props: {
-    branch: Tree
+    gene: Gene
     circles: CircleShape[]
     parentPosition?: Vec2
     parentRadius?: number
   }): void {
     let center = this.spawnPosition
     if (props.parentPosition != null && props.parentRadius != null) {
-      const distance = props.parentRadius + props.branch.radius + this.gap
-      const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * props.branch.angle)
+      const distance = props.parentRadius + props.gene.radius + this.gap
+      const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * props.gene.angle)
       center = Vec2.add(props.parentPosition, offset)
     }
-    const circle = new CircleShape(center, props.branch.radius)
+    const circle = new CircleShape(center, props.gene.radius)
     props.circles.push(circle)
-    for (const childBranch of props.branch.branches) {
+    for (const childBranch of props.gene.branches) {
       this.addCircles({
-        branch: childBranch,
+        gene: childBranch,
         parentPosition: circle.getCenter(),
         parentRadius: circle.getRadius(),
         circles: props.circles
@@ -172,7 +167,7 @@ export class Organism extends Actor {
 
   getEgg (): Egg {
     const circles: CircleShape[] = []
-    this.addCircles({ branch: this.tree, circles })
+    this.addCircles({ gene: this.gene, circles })
     const top = Math.max(...circles.map(circle => circle.getCenter().y + circle.getRadius()))
     const bottom = Math.min(...circles.map(circle => circle.getCenter().y - circle.getRadius()))
     const right = Math.max(...circles.map(circle => circle.getCenter().x + circle.getRadius()))
@@ -183,7 +178,7 @@ export class Organism extends Actor {
     return new Egg({ actor: this, position, hx, hy })
   }
 
-  getOffset (props: { parent: Membrane, branch: Tree }): Vec2 {
+  getOffset (props: { parent: Membrane, branch: Gene }): Vec2 {
     const parentPosition = props.parent.body.getPosition()
     const distance = props.parent.radius + props.branch.radius + this.gap
     const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * props.branch.angle)
@@ -200,14 +195,14 @@ export class Organism extends Actor {
     this.hatched = true
     this.stage.destructionQueue.push(this.membrane.body)
     this.spawnPosition = this.membrane.body.getPosition()
-    this.membrane = this.grow({ branch: this.tree })
+    this.membrane = this.grow({ branch: this.gene })
     this.membrane.borderWidth = 0.2
   }
 
   eggFlee (): void { }
 
   grow (props: {
-    branch: Tree
+    branch: Gene
     parent?: Membrane
   }): Membrane {
     const position = props.parent == null
@@ -247,7 +242,7 @@ export class Organism extends Actor {
     }
     const spawnPoint = choose(clearSpawnPoints)
     this.spawnPosition = spawnPoint
-    this.membrane = this.grow({ branch: this.tree })
+    this.membrane = this.grow({ branch: this.gene })
     this.dead = false
     return true
   }

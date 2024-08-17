@@ -17,7 +17,7 @@ import { LogProps, Logger } from './logger'
 import { Navigation } from './navigation'
 import { Bot } from './actor/bot'
 import { Player } from './actor/player'
-import { Tree } from './tree'
+import { Gene } from './gene'
 
 export class Stage {
   actors = new Map<number, Actor>()
@@ -80,7 +80,7 @@ export class Stage {
 
   addBot (props: {
     position: Vec2
-    tree: Tree
+    gene: Gene
   }): Bot {
     const organism = new Bot({ stage: this, ...props })
     return organism
@@ -98,7 +98,7 @@ export class Stage {
 
   addPlayer (props: {
     position: Vec2
-    tree: Tree
+    gene: Gene
   }): Organism {
     const organism = new Player({ stage: this, ...props })
     return organism

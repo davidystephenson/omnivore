@@ -161,7 +161,7 @@ export class Vision {
     const hits: RayCastHit[] = []
     this.stage.world.rayCast(point1, point2, function (fixture: Fixture, point: Vec2): number {
       const feature = fixture.getUserData() as Feature
-      if (excludeIds?.includes(feature.id) === true) {
+      if (excludeIds?.includes(feature.id) === true || fixture.isSensor()) {
         return -1
       }
       hits.push(new RayCastHit({ feature, point }))
@@ -232,7 +232,9 @@ export class Vision {
     const debug = false
     const sourcePoint = sourceFeature.body.getPosition()
     const targetPoint = targetFeature.body.getPosition()
-    if (this.isVisible(sourcePoint, targetPoint, undefined, debug)) return true
+    if (this.isVisible(sourcePoint, targetPoint, undefined, debug)) {
+      return true
+    }
     const direction = directionFromTo(sourcePoint, targetPoint)
     const rightDirection = rotate(direction, 0.5 * Math.PI)
     const rightSourcePoint = Vec2.combine(1, sourcePoint, sourceCircle.getRadius(), rightDirection)
@@ -240,8 +242,12 @@ export class Vision {
     const leftDirection = rotate(direction, -0.5 * Math.PI)
     const leftSourcePoint = Vec2.combine(1, sourcePoint, sourceCircle.getRadius(), leftDirection)
     const leftTargetPoint = Vec2.combine(1, targetPoint, targetCircle.getRadius(), leftDirection)
-    if (this.isVisible(leftSourcePoint, leftTargetPoint, undefined, debug)) return true
-    if (this.isVisible(rightSourcePoint, rightTargetPoint, undefined, debug)) return true
+    const clearLineLeft = this.isVisible(leftSourcePoint, leftTargetPoint, [sourceFeature.id, targetFeature.id])
+    if (clearLineLeft) {
+      return true
+    }
+    const clearLineRight = this.isVisible(rightSourcePoint, rightTargetPoint, [sourceFeature.id, targetFeature.id])
+    if (clearLineRight) return true
     const betweenVertices = [
       rightSourcePoint,
       leftSourcePoint,
@@ -254,12 +260,10 @@ export class Vision {
       leftTargetPoint
     ]
     if (debug) this.stage.debugPolygon({ polygon: betweenPolygon, color: Color.RED })
-    const clearLineLeft = this.isVisible(leftSourcePoint, leftTargetPoint, [sourceFeature.id, targetFeature.id])
-    if (clearLineLeft) return true
-    const clearLineRight = this.isVisible(rightSourcePoint, rightTargetPoint, [sourceFeature.id, targetFeature.id])
-    if (clearLineRight) return true
     const obstructions = this.getObstructions(betweenPolygon, sourceFeature.id, targetFeature.id)
-    if (obstructions.length === 0) return true
+    if (obstructions.length === 0) {
+      return true
+    }
     let visible = false
     obstructions.forEach(obstruction => {
       const shape = obstruction.fixture.getShape()
@@ -292,13 +296,18 @@ export class Vision {
             const hitFeatures = [firstHitA.feature, firstHitB.feature]
             const hitSource = hitFeatures.includes(sourceFeature)
             const hitTarget = hitFeatures.includes(targetFeature)
-            if (hitSource && hitTarget) visible = true
+            if (hitSource && hitTarget) {
+              visible = true
+            }
           }
           targetCorners.forEach(targetCorner => {
             const rayDir = directionFromTo(targetCorner, cornerA)
             const firstHit = this.getFirstHit(targetCorner, rayDir)
             if (debug) this.stage.debugLine({ a: targetCorner, b: firstHit.point, color: Color.YELLOW })
-            if (firstHit.feature?.id === sourceFeature.id) visible = true
+            if (firstHit.feature?.id === sourceFeature.id) {
+              this.stage.log({ value: `hit corner ${i}: firstHit.feature?.id === sourceFeature.id` })
+              visible = true
+            }
           })
         })
       })

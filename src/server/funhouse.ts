@@ -1,5 +1,5 @@
 import { Vec2 } from 'planck'
-import { Tree } from '../server/tree'
+import { Gene } from '../server/gene'
 import { Walled } from '../server/walled'
 
 export class Funhouse extends Walled {
@@ -227,47 +227,51 @@ export class Funhouse extends Walled {
     //   halfWidth: 1,
     //   position: Vec2(rightPropX - 5, 16)
     // })
-    const smallTree = new Tree({
+    const smallGene = new Gene({
       radius: 0.6
     })
     this.addBot({
       position: Vec2(-10, 15),
-      tree: smallTree
+      gene: smallGene
     })
     this.addBot({
       position: Vec2(-13, 0),
-      tree: smallTree
+      gene: smallGene
     })
     this.addBot({
       position: Vec2(-18, 0),
-      tree: smallTree
+      gene: smallGene
     })
     this.addBot({
       position: Vec2(-23, 0),
-      tree: smallTree
+      gene: smallGene
     })
-    const bigTree = new Tree({
+    const bigGene = new Gene({
       radius: 1.2
     })
     this.addBot({
-      position: Vec2(-10, 23),
-      tree: bigTree
+      position: Vec2(0, 10),
+      gene: bigGene
+    })
+    this.addBot({
+      position: Vec2(-10, 15),
+      gene: bigGene
     })
     this.addBot({
       position: Vec2(-10, -50),
-      tree: bigTree
+      gene: bigGene
     })
     this.addBot({
       position: Vec2(-10, 0),
-      tree: bigTree
+      gene: bigGene
     })
     this.addBot({
       position: Vec2(-15, 0),
-      tree: bigTree
+      gene: bigGene
     })
     this.addBot({
       position: Vec2(-20, 0),
-      tree: bigTree
+      gene: bigGene
     })
   }
 }

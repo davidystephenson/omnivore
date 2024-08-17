@@ -2,7 +2,7 @@ import { io } from './server'
 import { Vec2 } from 'planck'
 import { Controls } from '../shared/input'
 // import { Rehearsal } from './rehearsal'
-import { Tree } from './tree'
+import { Gene } from './gene'
 import { Funhouse } from './funhouse'
 
 const stage = new Funhouse()
@@ -12,13 +12,13 @@ io.on('connection', socket => {
     value: ['connection:', socket.id]
   })
   socket.emit('connected')
-  const tree = new Tree({
-    radius: 1.0
+  const gene = new Gene({
+    radius: 0.9
   })
-  stage.log({ value: ['tree:', tree] })
+  stage.log({ value: ['gene:', gene] })
   const organism = stage.addPlayer({
-    position: Vec2(0, 0),
-    tree
+    position: Vec2(-20, 15),
+    gene
   })
   socket.on('controls', (controls: Controls) => {
     organism.controls = controls
