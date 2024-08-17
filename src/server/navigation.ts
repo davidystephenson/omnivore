@@ -22,7 +22,7 @@ export class Navigation {
   stage: Stage
   waypoints = new Map<number, Waypoint>()
   gridWaypoints: Waypoint[] = []
-  wallOffset = 0.1
+  wallOffset = 0.4
   wallWaypoints: Waypoint[] = []
   cornerWaypoints: Waypoint[] = []
   radiiWaypoints = new Map<number, Waypoint[]>()
@@ -74,15 +74,24 @@ export class Navigation {
   navigate (start: Vec2, end: Vec2, radius: number, otherRadius?: number): Waypoint | Vec2 {
     const largerRadii = this.radii.filter(rad => rad >= radius)
     const validRadius = largerRadii[whichMin(largerRadii)]
-    const open = this.isOpen({
-      fromPosition: start,
-      toPosition: end,
-      radius: validRadius,
-      otherRadius,
-      debug: true
-    })
-    if (open) {
-      return end
+    const directPositions = [
+      end,
+      Vec2.combine(1, end, radius, Vec2(+1, 0)),
+      Vec2.combine(1, end, radius, Vec2(-1, 0)),
+      Vec2.combine(1, end, radius, Vec2(0, +1)),
+      Vec2.combine(1, end, radius, Vec2(0, -1))
+    ]
+    for (const directPosition of directPositions) {
+      const open = this.isOpen({
+        fromPosition: start,
+        toPosition: directPosition,
+        radius: validRadius,
+        otherRadius,
+        debug: true
+      })
+      if (open) {
+        return directPosition
+      }
     }
     const startNeighbors = this.getNeighbors(start, validRadius)
     const endNeighbors = this.getNeighbors(end, validRadius)
@@ -214,20 +223,18 @@ export class Navigation {
       })
     })
     const allOpen = opens.every(x => x)
-    if (props.otherRadius != null && props.radius === 1.2) {
-      range(0, 2).forEach(index => {
-        const start = starts[index]
-        const end = ends[index]
-        this.stage.debugLine({
-          a: start,
-          b: end,
-          color: opens[index] ? Color.CYAN : Color.RED,
-          width: 0.15
-        })
-      })
-      this.stage.log({ value: `opens: ${JSON.stringify(opens)}` })
-      this.stage.log({ value: `every: ${String(allOpen)}` })
-    }
+    // if (props.otherRadius != null && props.radius === 1.2) {
+    //   range(0, 2).forEach(index => {
+    //     const start = starts[index]
+    //     const end = ends[index]
+    //     this.stage.debugLine({
+    //       a: start,
+    //       b: end,
+    //       color: opens[index] ? Color.CYAN : Color.RED,
+    //       width: 0.15
+    //     })
+    //   })
+    // }
     return allOpen
   }
 
@@ -339,9 +346,10 @@ export class Navigation {
     })
     const player = players[0]
     if (player == null) return
+    const debugRadius = 1.2
     if (this.stage.debugWaypoints) {
       this.cornerWaypoints.forEach(waypoint => {
-        if (waypoint.radius === player.radius) {
+        if (waypoint.radius === debugRadius) {
           this.stage.debugCircle({
             circle: new Circle(waypoint.position, 0.2),
             color: Color.WHITE
@@ -355,7 +363,7 @@ export class Navigation {
         })
       })
       this.wallWaypoints.forEach(waypoint => {
-        if (waypoint.radius === player.radius) {
+        if (waypoint.radius === debugRadius) {
           this.stage.debugCircle({
             circle: new Circle(waypoint.position, 0.2),
             color: Color.WHITE

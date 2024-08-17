@@ -227,47 +227,47 @@ export class Funhouse extends Walled {
     //   halfWidth: 1,
     //   position: Vec2(rightPropX - 5, 16)
     // })
-    // const smallTree = new Tree({
-    //   radius: 0.6
-    // })
-    // this.addBot({
-    //   position: Vec2(-10, 15),
-    //   tree: smallTree
-    // })
-    // this.addBot({
-    //   position: Vec2(-13, 0),
-    //   tree: smallTree
-    // })
-    // this.addBot({
-    //   position: Vec2(-18, 0),
-    //   tree: smallTree
-    // })
-    // this.addBot({
-    //   position: Vec2(-23, 0),
-    //   tree: smallTree
-    // })
+    const smallTree = new Tree({
+      radius: 0.6
+    })
+    this.addBot({
+      position: Vec2(-10, 15),
+      tree: smallTree
+    })
+    this.addBot({
+      position: Vec2(-13, 0),
+      tree: smallTree
+    })
+    this.addBot({
+      position: Vec2(-18, 0),
+      tree: smallTree
+    })
+    this.addBot({
+      position: Vec2(-23, 0),
+      tree: smallTree
+    })
     const bigTree = new Tree({
       radius: 1.2
     })
-    // this.addBot({
-    //   position: Vec2(-10, 23),
-    //   tree: bigTree
-    // })
     this.addBot({
-      position: Vec2(-10, 9),
+      position: Vec2(-10, 23),
       tree: bigTree
     })
-    // this.addBot({
-    //   position: Vec2(-10, 0),
-    //   tree: bigTree
-    // })
-    // this.addBot({
-    //   position: Vec2(-15, 0),
-    //   tree: bigTree
-    // })
-    // this.addBot({
-    //   position: Vec2(-20, 0),
-    //   tree: bigTree
-    // })
+    this.addBot({
+      position: Vec2(-10, -50),
+      tree: bigTree
+    })
+    this.addBot({
+      position: Vec2(-10, 0),
+      tree: bigTree
+    })
+    this.addBot({
+      position: Vec2(-15, 0),
+      tree: bigTree
+    })
+    this.addBot({
+      position: Vec2(-20, 0),
+      tree: bigTree
+    })
   }
 }

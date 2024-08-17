@@ -196,7 +196,7 @@ export class Stage {
       const otherFeature = otherFixture.getBody().getUserData() as Feature
       if (sensorContact) {
         if (fixture.isSensor() && !otherFixture.isSensor()) {
-          feature.inRangeFeatures.push(otherFeature)
+          feature.sensorFeatures.push(otherFeature)
         }
         return
       }
@@ -218,7 +218,7 @@ export class Stage {
       const otherFeature = otherFixture.getBody().getUserData() as Feature
       feature.contacts = feature.contacts.filter(contact => contact.id !== otherFeature.id)
       if (fixture.isSensor() && !otherFixture.isSensor()) {
-        feature.inRangeFeatures = feature.inRangeFeatures.filter(contact => contact.id !== otherFeature.id)
+        feature.sensorFeatures = feature.sensorFeatures.filter(contact => contact.id !== otherFeature.id)
       }
     })
   }

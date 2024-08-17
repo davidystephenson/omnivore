@@ -81,7 +81,7 @@ export class Organism extends Actor {
       throw new Error('This organism has no membranes')
     }
     this.membranes.forEach(membrane => {
-      const forceScale = membrane.acceleration * membrane.body.getMass() * 5
+      const forceScale = membrane.acceleration * membrane.body.getMass() * 2
       membrane.force = Vec2.mul(direction, forceScale)
     })
   }
@@ -229,9 +229,6 @@ export class Organism extends Actor {
     const featuresInRange = this.membrane.getFeaturesInRange()
     this.featuresInVision = featuresInRange.filter(targetFeature => {
       const visible = this.membranes.some(membrane => this.stage.vision.isFeatureVisible(membrane, targetFeature))
-      if (visible && targetFeature.radius > 0 && this.membrane.radius === 1.2) {
-        this.stage.log({ value: ['visible', targetFeature.radius] })
-      }
       return visible
     })
     if (!this.hatched) this.eggFlee()
