@@ -22,31 +22,31 @@ export class Funhouse extends Walled {
     //   count: 3,
     //   gap: 0.1
     // })
-    this.addWall({
-      halfHeight: 1,
-      halfWidth: 5,
-      position: Vec2(-10, 29)
-    })
-    this.addWall({
-      halfWidth: 1,
-      halfHeight: 5,
-      position: Vec2(-12, 22)
-    })
-    this.addWall({
-      halfWidth: 1,
-      halfHeight: 5,
-      position: Vec2(-8, 22)
-    })
-    this.addWall({
-      halfWidth: 1,
-      halfHeight: 10,
-      position: Vec2(-13, 6.9)
-    })
-    this.addWall({
-      halfWidth: 1,
-      halfHeight: 10,
-      position: Vec2(-7, 6.9)
-    })
+    // this.addWall({
+    //   halfHeight: 1,
+    //   halfWidth: 5,
+    //   position: Vec2(-10, 29)
+    // })
+    // this.addWall({
+    //   halfWidth: 1,
+    //   halfHeight: 5,
+    //   position: Vec2(-12, 22)
+    // })
+    // this.addWall({
+    //   halfWidth: 1,
+    //   halfHeight: 5,
+    //   position: Vec2(-8, 22)
+    // })
+    // this.addWall({
+    //   halfWidth: 1,
+    //   halfHeight: 10,
+    //   position: Vec2(-13, 6.9)
+    // })
+    // this.addWall({
+    //   halfWidth: 1,
+    //   halfHeight: 10,
+    //   position: Vec2(-7, 6.9)
+    // })
 
     // Big wall
     // this.addWall({
@@ -119,14 +119,14 @@ export class Funhouse extends Walled {
     // Big brick
 
     // Big puppet
-    this.addPuppet({
-      vertices: [
-        Vec2(5, 15),
-        Vec2(-5, 0),
-        Vec2(5, -15)
-      ],
-      position: Vec2(0, -25)
-    })
+    // this.addPuppet({
+    //   vertices: [
+    //     Vec2(5, 15),
+    //     Vec2(-5, 0),
+    //     Vec2(5, -15)
+    //   ],
+    //   position: Vec2(0, -25)
+    // })
     // this.addBrick({
     //   // angle: Math.PI * 0.9,
     //   halfHeight: 6,
@@ -145,14 +145,14 @@ export class Funhouse extends Walled {
     // })
 
     // Tight Angled bricks
-    this.addBricks({
-      angle: Math.PI * 0.6,
-      count: 10,
-      gap: 0.1,
-      halfHeight: 0.5,
-      halfWidth: 5,
-      position: Vec2(15, 15)
-    })
+    // this.addBricks({
+    //   angle: Math.PI * 0.6,
+    //   count: 10,
+    //   gap: 0.1,
+    //   halfHeight: 0.5,
+    //   halfWidth: 5,
+    //   position: Vec2(15, 15)
+    // })
     // Aligned bricks
     // this.addBricks({
     //   count: 10,
@@ -227,52 +227,52 @@ export class Funhouse extends Walled {
     //   halfWidth: 1,
     //   position: Vec2(rightPropX - 5, 16)
     // })
-    const smallGene = new Gene({
-      radius: 0.6
-    })
-    this.addBot({
-      position: Vec2(-10, 15),
-      gene: smallGene
-    })
-    this.addBot({
-      position: Vec2(-13, 0),
-      gene: smallGene
-    })
-    this.addBot({
-      position: Vec2(-18, 0),
-      gene: smallGene
-    })
-    this.addBot({
-      position: Vec2(-23, 0),
-      gene: smallGene
-    })
-    const bigGene = new Gene({
-      radius: 1.2
-    })
-    this.addBot({
-      position: Vec2(0, 10),
-      gene: bigGene
-    })
-    this.addBot({
-      position: Vec2(-10, 15),
-      gene: bigGene
-    })
-    this.addBot({
-      position: Vec2(-10, -50),
-      gene: bigGene
-    })
-    this.addBot({
-      position: Vec2(-10, 0),
-      gene: bigGene
-    })
-    this.addBot({
-      position: Vec2(-15, 0),
-      gene: bigGene
-    })
-    this.addBot({
-      position: Vec2(-20, 0),
-      gene: bigGene
-    })
+    // const smallGene = new Gene({
+    //   radius: 0.6
+    // })
+    // this.addBot({
+    //   position: Vec2(-10, 15),
+    //   gene: smallGene
+    // })
+    // this.addBot({
+    //   position: Vec2(-13, 0),
+    //   gene: smallGene
+    // })
+    // this.addBot({
+    //   position: Vec2(-18, 0),
+    //   gene: smallGene
+    // })
+    // this.addBot({
+    //   position: Vec2(-23, 0),
+    //   gene: smallGene
+    // })
+    // const bigGene = new Gene({
+    //   radius: 1.2
+    // })
+    // this.addBot({
+    //   position: Vec2(0, 10),
+    //   gene: bigGene
+    // })
+    // this.addBot({
+    //   position: Vec2(-10, 15),
+    //   gene: bigGene
+    // })
+    // this.addBot({
+    //   position: Vec2(-10, -50),
+    //   gene: bigGene
+    // })
+    // this.addBot({
+    //   position: Vec2(-10, 0),
+    //   gene: bigGene
+    // })
+    // this.addBot({
+    //   position: Vec2(-15, 0),
+    //   gene: bigGene
+    // })
+    // this.addBot({
+    //   position: Vec2(-20, 0),
+    //   gene: bigGene
+    // })
     this.addTree({
       position: Vec2(-25, 15)
     })

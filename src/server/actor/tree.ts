@@ -8,6 +8,7 @@ export class Tree extends Actor {
   sculpture: Sculpture
   radius = 1
   growthRate = 1
+  step = 0
 
   constructor (props: {
     stage: Stage
@@ -20,7 +21,7 @@ export class Tree extends Actor {
       position: props.position,
       vertices: this.getVertices(this.radius)
     })
-    this.sculpture.health = 0.0000000000000000001
+    this.sculpture.health = 0.1 // 0.0000000000000000001
     this.features.push(this.sculpture)
   }
 
@@ -35,10 +36,26 @@ export class Tree extends Actor {
 
   onStep (stepSize: number): void {
     super.onStep(stepSize)
-    this.radius += stepSize * this.growthRate
-    const shape = this.sculpture.fixture.getShape()
-    if (shape instanceof PolygonShape) {
-      shape.m_vertices = this.getVertices(this.radius)
+    this.step += 1
+    this.radius = 1 // stepSize * this.growthRate
+    if (this.step % 20 === 0) {
+      this.sculpture.body.destroyFixture(this.sculpture.fixture)
+      this.stage.log({ value: 'tree onStep' })
+      const newVertices = this.getVertices(this.radius)
+      this.sculpture.fixture = this.sculpture.body.createFixture({
+        shape: new PolygonShape(newVertices),
+        density: 1,
+        restitution: 0,
+        friction: 0
+      })
+      this.sculpture.body.setUserData(this.sculpture)
+      this.sculpture.fixture.setUserData(this.sculpture)
     }
+
+    // const shape = this.sculpture.fixture.getShape()
+    // if (shape instanceof PolygonShape) {
+    //   shape.m_vertices = this.getVertices(4)
+    //   this.sculpture.body.resetMassData()
+    // }
   }
 }
