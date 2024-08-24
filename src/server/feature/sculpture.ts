@@ -15,7 +15,7 @@ export class Sculpture extends Prop {
       actor: props.actor,
       shape: new PolygonShape(props.vertices),
       color: props.color,
-      label: 'crate'
+      label: 'sculpture'
     })
   }
 }

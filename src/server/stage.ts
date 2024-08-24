@@ -209,6 +209,8 @@ export class Stage {
       if (sensorContact) {
         if (fixture.isSensor() && !otherFixture.isSensor()) {
           feature.sensorFeatures.push(otherFeature)
+          this.log({ value: ['begin otherFeature.label', otherFeature.label] })
+          this.log({ value: ['begin feature.sensorFeatures.length', feature.sensorFeatures.length] })
         }
         return
       }
@@ -231,6 +233,8 @@ export class Stage {
       feature.contacts = feature.contacts.filter(contact => contact.id !== otherFeature.id)
       if (fixture.isSensor() && !otherFixture.isSensor()) {
         feature.sensorFeatures = feature.sensorFeatures.filter(contact => contact.id !== otherFeature.id)
+        this.log({ value: ['end otherFeature.label', otherFeature.label] })
+        this.log({ value: ['end feature.sensorFeatures.length', feature.sensorFeatures.length] })
       }
     })
   }

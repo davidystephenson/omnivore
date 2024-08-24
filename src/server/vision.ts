@@ -305,7 +305,7 @@ export class Vision {
             const firstHit = this.getFirstHit(targetCorner, rayDir)
             if (debug) this.stage.debugLine({ a: targetCorner, b: firstHit.point, color: Color.YELLOW })
             if (firstHit.feature?.id === sourceFeature.id) {
-              this.stage.log({ value: `hit corner ${i}: firstHit.feature?.id === sourceFeature.id` })
+              // this.stage.log({ value: `hit corner ${i}: firstHit.feature?.id === sourceFeature.id` })
               visible = true
             }
           })
@@ -321,7 +321,7 @@ export class Vision {
     targetFeature: Feature,
     targetPolygon: PolygonShape
   ): boolean {
-    const debug = false
+    const debug = true
     const nearestPoint = this.getNearestPoint(sourcePoint, targetFeature, targetPolygon)
     if (debug) {
       this.stage.debugLine({ a: sourcePoint, b: nearestPoint, color: Color.YELLOW })

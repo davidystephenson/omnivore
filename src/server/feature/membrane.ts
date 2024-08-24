@@ -89,6 +89,7 @@ export class Membrane extends Feature {
   }
 
   onStep (): void {
+    this.actor.stage.log({ value: ['this.sensorFeatures.length', this.sensorFeatures.length] })
     this.handleContacts()
     const hunger = false
     if (
