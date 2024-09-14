@@ -321,7 +321,7 @@ export class Vision {
     targetFeature: Feature,
     targetPolygon: PolygonShape
   ): boolean {
-    const debug = true
+    const debug = false
     const nearestPoint = this.getNearestPoint(sourcePoint, targetFeature, targetPolygon)
     if (debug) {
       this.stage.debugLine({ a: sourcePoint, b: nearestPoint, color: Color.YELLOW })
