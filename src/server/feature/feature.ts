@@ -4,7 +4,7 @@ import { Actor } from '../actor/actor'
 // import { DebugLine } from '../../shared/debugLine'
 import { Rope } from '../../shared/rope'
 
-let actorCount = 0
+let featureCount = 0
 
 export class Feature {
   body: Body
@@ -40,8 +40,8 @@ export class Feature {
     this.fixture.setUserData(this)
     this.color = props.color
     this.borderWidth = props.borderWidth ?? 0.1
-    actorCount += 1
-    this.id = actorCount
+    featureCount += 1
+    this.id = featureCount
   }
 
   getFeaturesInRange (): Feature[] {

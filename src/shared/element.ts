@@ -20,6 +20,10 @@ export class Element {
     vertices: Vec2[]
   }
 
+  seed?: {
+    vertices: Vec2[]
+  }
+
   constructor (props: {
     feature: Feature
     stage: Stage
@@ -43,11 +47,11 @@ export class Element {
         radius: shape.getRadius()
       }
     } else if (props.feature.actor instanceof Tree) {
-      props.stage.log({
-        value: `vertices.length = ${props.feature.actor.vertices.length}`
-      })
       this.polygon = {
         vertices: props.feature.actor.vertices
+      }
+      this.seed = {
+        vertices: props.feature.actor.seedVertices
       }
     } else if (shape instanceof PolygonShape) {
       this.polygon = {
