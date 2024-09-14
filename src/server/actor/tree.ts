@@ -9,13 +9,18 @@ export class Tree extends Actor {
   radius = 1
   growthRate = 0.5
   vertices: Vec2[] = []
+  seedVertices: Vec2[] = []
   step = 0
+  growing: boolean
 
   constructor (props: {
     stage: Stage
     position: Vec2
+    growing?: boolean
   }) {
     super({ stage: props.stage, label: 'tree' })
+    this.growing = props.growing ?? true
+    this.seedVertices = this.getVertices(1)
     this.setupVertices()
     this.sculpture = new Sculpture({
       actor: this,
@@ -27,12 +32,16 @@ export class Tree extends Actor {
     this.features.push(this.sculpture)
   }
 
-  setupVertices (): void {
+  getVertices (radius: number): Vec2[] {
     const turns = [1 / 4, 7 / 12, 11 / 12]
     const angles = turns.map(turn => 2 * Math.PI * turn)
-    this.vertices = angles.map(angle => {
-      return Vec2(this.radius * Math.cos(angle), this.radius * Math.sin(angle))
+    return angles.map(angle => {
+      return Vec2(radius * Math.cos(angle), radius * Math.sin(angle))
     })
+  }
+
+  setupVertices (): void {
+    this.vertices = this.getVertices(this.radius)
   }
 
   grow (stepSize: number): void {
@@ -53,13 +62,12 @@ export class Tree extends Actor {
     }
   }
 
+  drop (): void {
+    this.radius = 1
+    this.vertices = this.seedVertices
+  }
+
   onStep (stepSize: number): void {
     super.onStep(stepSize)
-
-    // const shape = this.sculpture.fixture.getShape()
-    // if (shape instanceof PolygonShape) {
-    //   shape.m_vertices = this.getVertices(4)
-    //   this.sculpture.body.resetMassData()
-    // }
   }
 }

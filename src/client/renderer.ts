@@ -62,7 +62,12 @@ export class Renderer {
       this.context.translate(element.position.x, element.position.y)
       this.context.rotate(element.angle)
       this.drawCircle(element)
-      this.drawPolygon(element)
+      if (element.polygon != null) {
+        this.drawPolygon(element, element.polygon.vertices)
+        if (element.seed != null) {
+          this.drawPolygon(element, element.seed.vertices)
+        }
+      }
     })
     this.debugLines.forEach(debugLine => {
       this.followCamera()
@@ -93,36 +98,34 @@ export class Renderer {
     this.context.translate(-this.camera.position.x, -this.camera.position.y)
   }
 
-  drawPolygon (element: Element): void {
-    if (element.polygon != null) {
-      const context = this.context
-      context.save()
-      const color = element.color
-      this.context.fillStyle = `rgba(${color.red},${color.green},${color.blue},${color.alpha})`
-      context.beginPath()
-      element.polygon.vertices.forEach((vertex, i) => {
-        const x = vertex.x
-        const y = vertex.y
-        if (i === 0) context.moveTo(x, y)
-        else context.lineTo(x, y)
-      })
-      context.closePath()
-      context.clip()
-      context.fill()
-      const borderColor = element.borderColor
-      this.context.strokeStyle = `rgba(${borderColor.red},${borderColor.green},${borderColor.blue},${borderColor.alpha})`
-      this.context.lineWidth = 2 * element.borderWidth
-      context.beginPath()
-      element.polygon.vertices.forEach((vertex, i) => {
-        const x = vertex.x
-        const y = vertex.y
-        if (i === 0) context.moveTo(x, y)
-        else context.lineTo(x, y)
-      })
-      context.closePath()
-      context.stroke()
-      context.restore()
-    }
+  drawPolygon (element: Element, vertices: Vec2[]): void {
+    const context = this.context
+    context.save()
+    const color = element.color
+    this.context.fillStyle = `rgba(${color.red},${color.green},${color.blue},${color.alpha})`
+    context.beginPath()
+    vertices.forEach((vertex, i) => {
+      const x = vertex.x
+      const y = vertex.y
+      if (i === 0) context.moveTo(x, y)
+      else context.lineTo(x, y)
+    })
+    context.closePath()
+    context.clip()
+    context.fill()
+    const borderColor = element.borderColor
+    this.context.strokeStyle = `rgba(${borderColor.red},${borderColor.green},${borderColor.blue},${borderColor.alpha})`
+    this.context.lineWidth = 2 * element.borderWidth
+    context.beginPath()
+    vertices.forEach((vertex, i) => {
+      const x = vertex.x
+      const y = vertex.y
+      if (i === 0) context.moveTo(x, y)
+      else context.lineTo(x, y)
+    })
+    context.closePath()
+    context.stroke()
+    context.restore()
   }
 
   drawCircle (element: Element): void {

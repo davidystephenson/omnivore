@@ -6,6 +6,7 @@ import { Killing } from '../killing'
 import { Structure } from './structure'
 import { HALF_SIGHT } from '../../shared/sight'
 import { directionFromTo } from '../math'
+import { Tree } from '../actor/tree'
 
 export class Membrane extends Feature {
   actor: Organism
@@ -80,7 +81,11 @@ export class Membrane extends Feature {
         this.actor.stage.killingQueue.push(killing)
         return
       }
-      target.destroy()
+      if (target.actor instanceof Tree) {
+        target.actor.drop()
+      } else {
+        target.destroy()
+      }
     }
   }
 
