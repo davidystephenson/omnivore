@@ -2,6 +2,7 @@ import { CircleShape, PolygonShape, Vec2 } from 'planck'
 import { Feature } from '../server/feature/feature'
 import { Color } from './color'
 import { Stage } from '../server/stage'
+import { Tree } from '../server/actor/tree'
 
 export class Element {
   angle: number
@@ -40,6 +41,13 @@ export class Element {
       this.circle = {
         center: shape.getCenter(),
         radius: shape.getRadius()
+      }
+    } else if (props.feature.actor instanceof Tree) {
+      props.stage.log({
+        value: `vertices.length = ${props.feature.actor.vertices.length}`
+      })
+      this.polygon = {
+        vertices: props.feature.actor.vertices
       }
     } else if (shape instanceof PolygonShape) {
       this.polygon = {

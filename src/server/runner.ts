@@ -7,6 +7,7 @@ import { Rope } from '../shared/rope'
 import { DebugLine } from '../shared/debugLine'
 import { DebugCircle } from '../shared/debugCircle'
 import { Player } from './actor/player'
+import { Tree } from './actor/tree'
 
 export class Runner {
   // intervalId: NodeJS.Timeout
@@ -35,6 +36,11 @@ export class Runner {
       body.applyForceToCenter(actor.force)
     })
     const stepSize = this.timeStep * this.timeScale
+    this.stage.actors.forEach(actor => {
+      if (actor instanceof Tree) {
+        actor.grow(stepSize)
+      }
+    })
     this.stage.world.step(stepSize)
     this.elements = this.getElements()
     this.debugLines = []
