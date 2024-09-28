@@ -6,11 +6,12 @@
     "build:server": "npx tsc",
     "build:client": "npx parcel build src/client/index.html",
     "build": "npm run build:server && npm run build:client",
+    "dev": "npm run build && npm start",
     "start": "node --enable-source-maps build/server/index.js",
     "start:server": "npm run build:server && npm run start",
-    "dev:server": "npx onchange -i -k \"src/shared/**\" \"src/server/**\" -- npm run start:server",
-    "dev:client": "npx onchange -i -k \"src/shared/**\" \"src/client/**\" -- npm run build:client",
-    "dev": "npx concurrently \"npm run dev:server\" \"npm run dev:client\""
+    "watch:server": "npx onchange -i -k \"src/shared/**\" \"src/server/**\" -- npm run start:server",
+    "watch:client": "npx onchange -i -k \"src/shared/**\" \"src/client/**\" -- npm run build:client",
+    "watch": "npx concurrently \"npm run watch:server\" \"npm run watch:client\""
   },
   "repository": {
     "type": "git",

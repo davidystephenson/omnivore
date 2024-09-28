@@ -67,6 +67,11 @@ export class Renderer {
         if (element.seed != null) {
           this.drawPolygon(element, element.seed.vertices)
         }
+        if (element.food != null) {
+          element.food.polygons.forEach(polygon => {
+            this.drawPolygon(element, polygon)
+          })
+        }
       }
     })
     this.debugLines.forEach(debugLine => {
