@@ -9,10 +9,11 @@ export class Tree extends Actor {
   seedRadius = 1.25
   seedSideLength: number
   seedInnerRadius: number
-  sideLength: number
-  sculpture: Sculpture
   radius: number
+  sideLength: number
   innerRadius: number
+  oldSideLength: number
+  sculpture: Sculpture
   growthRate = 0.5
   vertices: Vec2[] = []
   seedVertices: Vec2[] = []
@@ -45,6 +46,7 @@ export class Tree extends Actor {
     this.radius = this.seedRadius
     this.sideLength = this.seedSideLength
     this.innerRadius = this.seedInnerRadius
+    this.oldSideLength = this.sideLength
   }
 
   getVertices (radius: number): Vec2[] {
@@ -60,17 +62,18 @@ export class Tree extends Actor {
   }
 
   addFood (): void {
-    console.log('add food')
-    this.foodLayer += 1
-    const rowCount = 2 // row count should be based on the food layer
-    const bottomY = this.seedRadius * Math.sin(2 * Math.PI * 7 / 12)
-    // y position should be based on the food layer
+    const rowCount = 1 + Math.floor(this.oldSideLength / this.foodSize)
+    const seedBottomY = this.seedRadius * Math.sin(2 * Math.PI * 7 / 12)
+    const y0 = seedBottomY - this.foodLayer * this.foodSize
+    const y1 = y0 - this.foodSize
     const foodRow1 = range(0, rowCount - 1).map(i => {
+      const x0 = i * this.foodSize - 0.5 * this.oldSideLength
+      const x1 = x0 + this.foodSize
       return [
-        Vec2((i - 0.5) * this.foodSize, bottomY),
-        Vec2((i + 0.5) * this.foodSize, bottomY),
-        Vec2((i + 0.5) * this.foodSize, bottomY - this.foodSize),
-        Vec2((i - 0.5) * this.foodSize, bottomY - this.foodSize)
+        Vec2(x0, y0),
+        Vec2(x1, y0),
+        Vec2(x1, y1),
+        Vec2(x0, y1)
       ]
     })
     const foodRow2 = foodRow1.map(points => {
@@ -80,11 +83,19 @@ export class Tree extends Actor {
       return points.map(point => rotate(point, 2 / 3 * Math.PI))
     })
     this.foodPolygons.push(...foodRow1, ...foodRow2, ...foodRow3)
+    this.foodLayer += 1
+    this.oldSideLength = this.sideLength
   }
 
   fall (): void {
     this.radius = this.seedRadius
     this.vertices = this.seedVertices
+    this.foodLayer = 0
+    this.radius = this.seedRadius
+    this.sideLength = this.seedSideLength
+    this.innerRadius = this.seedInnerRadius
+    this.oldSideLength = this.sideLength
+    this.foodPolygons = []
   }
 
   grow (stepSize: number): void {
@@ -106,7 +117,6 @@ export class Tree extends Actor {
       this.sculpture.fixture.setUserData(this.sculpture)
     }
     const gapSize = this.innerRadius - this.seedInnerRadius - this.foodLayer * this.foodSize
-    this.stage.log({ value: [gapSize, this.foodSize] })
     if (gapSize > this.foodSize) {
       this.addFood()
     }
