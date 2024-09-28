@@ -209,8 +209,6 @@ export class Stage {
       if (sensorContact) {
         if (fixture.isSensor() && !otherFixture.isSensor()) {
           feature.sensorFeatures.push(otherFeature)
-          this.log({ value: ['begin otherFeature.label', otherFeature.label] })
-          this.log({ value: ['begin feature.sensorFeatures.length', feature.sensorFeatures.length] })
         }
         return
       }

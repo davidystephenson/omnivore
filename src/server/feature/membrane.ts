@@ -82,7 +82,7 @@ export class Membrane extends Feature {
         return
       }
       if (target.actor instanceof Tree) {
-        target.actor.drop()
+        target.actor.fall()
       } else {
         target.destroy()
       }
@@ -94,7 +94,6 @@ export class Membrane extends Feature {
   }
 
   onStep (): void {
-    this.actor.stage.log({ value: ['this.sensorFeatures.length', this.sensorFeatures.length] })
     this.handleContacts()
     const hunger = false
     if (

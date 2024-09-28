@@ -24,6 +24,10 @@ export class Element {
     vertices: Vec2[]
   }
 
+  food?: {
+    polygons: Vec2[][]
+  }
+
   constructor (props: {
     feature: Feature
     stage: Stage
@@ -52,6 +56,9 @@ export class Element {
       }
       this.seed = {
         vertices: props.feature.actor.seedVertices
+      }
+      this.food = {
+        polygons: props.feature.actor.foodPolygons
       }
     } else if (shape instanceof PolygonShape) {
       this.polygon = {
