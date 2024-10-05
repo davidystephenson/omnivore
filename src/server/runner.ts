@@ -74,7 +74,7 @@ export class Runner {
         throw new Error('User data is not a feature')
       }
       const element = new Element({ feature, stage: this.stage })
-      // if (feature.actor instanceof Food) return
+      if (feature.actor instanceof Food) return
       elements.push(element)
     })
     return elements
