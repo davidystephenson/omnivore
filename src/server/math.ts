@@ -1,5 +1,16 @@
 import { AABB, Vec2 } from 'planck'
 
+export function sum (x: number[]): number {
+  let s = 0
+  x.forEach(value => { s += value })
+  return s
+}
+
+export function mean (x: number[]): number {
+  if (x.length === 0) return 0
+  return sum(x) / x.length
+}
+
 export function range (a: number, b: number): number[] {
   return [...Array(b - a + 1).keys()].map(i => a + i)
 }

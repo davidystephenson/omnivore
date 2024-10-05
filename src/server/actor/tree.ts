@@ -3,7 +3,7 @@ import { Stage } from '../stage'
 import { Actor } from './actor'
 import { Sculpture } from '../feature/sculpture'
 import { Color } from '../../shared/color'
-import { range, rotate } from '../math'
+import { mean, range, rotate } from '../math'
 
 export class Tree extends Actor {
   seedRadius = 1.25
@@ -14,7 +14,7 @@ export class Tree extends Actor {
   innerRadius: number
   oldSideLength: number
   sculpture: Sculpture
-  growthRate = 0.5
+  growthRate = 2
   vertices: Vec2[] = []
   seedVertices: Vec2[] = []
   foodPolygons: Vec2[][] = []
@@ -95,6 +95,16 @@ export class Tree extends Actor {
     this.sideLength = this.seedSideLength
     this.innerRadius = this.seedInnerRadius
     this.oldSideLength = this.sideLength
+    this.foodPolygons.forEach(polygon => {
+      const worldVertices = polygon.map(localPoint => {
+        return this.sculpture.body.getWorldPoint(localPoint)
+      })
+      const xValues = worldVertices.map(point => point.x)
+      const yValues = worldVertices.map(point => point.y)
+      const position = Vec2(mean(xValues), mean(yValues))
+      const vertices = worldVertices.map(point => Vec2.mul(0.9, Vec2.sub(point, position)))
+      this.stage.addFood({ vertices, position })
+    })
     this.foodPolygons = []
   }
 

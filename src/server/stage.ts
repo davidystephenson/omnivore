@@ -19,6 +19,7 @@ import { Bot } from './actor/bot'
 import { Player } from './actor/player'
 import { Gene } from './gene'
 import { Tree } from './actor/tree'
+import { Food } from './actor/food'
 
 export class Stage {
   actors = new Map<number, Actor>()
@@ -145,6 +146,11 @@ export class Stage {
     const wall = new Wall({ stage: this, ...props })
     this.walls.push(wall)
     return wall
+  }
+
+  addFood (props: { vertices: Vec2[], position: Vec2 }): Food {
+    const food = new Food({ stage: this, ...props })
+    return food
   }
 
   addBricks (props: {
