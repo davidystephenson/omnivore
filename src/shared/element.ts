@@ -11,6 +11,7 @@ export class Element {
   color: Color
   borderColor: Color
   borderWidth: number
+  visible: boolean
   circle?: {
     center: Vec2
     radius: number
@@ -31,7 +32,9 @@ export class Element {
   constructor (props: {
     feature: Feature
     stage: Stage
+    visible?: boolean
   }) {
+    this.visible = props.visible ?? true
     this.position = props.feature.body.getPosition()
     this.angle = props.feature.body.getAngle()
     this.borderColor = props.feature.color
@@ -57,9 +60,9 @@ export class Element {
       this.seed = {
         vertices: props.feature.actor.seedVertices
       }
-      this.food = {
-        polygons: props.feature.actor.foodPolygons
-      }
+      // this.food = {
+      //   polygons: props.feature.actor.foodPolygons
+      // }
     } else if (shape instanceof PolygonShape) {
       this.polygon = {
         vertices: shape.m_vertices
