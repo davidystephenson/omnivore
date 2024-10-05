@@ -58,6 +58,9 @@ export class Renderer {
       this.context.stroke()
     })
     this.elements.forEach(element => {
+      if (!element.visible) {
+        return
+      }
       this.followCamera()
       this.context.translate(element.position.x, element.position.y)
       this.context.rotate(element.angle)

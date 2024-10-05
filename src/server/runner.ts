@@ -8,6 +8,7 @@ import { DebugLine } from '../shared/debugLine'
 import { DebugCircle } from '../shared/debugCircle'
 import { Player } from './actor/player'
 import { Tree } from './actor/tree'
+import { Food } from './actor/food'
 
 export class Runner {
   // intervalId: NodeJS.Timeout
@@ -73,6 +74,7 @@ export class Runner {
         throw new Error('User data is not a feature')
       }
       const element = new Element({ feature, stage: this.stage })
+      // if (feature.actor instanceof Food) return
       elements.push(element)
     })
     return elements
