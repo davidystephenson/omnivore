@@ -132,7 +132,10 @@ export class Renderer {
     context.closePath()
     context.clip()
     context.fill()
-    const borderColor = element.borderColor
+    const borderColor = {
+      ...color,
+      alpha: 1
+    }
     this.context.strokeStyle = `rgba(${borderColor.red},${borderColor.green},${borderColor.blue},${borderColor.alpha})`
     this.context.lineWidth = 2 * element.borderWidth
     context.beginPath()
@@ -157,7 +160,10 @@ export class Renderer {
       context.arc(element.circle.center.x, element.circle.center.y, element.circle.radius, 0, 2 * Math.PI)
       context.fill()
       context.clip()
-      const borderColor = element.borderColor
+      const borderColor = {
+        ...color,
+        alpha: 1
+      }
       this.context.strokeStyle = `rgba(${borderColor.red},${borderColor.green},${borderColor.blue},${borderColor.alpha})`
       this.context.lineWidth = 5 * element.borderWidth
       context.beginPath()

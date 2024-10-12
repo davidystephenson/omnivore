@@ -8,8 +8,6 @@ import { DebugLine } from '../shared/debugLine'
 import { DebugCircle } from '../shared/debugCircle'
 import { Player } from './actor/player'
 import { Tree } from './actor/tree'
-import { Food } from './actor/food'
-import { Color } from '../shared/color'
 
 export class Runner {
   // intervalId: NodeJS.Timeout
@@ -54,7 +52,7 @@ export class Runner {
   getSummary (props: {
     player: Player
   }): Summary {
-    const idsInVision = props.player.featuresInVision.map(feature => feature.id)
+    const idsInVision = props.player.featuresInVision.map(feature => feature.element.id)
     const filteredElements = this.elements.filter(element => idsInVision.includes(element.id))
     const summary = new Summary({
       elements: filteredElements,
@@ -62,7 +60,7 @@ export class Runner {
       debugLines: this.debugLines,
       debugCircles: this.debugCircles,
       stage: this.stage,
-      id: props.player.membrane.id
+      id: props.player.membrane.element.id
     })
     this.stage.log({ value: ['summary.elements.length 1', summary.elements.length] })
     // this.stage.log({ value: ['summary.elements', JSON.stringify(summary.elements, null, 2)], seconds: 5 })
@@ -75,15 +73,13 @@ export class Runner {
 
   getElements (): Element[] {
     const bodies = this.getBodies()
-    const elements: Element[] = []
-    bodies.forEach(body => {
+    const elements: Element[] = bodies.map(body => {
       const feature = body.getUserData() as Feature
       if (!(feature instanceof Feature)) {
         throw new Error('User data is not a feature')
       }
-      const element = new Element({ feature, stage: this.stage })
       // if (feature.actor instanceof Food) return
-      elements.push(element)
+      return feature.element
     })
     return elements
   }
