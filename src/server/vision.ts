@@ -28,7 +28,7 @@ export class Vision {
     let clear = true
     this.stage.world.rayCast(sourcePoint, targetPoint, (fixture, point, normal, fraction) => {
       const collideFeature = fixture.getUserData() as Feature
-      const excluded = excludeIds?.includes(collideFeature.id)
+      const excluded = excludeIds?.includes(collideFeature.element.id)
       const membrany = collideFeature.label === 'membrane' || collideFeature.label === 'egg'
       if (excluded === true || membrany) return 1
       clear = false
@@ -161,7 +161,7 @@ export class Vision {
     const hits: RayCastHit[] = []
     this.stage.world.rayCast(point1, point2, function (fixture: Fixture, point: Vec2): number {
       const feature = fixture.getUserData() as Feature
-      if (excludeIds?.includes(feature.id) === true || fixture.isSensor()) {
+      if (excludeIds?.includes(feature.element.id) === true || fixture.isSensor()) {
         return -1
       }
       hits.push(new RayCastHit({ feature, point }))
@@ -217,7 +217,7 @@ export class Vision {
     const obstructions = featuresInShape.filter(feature => {
       const shape = feature.fixture.getShape()
       if (shape instanceof CircleShape) return false
-      return feature.id !== sourceId && feature.id !== targetId && feature.id
+      return feature.element.id !== sourceId && feature.element.id !== targetId && feature.element.id
     })
     return obstructions
   }
@@ -242,11 +242,11 @@ export class Vision {
     const leftDirection = rotate(direction, -0.5 * Math.PI)
     const leftSourcePoint = Vec2.combine(1, sourcePoint, sourceCircle.getRadius(), leftDirection)
     const leftTargetPoint = Vec2.combine(1, targetPoint, targetCircle.getRadius(), leftDirection)
-    const clearLineLeft = this.isVisible(leftSourcePoint, leftTargetPoint, [sourceFeature.id, targetFeature.id])
+    const clearLineLeft = this.isVisible(leftSourcePoint, leftTargetPoint, [sourceFeature.element.id, targetFeature.element.id])
     if (clearLineLeft) {
       return true
     }
-    const clearLineRight = this.isVisible(rightSourcePoint, rightTargetPoint, [sourceFeature.id, targetFeature.id])
+    const clearLineRight = this.isVisible(rightSourcePoint, rightTargetPoint, [sourceFeature.element.id, targetFeature.element.id])
     if (clearLineRight) return true
     const betweenVertices = [
       rightSourcePoint,
@@ -260,7 +260,7 @@ export class Vision {
       leftTargetPoint
     ]
     if (debug) this.stage.debugPolygon({ polygon: betweenPolygon, color: Color.RED })
-    const obstructions = this.getObstructions(betweenPolygon, sourceFeature.id, targetFeature.id)
+    const obstructions = this.getObstructions(betweenPolygon, sourceFeature.element.id, targetFeature.element.id)
     if (obstructions.length === 0) {
       return true
     }
@@ -270,7 +270,7 @@ export class Vision {
       if (!(shape instanceof PolygonShape)) return
       const featureBetweenVertices = this.getBetweenVertices(sourcePoint, obstruction, shape)
       const outerCorners = featureBetweenVertices.slice(1).filter(corner => {
-        return this.isClear(sourcePoint, corner, [obstruction.id, targetFeature.id])
+        return this.isClear(sourcePoint, corner, [obstruction.element.id, targetFeature.element.id])
       })
       outerCorners.forEach(corner => {
         const circle = new CircleShape(corner, 0.2)
@@ -280,7 +280,7 @@ export class Vision {
         const rayDirection = directionFromTo(sourcePoint, corner)
         const firstHit = this.getFirstHit(sourcePoint, rayDirection)
         if (debug) this.stage.debugLine({ a: sourcePoint, b: firstHit.point, color: Color.YELLOW })
-        if (firstHit.feature != null && firstHit.feature.id === targetFeature.id) visible = true
+        if (firstHit.feature != null && firstHit.feature.element.id === targetFeature.element.id) visible = true
         const worldCorners = shape.m_vertices.map(corner => {
           return obstruction.body.getWorldPoint(corner)
         })
@@ -304,7 +304,7 @@ export class Vision {
             const rayDir = directionFromTo(targetCorner, cornerA)
             const firstHit = this.getFirstHit(targetCorner, rayDir)
             if (debug) this.stage.debugLine({ a: targetCorner, b: firstHit.point, color: Color.YELLOW })
-            if (firstHit.feature?.id === sourceFeature.id) {
+            if (firstHit.feature?.element.id === sourceFeature.element.id) {
               // this.stage.log({ value: `hit corner ${i}: firstHit.feature?.id === sourceFeature.id` })
               visible = true
             }
@@ -328,14 +328,14 @@ export class Vision {
     }
     const nearDir = directionFromTo(sourcePoint, nearestPoint)
     const nearHit = this.getFirstHit(sourcePoint, nearDir)
-    if (nearHit.feature?.id === targetFeature.id) return true
+    if (nearHit.feature?.element.id === targetFeature.element.id) return true
     const betweenVertices = this.getBetweenVertices(sourcePoint, targetFeature, targetPolygon)
-    const clearCorner1 = this.isVisible(sourcePoint, betweenVertices[1], [sourceFeature.id, targetFeature.id])
-    const clearCorner2 = this.isVisible(sourcePoint, betweenVertices[2], [sourceFeature.id, targetFeature.id])
+    const clearCorner1 = this.isVisible(sourcePoint, betweenVertices[1], [sourceFeature.element.id, targetFeature.element.id])
+    const clearCorner2 = this.isVisible(sourcePoint, betweenVertices[2], [sourceFeature.element.id, targetFeature.element.id])
     const betweenPolygon = new PolygonShape(betweenVertices)
     if (debug) this.stage.debugPolygon({ polygon: betweenPolygon, color: Color.RED })
     if (clearCorner1 || clearCorner2) return true
-    const obstructions = this.getObstructions(betweenPolygon, sourceFeature.id, targetFeature.id)
+    const obstructions = this.getObstructions(betweenPolygon, sourceFeature.element.id, targetFeature.element.id)
     if (obstructions.length === 0) return true
     let visible = false
     obstructions.forEach(obstruction => {
@@ -343,7 +343,7 @@ export class Vision {
       if (!(shape instanceof PolygonShape)) return
       const featureBetweenVertices = this.getBetweenVertices(sourcePoint, obstruction, shape)
       const outerCorners = featureBetweenVertices.slice(1).filter(corner => {
-        return this.isClear(sourcePoint, corner, [obstruction.id, targetFeature.id])
+        return this.isClear(sourcePoint, corner, [obstruction.element.id, targetFeature.element.id])
       })
       outerCorners.forEach(corner => {
         const circle = new CircleShape(corner, 0.2)
@@ -355,7 +355,7 @@ export class Vision {
         const inRange = this.isPointInRange(sourcePoint, firstHit.point)
         if (!inRange) return
         if (debug) this.stage.debugLine({ a: sourcePoint, b: firstHit.point, color: Color.YELLOW })
-        if (firstHit.feature != null && firstHit.feature.id === targetFeature.id) visible = true
+        if (firstHit.feature != null && firstHit.feature.element.id === targetFeature.element.id) visible = true
         const worldCorners = shape.m_vertices.map(corner => {
           return obstruction.body.getWorldPoint(corner)
         })
