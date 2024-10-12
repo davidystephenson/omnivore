@@ -38,6 +38,7 @@ export class Stage {
   starvationQueue: Starvation[] = []
   vision: Vision
   walls: Wall[] = []
+  food: Food[] = []
   world: World
   virtualBoxes: AABB[] = []
   navigation: Navigation

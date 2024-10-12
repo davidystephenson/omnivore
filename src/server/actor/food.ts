@@ -18,6 +18,7 @@ export class Food extends Actor {
       actor: this
     })
     this.features.push(this.sculpture)
+    this.stage.food.push(this)
   }
 
   onStep (stepSize: number): void {

@@ -9,7 +9,6 @@ export class Element {
   position: Vec2
   id: number
   color: Color
-  borderColor: Color
   borderWidth: number
   visible: boolean
   circle?: {
@@ -30,23 +29,24 @@ export class Element {
   }
 
   constructor (props: {
+    id: number
+    borderWidth: number
+    color: Color
     feature: Feature
     stage: Stage
-    visible?: boolean
   }) {
-    this.visible = props.visible ?? true
+    this.visible = true
     this.position = props.feature.body.getPosition()
     this.angle = props.feature.body.getAngle()
-    this.borderColor = props.feature.color
     const healthRatio = props.feature.health / props.feature.maximumHealth
     this.color = new Color({
-      red: props.feature.color.red,
-      green: props.feature.color.green,
-      blue: props.feature.color.blue,
+      red: props.color.red,
+      green: props.color.green,
+      blue: props.color.blue,
       alpha: healthRatio
     })
-    this.borderWidth = props.feature.borderWidth
-    this.id = props.feature.id
+    this.borderWidth = props.borderWidth
+    this.id = props.id
     const shape = props.feature.fixture.getShape()
     if (shape instanceof CircleShape) {
       this.circle = {
