@@ -3,18 +3,17 @@ import { Color } from '../../shared/color'
 import { Actor } from '../actor/actor'
 // import { DebugLine } from '../../shared/debugLine'
 import { Rope } from '../../shared/rope'
+import { Element } from '../../shared/element'
 
 let featureCount = 0
 
 export class Feature {
   body: Body
   fixture: Fixture
+  element: Element
   force = Vec2(0, 0)
   label = 'default'
   actor: Actor
-  id: number
-  borderWidth: number
-  color: Color
   ropes: Rope[] = []
   spawnPosition = Vec2(0, 0)
   deathPosition = Vec2(0, 0)
@@ -38,10 +37,14 @@ export class Feature {
     this.label = props.label ?? this.label
     this.fixture = this.body.createFixture(props.fixtureDef)
     this.fixture.setUserData(this)
-    this.color = props.color
-    this.borderWidth = props.borderWidth ?? 0.1
     featureCount += 1
-    this.id = featureCount
+    this.element = new Element({
+      feature: this,
+      stage: this.actor.stage,
+      color: props.color,
+      borderWidth: props.borderWidth ?? 0.1,
+      id: featureCount
+    })
   }
 
   getFeaturesInRange (): Feature[] {

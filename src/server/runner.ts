@@ -9,6 +9,7 @@ import { DebugCircle } from '../shared/debugCircle'
 import { Player } from './actor/player'
 import { Tree } from './actor/tree'
 import { Food } from './actor/food'
+import { Color } from '../shared/color'
 
 export class Runner {
   // intervalId: NodeJS.Timeout
@@ -60,8 +61,15 @@ export class Runner {
       ropes: this.getRopes(props.player),
       debugLines: this.debugLines,
       debugCircles: this.debugCircles,
+      stage: this.stage,
       id: props.player.membrane.id
     })
+    this.stage.log({ value: ['summary.elements.length 1', summary.elements.length] })
+    // this.stage.log({ value: ['summary.elements', JSON.stringify(summary.elements, null, 2)], seconds: 5 })
+    // summary.elements = summary.elements.filter(element => {
+    //   return element.color.green !== 255 || element.color.blue !== 255
+    // })
+    this.stage.log({ value: ['summary.elements.length 2', summary.elements.length] })
     return summary
   }
 
@@ -74,7 +82,7 @@ export class Runner {
         throw new Error('User data is not a feature')
       }
       const element = new Element({ feature, stage: this.stage })
-      if (feature.actor instanceof Food) return
+      // if (feature.actor instanceof Food) return
       elements.push(element)
     })
     return elements

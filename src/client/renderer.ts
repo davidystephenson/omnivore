@@ -9,6 +9,8 @@ import { DebugCircle } from '../shared/debugCircle'
 export class Renderer {
   lerp = 0.5
   elements = new Map<number, Element>()
+  foodPoints: Vec2[] = []
+  foodCount = 0
   ropes: Rope[] = []
   debugLines: DebugLine[] = []
   debugCircles: DebugCircle[] = []
@@ -76,6 +78,15 @@ export class Renderer {
           })
         }
       }
+    })
+    console.log('foodCount:', this.foodCount)
+    this.foodPoints.forEach(point => {
+      this.followCamera()
+      this.context.translate(point.x, point.y)
+      this.context.beginPath()
+      this.context.fillStyle = 'rgba(255,0,0,1)'
+      this.context.arc(0, 0, 1, 0, 2 * Math.PI)
+      this.context.fill()
     })
     this.debugLines.forEach(debugLine => {
       this.followCamera()
@@ -171,6 +182,8 @@ export class Renderer {
       newElements.set(element.id, element)
       if (element.id === summary.id) this.camera.position = element.position
     })
+    this.foodPoints = summary.foodPoints
+    this.foodCount = summary.foodCount
     this.elements = newElements
     this.ropes = summary.ropes
     this.debugLines = summary.debugLines

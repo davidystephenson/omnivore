@@ -31,6 +31,7 @@ io.on('connection', socket => {
     }
     const summary = stage.runner.getSummary({ player: organism })
     stage.log({ value: ['size', JSON.stringify(summary).length] })
+    stage.log({ value: ['emit summary.elements.length', summary.elements.length] })
     socket.emit('serverUpdateClient', summary)
   })
   socket.on('disconnect', () => {
