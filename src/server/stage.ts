@@ -36,6 +36,7 @@ export class Stage {
   runner: Runner
   spawnPoints: Vec2[]
   starvationQueue: Starvation[] = []
+  fallQueue: Tree[] = []
   vision: Vision
   walls: Wall[] = []
   food: Food[] = []
@@ -213,11 +214,16 @@ export class Stage {
       const sensorContact = fixture.isSensor() || otherFixture.isSensor()
       const feature = fixture.getBody().getUserData() as Feature
       const otherFeature = otherFixture.getBody().getUserData() as Feature
+      const actor = feature.actor
+      const otherActor = otherFeature.actor
       if (sensorContact) {
         if (fixture.isSensor() && !otherFixture.isSensor()) {
           feature.sensorFeatures.push(otherFeature)
         }
         return
+      } else {
+        if (actor instanceof Tree) this.fallQueue.push(actor)
+        if (otherActor instanceof Tree) this.fallQueue.push(otherActor)
       }
       feature.contacts.push(otherFeature)
     })
@@ -333,8 +339,12 @@ export class Stage {
     this.starvationQueue.forEach(starvation => {
       starvation.execute()
     })
+    this.fallQueue.forEach(tree => {
+      tree.fall()
+    })
     this.killingQueue = []
     this.starvationQueue = []
+    this.fallQueue = []
     this.respawnQueue = this.respawnQueue.filter(organism => {
       const respawned = organism.respawn()
       return !respawned

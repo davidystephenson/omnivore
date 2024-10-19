@@ -15,8 +15,6 @@ export class Tree extends Actor {
   oldSideLength: number
   sculpture: Sculpture
   growthRate = 2
-  vertices: Vec2[] = []
-  seedVertices: Vec2[] = []
   foodPolygons: Vec2[][] = []
   step = 0
   growing: boolean
@@ -31,14 +29,16 @@ export class Tree extends Actor {
     super({ stage: props.stage, label: 'tree' })
     this.tree = true
     this.growing = props.growing ?? true
-    this.seedVertices = this.getVertices(this.seedRadius)
-    this.setupVertices()
     this.sculpture = new Sculpture({
       actor: this,
       color: Color.LIME,
       position: props.position,
-      vertices: this.vertices
+      vertices: this.getVertices(this.seedRadius)
     })
+    this.sculpture.element.seed = {
+      vertices: this.getVertices(this.seedRadius)
+    }
+    this.setupVertices()
     this.sculpture.health = 0.0000000000000000001
     this.features.push(this.sculpture)
     this.foodSize = this.seedRadius * 2 * Math.sin(2 / 3 * Math.PI)
@@ -59,7 +59,9 @@ export class Tree extends Actor {
   }
 
   setupVertices (): void {
-    this.vertices = this.getVertices(this.radius)
+    this.sculpture.element.polygon = {
+      vertices: this.getVertices(this.radius)
+    }
   }
 
   addFood (): void {
@@ -90,7 +92,12 @@ export class Tree extends Actor {
 
   fall (): void {
     this.radius = this.seedRadius
-    this.vertices = this.seedVertices
+    if (this.sculpture.element.polygon == null) {
+      throw new Error('There is no polygon')
+    }
+    this.sculpture.element.polygon = {
+      vertices: this.getVertices(this.radius)
+    }
     this.foodLayer = 0
     this.radius = this.seedRadius
     this.sideLength = this.seedSideLength
@@ -104,6 +111,7 @@ export class Tree extends Actor {
       const yValues = worldVertices.map(point => point.y)
       const position = Vec2(mean(xValues), mean(yValues))
       const vertices = worldVertices.map(point => Vec2.mul(0.9, Vec2.sub(point, position)))
+      this.stage.log({ value: ['vertices', vertices] })
       this.stage.addFood({ vertices, position })
     })
     this.foodPolygons = []
@@ -118,8 +126,11 @@ export class Tree extends Actor {
     if (this.step % 2 === 0) {
       this.sculpture.body.destroyFixture(this.sculpture.fixture)
       this.setupVertices()
+      if (this.sculpture.element.polygon == null) {
+        throw new Error('There is no polygon')
+      }
       this.sculpture.fixture = this.sculpture.body.createFixture({
-        shape: new PolygonShape(this.vertices),
+        shape: new PolygonShape(this.sculpture.element.polygon.vertices),
         density: 1,
         restitution: 0,
         friction: 0

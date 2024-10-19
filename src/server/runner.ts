@@ -62,12 +62,6 @@ export class Runner {
       stage: this.stage,
       id: props.player.membrane.element.id
     })
-    this.stage.log({ value: ['summary.elements.length 1', summary.elements.length] })
-    // this.stage.log({ value: ['summary.elements', JSON.stringify(summary.elements, null, 2)], seconds: 5 })
-    // summary.elements = summary.elements.filter(element => {
-    //   return element.color.green !== 255 || element.color.blue !== 255
-    // })
-    this.stage.log({ value: ['summary.elements.length 2', summary.elements.length] })
     return summary
   }
 

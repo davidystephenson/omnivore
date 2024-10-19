@@ -1,10 +1,8 @@
-import { Body, BodyDef, Fixture, FixtureDef, Vec2 } from 'planck'
+import { Body, BodyDef, Circle, Fixture, FixtureDef, Polygon, Vec2 } from 'planck'
 import { Color } from '../../shared/color'
 import { Actor } from '../actor/actor'
 import { Rope } from '../../shared/rope'
 import { Element } from '../../shared/element'
-
-console.log('Element outside', Element)
 
 let featureCount = 0
 
@@ -40,18 +38,25 @@ export class Feature {
     this.fixture.setUserData(this)
     featureCount += 1
     const shape = this.fixture.getShape()
-    console.log('Element', Element)
-    this.element = new Element({
-      body: this.body,
-      alpha: this.health / this.maximumHealth,
-      color: props.color,
-      shape,
-      borderWidth: props.borderWidth ?? 0.1,
+    const isCircle = shape instanceof Circle
+    const isPolygon = shape instanceof Polygon
+    const circle = {
+      center: isCircle ? shape.getCenter() : Vec2(0, 0),
+      radius: isCircle ? shape.getRadius() : 0
+    }
+    const polygon = {
+      vertices: isPolygon ? shape.m_vertices : []
+    }
+    this.element = {
+      visible: true,
+      position: this.body.getPosition(),
+      angle: this.body.getAngle(),
       id: featureCount,
-      tree: this.actor.tree,
-      vertices: this.actor.tree ? this.actor.vertices : undefined,
-      seedVertices: this.actor.tree ? this.actor.vertices : undefined
-    })
+      color: props.color,
+      borderWidth: props.borderWidth ?? 0.1,
+      circle: isCircle ? circle : undefined,
+      polygon: isPolygon ? polygon : undefined
+    }
   }
 
   getFeaturesInRange (): Feature[] {
