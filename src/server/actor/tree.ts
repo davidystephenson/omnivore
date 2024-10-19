@@ -29,6 +29,7 @@ export class Tree extends Actor {
     growing?: boolean
   }) {
     super({ stage: props.stage, label: 'tree' })
+    this.tree = true
     this.growing = props.growing ?? true
     this.seedVertices = this.getVertices(this.seedRadius)
     this.setupVertices()

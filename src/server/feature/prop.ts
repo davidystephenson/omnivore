@@ -3,6 +3,8 @@ import { Color } from '../../shared/color'
 import { Feature } from './feature'
 import { Actor } from '../actor/actor'
 
+console.log('Feature outside', Feature)
+
 export class Prop extends Feature {
   constructor (props: {
     position: Vec2

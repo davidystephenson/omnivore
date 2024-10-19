@@ -10,6 +10,7 @@ export class Actor {
   label: string
   id: number
   invincibleTime = 0
+  tree: boolean
 
   constructor (props: {
     stage: Stage
@@ -20,10 +21,11 @@ export class Actor {
     Actor.count += 1
     this.id = Actor.count
     this.stage.actors.set(this.id, this)
+    this.tree = false
   }
 
   onStep (stepSize: number): void {
-    this.features.forEach(feature => feature.onStep())
+    this.features.forEach(feature => feature.onStep(stepSize))
     // this.invincibleTime = Math.max(0, this.invincibleTime - this.stage.runner.timeStep)
   }
 }
