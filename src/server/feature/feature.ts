@@ -1,10 +1,10 @@
 import { Body, BodyDef, Fixture, FixtureDef, Vec2 } from 'planck'
 import { Color } from '../../shared/color'
 import { Actor } from '../actor/actor'
-// import { DebugLine } from '../../shared/debugLine'
 import { Rope } from '../../shared/rope'
 import { Element } from '../../shared/element'
-import { Tree } from '../actor/tree'
+
+console.log('Element outside', Element)
 
 let featureCount = 0
 
@@ -40,18 +40,17 @@ export class Feature {
     this.fixture.setUserData(this)
     featureCount += 1
     const shape = this.fixture.getShape()
+    console.log('Element', Element)
     this.element = new Element({
       body: this.body,
       alpha: this.health / this.maximumHealth,
-      stage: this.actor.stage,
       color: props.color,
       shape,
       borderWidth: props.borderWidth ?? 0.1,
       id: featureCount,
-      tree: this.actor instanceof Tree,
-      vertices: this.actor instanceof Tree ? this.actor.vertices : undefined,
-      seedVertices: this.actor instanceof Tree ? this.actor.vertices : undefined
-
+      tree: this.actor.tree,
+      vertices: this.actor.tree ? this.actor.vertices : undefined,
+      seedVertices: this.actor.tree ? this.actor.vertices : undefined
     })
   }
 
@@ -68,5 +67,5 @@ export class Feature {
     this.actor.stage.destructionQueue.push(this.body)
   }
 
-  onStep (): void {}
+  onStep (stepSize: number): void {}
 }

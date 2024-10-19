@@ -1,12 +1,11 @@
 import { Body, CircleShape, PolygonShape, Shape, Vec2 } from 'planck'
-import { Color } from './color'
-import { Stage } from '../server/stage'
+// import { Color } from './color'
 
 export class Element {
   angle: number
   position: Vec2
   id: number
-  color: Color
+  color: any
   borderWidth: number
   visible: boolean
   circle?: {
@@ -31,8 +30,7 @@ export class Element {
     alpha: number
     id: number
     borderWidth: number
-    color: Color
-    stage: Stage
+    color: any
     shape: Shape
     tree: boolean
     vertices?: Vec2[]
@@ -41,12 +39,12 @@ export class Element {
     this.visible = true
     this.position = props.body.getPosition()
     this.angle = props.body.getAngle()
-    this.color = new Color({
-      red: props.color.red,
-      green: props.color.green,
-      blue: props.color.blue,
-      alpha: props.alpha
-    })
+    // this.color = new Color({
+    //   red: props.color.red,
+    //   green: props.color.green,
+    //   blue: props.color.blue,
+    //   alpha: props.alpha
+    // })
     this.borderWidth = props.borderWidth
     this.id = props.id
     if (props.shape instanceof CircleShape) {
