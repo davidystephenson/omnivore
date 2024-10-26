@@ -241,9 +241,9 @@ export class Stage {
       const otherFixture = pair[1]
       const feature = fixture.getBody().getUserData() as Feature
       const otherFeature = otherFixture.getBody().getUserData() as Feature
-      feature.contacts = feature.contacts.filter(contact => contact.element.id !== otherFeature.element.id)
+      feature.contacts = feature.contacts.filter(contact => contact.id !== otherFeature.id)
       if (fixture.isSensor() && !otherFixture.isSensor()) {
-        feature.sensorFeatures = feature.sensorFeatures.filter(contact => contact.element.id !== otherFeature.element.id)
+        feature.sensorFeatures = feature.sensorFeatures.filter(contact => contact.id !== otherFeature.id)
       }
     })
   }

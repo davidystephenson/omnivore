@@ -2,7 +2,6 @@ import { Body, BodyDef, Circle, Fixture, FixtureDef, Polygon, Vec2 } from 'planc
 import { Color } from '../../shared/color'
 import { Actor } from '../actor/actor'
 import { Rope } from '../../shared/rope'
-import { Element } from '../../shared/element'
 
 let featureCount = 0
 
@@ -10,7 +9,6 @@ export class Feature {
   body: Body
   id: number
   fixture: Fixture
-  element: Element
   force = Vec2(0, 0)
   label = 'default'
   actor: Actor
@@ -19,9 +17,15 @@ export class Feature {
   deathPosition = Vec2(0, 0)
   health = 1
   maximumHealth = 1
-  radius = 0
   sensorFeatures: Feature[] = []
   contacts: Feature[] = []
+  color: Color
+  borderWidth: number
+  center: Vec2
+  radius: number
+  polygon: {
+    vertices: Vec2[]
+  }
 
   constructor (props: {
     bodyDef: BodyDef
@@ -42,23 +46,13 @@ export class Feature {
     const shape = this.fixture.getShape()
     const isCircle = shape instanceof Circle
     const isPolygon = shape instanceof Polygon
-    const circle = {
-      center: isCircle ? shape.getCenter() : Vec2(0, 0),
-      radius: isCircle ? shape.getRadius() : 0
-    }
-    const polygon = {
-      vertices: isPolygon ? shape.m_vertices : []
-    }
-    this.element = {
-      visible: true,
-      position: this.body.getPosition(),
-      angle: this.body.getAngle(),
-      id: featureCount,
-      color: props.color,
-      borderWidth: props.borderWidth ?? 0.1,
-      circle: isCircle ? circle : undefined,
-      polygon: isPolygon ? polygon : undefined
-    }
+    this.center = isCircle ? shape.getCenter() : Vec2(0, 0)
+    this.radius = isCircle ? shape.getRadius() : 0
+    this.polygon = isPolygon
+      ? { vertices: shape.m_vertices }
+      : { vertices: [] }
+    this.color = props.color
+    this.borderWidth = props.borderWidth ?? 0.1
   }
 
   getFeaturesInRange (): Feature[] {

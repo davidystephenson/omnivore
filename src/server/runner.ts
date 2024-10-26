@@ -52,7 +52,7 @@ export class Runner {
   getSummary (props: {
     player: Player
   }): Summary {
-    const idsInVision = props.player.featuresInVision.map(feature => feature.element.id)
+    const idsInVision = props.player.featuresInVision.map(feature => feature.id)
     const filteredElements = this.elements.filter(element => idsInVision.includes(element.id))
     const summary = new Summary({
       elements: filteredElements,
@@ -60,7 +60,7 @@ export class Runner {
       debugLines: this.debugLines,
       debugCircles: this.debugCircles,
       stage: this.stage,
-      id: props.player.membrane.element.id
+      id: props.player.membrane.id
     })
     return summary
   }
@@ -73,7 +73,6 @@ export class Runner {
         throw new Error('User data is not a feature')
       }
       // if (feature.actor instanceof Food) return
-      feature.element.angle = body.getAngle()
       return feature.element
     })
     return elements
