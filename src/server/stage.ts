@@ -248,6 +248,28 @@ export class Stage {
     })
   }
 
+  preSolve (contact: Contact): void {
+    const fixtureA = contact.getFixtureA()
+    const fixtureB = contact.getFixtureB()
+    const pairs = [
+      [fixtureA, fixtureB],
+      [fixtureB, fixtureA]
+    ]
+    pairs.forEach(pair => {
+      const fixture = pair[0]
+      const otherFixture = pair[1]
+      const sensorContact = fixture.isSensor() || otherFixture.isSensor()
+      const feature = fixture.getBody().getUserData() as Feature
+      const otherFeature = otherFixture.getBody().getUserData() as Feature
+      const actor = feature.actor
+      const otherActor = otherFeature.actor
+      if (!sensorContact) {
+        if (actor instanceof Tree) this.fallQueue.push(actor)
+        if (otherActor instanceof Tree) this.fallQueue.push(otherActor)
+      }
+    })
+  }
+
   debug<Value>(props: LogProps<Value>): void {
     this.logger.debug(props)
   }
@@ -355,23 +377,6 @@ export class Stage {
     this.destructionQueue = []
     this.virtualBoxes.forEach(box => {
       this.debugBox({ box, color: Color.RED })
-    })
-  }
-
-  preSolve (contact: Contact): void {
-    const fixtureA = contact.getFixtureA()
-    const fixtureB = contact.getFixtureB()
-    const featureA = fixtureA.getBody().getUserData() as Feature
-    const featureB = fixtureB.getBody().getUserData() as Feature
-    const pairs = [
-      [featureA, featureB],
-      [featureB, featureA]
-    ]
-    pairs.forEach(pair => {
-      const feature = pair[0]
-      const otherFeature = pair[1]
-      if (feature.label === 'egg' && otherFeature.label === 'membrane') contact.setEnabled(false)
-      // if (feature.label === 'egg' && otherFeature.label === 'crate') contact.setEnabled(false)
     })
   }
 }

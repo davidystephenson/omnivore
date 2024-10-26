@@ -118,6 +118,17 @@ export class Tree extends Actor {
   }
 
   grow (stepSize: number): void {
+    // const contacts = []
+    // let contactEdge = this.sculpture.body.getContactList()
+    // if (contactEdge != null) {
+    //   for (contactEdge; contactEdge != null; contactEdge = contactEdge.next) {
+    //     contacts.push(contactEdge.contact)
+    //   }
+    //   if (contacts.length > 1) {
+    //     console.log('contacts.length', contacts.length)
+    //     this.fall()
+    //   }
+    // }
     this.step += 1
     this.radius = this.radius + stepSize * this.growthRate
     this.seedSideLength = this.seedRadius * 2 * Math.sin(2 / 3 * Math.PI)

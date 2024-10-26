@@ -1,5 +1,5 @@
 import { Vec2 } from 'planck'
-import { Gene } from '../server/gene'
+// import { Gene } from '../server/gene'
 import { Walled } from '../server/walled'
 
 export class Funhouse extends Walled {
@@ -112,7 +112,7 @@ export class Funhouse extends Walled {
     //   count: 10,
     //   gap: 0.1,
     //   halfHeight: 1,
-    //   halfWidth: propHalfWidth,
+    //   halfWidth: propHalfWidth + 3,
     //   position: Vec2(rightPropX, -20)
     // })
 
@@ -273,8 +273,19 @@ export class Funhouse extends Walled {
     //   position: Vec2(-20, 0),
     //   gene: bigGene
     // })
+    // this.addBrick({
+    //   halfHeight: 1,
+    //   halfWidth: 1,
+    //   position: Vec2(-15, 14)
+    // })
+
+    // this.addBrick({
+    //   halfHeight: 1,
+    //   halfWidth: 5,
+    //   position: Vec2(-15, 14)
+    // })
     this.addTree({
-      position: Vec2(-25, 15)
+      position: Vec2(0, 0)
     })
   }
 }

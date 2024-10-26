@@ -8,6 +8,7 @@ let featureCount = 0
 
 export class Feature {
   body: Body
+  id: number
   fixture: Fixture
   element: Element
   force = Vec2(0, 0)
@@ -37,6 +38,7 @@ export class Feature {
     this.fixture = this.body.createFixture(props.fixtureDef)
     this.fixture.setUserData(this)
     featureCount += 1
+    this.id = featureCount
     const shape = this.fixture.getShape()
     const isCircle = shape instanceof Circle
     const isPolygon = shape instanceof Polygon

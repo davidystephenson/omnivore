@@ -2,6 +2,7 @@ import { Vec2 } from 'planck'
 import { Sculpture } from '../feature/sculpture'
 import { Stage } from '../stage'
 import { Actor } from './actor'
+import { Color } from '../../shared/color'
 
 export class Food extends Actor {
   sculpture: Sculpture
@@ -15,6 +16,7 @@ export class Food extends Actor {
     this.sculpture = new Sculpture({
       position: props.position,
       vertices: props.vertices,
+      color: Color.GREEN,
       actor: this
     })
     this.features.push(this.sculpture)

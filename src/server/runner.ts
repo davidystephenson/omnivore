@@ -73,6 +73,7 @@ export class Runner {
         throw new Error('User data is not a feature')
       }
       // if (feature.actor instanceof Food) return
+      feature.element.angle = body.getAngle()
       return feature.element
     })
     return elements
