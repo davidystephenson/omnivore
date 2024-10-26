@@ -35,7 +35,7 @@ export class Tree extends Actor {
       position: props.position,
       vertices: this.getVertices(this.seedRadius)
     })
-    this.sculpture.element.seed = {
+    this.sculpture.seed = {
       vertices: this.getVertices(this.seedRadius)
     }
     this.setupVertices()
@@ -59,7 +59,10 @@ export class Tree extends Actor {
   }
 
   setupVertices (): void {
-    this.sculpture.element.polygon = {
+    this.sculpture.polygon = {
+      vertices: this.getVertices(this.radius)
+    }
+    this.sculpture.seed = {
       vertices: this.getVertices(this.radius)
     }
   }
@@ -92,10 +95,10 @@ export class Tree extends Actor {
 
   fall (): void {
     this.radius = this.seedRadius
-    if (this.sculpture.element.polygon == null) {
+    if (this.sculpture.polygon == null) {
       throw new Error('There is no polygon')
     }
-    this.sculpture.element.polygon = {
+    this.sculpture.polygon = {
       vertices: this.getVertices(this.radius)
     }
     this.foodLayer = 0
@@ -137,11 +140,11 @@ export class Tree extends Actor {
     if (this.step % 2 === 0) {
       this.sculpture.body.destroyFixture(this.sculpture.fixture)
       this.setupVertices()
-      if (this.sculpture.element.polygon == null) {
+      if (this.sculpture.polygon == null) {
         throw new Error('There is no polygon')
       }
       this.sculpture.fixture = this.sculpture.body.createFixture({
-        shape: new PolygonShape(this.sculpture.element.polygon.vertices),
+        shape: new PolygonShape(this.sculpture.polygon.vertices),
         density: 1,
         restitution: 0,
         friction: 0
