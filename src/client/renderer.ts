@@ -71,11 +71,6 @@ export class Renderer {
         if (element.seed != null) {
           this.drawPolygon(element, element.seed.vertices)
         }
-        if (element.food != null) {
-          element.food.polygons.forEach(polygon => {
-            this.drawPolygon(element, polygon)
-          })
-        }
       }
     })
     console.log('foodCount:', this.foodCount)
@@ -173,7 +168,8 @@ export class Renderer {
         const newPosition = element.position
         const distance = Vec2.distance(oldPosition, newPosition)
         if (distance < 1) {
-          element.position = Vec2.add(Vec2.mul(oldPosition, this.lerp), Vec2.mul(newPosition, 1 - this.lerp))
+          // element.position = Vec2.add(Vec2.mul(oldPosition, this.lerp), Vec2.mul(newPosition, 1 - this.lerp))
+          element.position = newPosition
         }
       }
       newElements.set(element.id, element)

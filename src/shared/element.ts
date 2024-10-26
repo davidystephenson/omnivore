@@ -20,8 +20,4 @@ export interface Element {
   seed?: {
     vertices: Vec2[]
   }
-
-  food?: {
-    polygons: Vec2[][]
-  }
 }
