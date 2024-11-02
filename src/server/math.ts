@@ -102,7 +102,11 @@ export function choose<type> (array: type[]): type {
 
 export function roundVector (vector: Vec2): Vec2 {
   return Vec2(
-    Number(vector.x.toFixed(4)),
-    Number(vector.y.toFixed(4))
+    roundNumber(vector.x),
+    roundNumber(vector.y)
   )
+}
+
+export function roundNumber (x: number): number {
+  return Number(x.toFixed(2))
 }

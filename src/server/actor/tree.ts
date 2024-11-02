@@ -114,7 +114,6 @@ export class Tree extends Actor {
       const yValues = worldVertices.map(point => point.y)
       const position = Vec2(mean(xValues), mean(yValues))
       const vertices = worldVertices.map(point => Vec2.mul(0.9, Vec2.sub(point, position)))
-      this.stage.log({ value: ['vertices', vertices] })
       this.stage.addFood({ vertices, position })
     })
     this.foodPolygons = []
