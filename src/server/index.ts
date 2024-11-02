@@ -16,20 +16,20 @@ io.on('connection', socket => {
     radius: 0.9
   })
   stage.log({ value: ['gene:', gene] })
-  const organism = stage.addPlayer({
+  const player = stage.addPlayer({
     position: Vec2(-20, 15),
     gene
   })
   socket.on('controls', (controls: Controls) => {
-    organism.controls = controls
+    player.controls = controls
     if (controls.select) {
       stage.runner.paused = true
     }
     if (controls.cancel) {
       stage.runner.paused = false
-      organism.membrane.health = 1
+      player.membrane.health = 1
     }
-    const summary = stage.runner.getSummary({ player: organism })
+    const summary = stage.runner.getSummary({ player })
     stage.log({ value: ['size', JSON.stringify(summary).length] })
     stage.log({ value: ['emit summary.elements.length', summary.elements.length] })
     socket.emit('serverUpdateClient', summary)
@@ -38,9 +38,9 @@ io.on('connection', socket => {
     stage.log({
       value: ['disconnect:', socket.id]
     })
-    organism.features.forEach(feature => {
+    player.features.forEach(feature => {
       stage.world.destroyBody(feature.body)
     })
-    stage.actors.delete(organism.id)
+    stage.actors.delete(player.id)
   })
 })

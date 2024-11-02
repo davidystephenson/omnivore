@@ -16,15 +16,13 @@ export class Runner {
   timeScale = 1 // 1
   paused = false
   worldTime = 0
-  elements: Element[]
   debugLines: DebugLine[] = []
   debugCircles: DebugCircle[] = []
-
+  features: Feature[] = []
   constructor (props: {
     stage: Stage
   }) {
     this.stage = props.stage
-    this.elements = this.getElements()
   }
 
   step (): void {
@@ -42,20 +40,18 @@ export class Runner {
       }
     })
     this.stage.world.step(stepSize)
-    this.elements = this.getElements()
     this.debugLines = []
     this.debugCircles = []
     this.stage.onStep(stepSize)
-    this.elements = this.getElements()
+    this.features = this.getFeatures()
   }
 
   getSummary (props: {
     player: Player
   }): Summary {
-    const idsInVision = props.player.featuresInVision.map(feature => feature.id)
-    const filteredElements = this.elements.filter(element => idsInVision.includes(element.id))
+    const elements = this.getElements(props.player)
     const summary = new Summary({
-      elements: filteredElements,
+      elements,
       ropes: this.getRopes(props.player),
       debugLines: this.debugLines,
       debugCircles: this.debugCircles,
@@ -65,15 +61,14 @@ export class Runner {
     return summary
   }
 
-  getElements (): Element[] {
-    const bodies = this.getBodies()
-    const elements: Element[] = bodies.map(body => {
-      const feature = body.getUserData() as Feature
-      if (!(feature instanceof Feature)) {
-        throw new Error('User data is not a feature')
-      }
-      // if (feature.actor instanceof Food) return
-      return feature.element
+  getElements (player: Player): Element[] {
+    const idsInVision = player.featuresInVision.map(feature => feature.id)
+    const filteredFeatures = this.features.filter(feature => idsInVision.includes(feature.id))
+    const elements: Element[] = filteredFeatures.map(feature => {
+      const tree = feature.actor instanceof Tree
+      const seen = player.seenIds.includes(feature.id)
+      if (!seen) player.seenIds.push(feature.id)
+      return feature.getElement(seen && !tree)
     })
     return elements
   }
@@ -94,6 +89,19 @@ export class Runner {
     })
     */
     return ropes
+  }
+
+  getFeatures (): Feature[] {
+    const bodies = this.getBodies()
+    const features: Feature[] = []
+    bodies.forEach(body => {
+      const feature = body.getUserData()
+      if (!(feature instanceof Feature)) {
+        throw new Error('User data is not a feature')
+      }
+      features.push(feature)
+    })
+    return features
   }
 
   getBodies (): Body[] {

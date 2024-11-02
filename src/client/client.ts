@@ -33,6 +33,7 @@ socket.on('connected', () => {
 })
 socket.on('serverUpdateClient', (summary: Summary) => {
   lastSummary = summary
+  console.log('summary', summary)
   renderer.updateElements(summary)
 })
 

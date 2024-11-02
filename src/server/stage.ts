@@ -103,9 +103,9 @@ export class Stage {
   addPlayer (props: {
     position: Vec2
     gene: Gene
-  }): Organism {
-    const organism = new Player({ stage: this, ...props })
-    return organism
+  }): Player {
+    const player = new Player({ stage: this, ...props })
+    return player
   }
 
   addPuppet (props: {

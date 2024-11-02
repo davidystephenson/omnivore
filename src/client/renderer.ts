@@ -1,5 +1,5 @@
 import { Vec2 } from 'planck'
-import { Element } from '../shared/element'
+import { ClientElement } from '../shared/element'
 import { Summary } from '../shared/summary'
 import { Rope } from '../shared/rope'
 import { HALF_SIGHT } from '../shared/sight'
@@ -8,7 +8,7 @@ import { DebugCircle } from '../shared/debugCircle'
 
 export class Renderer {
   lerp = 0.5
-  elements = new Map<number, Element>()
+  elements = new Map<number, ClientElement>()
   foodCount = 0
   ropes: Rope[] = []
   debugLines: DebugLine[] = []
@@ -59,9 +59,7 @@ export class Renderer {
       this.context.stroke()
     })
     this.elements.forEach(element => {
-      if (!element.visible) {
-        return
-      }
+      if (!element.visible) return
       this.followCamera()
       this.context.translate(element.position.x, element.position.y)
       this.context.rotate(element.angle)
@@ -103,7 +101,7 @@ export class Renderer {
     this.context.translate(-this.camera.position.x, -this.camera.position.y)
   }
 
-  drawPolygon (element: Element, vertices: Vec2[]): void {
+  drawPolygon (element: ClientElement, vertices: Vec2[]): void {
     const context = this.context
     context.save()
     const color = element.color
@@ -136,7 +134,7 @@ export class Renderer {
     context.restore()
   }
 
-  drawCircle (element: Element): void {
+  drawCircle (element: ClientElement): void {
     if (element.circle != null) {
       const context = this.context
       context.save()
@@ -160,7 +158,9 @@ export class Renderer {
   }
 
   updateElements (summary: Summary): void {
-    const newElements = new Map<number, Element>()
+    this.elements.forEach(element => {
+      element.visible = false
+    })
     summary.elements.forEach(element => {
       const oldElement = this.elements.get(element.id)
       if (oldElement != null) {
@@ -171,12 +171,32 @@ export class Renderer {
           // element.position = Vec2.add(Vec2.mul(oldPosition, this.lerp), Vec2.mul(newPosition, 1 - this.lerp))
           element.position = newPosition
         }
+        const complete = { ...oldElement, ...element, visible: true }
+        this.elements.set(element.id, complete)
+      } else {
+        if (element.color == null) {
+          console.error(`missing element ${element.id} color`)
+          return
+        }
+        if (element.borderWidth == null) {
+          console.error(`missing element ${element.id} borderWidth`)
+          return
+        }
+        if (element.circle == null && element.polygon == null) {
+          console.error(`missing element ${element.id} circle and polygon`)
+          return
+        }
+        const complete: ClientElement = {
+          ...element,
+          color: element.color,
+          borderWidth: element.borderWidth,
+          visible: true
+        }
+        this.elements.set(element.id, complete)
       }
-      newElements.set(element.id, element)
       if (element.id === summary.id) this.camera.position = element.position
     })
     this.foodCount = summary.foodCount
-    this.elements = newElements
     this.ropes = summary.ropes
     this.debugLines = summary.debugLines
     this.debugCircles = summary.debugCircles

@@ -99,3 +99,10 @@ export function whichMin (array: number[]): number {
 export function choose<type> (array: type[]): type {
   return array[Math.floor(Math.random() * array.length)]
 }
+
+export function roundVector (vector: Vec2): Vec2 {
+  return Vec2(
+    Number(vector.x.toFixed(4)),
+    Number(vector.y.toFixed(4))
+  )
+}
