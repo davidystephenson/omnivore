@@ -3,7 +3,7 @@ import { Color } from '../../shared/color'
 import { Actor } from '../actor/actor'
 import { Rope } from '../../shared/rope'
 import { Element } from '../../shared/element'
-import { roundVector } from '../math'
+import { roundNumber, roundVector } from '../math'
 
 let featureCount = 0
 
@@ -75,32 +75,33 @@ export class Feature {
   }
 
   getElement (seen: boolean): Element {
+    const position = roundVector(this.body.getPosition())
     const element: Element = {
-      id: this.id,
-      position: roundVector(this.body.getPosition()),
-      angle: Number(this.body.getAngle().toFixed(4)),
-      scale: 1,
-      alpha: this.color.alpha
+      i: this.id,
+      x: position.x,
+      y: position.y,
+      n: roundNumber(this.body.getAngle()),
+      s: 1,
+      a: this.color.alpha
     }
     if (!seen) {
-      element.color = this.color
-      element.borderWidth = this.borderWidth
+      element.r = this.color.red
+      element.g = this.color.green
+      element.b = this.color.blue
+      element.o = this.borderWidth
       if (this.radius > 0) {
-        element.circle = {
-          center: this.center,
-          radius: this.radius
-        }
+        element.z = this.center.x
+        element.w = this.center.y
+        element.u = this.radius
       } else {
-        const vertices = this.polygon.vertices.map(vertex => {
+        element.v = this.polygon.vertices.map(vertex => {
           return roundVector(vertex)
         })
-        element.polygon = { vertices }
       }
       if (this.seed != null) {
-        const vertices = this.seed.vertices.map(vertex => {
+        element.d = this.seed.vertices.map(vertex => {
           return roundVector(vertex)
         })
-        element.seed = { vertices }
       }
     }
     return element

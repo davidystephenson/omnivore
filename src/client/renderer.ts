@@ -39,7 +39,7 @@ export class Renderer {
     if (eye == null) {
       return
     }
-    this.context.translate(eye.position.x, eye.position.y)
+    this.context.translate(eye.x, eye.y)
     this.context.fillStyle = 'rgba(50,50,50,1)'
     this.context.lineWidth = 0.4
     this.context.beginPath()
@@ -61,13 +61,15 @@ export class Renderer {
     this.elements.forEach(element => {
       if (!element.visible) return
       this.followCamera()
-      this.context.translate(element.position.x, element.position.y)
-      this.context.rotate(element.angle)
-      this.drawCircle(element)
-      if (element.polygon != null) {
-        this.drawPolygon(element, element.polygon.vertices)
-        if (element.seed != null) {
-          this.drawPolygon(element, element.seed.vertices)
+      this.context.translate(element.x, element.y)
+      this.context.rotate(element.n)
+      if (element.z != null) {
+        this.drawCircle(element)
+      }
+      if (element.v != null) {
+        this.drawPolygon(element, element.v)
+        if (element.d != null) {
+          this.drawPolygon(element, element.d)
         }
       }
     })
@@ -104,8 +106,7 @@ export class Renderer {
   drawPolygon (element: ClientElement, vertices: Vec2[]): void {
     const context = this.context
     context.save()
-    const color = element.color
-    this.context.fillStyle = `rgba(${color.red},${color.green},${color.blue},${color.alpha})`
+    this.context.fillStyle = `rgba(${element.r},${element.g},${element.b},${element.a})`
     context.beginPath()
     vertices.forEach((vertex, i) => {
       const x = vertex.x
@@ -116,12 +117,8 @@ export class Renderer {
     context.closePath()
     context.clip()
     context.fill()
-    const borderColor = {
-      ...color,
-      alpha: 1
-    }
-    this.context.strokeStyle = `rgba(${borderColor.red},${borderColor.green},${borderColor.blue},${borderColor.alpha})`
-    this.context.lineWidth = 2 * element.borderWidth
+    this.context.strokeStyle = `rgba(${element.r},${element.g},${element.b},1)`
+    this.context.lineWidth = 2 * element.o
     context.beginPath()
     vertices.forEach((vertex, i) => {
       const x = vertex.x
@@ -135,26 +132,28 @@ export class Renderer {
   }
 
   drawCircle (element: ClientElement): void {
-    if (element.circle != null) {
-      const context = this.context
-      context.save()
-      const color = element.color
-      this.context.fillStyle = `rgba(${color.red},${color.green},${color.blue},${color.alpha})`
-      context.beginPath()
-      context.arc(element.circle.center.x, element.circle.center.y, element.circle.radius, 0, 2 * Math.PI)
-      context.fill()
-      context.clip()
-      const borderColor = {
-        ...color,
-        alpha: 1
-      }
-      this.context.strokeStyle = `rgba(${borderColor.red},${borderColor.green},${borderColor.blue},${borderColor.alpha})`
-      this.context.lineWidth = 5 * element.borderWidth
-      context.beginPath()
-      context.arc(element.circle.center.x, element.circle.center.y, element.circle.radius, 0, 2 * Math.PI)
-      context.stroke()
-      context.restore()
+    if (element.z == null) {
+      throw new Error('Missing circle center x')
     }
+    if (element.w == null) {
+      throw new Error('Missing circle center y')
+    }
+    if (element.u == null) {
+      throw new Error('Missing circle radius')
+    }
+    const context = this.context
+    context.save()
+    this.context.fillStyle = `rgba(${element.r},${element.g},${element.b},${element.a})`
+    context.beginPath()
+    context.arc(element.z, element.w, element.u, 0, 2 * Math.PI)
+    context.fill()
+    context.clip()
+    this.context.strokeStyle = `rgba(${element.r},${element.g},${element.b},${element.a})`
+    this.context.lineWidth = 5 * element.o
+    context.beginPath()
+    context.arc(element.z, element.w, element.u, 0, 2 * Math.PI)
+    context.stroke()
+    context.restore()
   }
 
   updateElements (summary: Summary): void {
@@ -162,39 +161,52 @@ export class Renderer {
       element.visible = false
     })
     summary.elements.forEach(element => {
-      const oldElement = this.elements.get(element.id)
+      const oldElement = this.elements.get(element.i)
       if (oldElement != null) {
-        const oldPosition = oldElement.position
-        const newPosition = element.position
+        const oldPosition = new Vec2(oldElement.x, oldElement.y)
+        const newPosition = new Vec2(element.x, element.y)
         const distance = Vec2.distance(oldPosition, newPosition)
         if (distance < 1) {
-          // element.position = Vec2.add(Vec2.mul(oldPosition, this.lerp), Vec2.mul(newPosition, 1 - this.lerp))
-          element.position = newPosition
+          // const lerped = Vec2.add(Vec2.mul(oldPosition, this.lerp), Vec2.mul(newPosition, 1 - this.lerp))
+          // element.x = lerped.x
+          // element.y = lerped.y
         }
         const complete = { ...oldElement, ...element, visible: true }
-        this.elements.set(element.id, complete)
+        this.elements.set(element.i, complete)
       } else {
-        if (element.color == null) {
-          console.error(`missing element ${element.id} color`)
+        if (element.r == null) {
+          console.error(`missing element ${element.i} red`)
           return
         }
-        if (element.borderWidth == null) {
-          console.error(`missing element ${element.id} borderWidth`)
+        if (element.g == null) {
+          console.error(`missing element ${element.i} green`)
           return
         }
-        if (element.circle == null && element.polygon == null) {
-          console.error(`missing element ${element.id} circle and polygon`)
+        if (element.b == null) {
+          console.error(`missing element ${element.i} blue`)
+          return
+        }
+        if (element.o == null) {
+          console.error(`missing element ${element.i} borderWidth`)
+          return
+        }
+        if (element.z == null && element.v == null) {
+          console.error(`missing element ${element.i} center x and polygon`)
           return
         }
         const complete: ClientElement = {
           ...element,
-          color: element.color,
-          borderWidth: element.borderWidth,
+          r: element.r,
+          g: element.g,
+          b: element.b,
+          o: element.o,
           visible: true
         }
-        this.elements.set(element.id, complete)
+        this.elements.set(element.i, complete)
       }
-      if (element.id === summary.id) this.camera.position = element.position
+      if (element.i === summary.id) {
+        this.camera.position = new Vec2(element.x, element.y)
+      }
     })
     this.foodCount = summary.foodCount
     this.ropes = summary.ropes

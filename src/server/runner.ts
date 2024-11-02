@@ -50,14 +50,14 @@ export class Runner {
     player: Player
   }): Summary {
     const elements = this.getElements(props.player)
-    const summary = new Summary({
+    const summary: Summary = {
       elements,
+      foodCount: this.stage.food.length,
       ropes: this.getRopes(props.player),
-      debugLines: this.debugLines,
-      debugCircles: this.debugCircles,
-      stage: this.stage,
+      debugLines: [], // this.debugLines,
+      debugCircles: [], // this.debugCircles,
       id: props.player.membrane.id
-    })
+    }
     return summary
   }
 
