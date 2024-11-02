@@ -2,6 +2,8 @@ import { Body, BodyDef, Circle, Fixture, FixtureDef, Polygon, Vec2 } from 'planc
 import { Color } from '../../shared/color'
 import { Actor } from '../actor/actor'
 import { Rope } from '../../shared/rope'
+import { Element } from '../../shared/element'
+import { roundVector } from '../math'
 
 let featureCount = 0
 
@@ -24,6 +26,10 @@ export class Feature {
   center: Vec2
   radius: number
   polygon: {
+    vertices: Vec2[]
+  }
+
+  seed?: {
     vertices: Vec2[]
   }
 
@@ -66,6 +72,38 @@ export class Feature {
   destroy (): void {
     this.actor.stage.actors.delete(this.actor.id)
     this.actor.stage.destructionQueue.push(this.body)
+  }
+
+  getElement (seen: boolean): Element {
+    const element: Element = {
+      id: this.id,
+      position: roundVector(this.body.getPosition()),
+      angle: Number(this.body.getAngle().toFixed(4)),
+      scale: 1,
+      alpha: this.color.alpha
+    }
+    if (!seen) {
+      element.color = this.color
+      element.borderWidth = this.borderWidth
+      if (this.radius > 0) {
+        element.circle = {
+          center: this.center,
+          radius: this.radius
+        }
+      } else {
+        const vertices = this.polygon.vertices.map(vertex => {
+          return roundVector(vertex)
+        })
+        element.polygon = { vertices }
+      }
+      if (this.seed != null) {
+        const vertices = this.seed.vertices.map(vertex => {
+          return roundVector(vertex)
+        })
+        element.seed = { vertices }
+      }
+    }
+    return element
   }
 
   onStep (stepSize: number): void {}

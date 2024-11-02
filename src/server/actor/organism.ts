@@ -196,7 +196,7 @@ export class Organism extends Actor {
     this.stage.destructionQueue.push(this.membrane.body)
     this.spawnPosition = this.membrane.body.getPosition()
     this.membrane = this.grow({ branch: this.gene })
-    this.membrane.element.borderWidth = 0.2
+    this.membrane.borderWidth = 0.2
   }
 
   eggFlee (): void { }

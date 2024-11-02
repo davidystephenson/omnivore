@@ -4,6 +4,8 @@ import { Organism } from './organism'
 import { Gene } from '../gene'
 
 export class Player extends Organism {
+  seenIds: Number[] = []
+
   constructor (props: {
     position: Vec2
     stage: Stage

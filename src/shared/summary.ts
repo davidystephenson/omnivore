@@ -21,9 +21,9 @@ export class Summary {
     id: number
   }) {
     this.elements = props.elements
-    this.ropes = props.ropes
-    this.debugLines = props.debugLines
-    this.debugCircles = props.debugCircles
+    this.ropes = [] // props.ropes
+    this.debugLines = [] // props.debugLines
+    this.debugCircles = [] // props.debugCircles
     this.id = props.id
     this.foodCount = props.stage.food.length
   }
