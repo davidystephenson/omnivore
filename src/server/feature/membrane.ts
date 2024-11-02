@@ -7,6 +7,7 @@ import { Structure } from './structure'
 import { HALF_SIGHT } from '../../shared/sight'
 import { directionFromTo } from '../math'
 import { Tree } from '../actor/tree'
+import { Food } from '../actor/food'
 
 export class Membrane extends Feature {
   actor: Organism
@@ -84,6 +85,9 @@ export class Membrane extends Feature {
       if (target.actor instanceof Tree) {
         target.actor.fall()
       } else {
+        if (target.actor instanceof Food) {
+          this.health = Math.min(this.maximumHealth, this.health + 0.3)
+        }
         target.destroy()
       }
     }
@@ -95,14 +99,14 @@ export class Membrane extends Feature {
 
   onStep (): void {
     this.handleContacts()
-    const hunger = false
+    const hunger = true
     if (
       hunger &&
       this.health > 0 &&
       !this.destroyed &&
       !this.actor.dead
     ) {
-      const seconds = 60
+      const seconds = 120
       this.health -= 1 / (10 * seconds)
       if (this.health <= 0) {
         this.actor.starve({ membrane: this })

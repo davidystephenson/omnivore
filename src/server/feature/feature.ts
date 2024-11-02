@@ -82,7 +82,7 @@ export class Feature {
       y: position.y,
       n: roundNumber(this.body.getAngle()),
       s: 1,
-      a: this.color.alpha
+      a: this.health
     }
     if (!seen) {
       element.r = this.color.red
