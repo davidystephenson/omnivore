@@ -386,20 +386,20 @@ export class Vision {
   }
 
   isFeatureVisible (sourceFeature: Feature, targetFeature: Feature): boolean {
-    return true
-    // if (targetFeature.label === 'structure') {
-    //   return true
-    // }
-    // if (targetFeature.actor.id === sourceFeature.actor.id) return true
-    // const sourceShape = sourceFeature.fixture.getShape()
-    // const targetShape = targetFeature.fixture.getShape()
-    // if (sourceShape instanceof CircleShape && targetShape instanceof CircleShape) {
-    //   return this.checkCircleToCircle(sourceFeature, targetFeature, sourceShape, targetShape)
-    // }
-    // if (sourceShape instanceof CircleShape && targetShape instanceof PolygonShape) {
-    //   const polygonVisible = this.checkCircleToPolygon(sourceFeature, targetFeature, sourceShape, targetShape)
-    //   return polygonVisible
-    // }
     // return true
+    if (targetFeature.label === 'structure') {
+      return true
+    }
+    if (targetFeature.actor.id === sourceFeature.actor.id) return true
+    const sourceShape = sourceFeature.fixture.getShape()
+    const targetShape = targetFeature.fixture.getShape()
+    if (sourceShape instanceof CircleShape && targetShape instanceof CircleShape) {
+      return this.checkCircleToCircle(sourceFeature, targetFeature, sourceShape, targetShape)
+    }
+    if (sourceShape instanceof CircleShape && targetShape instanceof PolygonShape) {
+      const polygonVisible = this.checkCircleToPolygon(sourceFeature, targetFeature, sourceShape, targetShape)
+      return polygonVisible
+    }
+    return true
   }
 }
