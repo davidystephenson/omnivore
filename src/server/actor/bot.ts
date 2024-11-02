@@ -6,6 +6,7 @@ import { Color } from '../../shared/color'
 import { Waypoint } from '../waypoint'
 import { Gene } from '../gene'
 import { Membrane } from '../feature/membrane'
+import { Food } from './food'
 
 export class Bot extends Organism {
   giveUpTime: number
@@ -212,6 +213,17 @@ export class Bot extends Organism {
     return nearestReachableEnemy as Membrane
   }
 
+  getNearestReachableFood (): Food | undefined {
+    const foods = this.featuresInVision.filter(feature => feature.actor instanceof Food)
+    const reachableFoods = foods.filter(food => {
+      return this.isPointReachable(food.body.getPosition(), 1)
+    })
+    if (reachableFoods.length === 0) return undefined
+    const distances = reachableFoods.map(m => Vec2.distance(m.body.getPosition(), this.membrane.body.getPosition()))
+    const nearestReachableFood = reachableFoods[whichMin(distances)]
+    return nearestReachableFood.actor as Food
+  }
+
   isPointReachable (end: Vec2, otherRadius?: number): boolean {
     const start = this.membrane.body.getPosition()
     return this.stage.navigation.isPointReachable(start, end, this.membrane.radius, otherRadius)
@@ -231,6 +243,17 @@ export class Bot extends Organism {
       this.chase(this.enemy)
     } else {
       this.flee(this.enemy)
+    }
+    const food = this.getNearestReachableFood()
+    if (food == null) return true
+    const foodPosition = food.sculpture.body.getPosition()
+    const enemyPosition = this.enemy.body.getPosition()
+    const position = this.membrane.body.getPosition()
+    const enemyDistance = Vec2.distance(enemyPosition, position)
+    const foodDistance = Vec2.distance(foodPosition, position)
+    const foodDirection = directionFromTo(position, foodPosition)
+    if (foodDistance < enemyDistance) {
+      this.setControls(foodDirection)
     }
     return true
   }

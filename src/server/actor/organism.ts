@@ -72,7 +72,7 @@ export class Organism extends Actor {
     }
     const direction = Vec2(x, y)
     direction.normalize()
-    if (this.membranes.length === 0) {
+    if (!this.dead && this.membranes.length === 0) {
       throw new Error('This organism has no membranes')
     }
     this.membranes.forEach(membrane => {
