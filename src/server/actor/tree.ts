@@ -3,7 +3,8 @@ import { Stage } from '../stage'
 import { Actor } from './actor'
 import { Sculpture } from '../feature/sculpture'
 import { Color } from '../../shared/color'
-import { mean, range, rotate } from '../math'
+import { directionFromTo, mean, range, rotate } from '../math'
+import { getNearestOtherPoint } from '../geometry'
 
 export class Tree extends Actor {
   seedRadius = 1.25
@@ -14,7 +15,7 @@ export class Tree extends Actor {
   innerRadius: number
   oldSideLength: number
   sculpture: Sculpture
-  growthRate = 2
+  growthRate = 0.5
   foodPolygons: Vec2[][] = []
   step = 0
   growing: boolean
@@ -159,5 +160,13 @@ export class Tree extends Actor {
 
   onStep (stepSize: number): void {
     super.onStep(stepSize)
+    const actors = [...this.stage.actors.values()]
+    const features = actors.flatMap(actor => actor.features)
+    const otherFeatures = features.filter(feature => feature !== this.sculpture)
+    const nearestOtherPoint = getNearestOtherPoint(this.stage, this.sculpture, otherFeatures)
+    const position = this.sculpture.body.getPosition()
+    const direction = directionFromTo(nearestOtherPoint, position)
+    const force = Vec2.mul(5, direction)
+    this.sculpture.body.applyForceToCenter(force)
   }
 }
