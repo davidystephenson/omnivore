@@ -1,5 +1,5 @@
 import { Vec2, Box } from 'planck'
-import { Color } from '../../shared/color'
+import { BLUE } from '../../shared/color'
 import { Actor } from '../actor/actor'
 import { Feature } from './feature'
 
@@ -23,7 +23,7 @@ export class Structure extends Feature {
       },
       label: 'structure',
       actor: props.actor,
-      color: Color.BLUE
+      color: BLUE
     })
   }
 }

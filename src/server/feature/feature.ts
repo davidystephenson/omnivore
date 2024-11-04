@@ -1,5 +1,5 @@
 import { Body, BodyDef, Circle, Fixture, FixtureDef, Polygon, Vec2 } from 'planck'
-import { Color } from '../../shared/color'
+import { Rgb } from '../../shared/color'
 import { Actor } from '../actor/actor'
 import { Rope } from '../../shared/rope'
 import { Element } from '../../shared/element'
@@ -21,7 +21,7 @@ export class Feature {
   maximumHealth = 1
   sensorFeatures: Feature[] = []
   contacts: Feature[] = []
-  color: Color
+  color: Rgb
   borderWidth: number
   center: Vec2
   radius: number
@@ -38,7 +38,7 @@ export class Feature {
     fixtureDef: FixtureDef
     label?: string
     actor: Actor
-    color: Color
+    color: Rgb
     borderWidth?: number
   }) {
     this.actor = props.actor

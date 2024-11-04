@@ -6,7 +6,7 @@ import { Actor } from './actor/actor'
 import { Brick } from './actor/brick'
 import { Feature } from './feature/feature'
 import { Killing } from './killing'
-import { Color } from '../shared/color'
+import { Rgb, RED, Rgba } from '../shared/color'
 import { DebugLine } from '../shared/debugLine'
 import { Vision } from './vision'
 import { Puppet } from './actor/puppet'
@@ -277,35 +277,43 @@ export class Stage {
   debugLine (props: {
     a: Vec2
     b: Vec2
-    color: Color
+    color: Rgb
     width?: number
   }): DebugLine {
-    const debugLine = new DebugLine({
-      a: props.a,
-      b: props.b,
-      color: props.color,
-      width: props.width
-    })
+    const width = props.width ?? 0.05
+    const a = { x: props.a.x, y: props.a.y }
+    const b = { x: props.b.x, y: props.b.y }
+    const color: Rgba = { alpha: 1, ...props.color }
+    const debugLine: DebugLine = {
+      a,
+      b,
+      color,
+      width
+    }
     this.runner.debugLines.push(debugLine)
     return debugLine
   }
 
   debugCircle (props: {
     circle: CircleShape
-    color: Color
+    color: Rgb
   }): DebugCircle {
-    const debugCircle = new DebugCircle({
-      position: props.circle.getCenter(),
-      radius: props.circle.getRadius(),
-      color: props.color
-    })
+    const center = props.circle.getCenter()
+    const position = { x: center.x, y: center.y }
+    const radius = props.circle.getRadius()
+    const color: Rgba = { alpha: 1, ...props.color }
+    const debugCircle: DebugCircle = {
+      position,
+      radius,
+      color
+    }
     this.runner.debugCircles.push(debugCircle)
     return debugCircle
   }
 
   debugBox (props: {
     box: AABB
-    color: Color
+    color: Rgb
   }): void {
     const upper = props.box.upperBound.clone()
     const lower = props.box.lowerBound.clone()
@@ -321,7 +329,7 @@ export class Stage {
 
   debugPolygon (props: {
     polygon: PolygonShape
-    color: Color
+    color: Rgb
   }): void {
     range(0, props.polygon.m_vertices.length - 1).forEach(i => {
       const j = (i + 1) % props.polygon.m_vertices.length
@@ -376,7 +384,7 @@ export class Stage {
     }
     this.destructionQueue = []
     this.virtualBoxes.forEach(box => {
-      this.debugBox({ box, color: Color.RED })
+      this.debugBox({ box, color: RED })
     })
   }
 }

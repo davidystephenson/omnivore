@@ -1,19 +1,7 @@
-import { Vec2 } from 'planck'
-import { Color } from './color'
+import { Rgba } from './color'
 import { LineFigure } from './lineFigure'
 
-export class DebugLine extends LineFigure {
-  color: Color
+export interface DebugLine extends LineFigure {
+  color: Rgba
   width: number
-
-  constructor (props: {
-    a: Vec2
-    b: Vec2
-    color: Color
-    width?: number
-  }) {
-    super({ a: props.a, b: props.b })
-    this.color = props.color
-    this.width = props.width ?? 0.05
-  }
 }

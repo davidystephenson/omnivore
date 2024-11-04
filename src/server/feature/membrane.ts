@@ -1,5 +1,5 @@
 import { Vec2, Circle, Box, Fixture } from 'planck'
-import { Color } from '../../shared/color'
+import { GREEN } from '../../shared/color'
 import { Feature } from './feature'
 import { Organism } from '../actor/organism'
 import { Killing } from '../killing'
@@ -38,7 +38,7 @@ export class Membrane extends Feature {
       },
       label: 'membrane',
       actor: props.actor,
-      color: Color.GREEN
+      color: GREEN
     })
     this.actor = props.actor
     this.radius = radius

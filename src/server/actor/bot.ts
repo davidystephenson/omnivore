@@ -2,7 +2,7 @@ import { Circle, CircleShape, Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Organism } from './organism'
 import { directionFromTo, range, rotate, whichMax, whichMin } from '../math'
-import { Color } from '../../shared/color'
+import { Rgb, GREEN, MAGENTA, RED, WHITE } from '../../shared/color'
 import { Waypoint } from '../waypoint'
 import { Gene } from '../gene'
 import { Membrane } from '../feature/membrane'
@@ -94,14 +94,14 @@ export class Bot extends Organism {
     const start = this.membrane.body.getPosition()
     this.stage.debugCircle({
       circle: new Circle(start, 0.4),
-      color: Color.MAGENTA
+      color: MAGENTA
     })
     const length = 1
     if (this.controls.up) {
       this.stage.debugLine({
         a: start,
         b: Vec2(start.x, start.y + length),
-        color: Color.MAGENTA,
+        color: MAGENTA,
         width: 0.2
       })
     }
@@ -109,7 +109,7 @@ export class Bot extends Organism {
       this.stage.debugLine({
         a: start,
         b: Vec2(start.x, start.y - length),
-        color: Color.MAGENTA,
+        color: MAGENTA,
         width: 0.2
       })
     }
@@ -117,7 +117,7 @@ export class Bot extends Organism {
       this.stage.debugLine({
         a: start,
         b: Vec2(start.x - length, start.y),
-        color: Color.MAGENTA,
+        color: MAGENTA,
         width: 0.2
       })
     }
@@ -125,7 +125,7 @@ export class Bot extends Organism {
       this.stage.debugLine({
         a: start,
         b: Vec2(start.x + length, start.y),
-        color: Color.MAGENTA,
+        color: MAGENTA,
         width: 0.2
       })
     }
@@ -171,7 +171,7 @@ export class Bot extends Organism {
     })
     if (this.stage.debugBotFlee) {
       hitArrays.forEach((hitArray, i) => {
-        const color = hitArray.length === 0 ? Color.WHITE : Color.RED
+        const color = hitArray.length === 0 ? WHITE : RED
         this.stage.debugLine({
           a: sidePoints[i],
           b: lookPoints[i],
@@ -192,7 +192,7 @@ export class Bot extends Organism {
         this.stage.debugLine({
           a: myPosition,
           b: Vec2.combine(1, myPosition, 2, fleeDir),
-          color: Color.GREEN,
+          color: GREEN,
           width: 0.4
         })
       }
@@ -272,10 +272,10 @@ export class Bot extends Organism {
       range(0, path.length - 2).forEach(index => {
         const currentPoint = path[index]
         const nextPoint = path[index + 1]
-        this.stage.debugLine({ a: currentPoint, b: nextPoint, color: Color.WHITE, width: 0.1 })
+        this.stage.debugLine({ a: currentPoint, b: nextPoint, color: WHITE, width: 0.1 })
       })
       const circle = new CircleShape(end, this.membrane.radius)
-      this.stage.debugCircle({ circle, color: Color.RED })
+      this.stage.debugCircle({ circle, color: RED })
     }
     const nextPoint = this.stage.navigation.navigate(start, end, this.membrane.radius)
     const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint

@@ -2,7 +2,7 @@ import { Vec2 } from 'planck'
 import { Sculpture } from '../feature/sculpture'
 import { Stage } from '../stage'
 import { Actor } from './actor'
-import { Color } from '../../shared/color'
+import { GREEN } from '../../shared/color'
 
 export class Food extends Actor {
   sculpture: Sculpture
@@ -16,7 +16,7 @@ export class Food extends Actor {
     this.sculpture = new Sculpture({
       position: props.position,
       vertices: props.vertices,
-      color: Color.GREEN,
+      color: GREEN,
       actor: this
     })
     this.sculpture.health = 0.00000000000000001

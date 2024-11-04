@@ -1,5 +1,5 @@
 import { Vec2, Shape } from 'planck'
-import { Color } from '../../shared/color'
+import { CYAN, Rgb } from '../../shared/color'
 import { Feature } from './feature'
 import { Actor } from '../actor/actor'
 
@@ -11,9 +11,9 @@ export class Prop extends Feature {
     actor: Actor
     shape: Shape
     label: string
-    color?: Color
+    color?: Rgb
   }) {
-    const color = props.color ?? Color.CYAN
+    const color = props.color ?? CYAN
     super({
       bodyDef: {
         type: 'dynamic',
