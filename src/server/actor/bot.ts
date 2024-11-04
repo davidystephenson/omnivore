@@ -2,7 +2,7 @@ import { Circle, CircleShape, Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Organism } from './organism'
 import { directionFromTo, range, rotate, whichMax, whichMin } from '../math'
-import { Rgb, GREEN, MAGENTA, RED, WHITE } from '../../shared/color'
+import { GREEN, MAGENTA, RED, Rgb, WHITE } from '../../shared/color'
 import { Waypoint } from '../waypoint'
 import { Gene } from '../gene'
 import { Membrane } from '../feature/membrane'
@@ -16,14 +16,16 @@ export class Bot extends Organism {
   enemy: Membrane | undefined
 
   constructor (props: {
+    color: Rgb
+    gene: Gene
     stage: Stage
     position: Vec2
-    gene: Gene
   }) {
     super({
+      color: props.color,
+      gene: props.gene,
       stage: props.stage,
-      position: props.position,
-      gene: props.gene
+      position: props.position
     })
     this.giveUpTime = 30 / this.membrane.acceleration
     this.enemy = this.getNearestReachableEnemy()
@@ -210,7 +212,8 @@ export class Bot extends Organism {
     if (reachableEnemies.length === 0) return undefined
     const distances = reachableEnemies.map(m => Vec2.distance(m.body.getPosition(), this.membrane.body.getPosition()))
     const nearestReachableEnemy = reachableEnemies[whichMin(distances)]
-    return nearestReachableEnemy as Membrane
+    if (!(nearestReachableEnemy instanceof Membrane)) throw new Error('nearestReachableEnemy not a Membrane')
+    return nearestReachableEnemy
   }
 
   getNearestReachableFood (): Food | undefined {

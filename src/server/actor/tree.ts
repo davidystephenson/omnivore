@@ -92,10 +92,12 @@ export class Tree extends Actor {
     this.foodPolygons.push(...foodRow1, ...foodRow2, ...foodRow3)
     this.foodLayer += 1
     this.oldSideLength = this.sideLength
+    this.sculpture.health = 1
   }
 
   fall (): void {
     this.radius = this.seedRadius
+    this.sculpture.health = 0.0000000000000000001
     if (this.sculpture.polygon == null) {
       throw new Error('There is no polygon')
     }

@@ -1,6 +1,7 @@
 import { Vec2 } from 'planck'
 import { Gene } from '../server/gene'
 import { Walled } from '../server/walled'
+import { RED, YELLOW } from '../shared/color'
 
 export class Funhouse extends Walled {
   constructor () {
@@ -231,40 +232,42 @@ export class Funhouse extends Walled {
       radius: 0.6
     })
     this.addBot({
+      color: YELLOW,
       position: Vec2(-10, 15),
       gene: smallGene
     })
-    this.addBot({
-      position: Vec2(-13, 0),
-      gene: smallGene
-    })
-    this.addBot({
-      position: Vec2(-18, 0),
-      gene: smallGene
-    })
-    this.addBot({
-      position: Vec2(-23, 0),
-      gene: smallGene
-    })
+    // this.addBot({
+    //   position: Vec2(-13, 0),
+    //   gene: smallGene
+    // })
+    // this.addBot({
+    //   position: Vec2(-18, 0),
+    //   gene: smallGene
+    // })
+    // this.addBot({
+    //   position: Vec2(-23, 0),
+    //   gene: smallGene
+    // })
     const bigGene = new Gene({
       radius: 1.2
     })
     this.addBot({
+      color: RED,
       position: Vec2(0, 10),
       gene: bigGene
     })
-    this.addBot({
-      position: Vec2(-10, 15),
-      gene: bigGene
-    })
-    this.addBot({
-      position: Vec2(-10, -50),
-      gene: bigGene
-    })
-    this.addBot({
-      position: Vec2(-10, 0),
-      gene: bigGene
-    })
+    // this.addBot({
+    //   position: Vec2(-10, 15),
+    //   gene: bigGene
+    // })
+    // this.addBot({
+    //   position: Vec2(-10, -50),
+    //   gene: bigGene
+    // })
+    // this.addBot({
+    //   position: Vec2(-10, 0),
+    //   gene: bigGene
+    // })
     // this.addBot({
     //   position: Vec2(-15, 0),
     //   gene: bigGene

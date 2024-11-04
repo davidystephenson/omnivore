@@ -2,19 +2,22 @@ import { Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Organism } from './organism'
 import { Gene } from '../gene'
+import { Rgb } from '../../shared/color'
 
 export class Player extends Organism {
-  seenIds: Number[] = []
+  seenIds: number[] = []
 
   constructor (props: {
+    color: Rgb
+    gene: Gene
     position: Vec2
     stage: Stage
-    gene: Gene
   }) {
     super({
+      color: props.color,
+      gene: props.gene,
       position: props.position,
-      stage: props.stage,
-      gene: props.gene
+      stage: props.stage
     })
   }
 }

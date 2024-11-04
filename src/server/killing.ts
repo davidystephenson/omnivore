@@ -25,9 +25,6 @@ export class Killing extends Death {
     }
     const killerPosition = this.killer.body.getPosition()
     const brickDirection = getCompass(Vec2.sub(this.victim.deathPosition, killerPosition))
-    this.stage.log({
-      value: ['brickDirection:', brickDirection]
-    })
     const brickLookDistance = (brickDirection.x !== 0 ? HALF_SIGHT.x : HALF_SIGHT.y) - this.killer.radius
     const sideLookDistance = brickDirection.x !== 0 ? HALF_SIGHT.y : HALF_SIGHT.x
     const base = Vec2.combine(1, killerPosition, this.killer.radius, brickDirection)
@@ -65,8 +62,11 @@ export class Killing extends Death {
       return index !== nearestIndex
     })
     if (Math.min(halfWidth, halfHeight) > 0) {
+      this.stage.log({ value: 'new Puppet' })
       void new Puppet({ stage: this.stage, vertices: localPuppetCorners, position: brickPosition })
-      this.stage.respawnQueue.push(this.victim.actor)
+    } else {
+      this.stage.log({ value: 'no Puppet' })
     }
+    this.respawn()
   }
 }
