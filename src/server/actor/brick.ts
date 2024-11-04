@@ -2,14 +2,14 @@ import { Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Actor } from './actor'
 import { Crate } from '../feature/crate'
-import { Color } from '../../shared/color'
+import { Rgb } from '../../shared/color'
 
 export class Brick extends Actor {
   crate: Crate
 
   constructor (props: {
     angle?: number
-    color?: Color
+    color?: Rgb
     halfWidth: number
     halfHeight: number
     position: Vec2

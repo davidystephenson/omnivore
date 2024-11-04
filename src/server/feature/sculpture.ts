@@ -1,5 +1,5 @@
 import { Vec2, PolygonShape } from 'planck'
-import { Color } from '../../shared/color'
+import { Rgb } from '../../shared/color'
 import { Actor } from '../actor/actor'
 import { Prop } from './prop'
 
@@ -7,7 +7,7 @@ export class Sculpture extends Prop {
   constructor (props: {
     position: Vec2
     actor: Actor
-    color?: Color
+    color?: Rgb
     vertices: Vec2[]
   }) {
     super({

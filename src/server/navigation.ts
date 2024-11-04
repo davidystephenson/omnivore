@@ -1,7 +1,6 @@
 import { Circle, Vec2 } from 'planck'
 import { Stage } from './stage'
 import { Waypoint } from './waypoint'
-import { Color } from '../shared/color'
 import { HALF_SIGHT } from '../shared/sight'
 import { directionFromTo, normalize, range, rotate, whichMin } from './math'
 import { Wall } from './actor/wall'
@@ -10,6 +9,7 @@ import { Membrane } from './feature/membrane'
 import { Structure } from './feature/structure'
 import { Organism } from './actor/organism'
 import { Bot } from './actor/bot'
+import { WHITE } from '../shared/color'
 
 export class Navigation {
   static spacing = {
@@ -352,21 +352,21 @@ export class Navigation {
         if (waypoint.radius === debugRadius) {
           this.stage.debugCircle({
             circle: new Circle(waypoint.position, 0.2),
-            color: Color.WHITE
+            color: WHITE
           })
         }
       })
       this.gridWaypoints.forEach(waypoint => {
         this.stage.debugCircle({
           circle: new Circle(waypoint.position, 0.2),
-          color: Color.WHITE
+          color: WHITE
         })
       })
       this.wallWaypoints.forEach(waypoint => {
         if (waypoint.radius === debugRadius) {
           this.stage.debugCircle({
             circle: new Circle(waypoint.position, 0.2),
-            color: Color.WHITE
+            color: WHITE
           })
         }
       })

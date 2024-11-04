@@ -1,5 +1,5 @@
 import { Vec2, Box } from 'planck'
-import { Color } from '../../shared/color'
+import { WHITE } from '../../shared/color'
 import { Organism } from '../actor/organism'
 import { Prop } from './prop'
 
@@ -15,7 +15,7 @@ export class Egg extends Prop {
       position: props.position,
       actor: props.actor,
       shape: new Box(props.hx, props.hy),
-      color: Color.WHITE,
+      color: WHITE,
       label: 'egg'
     })
     this.actor = props.actor

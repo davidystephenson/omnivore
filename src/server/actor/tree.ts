@@ -2,7 +2,7 @@ import { PolygonShape, Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Actor } from './actor'
 import { Sculpture } from '../feature/sculpture'
-import { Color } from '../../shared/color'
+import { LIME } from '../../shared/color'
 import { directionFromTo, mean, range, rotate } from '../math'
 import { getNearestOtherPoint } from '../geometry'
 
@@ -32,7 +32,7 @@ export class Tree extends Actor {
     this.growing = props.growing ?? true
     this.sculpture = new Sculpture({
       actor: this,
-      color: Color.LIME,
+      color: LIME,
       position: props.position,
       vertices: this.getVertices(this.seedRadius)
     })

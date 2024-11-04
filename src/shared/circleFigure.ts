@@ -1,14 +1,6 @@
-import { Vec2 } from 'planck'
+import { Position } from './position'
 
-export class CircleFigure {
-  position: Vec2
+export interface CircleFigure {
+  position: Position
   radius: number
-
-  constructor (props: {
-    position: Vec2
-    radius: number
-  }) {
-    this.position = props.position
-    this.radius = props.radius
-  }
 }

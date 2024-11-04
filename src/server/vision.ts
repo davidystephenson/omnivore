@@ -3,7 +3,7 @@ import { HALF_SIGHT } from '../shared/sight'
 import { Feature } from './feature/feature'
 import { Vec2, CircleShape, PolygonShape, Fixture } from 'planck'
 import { Stage } from './stage'
-import { Color } from '../shared/color'
+import { BLUE, LIME, RED, YELLOW } from '../shared/color'
 import { directionFromTo, getAngleDifference, getNearestIndex, normalize, rotate, vecToAngle, whichMax } from './math'
 import { RayCastHit } from '../shared/rayCastHit'
 
@@ -35,7 +35,7 @@ export class Vision {
       return 0
     })
     if (debug === true) {
-      const color = clear ? Color.LIME : Color.RED
+      const color = clear ? LIME : RED
       this.stage.debugLine({
         a: sourcePoint,
         b: targetPoint,
@@ -52,7 +52,7 @@ export class Vision {
         this.stage.debugLine({
           a: sourcePoint,
           b: targetPoint,
-          color: Color.BLUE
+          color: BLUE
         })
       }
       return false
@@ -259,7 +259,7 @@ export class Vision {
       rightTargetPoint,
       leftTargetPoint
     ]
-    if (debug) this.stage.debugPolygon({ polygon: betweenPolygon, color: Color.RED })
+    if (debug) this.stage.debugPolygon({ polygon: betweenPolygon, color: RED })
     const obstructions = this.getObstructions(betweenPolygon, sourceFeature.id, targetFeature.id)
     if (obstructions.length === 0) {
       return true
@@ -274,12 +274,12 @@ export class Vision {
       })
       outerCorners.forEach(corner => {
         const circle = new CircleShape(corner, 0.2)
-        if (debug) this.stage.debugCircle({ circle, color: Color.RED })
+        if (debug) this.stage.debugCircle({ circle, color: RED })
       })
       outerCorners.forEach(corner => {
         const rayDirection = directionFromTo(sourcePoint, corner)
         const firstHit = this.getFirstHit(sourcePoint, rayDirection)
-        if (debug) this.stage.debugLine({ a: sourcePoint, b: firstHit.point, color: Color.YELLOW })
+        if (debug) this.stage.debugLine({ a: sourcePoint, b: firstHit.point, color: YELLOW })
         if (firstHit.feature != null && firstHit.feature.id === targetFeature.id) visible = true
         const worldCorners = shape.m_vertices.map(corner => {
           return obstruction.body.getWorldPoint(corner)
@@ -290,8 +290,8 @@ export class Vision {
           const rayDirB = directionFromTo(cornerA, cornerB)
           const firstHitA = this.getFirstHit(cornerA, rayDirA)
           const firstHitB = this.getFirstHit(cornerB, rayDirB)
-          if (debug) this.stage.debugLine({ a: cornerA, b: firstHitA.point, color: Color.LIME })
-          if (debug) this.stage.debugLine({ a: cornerB, b: firstHitB.point, color: Color.LIME })
+          if (debug) this.stage.debugLine({ a: cornerA, b: firstHitA.point, color: LIME })
+          if (debug) this.stage.debugLine({ a: cornerB, b: firstHitB.point, color: LIME })
           if (firstHitA.feature != null && firstHitB.feature != null) {
             const hitFeatures = [firstHitA.feature, firstHitB.feature]
             const hitSource = hitFeatures.includes(sourceFeature)
@@ -303,7 +303,7 @@ export class Vision {
           targetCorners.forEach(targetCorner => {
             const rayDir = directionFromTo(targetCorner, cornerA)
             const firstHit = this.getFirstHit(targetCorner, rayDir)
-            if (debug) this.stage.debugLine({ a: targetCorner, b: firstHit.point, color: Color.YELLOW })
+            if (debug) this.stage.debugLine({ a: targetCorner, b: firstHit.point, color: YELLOW })
             if (firstHit.feature?.id === sourceFeature.id) {
               // this.stage.log({ value: `hit corner ${i}: firstHit.feature?.id === sourceFeature.id` })
               visible = true
@@ -324,7 +324,7 @@ export class Vision {
     const debug = false
     const nearestPoint = this.getNearestPoint(sourcePoint, targetFeature, targetPolygon)
     if (debug) {
-      this.stage.debugLine({ a: sourcePoint, b: nearestPoint, color: Color.YELLOW })
+      this.stage.debugLine({ a: sourcePoint, b: nearestPoint, color: YELLOW })
     }
     const nearDir = directionFromTo(sourcePoint, nearestPoint)
     const nearHit = this.getFirstHit(sourcePoint, nearDir)
@@ -333,7 +333,7 @@ export class Vision {
     const clearCorner1 = this.isVisible(sourcePoint, betweenVertices[1], [sourceFeature.id, targetFeature.id])
     const clearCorner2 = this.isVisible(sourcePoint, betweenVertices[2], [sourceFeature.id, targetFeature.id])
     const betweenPolygon = new PolygonShape(betweenVertices)
-    if (debug) this.stage.debugPolygon({ polygon: betweenPolygon, color: Color.RED })
+    if (debug) this.stage.debugPolygon({ polygon: betweenPolygon, color: RED })
     if (clearCorner1 || clearCorner2) return true
     const obstructions = this.getObstructions(betweenPolygon, sourceFeature.id, targetFeature.id)
     if (obstructions.length === 0) return true
@@ -347,14 +347,14 @@ export class Vision {
       })
       outerCorners.forEach(corner => {
         const circle = new CircleShape(corner, 0.2)
-        if (debug) this.stage.debugCircle({ circle, color: Color.RED })
+        if (debug) this.stage.debugCircle({ circle, color: RED })
       })
       outerCorners.forEach(corner => {
         const rayDirection = directionFromTo(sourcePoint, corner)
         const firstHit = this.getFirstHit(sourcePoint, rayDirection)
         const inRange = this.isPointInRange(sourcePoint, firstHit.point)
         if (!inRange) return
-        if (debug) this.stage.debugLine({ a: sourcePoint, b: firstHit.point, color: Color.YELLOW })
+        if (debug) this.stage.debugLine({ a: sourcePoint, b: firstHit.point, color: YELLOW })
         if (firstHit.feature != null && firstHit.feature.id === targetFeature.id) visible = true
         const worldCorners = shape.m_vertices.map(corner => {
           return obstruction.body.getWorldPoint(corner)
@@ -365,8 +365,8 @@ export class Vision {
           const rayDirB = directionFromTo(cornerA, cornerB)
           const firstHitA = this.getFirstHit(cornerA, rayDirA)
           const firstHitB = this.getFirstHit(cornerB, rayDirB)
-          if (debug) this.stage.debugLine({ a: cornerA, b: firstHitA.point, color: Color.LIME })
-          if (debug) this.stage.debugLine({ a: cornerB, b: firstHitB.point, color: Color.LIME })
+          if (debug) this.stage.debugLine({ a: cornerA, b: firstHitA.point, color: LIME })
+          if (debug) this.stage.debugLine({ a: cornerB, b: firstHitB.point, color: LIME })
           if (firstHitA.feature != null && firstHitB.feature != null) {
             const hitFeatures = [firstHitA.feature, firstHitB.feature]
             const hitSource = hitFeatures.includes(sourceFeature)

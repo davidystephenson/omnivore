@@ -139,7 +139,9 @@ export class Organism extends Actor {
         maxLength
       })
       this.joints.push(joint)
-      const rope = new Rope({ joint })
+      const ropeA = joint.getBodyA().getPosition()
+      const ropeB = joint.getBodyB().getPosition()
+      const rope: Rope = { a: ropeA, b: ropeB }
       props.cell.ropes.push(rope)
       membrane.ropes.push(rope)
       this.stage.world.createJoint(joint)

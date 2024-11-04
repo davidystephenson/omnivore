@@ -54,8 +54,8 @@ export class Renderer {
       this.context.lineWidth = 0.1
       this.context.strokeStyle = 'green'
       this.context.beginPath()
-      this.context.moveTo(rope.positionA.x, rope.positionA.y)
-      this.context.lineTo(rope.positionB.x, rope.positionB.y)
+      this.context.moveTo(rope.a.x, rope.a.y)
+      this.context.lineTo(rope.b.x, rope.b.y)
       this.context.stroke()
     })
     this.elements.forEach(element => {
