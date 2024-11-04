@@ -83,6 +83,7 @@ export class Stage {
   }
 
   addBot (props: {
+    color: Rgb
     position: Vec2
     gene: Gene
   }): Bot {
@@ -101,6 +102,7 @@ export class Stage {
   }
 
   addPlayer (props: {
+    color: Rgb
     position: Vec2
     gene: Gene
   }): Player {
@@ -364,10 +366,10 @@ export class Stage {
       this.world.destroyBody(body)
     })
     this.killingQueue.forEach(killing => {
-      killing.execute()
+      killing.execute({ debug: true })
     })
     this.starvationQueue.forEach(starvation => {
-      starvation.execute()
+      starvation.execute({ debug: true })
     })
     this.fallQueue.forEach(tree => {
       tree.fall()

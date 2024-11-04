@@ -1,6 +1,7 @@
 import { AABB, Fixture, Vec2 } from 'planck'
 import { Membrane } from './feature/membrane'
 import { Stage } from './stage'
+import { Organism } from './actor/organism'
 
 export class Death {
   stage: Stage
@@ -57,5 +58,20 @@ export class Death {
   getArea (box: AABB): number {
     const extents = box.getExtents()
     return extents.x * extents.y
+  }
+
+  respawn (): void {
+    const actors = [...this.stage.actors.values()]
+    console.log('actors.length', actors.length)
+    const organisms = actors.filter((actor) => actor instanceof Organism) as Organism[]
+    console.log('organisms.length', organisms.length)
+    const relatives = organisms.filter((actor) => {
+      const relative = actor.color === this.victim.color
+      return relative
+    })
+    console.log('relatives.length', relatives.length)
+    if (relatives.length > 1) return
+    console.log('respawn', this.victim.actor.color)
+    this.stage.respawnQueue.push(this.victim.actor)
   }
 }

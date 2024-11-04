@@ -10,8 +10,10 @@ import { Starvation } from '../starvation'
 import { ExplorationPoint } from '../explorationPoint'
 import { Controls } from '../../shared/input'
 import { Gene } from '../gene'
+import { Rgb } from '../../shared/color'
 
 export class Organism extends Actor {
+  color: Rgb
   dead = false
   featuresInVision: Feature[] = []
   gap = 0.5
@@ -35,11 +37,13 @@ export class Organism extends Actor {
   }
 
   constructor (props: {
-    stage: Stage
-    position: Vec2
+    color: Rgb
     gene: Gene
+    position: Vec2
+    stage: Stage
   }) {
     super({ stage: props.stage, label: 'organism' })
+    this.color = props.color
     this.spawnPosition = props.position
     this.gene = props.gene
     this.membrane = this.grow({ branch: this.gene })
@@ -201,7 +205,9 @@ export class Organism extends Actor {
     this.membrane.borderWidth = 0.2
   }
 
-  eggFlee (): void { }
+  eggFlee (): void {
+    throw new Error('Not implemented')
+  }
 
   grow (props: {
     branch: Gene

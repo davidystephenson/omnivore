@@ -1,5 +1,4 @@
 import { Vec2, Circle, Box, Fixture } from 'planck'
-import { GREEN } from '../../shared/color'
 import { Feature } from './feature'
 import { Organism } from '../actor/organism'
 import { Killing } from '../killing'
@@ -38,7 +37,7 @@ export class Membrane extends Feature {
       },
       label: 'membrane',
       actor: props.actor,
-      color: GREEN
+      color: props.actor.color
     })
     this.actor = props.actor
     this.radius = radius
@@ -69,9 +68,14 @@ export class Membrane extends Feature {
   }
 
   doDamage (target: Feature): void {
-    if (target.actor.label === 'tree') this.actor.stage.log({ value: 'tree' })
+    if (target instanceof Membrane) {
+      if (target.actor.color === this.actor.color) {
+        return
+      }
+    }
     const ratio = this.body.getMass() / target.body.getMass()
     target.health -= 0.03 * Math.pow(ratio, 2)
+
     if (target.health <= 0) {
       if (target instanceof Membrane) {
         const killing = new Killing({
@@ -86,7 +90,18 @@ export class Membrane extends Feature {
         target.actor.fall()
       } else {
         if (target.actor instanceof Food) {
-          this.health = Math.min(this.maximumHealth, this.health + 0.3)
+          const nutrition = this.maximumHealth / 10
+          this.health = Math.min(this.maximumHealth, this.health + nutrition)
+          if (this.health >= this.maximumHealth) {
+            const bot = this.actor.stage.addBot({
+              color: this.actor.color,
+              gene: this.actor.gene,
+              position: this.body.getPosition()
+            })
+            const half = this.maximumHealth / 2
+            bot.membrane.health = half
+            this.health = half
+          }
         }
         target.destroy()
       }
@@ -106,7 +121,7 @@ export class Membrane extends Feature {
       !this.destroyed &&
       !this.actor.dead
     ) {
-      const seconds = 120
+      const seconds = 180
       this.health -= 1 / (10 * seconds)
       if (this.health <= 0) {
         this.actor.starve({ membrane: this })

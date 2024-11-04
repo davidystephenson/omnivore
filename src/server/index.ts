@@ -4,6 +4,7 @@ import { Controls } from '../shared/input'
 // import { Rehearsal } from './rehearsal'
 import { Gene } from './gene'
 import { Funhouse } from './funhouse'
+import { GREEN } from '../shared/color'
 
 const stage = new Funhouse()
 
@@ -17,8 +18,9 @@ io.on('connection', socket => {
   })
   stage.log({ value: ['gene:', gene] })
   const player = stage.addPlayer({
-    position: Vec2(-20, 15),
-    gene
+    color: GREEN,
+    gene,
+    position: Vec2(-20, 15)
   })
   socket.on('controls', (controls: Controls) => {
     player.controls = controls

@@ -20,22 +20,24 @@ export class Starvation extends Death {
     debug?: boolean
   }): void {
     if (props?.debug === true) {
-      console.debug('Killing.execute')
+      console.debug('Starvation.execute')
     }
     const victimPosition = this.victim.body.getPosition()
     const lookLowerBound = Vec2(victimPosition.x - HALF_SIGHT.x, victimPosition.y - HALF_SIGHT.y)
     const lookUpperBound = Vec2(victimPosition.x + HALF_SIGHT.x, victimPosition.y + HALF_SIGHT.y)
     const lookBox = new AABB(lookLowerBound, lookUpperBound)
     const brickBox = this.trim({ base: victimPosition, lookBox })
-    this.stage.log({ value: ['lookBox', lookBox] })
-    this.stage.log({ value: ['brickBox', brickBox] })
     const halfWidth = brickBox.getExtents().x
     const halfHeight = brickBox.getExtents().y
     const brickPosition = brickBox.getCenter()
-    if (Math.min(halfWidth, halfHeight) > 0) {
+    const sized = Math.min(halfWidth, halfHeight) > 0
+    if (sized) {
+      this.stage.log({ value: 'New brick' })
       void new Brick({ halfWidth, halfHeight, position: brickPosition, stage: this.stage })
-      this.stage.log({ value: 'increment respawnQueue' })
-      this.stage.respawnQueue.push(this.victim.actor)
+    } else {
+      this.stage.log({ value: 'No brick' })
     }
+    this.stage.log({ value: ['starvation.execute y'] })
+    this.respawn()
   }
 }
