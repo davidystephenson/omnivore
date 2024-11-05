@@ -1,7 +1,7 @@
 import { AABB, Fixture, Vec2 } from 'planck'
 import { Membrane } from './feature/membrane'
 import { Stage } from './stage'
-import { Organism } from './actor/organism'
+import { Organism, OrganismSpawn } from './actor/organism'
 
 export class Death {
   stage: Stage
@@ -10,6 +10,9 @@ export class Death {
   constructor (props: { stage: Stage, victim: Membrane }) {
     this.stage = props.stage
     this.victim = props.victim
+    this.victim.actor.dead = true
+    this.victim.deathPosition = this.victim.body.getPosition()
+    this.victim.actor.destroy()
   }
 
   execute (): void {}
@@ -66,12 +69,37 @@ export class Death {
     const organisms = actors.filter((actor) => actor instanceof Organism) as Organism[]
     console.log('organisms.length', organisms.length)
     const relatives = organisms.filter((actor) => {
-      const relative = actor.color === this.victim.color
-      return relative
+      const self = actor === this.victim.actor
+      if (self) return false
+      const related = actor.color === this.victim.color
+      return related
     })
     console.log('relatives.length', relatives.length)
-    if (relatives.length > 1) return
+    if (relatives.length > 0) {
+      console.log('has relatives')
+      if (this.victim.actor.player == null) {
+        console.log('not player')
+        return
+      }
+      console.log('is player')
+      const first = relatives[0]
+      const oldest = relatives.reduce((a, b) => a.createdAt < b.createdAt ? a : b, first)
+      if (oldest == null) {
+        throw new Error('There is no oldest relative')
+      }
+      console.log('oldest found', oldest.id)
+      this.victim.actor.player.organism = oldest
+      oldest.player = this.victim.actor.player
+      console.log('oldest switched')
+      return
+    }
     console.log('respawn', this.victim.actor.color)
-    this.stage.respawnQueue.push(this.victim.actor)
+    this.victim.actor.respawning = true
+    const spawn: OrganismSpawn = {
+      color: this.victim.actor.color,
+      gene: this.victim.actor.gene,
+      player: this.victim.actor.player
+    }
+    this.stage.respawnQueue.push(spawn)
   }
 }

@@ -6,14 +6,9 @@ import { Death } from './death'
 import { Brick } from './actor/brick'
 
 export class Starvation extends Death {
-  stage: Stage
-  victim: Membrane
-
   constructor (props: { stage: Stage, victim: Membrane }) {
     super({ stage: props.stage, victim: props.victim })
-    this.stage = props.stage
-    this.victim = props.victim
-    console.debug('construct starvation')
+    console.log('construct starvation')
   }
 
   execute (props?: {
@@ -33,7 +28,7 @@ export class Starvation extends Death {
     const sized = Math.min(halfWidth, halfHeight) > 0
     if (sized) {
       this.stage.log({ value: 'New brick' })
-      void new Brick({ halfWidth, halfHeight, position: brickPosition, stage: this.stage })
+      // void new Brick({ halfWidth, halfHeight, position: brickPosition, stage: this.stage })
     } else {
       this.stage.log({ value: 'No brick' })
     }

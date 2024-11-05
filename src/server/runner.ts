@@ -47,22 +47,36 @@ export class Runner {
   }
 
   getSummary (props: {
+    debug?: boolean
     player: Player
   }): Summary {
+    if (props.player.organism == null) {
+      throw new Error('Player organism is null')
+    }
     const elements = this.getElements(props.player)
+
     const summary: Summary = {
       elements,
       foodCount: this.stage.food.length,
       ropes: this.getRopes(props.player),
       debugLines: [], // this.debugLines,
       debugCircles: [], // this.debugCircles,
-      id: props.player.membrane.id
+      id: props.player.organism.membrane.id
+    }
+    if (props.debug === true) {
+      this.stage.log({ value: ['getSummary elements.length', elements.length], seconds: 10 })
+      const json = JSON.stringify(summary)
+      this.stage.log({ value: ['getSummary json.length', json.length], seconds: 10 })
     }
     return summary
   }
 
   getElements (player: Player): Element[] {
-    const idsInVision = player.featuresInVision.map(feature => feature.id)
+    if (player.organism == null) {
+      throw new Error('Player organism is null')
+    }
+    const idsInVision = player.organism.featuresInVision.map(feature => feature.id)
+    // this.stage.log({ value: ['idsInVision.length', idsInVision.length] })
     const filteredFeatures = this.features.filter(feature => idsInVision.includes(feature.id))
     const elements: Element[] = filteredFeatures.map(feature => {
       const tree = feature.actor instanceof Tree
@@ -74,8 +88,11 @@ export class Runner {
   }
 
   getRopes (player: Player): Rope[] {
+    if (player.organism == null) {
+      throw new Error('Player organism is null')
+    }
     const ropes: Rope[] = []
-    player.featuresInVision.forEach(feature => {
+    player.organism.featuresInVision.forEach(feature => {
       feature.ropes.forEach(rope => {
         ropes.push(rope)
       })

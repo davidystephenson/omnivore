@@ -89,6 +89,55 @@ export class Funhouse extends Walled {
     // })
 
     this.navigation.setupWaypoints()
+    this.addBricks({
+      count: 20,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: 1,
+      position: Vec2(-45, 25)
+    })
+    // this.addBricks({
+    //   count: 20,
+    //   gap: 0.1,
+    //   halfHeight: 1,
+    //   halfWidth: 1,
+    //   position: Vec2(25, 25)
+    // })
+    // this.addBricks({
+    //   count: 20,
+    //   gap: 0.1,
+    //   halfHeight: 1,
+    //   halfWidth: 1,
+    //   position: Vec2(20, 25)
+    // })
+    // this.addBricks({
+    //   count: 20,
+    //   gap: 0.1,
+    //   halfHeight: 1,
+    //   halfWidth: 1,
+    //   position: Vec2(30, 25)
+    // })
+    // this.addBricks({
+    //   count: 20,
+    //   gap: 0.1,
+    //   halfHeight: 1,
+    //   halfWidth: 1,
+    //   position: Vec2(35, 25)
+    // })
+    // this.addBricks({
+    //   count: 20,
+    //   gap: 0.1,
+    //   halfHeight: 1,
+    //   halfWidth: 1,
+    //   position: Vec2(40, 25)
+    // })
+    // this.addBricks({
+    //   count: 20,
+    //   gap: 0.1,
+    //   halfHeight: 1,
+    //   halfWidth: 1,
+    //   position: Vec2(45, 25)
+    // })
     // this.addPuppet({
     //   vertices: [
     //     Vec2(-5, 10),
@@ -228,34 +277,32 @@ export class Funhouse extends Walled {
     //   halfWidth: 1,
     //   position: Vec2(rightPropX - 5, 16)
     // })
-    const smallGene = new Gene({
-      radius: 0.6
-    })
-    this.addBot({
-      color: YELLOW,
-      position: Vec2(-10, 15),
-      gene: smallGene
-    })
+    // const smallGene = new Gene({
+    //   radius: 0.6
+    // })
     // this.addBot({
-    //   position: Vec2(-13, 0),
+    //   color: YELLOW,
+    //   position: Vec2(-10, 15),
     //   gene: smallGene
     // })
     // this.addBot({
-    //   position: Vec2(-18, 0),
+    //   color: YELLOW,
+    //   position: Vec2(-10, 20),
     //   gene: smallGene
     // })
     // this.addBot({
-    //   position: Vec2(-23, 0),
+    //   color: YELLOW,
+    //   position: Vec2(-10, 25),
     //   gene: smallGene
     // })
-    const bigGene = new Gene({
-      radius: 1.2
-    })
-    this.addBot({
-      color: RED,
-      position: Vec2(0, 10),
-      gene: bigGene
-    })
+    // const bigGene = new Gene({
+    //   radius: 1.2
+    // })
+    // this.addBot({
+    //   color: RED,
+    //   position: Vec2(0, 10),
+    //   gene: bigGene
+    // })
     // this.addBot({
     //   position: Vec2(-10, 15),
     //   gene: bigGene
@@ -287,12 +334,17 @@ export class Funhouse extends Walled {
     //   halfWidth: 5,
     //   position: Vec2(-15, 14)
     // })
-    this.addTree({
-      position: Vec2(20, 20)
-    })
-
-    this.addTree({
-      position: Vec2(-20, -20)
-    })
+    // this.addTree({
+    //   position: Vec2(20, 20)
+    // })
+    // this.addTree({
+    //   position: Vec2(20, -20)
+    // })
+    // this.addTree({
+    //   position: Vec2(-20, -20)
+    // })
+    // this.addTree({
+    //   position: Vec2(-20, -20)
+    // })
   }
 }

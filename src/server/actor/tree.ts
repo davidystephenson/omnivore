@@ -156,19 +156,19 @@ export class Tree extends Actor {
     }
     const gapSize = this.innerRadius - this.seedInnerRadius - this.foodLayer * this.foodSize
     if (gapSize > this.foodSize) {
-      this.addFood()
+      // this.addFood()
     }
   }
 
   onStep (stepSize: number): void {
     super.onStep(stepSize)
-    const actors = [...this.stage.actors.values()]
-    const features = actors.flatMap(actor => actor.features)
-    const otherFeatures = features.filter(feature => feature !== this.sculpture)
-    const nearestOtherPoint = getNearestOtherPoint(this.stage, this.sculpture, otherFeatures)
-    const position = this.sculpture.body.getPosition()
-    const direction = directionFromTo(nearestOtherPoint, position)
-    const force = Vec2.mul(5, direction)
-    this.sculpture.body.applyForceToCenter(force)
+    // const actors = [...this.stage.actors.values()]
+    // const features = actors.flatMap(actor => actor.features)
+    // const otherFeatures = features.filter(feature => feature !== this.sculpture)
+    // const nearestOtherPoint = getNearestOtherPoint(this.stage, this.sculpture, otherFeatures)
+    // const position = this.sculpture.body.getPosition()
+    // const direction = directionFromTo(nearestOtherPoint, position)
+    // const force = Vec2.mul(5, direction)
+    // this.sculpture.body.applyForceToCenter(force)
   }
 }

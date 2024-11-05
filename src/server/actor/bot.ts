@@ -204,8 +204,12 @@ export class Bot extends Organism {
   }
 
   getNearestReachableEnemy (): Membrane | undefined {
-    const membranes = this.featuresInVision.filter(feature => feature instanceof Membrane)
-    const enemies = membranes.filter(m => m.actor.id !== this.id)
+    const enemies = this.featuresInVision.filter(feature => {
+      if (feature instanceof Membrane) {
+        return feature.color !== this.color
+      }
+      return false
+    })
     const reachableEnemies = enemies.filter(enemy => {
       return this.isPointReachable(enemy.body.getPosition(), enemy.radius)
     })
@@ -263,6 +267,9 @@ export class Bot extends Organism {
 
   onStep (stepSize: number): void {
     super.onStep(stepSize)
+    if (this.player != null) {
+      return
+    }
     this.explore(stepSize)
     const maneuvered = this.maneuver()
     if (maneuvered) return

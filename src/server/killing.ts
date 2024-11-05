@@ -11,10 +11,8 @@ export class Killing extends Death {
 
   constructor (props: { killer: Membrane, stage: Stage, victim: Membrane }) {
     super({ stage: props.stage, victim: props.victim })
-    this.stage.destructionQueue.push(props.victim.body)
+    console.log('construct killing')
     this.killer = props.killer
-    this.victim.actor.dead = true
-    this.victim.deathPosition = this.victim.body.getPosition()
   }
 
   execute (props?: {

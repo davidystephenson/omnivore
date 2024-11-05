@@ -2,7 +2,7 @@ import { CircleShape, RopeJoint, Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Actor } from './actor'
 import { Membrane } from '../feature/membrane'
-import { choose, range, rotate, whichMin } from '../math'
+import { range, rotate, whichMin } from '../math'
 import { Egg } from '../feature/egg'
 import { Feature } from '../feature/feature'
 import { Rope } from '../../shared/rope'
@@ -11,22 +11,17 @@ import { ExplorationPoint } from '../explorationPoint'
 import { Controls } from '../../shared/input'
 import { Gene } from '../gene'
 import { Rgb } from '../../shared/color'
+import { Player } from './player'
+
+export interface OrganismSpawn {
+  color: Rgb
+  gene: Gene
+  player?: Player
+}
 
 export class Organism extends Actor {
   color: Rgb
-  dead = false
-  featuresInVision: Feature[] = []
-  gap = 0.5
-  hatched = true
-  membrane: Membrane
-  membranes: Membrane[] = []
-  north = Vec2(0, 1)
-  radius: number
-  readyToHatch = false
-  spawnPosition: Vec2
-  gene: Gene
-  explorationPoints: ExplorationPoint[] = []
-  explorationIds: number[]
+  createdAt: number
   controls: Controls = {
     up: false,
     down: false,
@@ -36,17 +31,36 @@ export class Organism extends Actor {
     cancel: false
   }
 
+  explorationIds: number[]
+  explorationPoints: ExplorationPoint[] = []
+  dead = false
+  featuresInVision: Feature[] = []
+  gap = 0.5
+  gene: Gene
+  hatched = true
+  membrane: Membrane
+  membranes: Membrane[] = []
+  north = Vec2(0, 1)
+  player?: Player
+  radius: number
+  readyToHatch = false
+  respawning = false
+  spawnPosition: Vec2
+
   constructor (props: {
-    color: Rgb
-    gene: Gene
     position: Vec2
     stage: Stage
-  }) {
+  } & OrganismSpawn) {
     super({ stage: props.stage, label: 'organism' })
+    this.createdAt = Date.now()
     this.color = props.color
-    this.spawnPosition = props.position
     this.gene = props.gene
+    this.player = props.player
+    this.spawnPosition = props.position
     this.membrane = this.grow({ branch: this.gene })
+    if (this.player != null) {
+      this.player.organism = this
+    }
     const largerRadii = this.stage.navigation.radii.filter(radius => radius >= this.membrane.radius)
     const indexOfMinimumValue = whichMin(largerRadii)
     const validRadius = largerRadii[indexOfMinimumValue]
@@ -155,21 +169,28 @@ export class Organism extends Actor {
     return membrane
   }
 
-  destroyMembrane (props: {
-    membrane: Membrane
-  }): void {
-    // this.membranes = this.membranes.filter(membrane => membrane !== props.membrane)
-    this.membranes = this.membranes.filter(membrane => {
-      const destroyed = membrane === props.membrane
-      if (destroyed) {
-        membrane.destroy()
-        return false
-      }
-      return true
-    })
-    this.features = this.features.filter(feature => feature !== props.membrane)
-    this.stage.world.destroyBody(props.membrane.body)
+  destroy (): void {
+    super.destroy()
+    if (this.player != null) {
+      this.player.organism = undefined
+    }
   }
+
+  // destroyMembrane (props: {
+  //   membrane: Membrane
+  // }): void {
+  //   // this.membranes = this.membranes.filter(membrane => membrane !== props.membrane)
+  //   this.membranes = this.membranes.filter(membrane => {
+  //     const destroyed = membrane === props.membrane
+  //     if (destroyed) {
+  //       membrane.destroy()
+  //       return false
+  //     }
+  //     return true
+  //   })
+  //   this.features = this.features.filter(feature => feature !== props.membrane)
+  //   this.stage.world.destroyBody(props.membrane.body)
+  // }
 
   getEgg (): Egg {
     const circles: CircleShape[] = []
@@ -230,43 +251,48 @@ export class Organism extends Actor {
   onStep (stepSize: number): void {
     super.onStep(stepSize)
     const featuresInRange = this.membrane.getFeaturesInRange()
+    if (this.player != null) {
+      // this.stage.log({ value: ['featuresInRange', featuresInRange.length] })
+    }
     this.featuresInVision = featuresInRange.filter(targetFeature => {
       const visible = this.membranes.some(membrane => this.stage.vision.isFeatureVisible(membrane, targetFeature))
       return visible
     })
+    if (this.player != null) {
+      // this.stage.log({ value: ['this.featuresInVision', this.featuresInVision.length] })
+    }
     if (!this.hatched) this.eggFlee()
     if (this.readyToHatch && !this.hatched) this.hatch()
     this.move()
   }
 
-  respawn (): boolean {
-    this.invincibleTime = 0
-    const clearSpawnPoints = this.stage.spawnPoints.filter(spawnPoint => {
-      const circle = new CircleShape(spawnPoint, this.getRadius())
-      return this.stage.getFeaturesInShape(circle).length === 0
-    })
-    if (clearSpawnPoints.length === 0) {
-      return false
-    }
-    const spawnPoint = choose(clearSpawnPoints)
-    this.spawnPosition = spawnPoint
-    this.membrane = this.grow({ branch: this.gene })
-    this.dead = false
-    return true
-  }
+  // respawn (): boolean {
+  //   this.invincibleTime = 0
+  //   const clearSpawnPoints = this.stage.spawnPoints.filter(spawnPoint => {
+  //     const circle = new CircleShape(spawnPoint, this.getRadius())
+  //     return this.stage.getFeaturesInShape(circle).length === 0
+  //   })
+  //   if (clearSpawnPoints.length === 0) {
+  //     return false
+  //   }
+  //   const spawnPoint = choose(clearSpawnPoints)
+  //   this.spawnPosition = spawnPoint
+  //   this.membrane = this.grow({ branch: this.gene })
+  //   this.dead = false
+  //   return true
+  // }
 
   starve (props: {
     membrane: Membrane
   }): void {
-    this.features.forEach(feature => {
-      if (feature instanceof Membrane) {
-        this.destroyMembrane({ membrane: feature })
-      }
-    })
+    // this.features.forEach(feature => {
+    //   if (feature instanceof Membrane) {
+    //     this.destroyMembrane({ membrane: feature })
+    //   }
+    // })
     this.stage.starvationQueue.push(new Starvation({
       stage: this.stage,
       victim: props.membrane
     }))
-    this.dead = true
   }
 }
