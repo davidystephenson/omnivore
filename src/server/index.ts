@@ -22,27 +22,29 @@ io.on('connection', socket => {
     gene,
     position: Vec2(-20, 15)
   })
+  if (player.organism == null) {
+    throw new Error('player.organism is undefined')
+  }
+  player.organism.membrane.health = 0.1
   socket.on('controls', (controls: Controls) => {
-    player.controls = controls
+    if (player.organism == null) {
+      return
+    }
+    player.organism.controls = controls
     if (controls.select) {
       stage.runner.paused = true
     }
     if (controls.cancel) {
       stage.runner.paused = false
-      player.membrane.health = 1
+      player.organism.membrane.health = 1
     }
-    const summary = stage.runner.getSummary({ player })
-    stage.log({ value: ['size', JSON.stringify(summary).length] })
-    stage.log({ value: ['emit summary.elements.length', summary.elements.length] })
+    const summary = stage.runner.getSummary({ debug: true, player })
     socket.emit('serverUpdateClient', summary)
   })
   socket.on('disconnect', () => {
     stage.log({
       value: ['disconnect:', socket.id]
     })
-    player.features.forEach(feature => {
-      stage.world.destroyBody(feature.body)
-    })
-    stage.actors.delete(player.id)
+    player.organism?.destroy()
   })
 })

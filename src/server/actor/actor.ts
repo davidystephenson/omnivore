@@ -24,6 +24,12 @@ export class Actor {
     this.tree = false
   }
 
+  destroy (): void {
+    this.stage.actors.delete(this.id)
+    this.features.forEach(feature => feature.destroy())
+    this.joints.forEach(joint => this.stage.world.destroyJoint(joint))
+  }
+
   onStep (stepSize: number): void {
     this.features.forEach(feature => feature.onStep(stepSize))
     // this.invincibleTime = Math.max(0, this.invincibleTime - this.stage.runner.timeStep)

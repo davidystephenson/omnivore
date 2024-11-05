@@ -70,7 +70,6 @@ export class Feature {
   }
 
   destroy (): void {
-    this.actor.stage.actors.delete(this.actor.id)
     this.actor.stage.destructionQueue.push(this.body)
   }
 

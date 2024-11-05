@@ -93,23 +93,24 @@ export class Membrane extends Feature {
           const nutrition = this.maximumHealth / 10
           this.health = Math.min(this.maximumHealth, this.health + nutrition)
           if (this.health >= this.maximumHealth) {
-            const bot = this.actor.stage.addBot({
-              color: this.actor.color,
-              gene: this.actor.gene,
-              position: this.body.getPosition()
-            })
-            const half = this.maximumHealth / 2
-            bot.membrane.health = half
-            this.health = half
+            // const bot = this.actor.stage.addBot({
+            //   color: this.actor.color,
+            //   gene: this.actor.gene,
+            //   position: this.body.getPosition()
+            // })
+            // const half = this.maximumHealth / 2
+            // bot.membrane.health = half
+            // this.health = half
           }
         }
-        target.destroy()
+        target.actor.destroy()
       }
     }
   }
 
   destroy (): void {
     this.destroyed = true
+    super.destroy()
   }
 
   onStep (): void {

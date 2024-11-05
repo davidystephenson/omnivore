@@ -96,8 +96,17 @@ export function whichMin (array: number[]): number {
   return whichMax(negArray)
 }
 
-export function choose<type> (array: type[]): type {
+export function choose<Element> (array: Element[]): Element {
   return array[Math.floor(Math.random() * array.length)]
+}
+
+export function shuffle <Element> (array: Element[]): Element[] {
+  const seeded = array.map((element) => {
+    return { element, seed: Math.random() }
+  })
+  seeded.sort((a, b) => a.seed - b.seed)
+  const shuffled = seeded.map((seeded) => seeded.element)
+  return shuffled
 }
 
 export function roundVector (vector: Vec2): Vec2 {

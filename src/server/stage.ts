@@ -1,6 +1,6 @@
 import { World, Vec2, Contact, Body, AABB, PolygonShape, CircleShape, Shape, Transform, testOverlap } from 'planck'
 import { Runner } from './runner'
-import { Organism } from './actor/organism'
+import { Organism, OrganismSpawn } from './actor/organism'
 import { Wall } from './actor/wall'
 import { Actor } from './actor/actor'
 import { Brick } from './actor/brick'
@@ -10,7 +10,7 @@ import { Rgb, RED, Rgba } from '../shared/color'
 import { DebugLine } from '../shared/debugLine'
 import { Vision } from './vision'
 import { Puppet } from './actor/puppet'
-import { range } from './math'
+import { range, shuffle } from './math'
 import { DebugCircle } from '../shared/debugCircle'
 import { Starvation } from './starvation'
 import { LogProps, Logger } from './logger'
@@ -32,7 +32,7 @@ export class Stage {
   halfWidth: number
   killingQueue: Killing[] = []
   logger: Logger
-  respawnQueue: Organism[] = []
+  respawnQueue: OrganismSpawn[] = []
   runner: Runner
   spawnPoints: Vec2[]
   starvationQueue: Starvation[] = []
@@ -377,10 +377,19 @@ export class Stage {
     this.killingQueue = []
     this.starvationQueue = []
     this.fallQueue = []
-    this.respawnQueue = this.respawnQueue.filter(organism => {
-      const respawned = organism.respawn()
-      return !respawned
+    const clearSpawnPoints = this.spawnPoints.filter(spawnPoint => {
+      const circle = new CircleShape(spawnPoint, 1.25)
+      return this.getFeaturesInShape(circle).length === 0
     })
+    const shuffled = shuffle(clearSpawnPoints)
+    if (clearSpawnPoints.length > 0) {
+      this.respawnQueue.forEach(def => {
+        const position = shuffled.pop()
+        if (position == null) throw new Error('no spawn points')
+        void new Organism({ ...def, position, stage: this })
+      })
+      this.respawnQueue = []
+    }
     if (this.respawnQueue.length > 0) {
       this.log({ value: ['respawnQueue.length', this.respawnQueue.length] })
     }
