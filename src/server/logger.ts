@@ -25,8 +25,8 @@ export class Logger {
     const message = this.stringify({ value: props.value })
     const frames = props.frames == null
       ? props.seconds == null
-        ? 60
-        : props.seconds * 60
+        ? 900
+        : props.seconds * 30
       : props.frames
 
     const key = props.key ?? caller

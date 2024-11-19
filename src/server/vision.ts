@@ -27,7 +27,8 @@ export class Vision {
   isClear (sourcePoint: Vec2, targetPoint: Vec2, excludeIds?: number[], debug?: boolean): boolean {
     let clear = true
     this.stage.world.rayCast(sourcePoint, targetPoint, (fixture, point, normal, fraction) => {
-      const collideFeature = fixture.getUserData() as Feature
+      const collideFeature = fixture.getUserData()
+      if (!(collideFeature instanceof Feature)) return 1
       const excluded = excludeIds?.includes(collideFeature.id)
       const membrany = collideFeature.label === 'membrane' || collideFeature.label === 'egg'
       if (excluded === true || membrany) return 1
@@ -160,7 +161,8 @@ export class Vision {
   rayCast (point1: Vec2, point2: Vec2, excludeIds?: number[]): RayCastHit[] {
     const hits: RayCastHit[] = []
     this.stage.world.rayCast(point1, point2, function (fixture: Fixture, point: Vec2): number {
-      const feature = fixture.getUserData() as Feature
+      const feature = fixture.getUserData()
+      if (!(feature instanceof Feature)) return -1
       if (excludeIds?.includes(feature.id) === true || fixture.isSensor()) {
         return -1
       }

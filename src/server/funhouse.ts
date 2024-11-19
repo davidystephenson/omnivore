@@ -89,55 +89,77 @@ export class Funhouse extends Walled {
     // })
 
     this.navigation.setupWaypoints()
+    this.spawner.setupSpawnPoints()
     this.addBricks({
       count: 20,
       gap: 0.1,
       halfHeight: 1,
       halfWidth: 1,
-      position: Vec2(-45, 25)
+      position: Vec2(-45, 0)
     })
-    // this.addBricks({
-    //   count: 20,
-    //   gap: 0.1,
-    //   halfHeight: 1,
-    //   halfWidth: 1,
-    //   position: Vec2(25, 25)
-    // })
-    // this.addBricks({
-    //   count: 20,
-    //   gap: 0.1,
-    //   halfHeight: 1,
-    //   halfWidth: 1,
-    //   position: Vec2(20, 25)
-    // })
-    // this.addBricks({
-    //   count: 20,
-    //   gap: 0.1,
-    //   halfHeight: 1,
-    //   halfWidth: 1,
-    //   position: Vec2(30, 25)
-    // })
-    // this.addBricks({
-    //   count: 20,
-    //   gap: 0.1,
-    //   halfHeight: 1,
-    //   halfWidth: 1,
-    //   position: Vec2(35, 25)
-    // })
-    // this.addBricks({
-    //   count: 20,
-    //   gap: 0.1,
-    //   halfHeight: 1,
-    //   halfWidth: 1,
-    //   position: Vec2(40, 25)
-    // })
-    // this.addBricks({
-    //   count: 20,
-    //   gap: 0.1,
-    //   halfHeight: 1,
-    //   halfWidth: 1,
-    //   position: Vec2(45, 25)
-    // })
+    this.addBricks({
+      count: 20,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: 1,
+      position: Vec2(5, 0)
+    })
+    this.addBricks({
+      count: 20,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: 1,
+      position: Vec2(10, 0)
+    })
+    this.addBricks({
+      count: 20,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: 1,
+      position: Vec2(15, 0)
+    })
+    this.addBricks({
+      count: 20,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: 1,
+      position: Vec2(20, 0)
+    })
+    this.addBricks({
+      count: 20,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: 1,
+      position: Vec2(25, 0)
+    })
+    this.addBricks({
+      count: 20,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: 1,
+      position: Vec2(30, 0)
+    })
+    this.addBricks({
+      count: 20,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: 1,
+      position: Vec2(35, 0)
+    })
+    this.addBricks({
+      count: 20,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: 1,
+      position: Vec2(40, 0)
+    })
+    this.addBricks({
+      count: 20,
+      gap: 0.1,
+      halfHeight: 1,
+      halfWidth: 1,
+      position: Vec2(45, 0)
+    })
     // this.addPuppet({
     //   vertices: [
     //     Vec2(-5, 10),
@@ -343,8 +365,8 @@ export class Funhouse extends Walled {
     // this.addTree({
     //   position: Vec2(-20, -20)
     // })
-    // this.addTree({
-    //   position: Vec2(-20, -20)
-    // })
+    this.addTree({
+      position: Vec2(-20, -20)
+    })
   }
 }

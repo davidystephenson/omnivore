@@ -20,6 +20,8 @@ import { Player } from './actor/player'
 import { Gene } from './gene'
 import { Tree } from './actor/tree'
 import { Food } from './actor/food'
+import { Spawner } from './spawner'
+import { SpawnPoint } from './spawnpoint'
 
 export class Stage {
   actors = new Map<number, Actor>()
@@ -34,7 +36,6 @@ export class Stage {
   logger: Logger
   respawnQueue: OrganismSpawn[] = []
   runner: Runner
-  spawnPoints: Vec2[]
   starvationQueue: Starvation[] = []
   fallQueue: Tree[] = []
   vision: Vision
@@ -43,6 +44,7 @@ export class Stage {
   world: World
   virtualBoxes: AABB[] = []
   navigation: Navigation
+  spawner: Spawner
 
   constructor (props: {
     debugBotChase?: boolean
@@ -67,19 +69,7 @@ export class Stage {
     this.navigation = new Navigation({ stage: this })
     this.runner = new Runner({ stage: this })
     this.vision = new Vision({ stage: this })
-
-    const xMin = -this.halfWidth
-    const xMax = this.halfWidth
-    const yMin = -this.halfHeight
-    const yMax = this.halfHeight
-    const steps = 10
-    this.spawnPoints = range(0, steps).flatMap(i =>
-      range(0, steps).map(j => {
-        const x = xMin + i / steps * (xMax - xMin)
-        const y = yMin + j / steps * (yMax - yMin)
-        return Vec2(x, y)
-      })
-    )
+    this.spawner = new Spawner(this)
   }
 
   addBot (props: {
@@ -214,8 +204,17 @@ export class Stage {
       const fixture = pair[0]
       const otherFixture = pair[1]
       const sensorContact = fixture.isSensor() || otherFixture.isSensor()
-      const feature = fixture.getBody().getUserData() as Feature
-      const otherFeature = otherFixture.getBody().getUserData() as Feature
+      const feature = fixture.getBody().getUserData()
+      const otherFeature = otherFixture.getBody().getUserData()
+      if (feature instanceof Spawner) {
+        const spawnPoint = fixture.getUserData()
+        if (!(spawnPoint instanceof SpawnPoint)) {
+          throw new Error('spawnPoint is not a SpawnPoint')
+        }
+        spawnPoint.collideCount += 1
+      }
+      if (!(feature instanceof Feature)) return
+      if (!(otherFeature instanceof Feature)) return
       const actor = feature.actor
       const otherActor = otherFeature.actor
       if (sensorContact) {
@@ -241,8 +240,17 @@ export class Stage {
     pairs.forEach(pair => {
       const fixture = pair[0]
       const otherFixture = pair[1]
-      const feature = fixture.getBody().getUserData() as Feature
-      const otherFeature = otherFixture.getBody().getUserData() as Feature
+      const feature = fixture.getBody().getUserData()
+      const otherFeature = otherFixture.getBody().getUserData()
+      if (feature instanceof Spawner) {
+        const spawnPoint = fixture.getUserData()
+        if (!(spawnPoint instanceof SpawnPoint)) {
+          throw new Error('spawnPoint is not a SpawnPoint')
+        }
+        spawnPoint.collideCount += 1
+      }
+      if (!(feature instanceof Feature)) return
+      if (!(otherFeature instanceof Feature)) return
       feature.contacts = feature.contacts.filter(contact => contact.id !== otherFeature.id)
       if (fixture.isSensor() && !otherFixture.isSensor()) {
         feature.sensorFeatures = feature.sensorFeatures.filter(contact => contact.id !== otherFeature.id)
@@ -261,8 +269,10 @@ export class Stage {
       const fixture = pair[0]
       const otherFixture = pair[1]
       const sensorContact = fixture.isSensor() || otherFixture.isSensor()
-      const feature = fixture.getBody().getUserData() as Feature
-      const otherFeature = otherFixture.getBody().getUserData() as Feature
+      const feature = fixture.getBody().getUserData()
+      const otherFeature = otherFixture.getBody().getUserData()
+      if (!(feature instanceof Feature)) return
+      if (!(otherFeature instanceof Feature)) return
       const actor = feature.actor
       const otherActor = otherFeature.actor
       if (!sensorContact) {
@@ -345,7 +355,8 @@ export class Stage {
     const featuresInShape: Feature[] = []
     const origin = new Transform()
     this.runner.getBodies().forEach(body => {
-      const feature = body.getUserData() as Feature
+      const feature = body.getUserData()
+      if (!(feature instanceof Feature)) return false
       const featureShape = feature.fixture.getShape()
       const overlap = testOverlap(shape, 0, featureShape, 0, origin, body.getTransform())
       if (overlap) { featuresInShape.push(feature) }
@@ -377,21 +388,19 @@ export class Stage {
     this.killingQueue = []
     this.starvationQueue = []
     this.fallQueue = []
-    const clearSpawnPoints = this.spawnPoints.filter(spawnPoint => {
-      const circle = new CircleShape(spawnPoint, 1.25)
-      return this.getFeaturesInShape(circle).length === 0
-    })
-    const shuffled = shuffle(clearSpawnPoints)
-    if (clearSpawnPoints.length > 0) {
-      this.respawnQueue.forEach(def => {
-        const position = shuffled.pop()
-        if (position == null) throw new Error('no spawn points')
-        void new Organism({ ...def, position, stage: this })
-      })
-      this.respawnQueue = []
-    }
     if (this.respawnQueue.length > 0) {
       this.log({ value: ['respawnQueue.length', this.respawnQueue.length] })
+      const clearSpawnPoints = this.spawner.spawnPoints.filter(spawnPoint => spawnPoint.collideCount === 0)
+      const clearSpawnPositions = clearSpawnPoints.map(spawnPoint => spawnPoint.location)
+      const shuffled = shuffle(clearSpawnPositions)
+      if (clearSpawnPositions.length > 0) {
+        this.respawnQueue.forEach(def => {
+          const position = shuffled.pop()
+          if (position == null) throw new Error('no spawn points')
+          void new Organism({ ...def, position, stage: this })
+        })
+        this.respawnQueue = []
+      }
     }
     this.destructionQueue = []
     this.virtualBoxes.forEach(box => {
