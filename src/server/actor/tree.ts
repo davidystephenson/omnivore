@@ -156,7 +156,7 @@ export class Tree extends Actor {
     }
     const gapSize = this.innerRadius - this.seedInnerRadius - this.foodLayer * this.foodSize
     if (gapSize > this.foodSize) {
-      // this.addFood()
+      this.addFood()
     }
   }
 

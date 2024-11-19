@@ -12,13 +12,17 @@ import { Tree } from './actor/tree'
 export class Runner {
   // intervalId: NodeJS.Timeout
   stage: Stage
-  timeStep = 1 / 60
+  timeStep = 1 / 30
   timeScale = 1 // 1
   paused = false
   worldTime = 0
   debugLines: DebugLine[] = []
   debugCircles: DebugCircle[] = []
   features: Feature[] = []
+  oldStepDate?: number
+  stepDate = performance.now()
+  stepCount = 0
+  stepCountInterval = 100
   constructor (props: {
     stage: Stage
   }) {
@@ -26,12 +30,20 @@ export class Runner {
   }
 
   step (): void {
+    this.stepCount = this.stepCount + 1
+    this.oldStepDate = this.stepDate
+    this.stepDate = performance.now()
     if (this.paused) return
+    if (this.stepCount % this.stepCountInterval === 0) {
+      const difference = this.stepDate - this.oldStepDate
+      console.log('difference', difference)
+    }
     this.worldTime += this.timeStep
     const bodies = this.getBodies()
     bodies.forEach(body => {
-      const actor = body.getUserData() as Feature
-      body.applyForceToCenter(actor.force)
+      const feature = body.getUserData()
+      if (!(feature instanceof Feature)) return
+      body.applyForceToCenter(feature.force)
     })
     const stepSize = this.timeStep * this.timeScale
     this.stage.actors.forEach(actor => {
@@ -39,7 +51,13 @@ export class Runner {
         actor.grow(stepSize)
       }
     })
+    const worldStepBefore = performance.now()
     this.stage.world.step(stepSize)
+    const worldStepAfter = performance.now()
+    if (this.stepCount % this.stepCountInterval === 0) {
+      const worldStepDifference = worldStepAfter - worldStepBefore
+      console.log('worldStepDifference', worldStepDifference)
+    }
     this.debugLines = []
     this.debugCircles = []
     this.stage.onStep(stepSize)
@@ -54,7 +72,6 @@ export class Runner {
       throw new Error('Player organism is null')
     }
     const elements = this.getElements(props.player)
-
     const summary: Summary = {
       elements,
       foodCount: this.stage.food.length,
@@ -64,9 +81,9 @@ export class Runner {
       id: props.player.organism.membrane.id
     }
     if (props.debug === true) {
-      this.stage.log({ value: ['getSummary elements.length', elements.length], seconds: 10 })
-      const json = JSON.stringify(summary)
-      this.stage.log({ value: ['getSummary json.length', json.length], seconds: 10 })
+      // this.stage.log({ value: ['getSummary elements.length', elements.length], seconds: 10 })
+      // const json = JSON.stringify(summary)
+      // this.stage.log({ value: ['getSummary json.length', json.length], seconds: 10 })
     }
     return summary
   }
@@ -76,7 +93,6 @@ export class Runner {
       throw new Error('Player organism is null')
     }
     const idsInVision = player.organism.featuresInVision.map(feature => feature.id)
-    // this.stage.log({ value: ['idsInVision.length', idsInVision.length] })
     const filteredFeatures = this.features.filter(feature => idsInVision.includes(feature.id))
     const elements: Element[] = filteredFeatures.map(feature => {
       const tree = feature.actor instanceof Tree
@@ -113,10 +129,9 @@ export class Runner {
     const features: Feature[] = []
     bodies.forEach(body => {
       const feature = body.getUserData()
-      if (!(feature instanceof Feature)) {
-        throw new Error('User data is not a feature')
+      if (feature instanceof Feature) {
+        features.push(feature)
       }
-      features.push(feature)
     })
     return features
   }

@@ -216,8 +216,9 @@ export class Navigation {
       const start = starts[index]
       const end = ends[index]
       this.stage.world.rayCast(start, end, (fixture, point, normal, fraction) => {
-        const feature = fixture.getBody().getUserData() as Feature
-        if (!(feature instanceof Structure)) return 1
+        const data = fixture.getBody().getUserData()
+        if (!(data instanceof Feature)) return 1
+        if (!(data instanceof Structure)) return 1
         opens[index] = false
         return 0
       })

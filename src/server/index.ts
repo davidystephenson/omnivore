@@ -27,6 +27,7 @@ io.on('connection', socket => {
   }
   player.organism.membrane.health = 0.1
   socket.on('controls', (controls: Controls) => {
+    // stage.log({ value: ['controls', socket.id] })
     if (player.organism == null) {
       return
     }
