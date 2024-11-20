@@ -1,9 +1,8 @@
-import { Vec2, Circle, Box, Fixture } from 'planck'
+import { Vec2, Circle, Fixture } from 'planck'
 import { Feature } from './feature'
 import { Organism } from '../actor/organism'
 import { Killing } from '../killing'
 import { Structure } from './structure'
-import { HALF_SIGHT } from '../../shared/sight'
 import { directionFromTo } from '../math'
 import { Tree } from '../actor/tree'
 import { Food } from '../actor/food'
@@ -41,11 +40,7 @@ export class Membrane extends Feature {
     })
     this.actor = props.actor
     this.radius = radius
-    this.sensor = this.body.createFixture({
-      shape: Box(HALF_SIGHT.x, HALF_SIGHT.y),
-      isSensor: true
-    })
-    this.sensor.setUserData(this)
+    this.sensor = this.addSensor()
   }
 
   handleContacts (): void {
@@ -93,14 +88,14 @@ export class Membrane extends Feature {
           const nutrition = this.maximumHealth / 10
           this.health = Math.min(this.maximumHealth, this.health + nutrition)
           if (this.health >= this.maximumHealth) {
-            // const bot = this.actor.stage.addBot({
-            //   color: this.actor.color,
-            //   gene: this.actor.gene,
-            //   position: this.body.getPosition()
-            // })
-            // const half = this.maximumHealth / 2
-            // bot.membrane.health = half
-            // this.health = half
+            const bot = this.actor.stage.addBot({
+              color: this.actor.color,
+              gene: this.actor.gene,
+              position: this.body.getPosition()
+            })
+            const half = this.maximumHealth / 2
+            bot.membrane.health = half
+            this.health = half
           }
         }
         target.actor.destroy()

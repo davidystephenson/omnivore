@@ -76,7 +76,7 @@ export class Runner {
       elements,
       foodCount: this.stage.food.length,
       ropes: this.getRopes(props.player),
-      debugLines: [], // this.debugLines,
+      debugLines: this.debugLines,
       debugCircles: [], // this.debugCircles,
       id: props.player.organism.membrane.id
     }
