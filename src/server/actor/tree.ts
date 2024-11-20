@@ -1,4 +1,4 @@
-import { PolygonShape, Vec2 } from 'planck'
+import { Fixture, PolygonShape, Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Actor } from './actor'
 import { Sculpture } from '../feature/sculpture'
@@ -21,6 +21,7 @@ export class Tree extends Actor {
   growing: boolean
   foodSize: number
   foodLayer = 0
+  sensor: Fixture
 
   constructor (props: {
     stage: Stage
@@ -49,6 +50,7 @@ export class Tree extends Actor {
     this.sideLength = this.seedSideLength
     this.innerRadius = this.seedInnerRadius
     this.oldSideLength = this.sideLength
+    this.sensor = this.sculpture.addSensor()
   }
 
   getVertices (radius: number): Vec2[] {
@@ -92,7 +94,7 @@ export class Tree extends Actor {
     this.foodPolygons.push(...foodRow1, ...foodRow2, ...foodRow3)
     this.foodLayer += 1
     this.oldSideLength = this.sideLength
-    this.sculpture.health = 1
+    this.sculpture.health = Math.max(rowCount * 0.2, 1)
   }
 
   fall (): void {
@@ -162,13 +164,13 @@ export class Tree extends Actor {
 
   onStep (stepSize: number): void {
     super.onStep(stepSize)
-    // const actors = [...this.stage.actors.values()]
-    // const features = actors.flatMap(actor => actor.features)
-    // const otherFeatures = features.filter(feature => feature !== this.sculpture)
-    // const nearestOtherPoint = getNearestOtherPoint(this.stage, this.sculpture, otherFeatures)
-    // const position = this.sculpture.body.getPosition()
-    // const direction = directionFromTo(nearestOtherPoint, position)
-    // const force = Vec2.mul(5, direction)
-    // this.sculpture.body.applyForceToCenter(force)
+    const features = this.sculpture.getFeaturesInRange()
+    const otherFeatures = features.filter(feature => feature !== this.sculpture)
+    const nearestOtherPoint = getNearestOtherPoint(this.stage, this.sculpture, otherFeatures)
+    // this.stage.debugLine({ a: this.sculpture.body.getPosition(), b: nearestOtherPoint, color: RED })
+    const position = this.sculpture.body.getPosition()
+    const direction = directionFromTo(nearestOtherPoint, position)
+    const force = Vec2.mul(5, direction)
+    this.sculpture.body.applyForceToCenter(force)
   }
 }

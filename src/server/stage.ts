@@ -385,12 +385,14 @@ export class Stage {
     this.fallQueue.forEach(tree => {
       tree.fall()
     })
-    this.killingQueue = []
-    this.starvationQueue = []
     this.fallQueue = []
-    if (this.respawnQueue.length > 0) {
+    const living = this.killingQueue.length === 0 && this.starvationQueue.length === 0
+    const respawnable = living && this.respawnQueue.length > 0
+    if (respawnable) {
       this.log({ value: ['respawnQueue.length', this.respawnQueue.length] })
+      this.log({ value: ['spawnPoints.length', this.spawner.spawnPoints.length] })
       const clearSpawnPoints = this.spawner.spawnPoints.filter(spawnPoint => spawnPoint.collideCount === 0)
+      this.log({ value: ['clearSpawnPoints.length', clearSpawnPoints.length] })
       const clearSpawnPositions = clearSpawnPoints.map(spawnPoint => spawnPoint.location)
       const shuffled = shuffle(clearSpawnPositions)
       if (clearSpawnPositions.length > 0) {
@@ -402,6 +404,11 @@ export class Stage {
         this.respawnQueue = []
       }
     }
+    this.killingQueue = []
+    this.starvationQueue = []
+    this.spawner.spawnPoints.forEach(spawnPoint => {
+      spawnPoint.collideCount = 0
+    })
     this.destructionQueue = []
     this.virtualBoxes.forEach(box => {
       this.debugBox({ box, color: RED })

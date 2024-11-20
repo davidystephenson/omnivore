@@ -1,9 +1,10 @@
-import { Body, BodyDef, Circle, Fixture, FixtureDef, Polygon, Vec2 } from 'planck'
+import { Body, BodyDef, Box, Circle, Fixture, FixtureDef, Polygon, Vec2 } from 'planck'
 import { Rgb } from '../../shared/color'
 import { Actor } from '../actor/actor'
 import { Rope } from '../../shared/rope'
 import { Element } from '../../shared/element'
 import { roundNumber, roundVector } from '../math'
+import { HALF_SIGHT } from '../../shared/sight'
 
 let featureCount = 0
 
@@ -25,6 +26,7 @@ export class Feature {
   borderWidth: number
   center: Vec2
   radius: number
+  sensor?: Fixture
   polygon: {
     vertices: Vec2[]
   }
@@ -59,6 +61,15 @@ export class Feature {
       : { vertices: [] }
     this.color = props.color
     this.borderWidth = props.borderWidth ?? 0.1
+  }
+
+  addSensor (): Fixture {
+    this.sensor = this.body.createFixture({
+      shape: Box(HALF_SIGHT.x, HALF_SIGHT.y),
+      isSensor: true
+    })
+    this.sensor.setUserData(this)
+    return this.sensor
   }
 
   getFeaturesInRange (): Feature[] {

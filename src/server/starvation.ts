@@ -28,7 +28,7 @@ export class Starvation extends Death {
     const sized = Math.min(halfWidth, halfHeight) > 0
     if (sized) {
       this.stage.log({ value: 'New brick' })
-      // void new Brick({ halfWidth, halfHeight, position: brickPosition, stage: this.stage })
+      void new Brick({ halfWidth, halfHeight, position: brickPosition, stage: this.stage })
     } else {
       this.stage.log({ value: 'No brick' })
     }
