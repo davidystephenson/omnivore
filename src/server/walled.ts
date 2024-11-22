@@ -1,16 +1,14 @@
 import { Vec2 } from 'planck'
 import { Stage } from './stage'
+import { DebugFlags } from './debugFlags'
 
 export class Walled extends Stage {
   constructor (props: {
-    debugBotChase?: boolean
-    debugBotFlee?: boolean
-    debugWaypoints?: boolean
+    flags: DebugFlags
     halfHeight: number
     halfWidth: number
   }) {
     super(props)
-    // Right wall
     this.addWall({
       halfWidth: this.halfWidth,
       halfHeight: 1,

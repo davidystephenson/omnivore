@@ -1,22 +1,21 @@
 import { io } from './server'
 import { Vec2 } from 'planck'
 import { Controls } from '../shared/input'
-// import { Rehearsal } from './rehearsal'
+import { Rehearsal } from './rehearsal'
 import { Gene } from './gene'
-import { Funhouse } from './funhouse'
+// import { Funhouse } from './funhouse'
 import { GREEN } from '../shared/color'
 
-const stage = new Funhouse()
+const stage = new Rehearsal()
 
 io.on('connection', socket => {
-  stage.log({
-    value: ['connection:', socket.id]
+  stage.debug({
+    vs: ['connection:', socket.id]
   })
   socket.emit('connected')
   const gene = new Gene({
     radius: 0.9
   })
-  stage.log({ value: ['gene:', gene] })
   const player = stage.addPlayer({
     color: GREEN,
     gene,
@@ -27,7 +26,6 @@ io.on('connection', socket => {
   }
   player.organism.membrane.health = 0.1
   socket.on('controls', (controls: Controls) => {
-    // stage.log({ value: ['controls', socket.id] })
     if (player.organism == null) {
       return
     }
@@ -39,13 +37,11 @@ io.on('connection', socket => {
       stage.runner.paused = false
       player.organism.membrane.health = 1
     }
-    const summary = stage.runner.getSummary({ debug: true, player })
+    const summary = stage.runner.getSummary({ player })
     socket.emit('serverUpdateClient', summary)
   })
   socket.on('disconnect', () => {
-    stage.log({
-      value: ['disconnect:', socket.id]
-    })
+    stage.debug({ vs: ['disconnect:', socket.id] })
     player.organism?.destroy()
   })
 })

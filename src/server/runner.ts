@@ -36,7 +36,9 @@ export class Runner {
     if (this.paused) return
     if (this.stepCount % this.stepCountInterval === 0) {
       const difference = this.stepDate - this.oldStepDate
-      console.log('difference', difference)
+      const fps = 1000 / difference
+      const fpsString = fps.toFixed(2)
+      console.info('fps', fpsString)
     }
     this.worldTime += this.timeStep
     const bodies = this.getBodies()
@@ -56,7 +58,8 @@ export class Runner {
     const worldStepAfter = performance.now()
     if (this.stepCount % this.stepCountInterval === 0) {
       const worldStepDifference = worldStepAfter - worldStepBefore
-      console.log('worldStepDifference', worldStepDifference)
+      const worldStepDifferenceString = worldStepDifference.toFixed(2)
+      console.info('planck', worldStepDifferenceString)
     }
     this.debugLines = []
     this.debugCircles = []
@@ -65,7 +68,6 @@ export class Runner {
   }
 
   getSummary (props: {
-    debug?: boolean
     player: Player
   }): Summary {
     if (props.player.organism == null) {
@@ -77,13 +79,13 @@ export class Runner {
       foodCount: this.stage.food.length,
       ropes: this.getRopes(props.player),
       debugLines: this.debugLines,
-      debugCircles: [], // this.debugCircles,
+      debugCircles: this.debugCircles,
       id: props.player.organism.membrane.id
     }
-    if (props.debug === true) {
-      // this.stage.log({ value: ['getSummary elements.length', elements.length], seconds: 10 })
-      // const json = JSON.stringify(summary)
-      // this.stage.log({ value: ['getSummary json.length', json.length], seconds: 10 })
+    if (this.stage.flags.summary) {
+      this.stage.debug({ vs: ['getSummary elements.length', elements.length], seconds: 10 })
+      const json = JSON.stringify(summary)
+      this.stage.debug({ vs: ['getSummary json.length', json.length], seconds: 10 })
     }
     return summary
   }

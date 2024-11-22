@@ -11,16 +11,11 @@ export class Killing extends Death {
 
   constructor (props: { killer: Membrane, stage: Stage, victim: Membrane }) {
     super({ stage: props.stage, victim: props.victim })
-    console.log('construct killing')
     this.killer = props.killer
   }
 
-  execute (props?: {
-    debug?: boolean
-  }): void {
-    if (props?.debug === true) {
-      console.debug('Killing.execute')
-    }
+  execute (): void {
+    this.stage.flag({ f: 'death', v: 'Killing.execute' })
     const killerPosition = this.killer.body.getPosition()
     const brickDirection = getCompass(Vec2.sub(this.victim.deathPosition, killerPosition))
     const brickLookDistance = (brickDirection.x !== 0 ? HALF_SIGHT.x : HALF_SIGHT.y) - this.killer.radius
@@ -60,10 +55,7 @@ export class Killing extends Death {
       return index !== nearestIndex
     })
     if (Math.min(halfWidth, halfHeight) > 0) {
-      this.stage.log({ value: 'new Puppet' })
       void new Puppet({ stage: this.stage, vertices: localPuppetCorners, position: brickPosition })
-    } else {
-      this.stage.log({ value: 'no Puppet' })
     }
     this.respawn()
   }

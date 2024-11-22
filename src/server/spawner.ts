@@ -1,10 +1,11 @@
-import { Vec2, Body } from 'planck'
-import { SpawnPoint } from './spawnpoint'
+import { Vec2, Body, Circle } from 'planck'
+import { Spawnpoint } from './spawnpoint'
 import { Stage } from './stage'
+import { RED, GREEN } from '../shared/color'
 
 export class Spawner {
   stage: Stage
-  spawnPoints: SpawnPoint[] = []
+  spawnPoints: Spawnpoint[] = []
   body: Body
 
   constructor (stage: Stage) {
@@ -22,6 +23,20 @@ export class Spawner {
       throw new Error('There are no waypoints')
     }
     const locations = waypoints.map(waypoint => waypoint.position)
-    this.spawnPoints = locations.map(location => new SpawnPoint(this, location))
+    this.spawnPoints = locations.map(location => new Spawnpoint(this, location))
+  }
+
+  onStep (): void {
+    if (!this.stage.flags.respawn) {
+      return
+    }
+    this.spawnPoints.forEach(point => {
+      const collided = point.collideCount > 0
+      const color = collided ? RED : GREEN
+      this.stage.debugCircle({
+        circle: new Circle(point.location, 0.2),
+        color
+      })
+    })
   }
 }

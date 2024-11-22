@@ -9,7 +9,7 @@ import { Membrane } from './feature/membrane'
 import { Structure } from './feature/structure'
 import { Organism } from './actor/organism'
 import { Bot } from './actor/bot'
-import { WHITE } from '../shared/color'
+import { CYAN, RED, WHITE } from '../shared/color'
 
 export class Navigation {
   static spacing = {
@@ -17,7 +17,6 @@ export class Navigation {
     y: HALF_SIGHT.y
   }
 
-  debug: boolean
   radii = [1.2, 1.1, 1.0, 0.9, 0.8, 0.7, 0.6]
   stage: Stage
   waypoints = new Map<number, Waypoint>()
@@ -28,10 +27,8 @@ export class Navigation {
   radiiWaypoints = new Map<number, Waypoint[]>()
 
   constructor (props: {
-    debug?: boolean
     stage: Stage
   }) {
-    this.debug = props.debug ?? false
     this.stage = props.stage
   }
 
@@ -63,9 +60,8 @@ export class Navigation {
       nextPoint = this.navigate(path[path.length - 1], end, radius, otherRadius)
       if (!(nextPoint instanceof Waypoint)) path.push(nextPoint)
       if (path.length > radiusWaypoints.length) {
-        this.stage.log({ value: 'The path is too long' })
+        this.stage.debug({ v: 'The path is too long' })
         return path
-        // throw new Error('The path is too long')
       }
     }
     return path
@@ -86,8 +82,7 @@ export class Navigation {
         fromPosition: start,
         toPosition: directPosition,
         radius: validRadius,
-        otherRadius,
-        debug: true
+        otherRadius
       })
       if (open) {
         return directPosition
@@ -115,15 +110,15 @@ export class Navigation {
   }
 
   setupWaypoints (): void {
-    this.stage.debug({ value: 'Setting up waypoints...' })
+    this.stage.debug({ v: 'Setting up waypoints...' })
     this.createWaypoints()
-    this.stage.debug({ value: 'Setting up neighbors...' })
+    this.stage.debug({ v: 'Setting up neighbors...' })
     this.setupNeighbors()
-    this.stage.debug({ value: 'Calculating distances...' })
+    this.stage.debug({ v: 'Calculating distances...' })
     this.preCalculate()
-    this.stage.debug({ value: 'Starting the runner...' })
+    this.stage.debug({ v: 'Starting the runner...' })
     setInterval(() => { this.stage.runner.step() }, 1000 * this.stage.runner.timeStep)
-    this.stage.debug({ value: 'Runner started!' })
+    this.stage.debug({ v: 'Runner started!' })
   }
 
   preCalculate (): void {
@@ -133,7 +128,7 @@ export class Navigation {
       })
     })
     this.radii.forEach(radius => {
-      this.stage.debug({ value: `Calculating for radius ${radius}...` })
+      this.stage.debug({ v: `Radius ${radius}...` })
       // Initialize distance array for each waypoint for this radius
       this.waypoints.forEach(waypoint => {
         const distances = range(1, this.waypoints.size).map(i => Infinity)
@@ -191,7 +186,6 @@ export class Navigation {
     fromPosition: Vec2
     toPosition: Vec2
     radius: number
-    debug?: boolean
     otherRadius?: number
   }): boolean {
     const direction = directionFromTo(props.fromPosition, props.toPosition)
@@ -224,34 +218,32 @@ export class Navigation {
       })
     })
     const allOpen = opens.every(x => x)
-    // if (props.otherRadius != null && props.radius === 1.2) {
-    //   range(0, 2).forEach(index => {
-    //     const start = starts[index]
-    //     const end = ends[index]
-    //     this.stage.debugLine({
-    //       a: start,
-    //       b: end,
-    //       color: opens[index] ? Color.CYAN : Color.RED,
-    //       width: 0.15
-    //     })
-    //   })
-    // }
+    if (this.stage.flags.navigation) {
+      range(0, 2).forEach(index => {
+        const start = starts[index]
+        const end = ends[index]
+        this.stage.debugLine({
+          a: start,
+          b: end,
+          color: opens[index] ? CYAN : RED,
+          width: 0.15
+        })
+      })
+    }
     return allOpen
   }
 
-  getNeighbors (position: Vec2, radius: number, debug?: boolean): Waypoint[] {
+  getNeighbors (position: Vec2, radius: number): Waypoint[] {
     const validWaypoints = this.radiiWaypoints.get(radius)
     if (validWaypoints == null) return []
     const neighbors = validWaypoints.filter(otherWaypoint => {
       if (Vec2.distance(position, otherWaypoint.position) === 0) return false
       const open1 = this.isOpen({
-        debug,
         fromPosition: position,
         toPosition: otherWaypoint.position,
         radius
       })
       const open2 = this.isOpen({
-        debug,
         fromPosition: otherWaypoint.position,
         toPosition: position,
         radius
@@ -348,7 +340,7 @@ export class Navigation {
     const player = players[0]
     if (player == null) return
     const debugRadius = 1.2
-    if (this.stage.debugWaypoints) {
+    if (this.stage.flags.waypoints) {
       this.cornerWaypoints.forEach(waypoint => {
         if (waypoint.radius === debugRadius) {
           this.stage.debugCircle({

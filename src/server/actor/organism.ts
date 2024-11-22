@@ -251,45 +251,18 @@ export class Organism extends Actor {
   onStep (stepSize: number): void {
     super.onStep(stepSize)
     const featuresInRange = this.membrane.getFeaturesInRange()
-    if (this.player != null) {
-      // this.stage.log({ value: ['featuresInRange', featuresInRange.length] })
-    }
     this.featuresInVision = featuresInRange.filter(targetFeature => {
       const visible = this.membranes.some(membrane => this.stage.vision.isFeatureVisible(membrane, targetFeature))
       return visible
     })
-    if (this.player != null) {
-      // this.stage.log({ value: ['this.featuresInVision', this.featuresInVision.length] })
-    }
     if (!this.hatched) this.eggFlee()
     if (this.readyToHatch && !this.hatched) this.hatch()
     this.move()
   }
 
-  // respawn (): boolean {
-  //   this.invincibleTime = 0
-  //   const clearSpawnPoints = this.stage.spawnPoints.filter(spawnPoint => {
-  //     const circle = new CircleShape(spawnPoint, this.getRadius())
-  //     return this.stage.getFeaturesInShape(circle).length === 0
-  //   })
-  //   if (clearSpawnPoints.length === 0) {
-  //     return false
-  //   }
-  //   const spawnPoint = choose(clearSpawnPoints)
-  //   this.spawnPosition = spawnPoint
-  //   this.membrane = this.grow({ branch: this.gene })
-  //   this.dead = false
-  //   return true
-  // }
-
   starve (props: {
     membrane: Membrane
   }): void {
-    // this.features.forEach(feature => {
-    //   if (feature instanceof Membrane) {
-    //     this.destroyMembrane({ membrane: feature })
-    //   }
-    // })
     this.stage.starvationQueue.push(new Starvation({
       stage: this.stage,
       victim: props.membrane

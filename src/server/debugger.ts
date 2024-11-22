@@ -1,7 +1,15 @@
-interface Pair <Value> {
-  value: Value
-  key?: string
+interface V <Value> {
+  v: Value
 }
+interface Vs <Value> {
+  vs: Value[]
+}
+type Vx <Value> = V<Value> | Vs<Value>
+interface K {
+  k?: string
+}
+type Pair <Value> = Vx<Value> & K
+
 interface Frames { frames: number, seconds?: undefined }
 interface Seconds { frames?: undefined, seconds: number }
 interface Default { frames?: undefined, seconds?: undefined }
@@ -12,7 +20,7 @@ interface Interval {
   frames: number
 }
 
-export class Logger {
+export class Debugger {
   intervals: Record<string, Interval> = {}
   windowed: boolean
 
@@ -22,14 +30,14 @@ export class Logger {
 
   debug <Value> (props: LogProps<Value>): void {
     const caller = this.getCaller()
-    const message = this.stringify({ value: props.value })
+    const message = this.getMessage(props)
     const frames = props.frames == null
       ? props.seconds == null
         ? 300
         : props.seconds * 30
       : props.frames
 
-    const key = props.key ?? caller
+    const key = props.k ?? caller
     const debugInterval = this.intervals[key] ?? (
       this.intervals[key] = { frame: 0, frames }
     )
@@ -98,6 +106,14 @@ export class Logger {
     return names[0]
   }
 
+  getMessage <Value> (props: LogProps<Value>): string {
+    if ('vs' in props) {
+      const joined = this.join({ values: props.vs })
+      return joined
+    }
+    return this.stringify({ value: props.v })
+  }
+
   getMethod (props: {
     line: string
   }): string {
@@ -136,6 +152,16 @@ export class Logger {
     return sources
   }
 
+  join <Value> (props: {
+    values: Value[]
+  }): string {
+    const strings = props.values.map(value => {
+      return this.stringify({ value })
+    })
+    const joined = strings.join(' ')
+    return joined
+  }
+
   onStep (): void {
     for (const key in this.intervals) {
       const interval = this.intervals[key]
@@ -157,13 +183,7 @@ export class Logger {
     if (typeof props.value === 'string') {
       return props.value
     }
-    if (Array.isArray(props.value)) {
-      const strings = props.value.map(value => {
-        return this.stringify({ value })
-      })
-      const joined = strings.join(' ')
-      return joined
-    }
+
     try {
       const string = JSON.stringify(props.value)
       return string
