@@ -22,12 +22,12 @@ import { Tree } from './actor/tree'
 import { Food } from './actor/food'
 import { Spawner } from './spawner'
 import { Spawnpoint } from './spawnpoint'
-import { DebugFlags } from './debugFlags'
+import { Flags } from './flags'
 
 export class Stage {
   actors = new Map<number, Actor>()
   destructionQueue: Body[] = []
-  flags: DebugFlags
+  flags: Flags
   halfHeight: number
   halfWidth: number
   killingQueue: Killing[] = []
@@ -45,7 +45,7 @@ export class Stage {
   spawner: Spawner
 
   constructor (props: {
-    flags: DebugFlags
+    flags: Flags
     halfHeight: number
     halfWidth: number
   }) {
@@ -257,7 +257,7 @@ export class Stage {
   }
 
   flag <Value> (props: {
-    f: keyof DebugFlags
+    f: keyof Flags
   } & LogProps<Value>): void {
     const raised = this.flags[props.f]
     if (!raised) {

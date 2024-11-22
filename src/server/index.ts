@@ -5,6 +5,7 @@ import { Rehearsal } from './rehearsal'
 import { Gene } from './gene'
 // import { Funhouse } from './funhouse'
 import { GREEN } from '../shared/color'
+// import { Mission } from './mission'
 
 const stage = new Rehearsal()
 
@@ -19,7 +20,7 @@ io.on('connection', socket => {
   const player = stage.addPlayer({
     color: GREEN,
     gene,
-    position: Vec2(-20, 15)
+    position: Vec2(0, 0)
   })
   if (player.organism == null) {
     throw new Error('player.organism is undefined')

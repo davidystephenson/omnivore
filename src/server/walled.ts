@@ -1,10 +1,10 @@
 import { Vec2 } from 'planck'
 import { Stage } from './stage'
-import { DebugFlags } from './debugFlags'
+import { Flags } from './flags'
 
 export class Walled extends Stage {
   constructor (props: {
-    flags: DebugFlags
+    flags: Flags
     halfHeight: number
     halfWidth: number
   }) {
