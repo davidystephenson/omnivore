@@ -2,12 +2,12 @@ import { Vec2 } from 'planck'
 import { Gene } from '../server/gene'
 import { Walled } from '../server/walled'
 import { RED, YELLOW } from '../shared/color'
-import { DebugFlags } from './debugFlags'
+import { Flags } from './flags'
 
 export class Funhouse extends Walled {
   constructor () {
     super({
-      flags: new DebugFlags({
+      flags: new Flags({
         botChase: true,
         botFlee: true,
         waypoints: true

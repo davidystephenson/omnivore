@@ -110,9 +110,8 @@ export class Membrane extends Feature {
 
   onStep (): void {
     this.handleContacts()
-    const hunger = true
     if (
-      hunger &&
+      this.actor.stage.flags.hungerY &&
       this.health > 0 &&
       !this.destroyed &&
       !this.actor.dead
