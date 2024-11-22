@@ -15,7 +15,6 @@ export class Bot extends Organism {
   giveUpTimer = 0
   chasePoint: Vec2 | undefined
   chaseRadius: number | undefined
-  enemy: Feature | undefined
 
   constructor (props: {
     color: Rgb
@@ -30,10 +29,9 @@ export class Bot extends Organism {
       position: props.position
     })
     this.giveUpTime = 30 / this.membrane.acceleration
-    this.enemy = this.getNearestReachableEnemy()
   }
 
-  chase (enemy: Feature): void {
+  charge (enemy: Feature): void {
     const enemyPosition = enemy.body.getPosition()
     const myPosition = this.membrane.body.getPosition()
     const navPoint = this.stage.navigation.navigate(myPosition, enemyPosition, this.membrane.radius, enemy.radius)
@@ -50,30 +48,21 @@ export class Bot extends Organism {
     this.chaseRadius = enemy.radius
   }
 
-  checkChasePoint (): boolean {
+  search (): boolean {
     if (this.chasePoint == null) {
       return false
     }
     const myPosition = this.membrane.body.getPosition()
     const chaseRadius = this.chaseRadius ?? 0
     const reachable = this.isPointReachable(this.chasePoint, chaseRadius)
-    // const open = this.stage.navigation.isOpen({
-    //   fromPosition: myPosition,
-    //   toPosition: this.chasePoint,
-    //   radius: this.membrane.radius,
-    //   otherRadius: chaseRadius
-    // })
-    // if (this.radius === 1.2) {
-    //   // this.stage.log({ value: ['chaseRadius', chaseRadius] })
-    //   // this.stage.log({ value: ['reachable', reachable] })
-    //   // this.stage.log({ value: ['open', open] })
-    // }
     if (!reachable) {
       this.chasePoint = undefined
       return false
     }
     const distance = Vec2.distance(myPosition, this.chasePoint)
-    if (distance < this.membrane.radius + chaseRadius) {
+    const reachDistance = this.membrane.radius + chaseRadius
+    const reached = distance < reachDistance
+    if (reached) {
       this.chasePoint = undefined
       return false
     }
@@ -173,7 +162,7 @@ export class Bot extends Organism {
     const hitArrays = rays.map(ray => {
       return this.stage.vision.rayCast(ray[0], ray[1])
     })
-    if (this.stage.debugBotFlee) {
+    if (this.stage.flags.botFlee) {
       hitArrays.forEach((hitArray, i) => {
         const color = hitArray.length === 0 ? WHITE : RED
         this.stage.debugLine({
@@ -192,7 +181,7 @@ export class Bot extends Organism {
       if (directions.length === 0) return
       const fleeDir = directions[whichMax(dotProducts)]
       this.setControls(fleeDir)
-      if (this.stage.debugBotFlee) {
+      if (this.stage.flags.botFlee) {
         this.stage.debugLine({
           a: myPosition,
           b: Vec2.combine(1, myPosition, 2, fleeDir),
@@ -203,35 +192,6 @@ export class Bot extends Organism {
       return
     }
     this.setControls(dirFromEnemy)
-  }
-
-  getNearestReachableEnemy (): Feature | undefined {
-    const enemies = this.featuresInVision.filter(feature => {
-      if (feature instanceof Membrane) {
-        return feature.color !== this.color
-      }
-      if (feature.actor instanceof Food) {
-        return true
-      }
-      if (feature.actor instanceof Tree) {
-        const healthy = feature.health > 0.1
-        this.stage.debugLine({
-          a: this.membrane.body.getPosition(),
-          b: feature.body.getPosition(),
-          color: healthy ? GREEN : RED,
-        })
-        return healthy
-      }
-      return false
-    })
-    const reachableEnemies = enemies.filter(enemy => {
-      return this.isPointReachable(enemy.body.getPosition(), enemy.radius)
-    })
-    if (reachableEnemies.length === 0) return undefined
-    // TODO get nearest point, not center
-    const distances = reachableEnemies.map(m => Vec2.distance(m.body.getPosition(), this.membrane.body.getPosition()))
-    const nearestReachableEnemy = reachableEnemies[whichMin(distances)]
-    return nearestReachableEnemy
   }
 
   getNearestReachableFood (): Food | undefined {
@@ -251,27 +211,48 @@ export class Bot extends Organism {
   }
 
   maneuver (): boolean {
-    this.enemy = this.getNearestReachableEnemy()
-    if (this.enemy == null) {
-      return this.checkChasePoint()
+    const results = this.featuresInVision.filter(feature => {
+      if (feature instanceof Membrane) {
+        return feature.color !== this.color
+      }
+      if (feature.actor instanceof Food) {
+        return true
+      }
+      if (feature.actor instanceof Tree) {
+        const healthy = feature.health > 0.1
+        return healthy
+      }
+      return false
+    })
+    // TODO get path length
+    const reachableResults = results.filter(enemy => {
+      const position = enemy.body.getPosition()
+      return this.isPointReachable(position, enemy.radius)
+    })
+    if (reachableResults.length === 0) {
+      return this.search()
     }
-    const foody = this.enemy.actor instanceof Food
-    const arboreal = this.enemy.actor instanceof Tree
+    // TODO get nearest point, not center
+    const distances = reachableResults.map(m => Vec2.distance(m.body.getPosition(), this.membrane.body.getPosition()))
+    const nearestIndex = whichMin(distances)
+    const result = reachableResults[nearestIndex]
+    const foody = result.actor instanceof Food
+    const arboreal = result.actor instanceof Tree
     const nutritious = foody || arboreal
-    const enemyMass = nutritious ? -1 : this.enemy.body.getMass()
+    const enemyMass = nutritious ? -1 : result.body.getMass()
     const myMass = this.membrane.body.getMass()
     if (enemyMass === myMass) {
       return false
     }
     if (enemyMass < myMass) {
-      this.chase(this.enemy)
+      this.charge(result)
     } else {
-      this.flee(this.enemy)
+      this.flee(result)
     }
     const food = this.getNearestReachableFood()
     if (food == null) return true
     const foodPosition = food.sculpture.body.getPosition()
-    const enemyPosition = this.enemy.body.getPosition()
+    const enemyPosition = result.body.getPosition()
     const position = this.membrane.body.getPosition()
     const enemyDistance = Vec2.distance(enemyPosition, position)
     const foodDistance = Vec2.distance(foodPosition, position)
@@ -288,26 +269,36 @@ export class Bot extends Organism {
       return
     }
     this.explore(stepSize)
-    const maneuvered = this.maneuver()
-    if (maneuvered) return
-    const start = this.membrane.body.getPosition()
-    const explorationId = this.explorationIds[0]
-    const explorationPoint = this.explorationPoints[explorationId]
-    const end = explorationPoint.position
-    if (this.stage.debugBotPath) {
-      const path = this.stage.navigation.getPath(start, end, this.membrane.radius)
-      range(0, path.length - 2).forEach(index => {
-        const currentPoint = path[index]
-        const nextPoint = path[index + 1]
-        this.stage.debugLine({ a: currentPoint, b: nextPoint, color: WHITE, width: 0.1 })
-      })
-      const circle = new CircleShape(end, this.membrane.radius)
-      this.stage.debugCircle({ circle, color: RED })
-    }
-    const nextPoint = this.stage.navigation.navigate(start, end, this.membrane.radius)
-    const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
-    const directionToNext = directionFromTo(start, nextPosition)
-    this.setControls(directionToNext)
+    const maneuvering = this.maneuver()
+    if (maneuvering) return
+    this.wander()
+  }
+
+  scan (): Feature | undefined {
+    const results = this.featuresInVision.filter(feature => {
+      if (feature instanceof Membrane) {
+        return feature.color !== this.color
+      }
+      if (feature.actor instanceof Food) {
+        return true
+      }
+      if (feature.actor instanceof Tree) {
+        const healthy = feature.health > 0.1
+        return healthy
+      }
+      return false
+    })
+    // TODO get path length
+    const reachableResults = results.filter(enemy => {
+      const position = enemy.body.getPosition()
+      return this.isPointReachable(position, enemy.radius)
+    })
+    if (reachableResults.length === 0) return undefined
+    // TODO get nearest point, not center
+    const distances = reachableResults.map(m => Vec2.distance(m.body.getPosition(), this.membrane.body.getPosition()))
+    const nearestIndex = whichMin(distances)
+    const nearestResult = reachableResults[nearestIndex]
+    return nearestResult
   }
 
   setControls (direction: Vec2): void {
@@ -330,5 +321,26 @@ export class Bot extends Organism {
     this.controls.left = roundDir.x < 0
     this.controls.right = roundDir.x > 0
     this.debugControls()
+  }
+
+  wander (): void {
+    const start = this.membrane.body.getPosition()
+    const explorationId = this.explorationIds[0]
+    const explorationPoint = this.explorationPoints[explorationId]
+    const end = explorationPoint.position
+    if (this.stage.flags.botPath) {
+      const path = this.stage.navigation.getPath(start, end, this.membrane.radius)
+      range(0, path.length - 2).forEach(index => {
+        const currentPoint = path[index]
+        const nextPoint = path[index + 1]
+        this.stage.debugLine({ a: currentPoint, b: nextPoint, color: WHITE, width: 0.1 })
+      })
+      const circle = new CircleShape(end, this.membrane.radius)
+      this.stage.debugCircle({ circle, color: RED })
+    }
+    const nextPoint = this.stage.navigation.navigate(start, end, this.membrane.radius)
+    const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
+    const directionToNext = directionFromTo(start, nextPosition)
+    this.setControls(directionToNext)
   }
 }

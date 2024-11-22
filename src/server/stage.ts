@@ -13,7 +13,7 @@ import { Puppet } from './actor/puppet'
 import { range, shuffle } from './math'
 import { DebugCircle } from '../shared/debugCircle'
 import { Starvation } from './starvation'
-import { LogProps, Logger } from './logger'
+import { LogProps, Debugger } from './debugger'
 import { Navigation } from './navigation'
 import { Bot } from './actor/bot'
 import { Player } from './actor/player'
@@ -21,19 +21,17 @@ import { Gene } from './gene'
 import { Tree } from './actor/tree'
 import { Food } from './actor/food'
 import { Spawner } from './spawner'
-import { SpawnPoint } from './spawnpoint'
+import { Spawnpoint } from './spawnpoint'
+import { DebugFlags } from './debugFlags'
 
 export class Stage {
   actors = new Map<number, Actor>()
-  debugBotChase: boolean
-  debugBotFlee: boolean
-  debugBotPath: boolean
-  debugWaypoints: boolean
   destructionQueue: Body[] = []
+  flags: DebugFlags
   halfHeight: number
   halfWidth: number
   killingQueue: Killing[] = []
-  logger: Logger
+  debugger: Debugger
   respawnQueue: OrganismSpawn[] = []
   runner: Runner
   starvationQueue: Starvation[] = []
@@ -47,17 +45,12 @@ export class Stage {
   spawner: Spawner
 
   constructor (props: {
-    debugBotChase?: boolean
-    debugBotFlee?: boolean
-    debugBotPath?: boolean
-    debugWaypoints?: boolean
+    flags: DebugFlags
     halfHeight: number
     halfWidth: number
   }) {
-    this.debugBotChase = props.debugBotChase ?? false
-    this.debugBotFlee = props.debugBotFlee ?? false
-    this.debugBotPath = props.debugBotPath ?? false
-    this.debugWaypoints = props.debugWaypoints ?? false
+    this.flags = props.flags
+    this.debugger = new Debugger()
     this.world = new World({ gravity: Vec2(0, 0) })
     this.world.on('pre-solve', contact => this.preSolve(contact))
     this.world.on('begin-contact', contact => this.beginContact(contact))
@@ -65,7 +58,6 @@ export class Stage {
 
     this.halfHeight = props.halfHeight
     this.halfWidth = props.halfWidth
-    this.logger = new Logger()
     this.navigation = new Navigation({ stage: this })
     this.runner = new Runner({ stage: this })
     this.vision = new Vision({ stage: this })
@@ -206,15 +198,18 @@ export class Stage {
       const sensorContact = fixture.isSensor() || otherFixture.isSensor()
       const feature = fixture.getBody().getUserData()
       const otherFeature = otherFixture.getBody().getUserData()
+      if (!(otherFeature instanceof Feature)) return
       if (feature instanceof Spawner) {
         const spawnPoint = fixture.getUserData()
-        if (!(spawnPoint instanceof SpawnPoint)) {
+        if (!(spawnPoint instanceof Spawnpoint)) {
           throw new Error('spawnPoint is not a SpawnPoint')
+        }
+        if (otherFeature.label === 'food') {
+          return false
         }
         spawnPoint.collideCount += 1
       }
       if (!(feature instanceof Feature)) return
-      if (!(otherFeature instanceof Feature)) return
       const actor = feature.actor
       const otherActor = otherFeature.actor
       if (sensorContact) {
@@ -242,20 +237,33 @@ export class Stage {
       const otherFixture = pair[1]
       const feature = fixture.getBody().getUserData()
       const otherFeature = otherFixture.getBody().getUserData()
+      if (!(otherFeature instanceof Feature)) return
       if (feature instanceof Spawner) {
         const spawnPoint = fixture.getUserData()
-        if (!(spawnPoint instanceof SpawnPoint)) {
+        if (!(spawnPoint instanceof Spawnpoint)) {
           throw new Error('spawnPoint is not a SpawnPoint')
         }
-        spawnPoint.collideCount += 1
+        if (otherFeature.label === 'food') {
+          return false
+        }
+        spawnPoint.collideCount -= 1
       }
       if (!(feature instanceof Feature)) return
-      if (!(otherFeature instanceof Feature)) return
       feature.contacts = feature.contacts.filter(contact => contact.id !== otherFeature.id)
       if (fixture.isSensor() && !otherFixture.isSensor()) {
         feature.sensorFeatures = feature.sensorFeatures.filter(contact => contact.id !== otherFeature.id)
       }
     })
+  }
+
+  flag <Value> (props: {
+    f: keyof DebugFlags
+  } & LogProps<Value>): void {
+    const raised = this.flags[props.f]
+    if (!raised) {
+      return
+    }
+    this.debug(props)
   }
 
   preSolve (contact: Contact): void {
@@ -283,7 +291,7 @@ export class Stage {
   }
 
   debug<Value>(props: LogProps<Value>): void {
-    this.logger.debug(props)
+    this.debugger.debug(props)
   }
 
   debugLine (props: {
@@ -370,17 +378,18 @@ export class Stage {
   }
 
   onStep (stepSize: number): void {
-    this.logger.onStep()
+    this.debugger.onStep()
     this.navigation.onStep()
+    this.spawner.onStep()
     this.actors.forEach(actor => actor.onStep(stepSize))
     this.destructionQueue.forEach(body => {
       this.world.destroyBody(body)
     })
     this.killingQueue.forEach(killing => {
-      killing.execute({ debug: true })
+      killing.execute()
     })
     this.starvationQueue.forEach(starvation => {
-      starvation.execute({ debug: true })
+      starvation.execute()
     })
     this.fallQueue.forEach(tree => {
       tree.fall()
@@ -389,10 +398,10 @@ export class Stage {
     const living = this.killingQueue.length === 0 && this.starvationQueue.length === 0
     const respawnable = living && this.respawnQueue.length > 0
     if (respawnable) {
-      this.log({ value: ['respawnQueue.length', this.respawnQueue.length] })
-      this.log({ value: ['spawnPoints.length', this.spawner.spawnPoints.length] })
-      const clearSpawnPoints = this.spawner.spawnPoints.filter(spawnPoint => spawnPoint.collideCount === 0)
-      this.log({ value: ['clearSpawnPoints.length', clearSpawnPoints.length] })
+      this.flag({ f: 'respawn', vs: ['respawnQueue.length', this.respawnQueue.length] })
+      this.flag({ f: 'respawn', vs: ['spawnPoints.length', this.spawner.spawnPoints.length] })
+      const clearSpawnPoints = this.spawner.spawnPoints.filter(spawnPoint => spawnPoint.collideCount < 1)
+      this.flag({ f: 'respawn', vs: ['clearSpawnPoints.length', clearSpawnPoints.length] })
       const clearSpawnPositions = clearSpawnPoints.map(spawnPoint => spawnPoint.location)
       const shuffled = shuffle(clearSpawnPositions)
       if (clearSpawnPositions.length > 0) {
@@ -406,9 +415,6 @@ export class Stage {
     }
     this.killingQueue = []
     this.starvationQueue = []
-    this.spawner.spawnPoints.forEach(spawnPoint => {
-      spawnPoint.collideCount = 0
-    })
     this.destructionQueue = []
     this.virtualBoxes.forEach(box => {
       this.debugBox({ box, color: RED })

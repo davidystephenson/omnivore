@@ -35,7 +35,7 @@ export class Vision {
       clear = false
       return 0
     })
-    if (debug === true) {
+    if (this.stage.flags.vision || debug === true) {
       const color = clear ? LIME : RED
       this.stage.debugLine({
         a: sourcePoint,
@@ -49,7 +49,7 @@ export class Vision {
   isVisible (sourcePoint: Vec2, targetPoint: Vec2, excludeIds?: number[], debug?: boolean): boolean {
     const inRange = this.isPointInRange(sourcePoint, targetPoint)
     if (!inRange) {
-      if (debug === true) {
+      if (this.stage.flags.vision || debug === true) {
         this.stage.debugLine({
           a: sourcePoint,
           b: targetPoint,
@@ -307,7 +307,6 @@ export class Vision {
             const firstHit = this.getFirstHit(targetCorner, rayDir)
             if (debug) this.stage.debugLine({ a: targetCorner, b: firstHit.point, color: YELLOW })
             if (firstHit.feature?.id === sourceFeature.id) {
-              // this.stage.log({ value: `hit corner ${i}: firstHit.feature?.id === sourceFeature.id` })
               visible = true
             }
           })

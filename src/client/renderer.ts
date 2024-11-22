@@ -72,7 +72,6 @@ export class Renderer {
         }
       }
     })
-    console.log('foodCount:', this.foodCount)
     this.debugLines.forEach(debugLine => {
       this.followCamera()
       this.context.lineWidth = debugLine.width

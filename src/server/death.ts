@@ -65,35 +65,26 @@ export class Death {
 
   respawn (): void {
     const actors = [...this.stage.actors.values()]
-    console.log('actors.length', actors.length)
     const organisms = actors.filter((actor) => actor instanceof Organism) as Organism[]
-    console.log('organisms.length', organisms.length)
     const relatives = organisms.filter((actor) => {
       const self = actor === this.victim.actor
       if (self) return false
       const related = actor.color === this.victim.color
       return related
     })
-    console.log('relatives.length', relatives.length)
     if (relatives.length > 0) {
-      console.log('has relatives')
       if (this.victim.actor.player == null) {
-        console.log('not player')
         return
       }
-      console.log('is player')
       const first = relatives[0]
       const oldest = relatives.reduce((a, b) => a.createdAt < b.createdAt ? a : b, first)
       if (oldest == null) {
         throw new Error('There is no oldest relative')
       }
-      console.log('oldest found', oldest.id)
       this.victim.actor.player.organism = oldest
       oldest.player = this.victim.actor.player
-      console.log('oldest switched')
       return
     }
-    console.log('respawn', this.victim.actor.color)
     this.victim.actor.respawning = true
     const spawn: OrganismSpawn = {
       color: this.victim.actor.color,

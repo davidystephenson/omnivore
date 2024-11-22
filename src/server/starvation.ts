@@ -8,15 +8,10 @@ import { Brick } from './actor/brick'
 export class Starvation extends Death {
   constructor (props: { stage: Stage, victim: Membrane }) {
     super({ stage: props.stage, victim: props.victim })
-    console.log('construct starvation')
   }
 
-  execute (props?: {
-    debug?: boolean
-  }): void {
-    if (props?.debug === true) {
-      console.debug('Starvation.execute')
-    }
+  execute (): void {
+    this.stage.flag({ f: 'death', v: 'Starvation.execute' })
     const victimPosition = this.victim.body.getPosition()
     const lookLowerBound = Vec2(victimPosition.x - HALF_SIGHT.x, victimPosition.y - HALF_SIGHT.y)
     const lookUpperBound = Vec2(victimPosition.x + HALF_SIGHT.x, victimPosition.y + HALF_SIGHT.y)
@@ -27,12 +22,8 @@ export class Starvation extends Death {
     const brickPosition = brickBox.getCenter()
     const sized = Math.min(halfWidth, halfHeight) > 0
     if (sized) {
-      this.stage.log({ value: 'New brick' })
       void new Brick({ halfWidth, halfHeight, position: brickPosition, stage: this.stage })
-    } else {
-      this.stage.log({ value: 'No brick' })
     }
-    this.stage.log({ value: ['starvation.execute y'] })
     this.respawn()
   }
 }

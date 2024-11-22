@@ -1,7 +1,7 @@
 import { Vec2, Fixture, CircleShape } from 'planck'
 import { Spawner } from './spawner'
 
-export class SpawnPoint {
+export class Spawnpoint {
   spawner: Spawner
   location: Vec2
   fixture: Fixture
