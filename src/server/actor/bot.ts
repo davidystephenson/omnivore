@@ -1,20 +1,18 @@
-import { Circle, CircleShape, Vec2 } from 'planck'
-import { GREEN, MAGENTA, RED, Rgb, WHITE } from '../../shared/color'
+import { CircleShape, Vec2 } from 'planck'
+import { BLUE, GRAY, GREEN, LIME, MAGENTA, PINK, PURPLE, RED, Rgb, WHITE } from '../../shared/color'
 import { Feature } from '../feature/feature'
-import { Membrane } from '../feature/membrane'
 import { Gene } from '../gene'
 import { directionFromTo, range, rotate, whichMax } from '../math'
 import { Stage } from '../stage'
 import { Waypoint } from '../waypoint'
-import { Food } from './food'
 import { Organism } from './organism'
-import { Tree } from './tree'
 
 export class Bot extends Organism {
-  giveUpTime: number
-  giveUpTimer = 0
+  controlColor = LIME
   chasePoint: Vec2 | undefined
   chaseRadius = 0
+  giveUpTime: number
+  giveUpTimer = 0
 
   constructor (props: {
     color: Rgb
@@ -31,7 +29,7 @@ export class Bot extends Organism {
     this.giveUpTime = 30 / this.membrane.acceleration
   }
 
-  charge (enemy: Feature): void {
+  charge (enemy: Feature): Rgb {
     const enemyPosition = enemy.body.getPosition()
     const myPosition = this.membrane.body.getPosition()
     const navPoint = this.stage.navigation.navigate(myPosition, enemyPosition, this.membrane.radius, enemy.radius)
@@ -49,47 +47,61 @@ export class Bot extends Organism {
     this.setControls(dirToEnemy)
     this.chasePoint = enemyPosition.clone()
     this.chaseRadius = enemy.radius
+    return MAGENTA
+  }
+
+  debugControlLine (props: {
+    point: Vec2
+  }): void {
+    const start = this.membrane.body.getPosition()
+    this.stage.debugLine({
+      a: start,
+      b: props.point,
+      color: this.controlColor,
+      width: 0.2
+    })
   }
 
   debugControls (): void {
     const start = this.membrane.body.getPosition()
-    this.stage.debugCircle({
-      circle: new Circle(start, 0.4),
-      color: MAGENTA
-    })
+    const circle = new CircleShape(start, 0.2)
+    this.stage.debugCircle({ circle, color: this.controlColor })
     const length = 1
     if (this.controls.up) {
-      this.stage.debugLine({
-        a: start,
-        b: Vec2(start.x, start.y + length),
-        color: MAGENTA,
-        width: 0.2
-      })
+      const point = Vec2(start.x, start.y + length)
+      this.debugControlLine({ point })
     }
     if (this.controls.down) {
-      this.stage.debugLine({
-        a: start,
-        b: Vec2(start.x, start.y - length),
-        color: MAGENTA,
-        width: 0.2
-      })
+      const point = Vec2(start.x, start.y - length)
+      this.debugControlLine({ point })
     }
     if (this.controls.left) {
-      this.stage.debugLine({
-        a: start,
-        b: Vec2(start.x - length, start.y),
-        color: MAGENTA,
-        width: 0.2
-      })
+      const point = Vec2(start.x - length, start.y)
+      this.debugControlLine({ point })
     }
     if (this.controls.right) {
-      this.stage.debugLine({
-        a: start,
-        b: Vec2(start.x + length, start.y),
-        color: MAGENTA,
-        width: 0.2
-      })
+      const point = Vec2(start.x + length, start.y)
+      this.debugControlLine({ point })
     }
+  }
+
+  debugManeuverLine (props: {
+    color: Rgb
+    feature: Feature
+  }): void {
+    const b = props.feature.body.getPosition()
+    this.debugLine({ color: GRAY, b, width: 0.05 })
+  }
+
+  debugLine (props: {
+    color: Rgb
+    b: Vec2
+    width: number
+  }): void {
+    this.stage.debugLine({
+      a: this.membrane.body.getPosition(),
+      ...props
+    })
   }
 
   debugPath (props: {
@@ -124,7 +136,7 @@ export class Bot extends Organism {
     }
   }
 
-  flee (enemy: Feature): void {
+  flee (enemy: Feature): Rgb {
     const enemyPosition = enemy.body.getPosition()
     const myPosition = this.membrane.body.getPosition()
     const dirFromEnemy = directionFromTo(enemyPosition, myPosition)
@@ -161,7 +173,7 @@ export class Bot extends Organism {
       const visibleExplorationPoints = this.explorationPoints.filter(point => point.visible)
       const directions = visibleExplorationPoints.map(point => directionFromTo(myPosition, point.position))
       const dotProducts = directions.map(direction => Vec2.dot(direction, dirFromEnemy))
-      if (directions.length === 0) return
+      if (directions.length === 0) return PINK
       const fleeDir = directions[whichMax(dotProducts)]
       this.setControls(fleeDir)
       if (this.stage.flags.botFlee) {
@@ -172,9 +184,10 @@ export class Bot extends Organism {
           width: 0.4
         })
       }
-      return
+      return PINK
     }
     this.setControls(dirFromEnemy)
+    return PINK
   }
 
   // isUrgent (props: { feature: Feature }): boolean {
@@ -223,8 +236,8 @@ export class Bot extends Organism {
   }
 
   judge ({ feature }: { feature: Feature }): boolean | undefined {
-    switch (feature.constructor) {
-      case Membrane: {
+    switch (feature.actor.label) {
+      case 'organism': {
         const allied = feature.color === this.color
         if (allied) return undefined
         const theirMass = feature.body.getMass()
@@ -234,20 +247,49 @@ export class Bot extends Organism {
         const prey = theirMass < myMass
         return prey
       }
-      case Tree: {
+      case 'tree': {
         const unhealthy = feature.health < 0.1
         if (unhealthy) return undefined
         return true
       }
-      case Food: return true
+      case 'food': return true
       default: return undefined
     }
+  }
+
+  maneuver (): Rgb {
+    const sorted = this.sortNearest({ features: this.featuresInVision })
+    for (const feature of sorted) {
+      const judgement = this.judge({ feature })
+      if (judgement == null) {
+        this.debugManeuverLine({ color: GRAY, feature })
+        continue
+      }
+      const reachable = this.isFeatureReachable({ feature })
+      if (!reachable) {
+        this.debugManeuverLine({ color: RED, feature })
+        continue
+      }
+      if (judgement) return this.charge(feature)
+      return this.flee(feature)
+    }
+    if (this.chasePoint != null) {
+      const reached = this.isTouching({ point: this.chasePoint })
+      if (!reached) {
+        const reachable = this.isPointReachable(this.chasePoint, this.chaseRadius)
+        if (reachable) {
+          return this.navigate({ debug: this.stage.flags.botChase, target: this.chasePoint })
+        }
+      }
+      this.chasePoint = undefined
+    }
+    return this.wander()
   }
 
   navigate (props: {
     debug?: boolean
     target: Vec2
-  }): void {
+  }): Rgb {
     if (props.debug === true) {
       this.debugPath(props)
     }
@@ -256,32 +298,21 @@ export class Bot extends Organism {
     const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
     const direction = directionFromTo(myPosition, nextPosition)
     this.setControls(direction)
+    return GRAY
   }
 
   onStep (stepSize: number): void {
     super.onStep(stepSize)
     if (this.player != null) {
+      const circle = new CircleShape(this.membrane.body.getPosition(), 0.3)
+      this.stage.debugCircle({
+        circle,
+        color: PURPLE
+      })
       return
     }
     this.explore(stepSize)
-    const sorted = this.sortNearest({ features: this.featuresInVision })
-    for (const feature of sorted) {
-      const judgement = this.judge({ feature })
-      if (judgement == null) continue
-      const reachable = this.isFeatureReachable({ feature })
-      if (!reachable) continue
-      if (judgement) return this.charge(feature)
-      return this.flee(feature)
-    }
-    if (this.chasePoint == null) return this.wander()
-    const reachable = this.isPointReachable(this.chasePoint, this.chaseRadius)
-    if (!reachable) {
-      this.chasePoint = undefined
-      return this.wander()
-    }
-    const reached = this.isTouching({ point: this.chasePoint })
-    if (reached) return this.wander()
-    return this.navigate({ debug: this.stage.flags.botChase, target: this.chasePoint })
+    this.controlColor = this.maneuver()
   }
 
   setControls (direction: Vec2): void {
@@ -323,7 +354,7 @@ export class Bot extends Organism {
     return features
   }
 
-  wander (): void {
+  wander (): Rgb {
     const start = this.membrane.body.getPosition()
     const explorationId = this.explorationIds[0]
     const explorationPoint = this.explorationPoints[explorationId]
@@ -342,5 +373,6 @@ export class Bot extends Organism {
     const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
     const directionToNext = directionFromTo(start, nextPosition)
     this.setControls(directionToNext)
+    return BLUE
   }
 }
