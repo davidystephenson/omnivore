@@ -44,6 +44,7 @@ export class Bot extends Organism {
         width: 0.2
       })
     }
+    // TODO navigate
     const dirToEnemy = directionFromTo(myPosition, navPosition)
     this.setControls(dirToEnemy)
     this.chasePoint = enemyPosition.clone()
@@ -176,21 +177,34 @@ export class Bot extends Organism {
     this.setControls(dirFromEnemy)
   }
 
-  sortNearest (props: {
-    features: Feature[]
-  }): Feature[] {
-    const myPosition = this.membrane.body.getPosition()
-    const distances = props.features.map(feature => {
-      // TODO get nearest point, not center
-      const distance = Vec2.distance(feature.body.getPosition(), myPosition)
-      return {
-        distance,
-        feature
-      }
-    })
-    const sorted = distances.sort((a, b) => a.distance - b.distance)
-    const features = sorted.map(pair => pair.feature)
-    return features
+  // isUrgent (props: { feature: Feature }): boolean {
+  //   switch (props.feature.constructor) {
+  //     case Membrane:
+  //       const theirMass = feature.body.getMass()
+  //       const myMass = this.membrane.body.getMass()
+  //   const foody = feature.actor instanceof Food
+  //   const arboreal = feature.actor instanceof Tree
+  //   const membrany = feature instanceof Membrane
+  //   const nutritious = foody || arboreal || membrany
+  //   if (!nutritious) continue
+  //   const theirMass = feature.body.getMass()
+  //   const myMass = this.membrane.body.getMass()
+  //   if (membrany) {
+  //     if (feature.color === this.color) continue
+  //     if (theirMass === myMass) continue
+  //   }
+  //   if (arboreal) {
+  //     const unhealthy = feature.health < 0.1
+  //     if (unhealthy) continue
+  //   }
+  // }
+
+  isFeatureReachable (props: {
+    feature: Feature
+    otherRadius?: number
+  }): boolean {
+    const position = props.feature.body.getPosition()
+    return this.isPointReachable(position, props.otherRadius)
   }
 
   isPointReachable (end: Vec2, otherRadius?: number): boolean {
@@ -198,62 +212,36 @@ export class Bot extends Organism {
     return this.stage.navigation.isPointReachable(start, end, this.membrane.radius, otherRadius)
   }
 
-  maneuver (): boolean {
-    // TODO separate filtered
-    const sorted = this.sortNearest({ features: this.featuresInVision })
-    for (const feature of sorted) {
-      const foody = feature.actor instanceof Food
-      const arboreal = feature.actor instanceof Tree
-      const membrany = feature instanceof Membrane
-      const nutritious = foody || arboreal || membrany
-      if (!nutritious) continue
-      const position = feature.body.getPosition()
-      const reachable = this.isPointReachable(position, feature.radius)
-      if (!reachable) continue
-      if (membrany) {
-        if (feature.color === this.color) continue
+  isTouching (props: {
+    point: Vec2
+  }): boolean {
+    const myPosition = this.membrane.body.getPosition()
+    const distance = Vec2.distance(myPosition, props.point)
+    const reachDistance = this.membrane.radius + this.chaseRadius
+    const reached = distance < reachDistance
+    return reached
+  }
+
+  judge ({ feature }: { feature: Feature }): boolean | undefined {
+    switch (feature.constructor) {
+      case Membrane: {
+        const allied = feature.color === this.color
+        if (allied) return undefined
         const theirMass = feature.body.getMass()
         const myMass = this.membrane.body.getMass()
-        if (theirMass < myMass) {
-          this.charge(feature)
-          return true
-        } else if (theirMass > myMass) {
-          this.flee(feature)
-          return true
-        }
-        continue
+        const tied = theirMass === myMass
+        if (tied) return undefined
+        const prey = theirMass < myMass
+        return prey
       }
-      if (arboreal) {
-        const healthy = feature.health > 0.1
-        if (!healthy) continue
-        this.charge(feature)
+      case Tree: {
+        const unhealthy = feature.health < 0.1
+        if (unhealthy) return undefined
         return true
       }
-      if (foody) {
-        this.charge(feature)
-        return true
-      }
-      throw new Error('Impossible')
+      case Food: return true
+      default: return undefined
     }
-    if (this.chasePoint != null) {
-      const myPosition = this.membrane.body.getPosition()
-      const reachable = this.isPointReachable(this.chasePoint, this.chaseRadius)
-      if (reachable) {
-        const distance = Vec2.distance(myPosition, this.chasePoint)
-        const reachDistance = this.membrane.radius + this.chaseRadius
-        const reached = distance < reachDistance
-        if (!reached) {
-          this.navigate({
-            debug: this.stage.flags.botChase,
-            target: this.chasePoint
-          })
-          return true
-        }
-      }
-      this.chasePoint = undefined
-    }
-
-    return false
   }
 
   navigate (props: {
@@ -276,9 +264,24 @@ export class Bot extends Organism {
       return
     }
     this.explore(stepSize)
-    const maneuvering = this.maneuver()
-    if (maneuvering) return
-    this.wander()
+    const sorted = this.sortNearest({ features: this.featuresInVision })
+    for (const feature of sorted) {
+      const judgement = this.judge({ feature })
+      if (judgement == null) continue
+      const reachable = this.isFeatureReachable({ feature })
+      if (!reachable) continue
+      if (judgement) return this.charge(feature)
+      return this.flee(feature)
+    }
+    if (this.chasePoint == null) return this.wander()
+    const reachable = this.isPointReachable(this.chasePoint, this.chaseRadius)
+    if (!reachable) {
+      this.chasePoint = undefined
+      return this.wander()
+    }
+    const reached = this.isTouching({ point: this.chasePoint })
+    if (reached) return this.wander()
+    return this.navigate({ debug: this.stage.flags.botChase, target: this.chasePoint })
   }
 
   setControls (direction: Vec2): void {
@@ -301,6 +304,23 @@ export class Bot extends Organism {
     this.controls.left = roundDir.x < 0
     this.controls.right = roundDir.x > 0
     this.debugControls()
+  }
+
+  sortNearest (props: {
+    features: Feature[]
+  }): Feature[] {
+    const myPosition = this.membrane.body.getPosition()
+    const distances = props.features.map(feature => {
+      // TODO get nearest point, not center
+      const distance = Vec2.distance(feature.body.getPosition(), myPosition)
+      return {
+        distance,
+        feature
+      }
+    })
+    const sorted = distances.sort((a, b) => a.distance - b.distance)
+    const features = sorted.map(pair => pair.feature)
+    return features
   }
 
   wander (): void {
