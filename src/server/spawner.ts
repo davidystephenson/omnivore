@@ -34,7 +34,7 @@ export class Spawner {
       const collided = point.collideCount > 0
       const color = collided ? RED : GREEN
       this.stage.debugCircle({
-        circle: new Circle(point.location, 0.2),
+        circle: new Circle(point.location, 1.25),
         color
       })
     })

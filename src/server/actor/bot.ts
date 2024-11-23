@@ -278,7 +278,10 @@ export class Bot extends Organism {
       if (!reached) {
         const reachable = this.isPointReachable(this.chasePoint, this.chaseRadius)
         if (reachable) {
-          return this.navigate({ debug: this.stage.flags.botChase, target: this.chasePoint })
+          return this.navigate({
+            debug: this.stage.flags.botChase,
+            target: this.chasePoint
+          })
         }
       }
       this.chasePoint = undefined

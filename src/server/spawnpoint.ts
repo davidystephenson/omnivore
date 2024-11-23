@@ -11,7 +11,7 @@ export class Spawnpoint {
     this.spawner = spawner
     this.location = location
     this.fixture = this.spawner.body.createFixture({
-      shape: new CircleShape(1.25),
+      shape: new CircleShape(location, 1.25),
       isSensor: true
     })
     this.fixture.setUserData(this)

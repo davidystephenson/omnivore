@@ -1,11 +1,11 @@
 import { io } from './server'
 import { Vec2 } from 'planck'
 import { Controls } from '../shared/input'
-import { Rehearsal } from './rehearsal'
 import { Gene } from './gene'
 // import { Funhouse } from './funhouse'
 import { GREEN } from '../shared/color'
-// import { Mission } from './mission'
+import { Mission } from './mission'
+import { Rehearsal } from './rehearsal'
 
 const stage = new Rehearsal()
 
