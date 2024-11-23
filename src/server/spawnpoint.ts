@@ -10,8 +10,9 @@ export class Spawnpoint {
   constructor (spawner: Spawner, location: Vec2) {
     this.spawner = spawner
     this.location = location
+    const circleShape = new CircleShape(location, 1.25)
     this.fixture = this.spawner.body.createFixture({
-      shape: new CircleShape(location, 1.25),
+      shape: circleShape,
       isSensor: true
     })
     this.fixture.setUserData(this)

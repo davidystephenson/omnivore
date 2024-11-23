@@ -18,12 +18,20 @@ export class Spawner {
   }
 
   setupSpawnPoints (): void {
-    const waypoints = this.stage.navigation.radiiWaypoints.get(this.stage.navigation.radii[0])
-    if (waypoints == null) {
-      throw new Error('There are no waypoints')
+    if (this.stage.flags.waypointSpawnpointsY) {
+      const waypoints = this.stage.navigation.radiiWaypoints.get(this.stage.navigation.radii[0])
+      if (waypoints == null) {
+        throw new Error('There are no waypoints')
+      }
+      this.spawnPoints = waypoints.map(waypoint => {
+        return new Spawnpoint(this, waypoint.position)
+      })
+    } else {
+      this.spawnPoints = [
+        new Spawnpoint(this, Vec2(5, 5)),
+        new Spawnpoint(this, Vec2(15, 15))
+      ]
     }
-    const locations = waypoints.map(waypoint => waypoint.position)
-    this.spawnPoints = locations.map(location => new Spawnpoint(this, location))
   }
 
   onStep (): void {
@@ -34,7 +42,7 @@ export class Spawner {
       const collided = point.collideCount > 0
       const color = collided ? RED : GREEN
       this.stage.debugCircle({
-        circle: new Circle(point.location, 1.25),
+        circle: new Circle(point.location, 0.2),
         color
       })
     })

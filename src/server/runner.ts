@@ -34,7 +34,7 @@ export class Runner {
     this.oldStepDate = this.stepDate
     this.stepDate = performance.now()
     if (this.paused) return
-    if (this.stepCount % this.stepCountInterval === 0) {
+    if (this.stage.flags.performance && this.stepCount % this.stepCountInterval === 0) {
       const difference = this.stepDate - this.oldStepDate
       const fps = 1000 / difference
       const fpsString = fps.toFixed(2)
@@ -56,7 +56,7 @@ export class Runner {
     const worldStepBefore = performance.now()
     this.stage.world.step(stepSize)
     const worldStepAfter = performance.now()
-    if (this.stepCount % this.stepCountInterval === 0) {
+    if (this.stage.flags.performance && this.stepCount % this.stepCountInterval === 0) {
       const worldStepDifference = worldStepAfter - worldStepBefore
       const worldStepDifferenceString = worldStepDifference.toFixed(2)
       console.info('planck', worldStepDifferenceString)
@@ -80,7 +80,8 @@ export class Runner {
       ropes: this.getRopes(props.player),
       debugLines: this.debugLines,
       debugCircles: this.debugCircles,
-      id: props.player.organism.membrane.id
+      id: props.player.organism.membrane.id,
+      controls: props.player.organism.controls
     }
     if (this.stage.flags.summary) {
       this.stage.debug({ vs: ['getSummary elements.length', elements.length], seconds: 10 })

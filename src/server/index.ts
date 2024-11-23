@@ -7,7 +7,7 @@ import { GREEN } from '../shared/color'
 import { Mission } from './mission'
 import { Rehearsal } from './rehearsal'
 
-const stage = new Rehearsal()
+const stage = new Mission()
 
 io.on('connection', socket => {
   stage.debug({
