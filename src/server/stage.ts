@@ -199,7 +199,7 @@ export class Stage {
       const feature = fixture.getBody().getUserData()
       const otherFeature = otherFixture.getBody().getUserData()
       if (!(otherFeature instanceof Feature)) return
-      if (feature instanceof Spawner) {
+      if (feature instanceof Spawner && !otherFixture.isSensor()) {
         const spawnPoint = fixture.getUserData()
         if (!(spawnPoint instanceof Spawnpoint)) {
           throw new Error('spawnPoint is not a SpawnPoint')
@@ -238,7 +238,7 @@ export class Stage {
       const feature = fixture.getBody().getUserData()
       const otherFeature = otherFixture.getBody().getUserData()
       if (!(otherFeature instanceof Feature)) return
-      if (feature instanceof Spawner) {
+      if (feature instanceof Spawner && !otherFixture.isSensor()) {
         const spawnPoint = fixture.getUserData()
         if (!(spawnPoint instanceof Spawnpoint)) {
           throw new Error('spawnPoint is not a SpawnPoint')
