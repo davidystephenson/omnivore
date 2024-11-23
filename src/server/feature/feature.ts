@@ -61,7 +61,6 @@ export class Feature {
       : { vertices: [] }
     this.color = props.color
     this.borderWidth = props.borderWidth ?? 0.1
-    // TODO spawn points
   }
 
   addSensor (): Fixture {

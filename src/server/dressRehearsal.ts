@@ -6,10 +6,7 @@ export class DressRehearsal extends Playhouse {
   constructor () {
     super({
       flags: new Flags({
-        botChase: true,
-        botFlee: true,
-        respawn: true,
-        vision: false
+        respawn: true
       }),
       halfHeight: 50,
       halfWidth: 50

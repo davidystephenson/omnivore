@@ -1,6 +1,6 @@
 import { World, Vec2, Contact, Body, AABB, PolygonShape, CircleShape, Shape, Transform, testOverlap } from 'planck'
 import { Runner } from './runner'
-import { Organism, OrganismSpawn } from './actor/organism'
+import { OrganismSpawn } from './actor/organism'
 import { Wall } from './actor/wall'
 import { Actor } from './actor/actor'
 import { Brick } from './actor/brick'
@@ -425,12 +425,14 @@ export class Stage {
       const clearSpawnPositions = clearSpawnPoints.map(spawnPoint => spawnPoint.location)
       const shuffled = shuffle(clearSpawnPositions)
       if (clearSpawnPositions.length > 0) {
-        this.respawnQueue.forEach(def => {
+        this.respawnQueue = this.respawnQueue.filter(def => {
           const position = shuffled.pop()
-          if (position == null) throw new Error('no spawn points')
-          void new Organism({ ...def, position, stage: this })
+          if (position == null) {
+            return true
+          }
+          void new Bot({ ...def, position, stage: this })
+          return false
         })
-        this.respawnQueue = []
       }
     }
     this.killingQueue = []
