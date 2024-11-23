@@ -1,4 +1,4 @@
-import { CircleShape, Vec2 } from 'planck'
+import { CircleShape, PolygonShape, Vec2 } from 'planck'
 import { BLUE, GRAY, GREEN, LIME, MAGENTA, PINK, PURPLE, RED, Rgb, WHITE } from '../../shared/color'
 import { Feature } from '../feature/feature'
 import { Gene } from '../gene'
@@ -6,6 +6,7 @@ import { directionFromTo, range, rotate, whichMax } from '../math'
 import { Stage } from '../stage'
 import { Waypoint } from '../waypoint'
 import { Organism } from './organism'
+import { Player } from './player'
 
 export class Bot extends Organism {
   controlColor = LIME
@@ -18,12 +19,14 @@ export class Bot extends Organism {
     color: Rgb
     gene: Gene
     stage: Stage
+    player?: Player
     position: Vec2
   }) {
     super({
       color: props.color,
       gene: props.gene,
       stage: props.stage,
+      player: props.player,
       position: props.position
     })
     this.giveUpTime = 30 / this.membrane.acceleration
@@ -42,7 +45,6 @@ export class Bot extends Organism {
         width: 0.2
       })
     }
-    // TODO navigate
     const dirToEnemy = directionFromTo(myPosition, navPosition)
     this.setControls(dirToEnemy)
     this.chasePoint = enemyPosition.clone()
@@ -63,6 +65,9 @@ export class Bot extends Organism {
   }
 
   debugControls (): void {
+    if (!this.stage.flags.controlLines) {
+      return
+    }
     const start = this.membrane.body.getPosition()
     const circle = new CircleShape(start, 0.2)
     this.stage.debugCircle({ circle, color: this.controlColor })
@@ -89,6 +94,9 @@ export class Bot extends Organism {
     color: Rgb
     feature: Feature
   }): void {
+    if (!this.stage.flags.maneuverLines) {
+      return
+    }
     const b = props.feature.body.getPosition()
     this.debugLine({ color: GRAY, b, width: 0.05 })
   }
@@ -190,28 +198,6 @@ export class Bot extends Organism {
     return PINK
   }
 
-  // isUrgent (props: { feature: Feature }): boolean {
-  //   switch (props.feature.constructor) {
-  //     case Membrane:
-  //       const theirMass = feature.body.getMass()
-  //       const myMass = this.membrane.body.getMass()
-  //   const foody = feature.actor instanceof Food
-  //   const arboreal = feature.actor instanceof Tree
-  //   const membrany = feature instanceof Membrane
-  //   const nutritious = foody || arboreal || membrany
-  //   if (!nutritious) continue
-  //   const theirMass = feature.body.getMass()
-  //   const myMass = this.membrane.body.getMass()
-  //   if (membrany) {
-  //     if (feature.color === this.color) continue
-  //     if (theirMass === myMass) continue
-  //   }
-  //   if (arboreal) {
-  //     const unhealthy = feature.health < 0.1
-  //     if (unhealthy) continue
-  //   }
-  // }
-
   isFeatureReachable (props: {
     feature: Feature
     otherRadius?: number
@@ -306,7 +292,15 @@ export class Bot extends Organism {
 
   onStep (stepSize: number): void {
     super.onStep(stepSize)
+    if (this.stage.flags.organisms) {
+      const position = this.membrane.body.getPosition()
+      const bigCircle = new CircleShape(position, 0.5)
+      this.stage.debugCircle({ circle: bigCircle, color: WHITE })
+    }
     if (this.player != null) {
+      return
+    }
+    if (this.stage.flags.players && this.player != null) {
       const circle = new CircleShape(this.membrane.body.getPosition(), 0.3)
       this.stage.debugCircle({
         circle,
@@ -346,9 +340,20 @@ export class Bot extends Organism {
     const myPosition = this.membrane.body.getPosition()
     const distances = props.features.map(feature => {
       // TODO get nearest point, not center
-      const distance = Vec2.distance(feature.body.getPosition(), myPosition)
+      const sourcePoint = feature.body.getPosition()
+      const shape = feature.fixture.getShape()
+      if (shape instanceof PolygonShape) {
+        const nearestPoint = this.stage.vision.getNearestPoint(sourcePoint, feature, shape)
+        const distance = Vec2.distance(nearestPoint, myPosition)
+        return {
+          distance,
+          feature
+        }
+      }
+      const distance = Vec2.distance(sourcePoint, myPosition)
+      const centerToEdge = distance - feature.radius
       return {
-        distance,
+        distance: centerToEdge,
         feature
       }
     })

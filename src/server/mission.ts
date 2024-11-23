@@ -12,16 +12,17 @@ export class Mission extends Playhouse {
         hungerY: false,
         performance: false,
         respawn: true,
+        visionY: false,
         waypointSpawnpointsY: false
       }),
       halfHeight: 20,
       halfWidth: 20
     })
-    // this.addWall({
-    //   halfWidth: 10,
-    //   halfHeight: 1,
-    //   position: Vec2(5, 10)
-    // })
+    this.addWall({
+      halfWidth: 10,
+      halfHeight: 5,
+      position: Vec2(5, 13)
+    })
     // this.addWall({
     //   halfWidth: 10,
     //   halfHeight: 1,
@@ -31,15 +32,15 @@ export class Mission extends Playhouse {
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
 
-    this.addBrick({ position: Vec2(15, 15), halfHeight: 1, halfWidth: 1 })
-    this.addFoodSquare({ position: Vec2(5, 5) })
-    this.addFoodSquare({ position: Vec2(0, -5) })
+    // this.addBrick({ position: Vec2(15, 15), halfHeight: 1, halfWidth: 1 })
+    // this.addFoodSquare({ position: Vec2(5, 5) })
+    // this.addFoodSquare({ position: Vec2(0, -5) })
     // this.addFoodSquare({ position: Vec2(-5, -5) })
     // this.addFoodSquare({ position: Vec2(0, -5) })
     // this.addFoodSquare({ position: Vec2(-5, 0) })
     // this.addFoodSquare({ position: Vec2(-5, 5) })
     // this.addFoodSquare({ position: Vec2(0, 5) })
-    // this.addBig({ position: Vec2(7, 7) })
+    this.addBig({ position: Vec2(7, 7) })
     // this.addTree({ position: Vec2(10, -10) })
   }
 }

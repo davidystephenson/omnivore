@@ -4,10 +4,11 @@ import { Controls } from '../shared/input'
 import { Gene } from './gene'
 // import { Funhouse } from './funhouse'
 import { GREEN } from '../shared/color'
-import { Mission } from './mission'
-import { Rehearsal } from './rehearsal'
+// import { Mission } from './mission'
+import { GrandRehearsal } from './grandRehearsal'
+// import { Rehearsal } from './rehearsal'
 
-const stage = new Mission()
+const stage = new GrandRehearsal()
 
 io.on('connection', socket => {
   stage.debug({

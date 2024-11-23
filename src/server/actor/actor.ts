@@ -1,6 +1,7 @@
-import { RopeJoint } from 'planck'
+import { CircleShape, RopeJoint } from 'planck'
 import { Feature } from '../feature/feature'
 import { Stage } from '../stage'
+import { GRAY } from '../../shared/color'
 
 export class Actor {
   static count = 0
@@ -31,7 +32,11 @@ export class Actor {
   }
 
   onStep (stepSize: number): void {
+    if (this.stage.flags.actors) {
+      const position = this.features[0].body.getPosition()
+      const circle = new CircleShape(position, 0.5)
+      this.stage.debugCircle({ circle, color: GRAY })
+    }
     this.features.forEach(feature => feature.onStep(stepSize))
-    // this.invincibleTime = Math.max(0, this.invincibleTime - this.stage.runner.timeStep)
   }
 }
