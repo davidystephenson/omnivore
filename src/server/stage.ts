@@ -139,6 +139,26 @@ export class Stage {
     return food
   }
 
+  addFoodSquare (props: {
+    position: Vec2
+  }): Food {
+    const halfSize = 1.25
+    const y0 = 0 - halfSize
+    const y1 = 0 + halfSize
+    const x0 = 0 - halfSize
+    const x1 = 0 + halfSize
+    const vertices = [
+      Vec2(x0, y0),
+      Vec2(x1, y0),
+      Vec2(x1, y1),
+      Vec2(x0, y1)
+    ]
+    return this.addFood({
+      vertices,
+      position: props.position
+    })
+  }
+
   addBricks (props: {
     angle?: number
     count: number
@@ -204,7 +224,7 @@ export class Stage {
         if (!(spawnPoint instanceof Spawnpoint)) {
           throw new Error('spawnPoint is not a SpawnPoint')
         }
-        if (otherFeature.label === 'food') {
+        if (otherFeature.actor.label === 'food') {
           return false
         }
         spawnPoint.collideCount += 1
@@ -243,7 +263,7 @@ export class Stage {
         if (!(spawnPoint instanceof Spawnpoint)) {
           throw new Error('spawnPoint is not a SpawnPoint')
         }
-        if (otherFeature.label === 'food') {
+        if (otherFeature.actor.label === 'food') {
           return false
         }
         spawnPoint.collideCount -= 1

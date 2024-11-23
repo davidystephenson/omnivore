@@ -11,8 +11,8 @@ export class Rehearsal extends Playhouse {
         respawn: true,
         vision: false
       }),
-      halfHeight: 40,
-      halfWidth: 40
+      halfHeight: 25,
+      halfWidth: 25
     })
     this.addWall({
       halfWidth: 10,
@@ -23,17 +23,16 @@ export class Rehearsal extends Playhouse {
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
 
-    this.addBig({ position: Vec2(0, 10) })
-    this.addBig({ position: Vec2(0, 20) })
-    this.addBig({ position: Vec2(-10, -10) })
+    this.addBig({ position: Vec2(5, 10) })
+    this.addBig({ position: Vec2(10, 20) })
     this.addBig({ position: Vec2(20, 20) })
 
-    this.addSmall({ position: Vec2(-10, 15) })
-    this.addSmall({ position: Vec2(-10, 20) })
-    this.addSmall({ position: Vec2(-10, 25) })
-    this.addSmall({ position: Vec2(-10, 30) })
-    this.addSmall({ position: Vec2(-10, 35) })
-    this.addSmall({ position: Vec2(-10, 35) })
+    this.addSmall({ position: Vec2(-10, -20) })
+    this.addSmall({ position: Vec2(-10, -15) })
+    this.addSmall({ position: Vec2(-10, -10) })
+    this.addSmall({ position: Vec2(-10, -5) })
+    this.addSmall({ position: Vec2(-10, 5) })
+    this.addSmall({ position: Vec2(-10, 10) })
 
     this.addTree({ position: Vec2(20, 20) })
     this.addTree({ position: Vec2(20, -20) })

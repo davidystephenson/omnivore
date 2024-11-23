@@ -6,11 +6,13 @@ export class Flags {
   death: boolean
   hungerY: boolean
   navigation: boolean
+  performance: boolean
   respawn: boolean
   summary: boolean
   vision: boolean
   visionY: boolean
   waypoints: boolean
+  waypointSpawnpointsY: boolean
 
   constructor (props: {
     charge?: boolean
@@ -20,11 +22,13 @@ export class Flags {
     death?: boolean
     hungerY?: boolean
     navigation?: boolean
+    performance?: boolean
     respawn?: boolean
     summary?: boolean
     vision?: boolean
     visionY?: boolean
     waypoints?: boolean
+    waypointSpawnpointsY?: boolean
   }) {
     this.botChase = props.botChase ?? false
     this.botFlee = props.botFlee ?? false
@@ -33,10 +37,12 @@ export class Flags {
     this.death = props.death ?? false
     this.hungerY = props.hungerY ?? true
     this.navigation = props.navigation ?? false
+    this.performance = props.performance ?? true
     this.respawn = props.respawn ?? false
     this.summary = props.summary ?? false
     this.vision = props.vision ?? false
     this.visionY = props.visionY ?? true
     this.waypoints = props.waypoints ?? false
+    this.waypointSpawnpointsY = props.waypointSpawnpointsY ?? true
   }
 }
