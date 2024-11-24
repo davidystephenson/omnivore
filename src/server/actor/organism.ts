@@ -1,8 +1,8 @@
-import { CircleShape, RopeJoint, Vec2 } from 'planck'
+import { CircleShape, PolygonShape, RopeJoint, Vec2 } from 'planck'
 import { Stage } from '../stage'
 import { Actor } from './actor'
 import { Membrane } from '../feature/membrane'
-import { range, rotate, whichMin } from '../math'
+import { directionFromTo, range, rotate, whichMax, whichMin } from '../math'
 import { Egg } from '../feature/egg'
 import { Feature } from '../feature/feature'
 import { Rope } from '../../shared/rope'
@@ -10,8 +10,9 @@ import { Starvation } from '../starvation'
 import { ExplorationPoint } from '../explorationPoint'
 import { Controls } from '../../shared/input'
 import { Gene } from '../gene'
-import { Rgb } from '../../shared/color'
+import { BLUE, GRAY, GREEN, LIME, MAGENTA, PINK, PURPLE, RED, Rgb, WHITE } from '../../shared/color'
 import { Player } from './player'
+import { Waypoint } from '../waypoint'
 
 export interface OrganismSpawn {
   color: Rgb
@@ -20,6 +21,11 @@ export interface OrganismSpawn {
 }
 
 export class Organism extends Actor {
+  controlColor = LIME
+  chasePoint: Vec2 | undefined
+  chaseRadius = 0
+  giveUpTime: number
+  giveUpTimer = 0
   color: Rgb
   createdAt: number
   controls: Controls = {
@@ -57,7 +63,7 @@ export class Organism extends Actor {
     this.gene = props.gene
     this.player = props.player
     this.spawnPosition = props.position
-    this.membrane = this.grow({ branch: this.gene })
+    this.membrane = this.grow({ gene: this.gene })
     if (this.player != null) {
       this.player.organism = this
     }
@@ -72,11 +78,13 @@ export class Organism extends Actor {
       if (isGrid || isSmallRadius) {
         const position = waypoint.position
         const id = this.explorationPoints.length
-        this.explorationPoints.push(new ExplorationPoint({ position, id }))
+        const explorationPoint = new ExplorationPoint({ position, id })
+        this.explorationPoints.push(explorationPoint)
       }
     })
     this.explorationIds = range(0, this.explorationPoints.length - 1)
     this.sortExplorationPoints()
+    this.giveUpTime = 30 / this.membrane.acceleration
   }
 
   move (): void {
@@ -100,10 +108,9 @@ export class Organism extends Actor {
   }
 
   sortExplorationPoints (): void {
-    const position = this.membrane.body.getPosition()
     const distances = this.explorationIds.map(i => {
       const point = this.explorationPoints[i]
-      const distance = Vec2.distance(position, point.position)
+      const distance = Vec2.distance(this.membrane.position, point.position)
       return distance
     })
     this.explorationIds.sort((a, b) => {
@@ -147,7 +154,8 @@ export class Organism extends Actor {
   }): Membrane {
     const membrane = new Membrane({ position: props.position, actor: this, radius: props.radius })
     if (props.cell != null) {
-      const maxLength = Vec2.distance(props.position, props.cell.body.getPosition())
+      const cellPosition = props.cell.body.getPosition()
+      const maxLength = Vec2.distance(props.position, cellPosition)
       const joint = new RopeJoint({
         bodyA: props.cell.body,
         bodyB: membrane.body,
@@ -222,7 +230,7 @@ export class Organism extends Actor {
     this.hatched = true
     this.stage.destructionQueue.push(this.membrane.body)
     this.spawnPosition = this.membrane.body.getPosition()
-    this.membrane = this.grow({ branch: this.gene })
+    this.membrane = this.grow({ gene: this.gene })
     this.membrane.borderWidth = 0.2
   }
 
@@ -231,21 +239,287 @@ export class Organism extends Actor {
   }
 
   grow (props: {
-    branch: Gene
+    gene: Gene
     parent?: Membrane
   }): Membrane {
     const position = props.parent == null
       ? this.spawnPosition
-      : this.getOffset({ parent: props.parent, branch: props.branch })
+      : this.getOffset({ parent: props.parent, branch: props.gene })
     const membrane = this.addMembrane({
       position,
       cell: props.parent,
-      radius: props.branch.radius
+      radius: props.gene.radius
     })
-    for (const childBranch of props.branch.branches) {
-      this.grow({ branch: childBranch, parent: membrane })
+    for (const childBranch of props.gene.branches) {
+      this.grow({ gene: childBranch, parent: membrane })
     }
     return membrane
+  }
+
+  starve (props: {
+    membrane: Membrane
+  }): void {
+    this.stage.starvationQueue.push(new Starvation({
+      stage: this.stage,
+      victim: props.membrane
+    }))
+  }
+
+  charge (enemy: Feature): Rgb {
+    const enemyPosition = enemy.body.getPosition()
+    const navPoint = this.stage.navigation.navigate(this.membrane.position, enemyPosition, this.membrane.radius, enemy.radius)
+    const navPosition = navPoint instanceof Vec2 ? navPoint : navPoint.position
+    if (this.stage.flags.charge) {
+      this.stage.debugLine({
+        a: this.membrane.position,
+        b: navPosition,
+        color: WHITE,
+        width: 0.2
+      })
+    }
+    const dirToEnemy = directionFromTo(this.membrane.position, navPosition)
+    this.setControls(dirToEnemy)
+    this.chasePoint = enemyPosition.clone()
+    this.chaseRadius = enemy.radius
+    return MAGENTA
+  }
+
+  debugControlLine (props: {
+    point: Vec2
+  }): void {
+    this.stage.debugLine({
+      a: this.membrane.position,
+      b: props.point,
+      color: this.controlColor,
+      width: 0.2
+    })
+  }
+
+  debugControls (): void {
+    if (!this.stage.flags.controlLines) {
+      return
+    }
+    const circle = new CircleShape(this.membrane.position, 0.2)
+    this.stage.debugCircle({ circle, color: this.controlColor })
+    const length = 1
+    if (this.controls.up) {
+      const point = Vec2(this.membrane.position.x, this.membrane.position.y + length)
+      this.debugControlLine({ point })
+    }
+    if (this.controls.down) {
+      const point = Vec2(this.membrane.position.x, this.membrane.position.y - length)
+      this.debugControlLine({ point })
+    }
+    if (this.controls.left) {
+      const point = Vec2(this.membrane.position.x - length, this.membrane.position.y)
+      this.debugControlLine({ point })
+    }
+    if (this.controls.right) {
+      const point = Vec2(this.membrane.position.x + length, this.membrane.position.y)
+      this.debugControlLine({ point })
+    }
+  }
+
+  debugManeuverLine (props: {
+    color: Rgb
+    feature: Feature
+  }): void {
+    if (!this.stage.flags.maneuverLines) {
+      return
+    }
+    const b = props.feature.body.getPosition()
+    this.debugLine({ color: GRAY, b, width: 0.05 })
+  }
+
+  debugLine (props: {
+    color: Rgb
+    b: Vec2
+    width: number
+  }): void {
+    this.stage.debugLine({
+      a: this.membrane.body.getPosition(),
+      ...props
+    })
+  }
+
+  debugPath (props: {
+    target: Vec2
+  }): void {
+    const path = this.stage.navigation.getPath({
+      a: this.membrane.position,
+      b: props.target,
+      radius: this.membrane.radius,
+      otherRadius: this.chaseRadius
+    })
+    const circle = new CircleShape(props.target, this.chaseRadius)
+    this.stage.debugCircle({ circle, color: RED })
+    range(0, path.length - 2).forEach(index => {
+      const currentPoint = path[index]
+      const nextPoint = path[index + 1]
+      this.stage.debugLine({ a: currentPoint, b: nextPoint, color: GREEN, width: 0.2 })
+    })
+  }
+
+  explore (stepSize: number): void {
+    this.giveUpTimer += stepSize
+    const position = this.membrane.body.getPosition()
+    this.explorationPoints.forEach(point => {
+      const visible = this.stage.vision.isVisible(position, point.position)
+      point.visible = visible
+      if (visible) point.time = Date.now()
+    })
+    const targetPoint = this.explorationPoints[this.explorationIds[0]]
+    const targetVisible = this.stage.vision.isVisible(position, targetPoint.position)
+    if (targetVisible || this.giveUpTimer > this.giveUpTime) {
+      this.giveUpTimer = 0
+      targetPoint.time = Date.now()
+      this.sortExplorationPoints()
+    }
+  }
+
+  flee (enemy: Feature): Rgb {
+    const enemyPosition = enemy.body.getPosition()
+    const myPosition = this.membrane.body.getPosition()
+    const dirFromEnemy = directionFromTo(enemyPosition, myPosition)
+    const perps = [
+      rotate(dirFromEnemy, +0.5 * Math.PI),
+      rotate(dirFromEnemy, -0.5 * Math.PI)
+    ]
+    const sidePoints = perps.map(perp => {
+      return Vec2.combine(1, myPosition, this.membrane.radius, perp)
+    })
+    const lookDistance = 4
+    const lookPoints = sidePoints.map(sidePoint => {
+      return Vec2.combine(1, sidePoint, lookDistance, dirFromEnemy)
+    })
+    const rays = sidePoints.map((sidePoint, i) => {
+      return [sidePoint, lookPoints[i]]
+    })
+    const hitArrays = rays.map(ray => {
+      return this.stage.vision.rayCast(ray[0], ray[1])
+    })
+    if (this.stage.flags.botFlee) {
+      hitArrays.forEach((hitArray, i) => {
+        const color = hitArray.length === 0 ? WHITE : RED
+        this.stage.debugLine({
+          a: sidePoints[i],
+          b: lookPoints[i],
+          color,
+          width: 0.2
+        })
+      })
+    }
+    const blocked = hitArrays[0].length > 0 || hitArrays[1].length > 0
+    if (blocked) {
+      const visibleExplorationPoints = this.explorationPoints.filter(point => point.visible)
+      const directions = visibleExplorationPoints.map(point => directionFromTo(myPosition, point.position))
+      const dotProducts = directions.map(direction => Vec2.dot(direction, dirFromEnemy))
+      if (directions.length === 0) return PINK
+      const fleeDir = directions[whichMax(dotProducts)]
+      this.setControls(fleeDir)
+      if (this.stage.flags.botFlee) {
+        this.stage.debugLine({
+          a: myPosition,
+          b: Vec2.combine(1, myPosition, 2, fleeDir),
+          color: GREEN,
+          width: 0.4
+        })
+      }
+      return PINK
+    }
+    this.setControls(dirFromEnemy)
+    return PINK
+  }
+
+  isFeatureReachable (props: {
+    feature: Feature
+    otherRadius?: number
+  }): boolean {
+    const position = props.feature.body.getPosition()
+    return this.isPointReachable(position, props.otherRadius)
+  }
+
+  isPointReachable (end: Vec2, otherRadius?: number): boolean {
+    return this.stage.navigation.isPointReachable(this.membrane.position, end, this.membrane.radius, otherRadius)
+  }
+
+  isTouching (props: {
+    point: Vec2
+  }): boolean {
+    const myPosition = this.membrane.body.getPosition()
+    const distance = Vec2.distance(myPosition, props.point)
+    const reachDistance = this.membrane.radius + this.chaseRadius
+    const reached = distance < reachDistance
+    return reached
+  }
+
+  judge ({ feature }: { feature: Feature }): boolean | undefined {
+    switch (feature.actor.label) {
+      case 'organism': {
+        const allied = feature.color === this.color
+        if (allied) return undefined
+        const theirMass = feature.body.getMass()
+        const myMass = this.membrane.body.getMass()
+        const tied = theirMass === myMass
+        if (tied) return undefined
+        const prey = theirMass < myMass
+        return prey
+      }
+      case 'tree': {
+        const unhealthy = feature.health < 0.1
+        if (unhealthy) return undefined
+        return true
+      }
+      case 'food': return true
+      default: return undefined
+    }
+  }
+
+  maneuver (): Rgb {
+    const sorted = this.sortNearest({ features: this.featuresInVision })
+    for (const feature of sorted) {
+      const judgement = this.judge({ feature })
+      if (judgement == null) {
+        this.debugManeuverLine({ color: GRAY, feature })
+        continue
+      }
+      const reachable = this.isFeatureReachable({ feature })
+      if (!reachable) {
+        this.debugManeuverLine({ color: RED, feature })
+        continue
+      }
+      if (judgement) return this.charge(feature)
+      return this.flee(feature)
+    }
+    if (this.chasePoint != null) {
+      const reached = this.isTouching({ point: this.chasePoint })
+      if (!reached) {
+        const reachable = this.isPointReachable(this.chasePoint, this.chaseRadius)
+        if (reachable) {
+          return this.navigate({
+            debug: this.stage.flags.botChase,
+            target: this.chasePoint
+          })
+        }
+      }
+      this.chasePoint = undefined
+    }
+    return this.wander()
+  }
+
+  navigate (props: {
+    debug?: boolean
+    target: Vec2
+  }): Rgb {
+    if (props.debug === true) {
+      this.debugPath(props)
+    }
+    const myPosition = this.membrane.body.getPosition()
+    const nextPoint = this.stage.navigation.navigate(myPosition, props.target, this.membrane.radius, this.chaseRadius)
+    const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
+    const direction = directionFromTo(myPosition, nextPosition)
+    this.setControls(direction)
+    return GRAY
   }
 
   onStep (stepSize: number): void {
@@ -258,14 +532,97 @@ export class Organism extends Actor {
     if (!this.hatched) this.eggFlee()
     if (this.readyToHatch && !this.hatched) this.hatch()
     this.move()
+    if (this.stage.flags.organisms) {
+      const position = this.membrane.body.getPosition()
+      const bigCircle = new CircleShape(position, 0.5)
+      this.stage.debugCircle({ circle: bigCircle, color: WHITE })
+    }
+    if (this.player != null) {
+      return
+    }
+    if (this.stage.flags.players && this.player != null) {
+      const circle = new CircleShape(this.membrane.body.getPosition(), 0.3)
+      this.stage.debugCircle({
+        circle,
+        color: PURPLE
+      })
+      return
+    }
+    this.explore(stepSize)
+    this.controlColor = this.maneuver()
   }
 
-  starve (props: {
-    membrane: Membrane
-  }): void {
-    this.stage.starvationQueue.push(new Starvation({
-      stage: this.stage,
-      victim: props.membrane
-    }))
+  setControls (direction: Vec2): void {
+    const root2over2 = Math.sqrt(2) / 2
+    const roundDirs = [
+      Vec2(+1, +0),
+      Vec2(-1, +0),
+      Vec2(+0, +1),
+      Vec2(+0, -1),
+      Vec2(+root2over2, +root2over2),
+      Vec2(+root2over2, -root2over2),
+      Vec2(-root2over2, +root2over2),
+      Vec2(-root2over2, -root2over2)
+    ]
+    const dotProducts = roundDirs.map(roundDir => Vec2.dot(roundDir, direction))
+    const whichMaxDot = whichMax(dotProducts)
+    const roundDir = roundDirs[whichMaxDot]
+    this.controls.up = roundDir.y > 0
+    this.controls.down = roundDir.y < 0
+    this.controls.left = roundDir.x < 0
+    this.controls.right = roundDir.x > 0
+    this.debugControls()
+  }
+
+  sortNearest (props: {
+    features: Feature[]
+  }): Feature[] {
+    const myPosition = this.membrane.body.getPosition()
+    const distances = props.features.map(feature => {
+      const sourcePoint = feature.body.getPosition()
+      const shape = feature.fixture.getShape()
+      if (shape instanceof PolygonShape) {
+        const nearestPoint = this.stage.vision.getNearestPoint(sourcePoint, feature, shape)
+        const distance = Vec2.distance(nearestPoint, myPosition)
+        return {
+          distance,
+          feature
+        }
+      }
+      const distance = Vec2.distance(sourcePoint, myPosition)
+      const centerToEdge = distance - feature.radius
+      return {
+        distance: centerToEdge,
+        feature
+      }
+    })
+    const sorted = distances.sort((a, b) => a.distance - b.distance)
+    const features = sorted.map(pair => pair.feature)
+    return features
+  }
+
+  wander (): Rgb {
+    const explorationId = this.explorationIds[0]
+    const explorationPoint = this.explorationPoints[explorationId]
+    const end = explorationPoint.position
+    if (this.stage.flags.botPath) {
+      const path = this.stage.navigation.getPath({
+        a: this.membrane.position,
+        b: end,
+        radius: this.membrane.radius
+      })
+      range(0, path.length - 2).forEach(index => {
+        const currentPoint = path[index]
+        const nextPoint = path[index + 1]
+        this.stage.debugLine({ a: currentPoint, b: nextPoint, color: WHITE, width: 0.1 })
+      })
+      const circle = new CircleShape(end, this.membrane.radius)
+      this.stage.debugCircle({ circle, color: RED })
+    }
+    const nextPoint = this.stage.navigation.navigate(this.membrane.position, end, this.membrane.radius)
+    const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
+    const directionToNext = directionFromTo(this.membrane.position, nextPosition)
+    this.setControls(directionToNext)
+    return BLUE
   }
 }

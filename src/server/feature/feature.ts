@@ -9,31 +9,33 @@ import { HALF_SIGHT } from '../../shared/sight'
 let featureCount = 0
 
 export class Feature {
+  actor: Actor
   body: Body
+  borderWidth: number
+  center: Vec2
+  color: Rgb
+  contacts: Feature[] = []
+  deathPosition = Vec2(0, 0)
+  health = 1
   id: number
   fixture: Fixture
   force = Vec2(0, 0)
   label = 'default'
-  actor: Actor
-  ropes: Rope[] = []
-  spawnPosition = Vec2(0, 0)
-  deathPosition = Vec2(0, 0)
-  health = 1
   maximumHealth = 1
-  sensorFeatures: Feature[] = []
-  contacts: Feature[] = []
-  color: Rgb
-  borderWidth: number
-  center: Vec2
-  radius: number
-  sensor?: Fixture
+  position: Vec2
   polygon: {
     vertices: Vec2[]
   }
 
+  radius: number
+  ropes: Rope[] = []
   seed?: {
     vertices: Vec2[]
   }
+
+  sensor?: Fixture
+  sensorFeatures: Feature[] = []
+  spawnPosition = Vec2(0, 0)
 
   constructor (props: {
     bodyDef: BodyDef
@@ -61,6 +63,7 @@ export class Feature {
       : { vertices: [] }
     this.color = props.color
     this.borderWidth = props.borderWidth ?? 0.1
+    this.position = this.body.getPosition()
   }
 
   addSensor (): Fixture {
@@ -85,12 +88,14 @@ export class Feature {
   }
 
   getElement (seen: boolean): Element {
-    const position = roundVector(this.body.getPosition())
+    const position = roundVector({ vector: this.position })
+    const angle = this.body.getAngle()
+    const n = roundNumber({ number: angle, decimals: 3 })
     const element: Element = {
       i: this.id,
       x: position.x,
       y: position.y,
-      n: roundNumber(this.body.getAngle()),
+      n,
       s: 1,
       a: this.health
     }
@@ -105,17 +110,19 @@ export class Feature {
         element.u = this.radius
       } else {
         element.v = this.polygon.vertices.map(vertex => {
-          return roundVector(vertex)
+          return roundVector({ vector: vertex })
         })
       }
       if (this.seed != null) {
         element.d = this.seed.vertices.map(vertex => {
-          return roundVector(vertex)
+          return roundVector({ vector: vertex })
         })
       }
     }
     return element
   }
 
-  onStep (stepSize: number): void {}
+  onStep (stepSize: number): void {
+    this.position = this.body.getPosition()
+  }
 }

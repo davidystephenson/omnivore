@@ -4,12 +4,11 @@ import { Playhouse } from './playhouse'
 
 export class GrandRehearsal extends Playhouse {
   constructor () {
+    const flags = new Flags({
+      visionY: false
+    })
     super({
-      flags: new Flags({
-        controlLines: true,
-        visionY: false,
-        respawn: true
-      }),
+      flags,
       halfHeight: 40,
       halfWidth: 40
     })

@@ -109,13 +109,24 @@ export function shuffle <Element> (array: Element[]): Element[] {
   return shuffled
 }
 
-export function roundVector (vector: Vec2): Vec2 {
-  return Vec2(
-    roundNumber(vector.x),
-    roundNumber(vector.y)
-  )
+interface Decimals {
+  decimals?: number
 }
 
-export function roundNumber (x: number): number {
-  return Number(x.toFixed(2))
+export function roundVector (props: {
+  vector: Vec2
+} & Decimals): Vec2 {
+  const x = roundNumber({ number: props.vector.x, ...props })
+  const y = roundNumber({ number: props.vector.y, ...props })
+  const vector = Vec2(x, y)
+  return vector
+}
+
+export function roundNumber (props: {
+  number: number
+} & Decimals): number {
+  const decimals = props.decimals ?? 2
+  const string = props.number.toFixed(decimals)
+  const number = Number(string)
+  return number
 }
