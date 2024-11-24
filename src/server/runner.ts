@@ -1,5 +1,5 @@
 import { Body } from 'planck'
-import { Stage } from './stage'
+import { Stage } from './stage/stage'
 import { Element } from '../shared/element'
 import { Feature } from './feature/feature'
 import { Summary } from '../shared/summary'
@@ -10,9 +10,10 @@ import { Player } from './actor/player'
 import { Tree } from './actor/tree'
 
 export class Runner {
+  static FPS = 30
   // intervalId: NodeJS.Timeout
   stage: Stage
-  timeStep = 1 / 30
+  timeStep = 1 / Runner.FPS
   timeScale = 1 // 1
   paused = false
   worldTime = 0
@@ -63,7 +64,7 @@ export class Runner {
     }
     this.debugLines = []
     this.debugCircles = []
-    this.stage.onStep(stepSize)
+    this.stage.onStep({ stepSize })
     this.features = this.getFeatures()
   }
 
@@ -74,7 +75,9 @@ export class Runner {
       throw new Error('Player organism is null')
     }
     const elements = this.getElements(props.player)
+    const age = Math.floor(props.player.age)
     const summary: Summary = {
+      age,
       elements,
       foodCount: this.stage.food.length,
       ropes: this.getRopes(props.player),

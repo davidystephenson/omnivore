@@ -1,7 +1,7 @@
 import { AABB, Fixture, Vec2 } from 'planck'
-import { Membrane } from './feature/membrane'
-import { Stage } from './stage'
-import { Organism, OrganismSpawn } from './actor/organism'
+import { Membrane } from '../feature/membrane'
+import { Stage } from '../stage/stage'
+import { Organism, OrganismSpawn } from '../actor/organism'
 
 export class Death {
   stage: Stage
@@ -15,7 +15,39 @@ export class Death {
     this.victim.actor.destroy()
   }
 
-  execute (): void {}
+  execute (): void {
+    if (this.victim.actor instanceof Organism && this.victim.actor.player != null) {
+      this.victim.actor.player.age = 0
+    }
+    const actors = [...this.stage.actors.values()]
+    const organisms = actors.filter((actor) => actor instanceof Organism) as Organism[]
+    const relatives = organisms.filter((actor) => {
+      const self = actor === this.victim.actor
+      if (self) return false
+      const related = actor.color === this.victim.color
+      return related
+    })
+    if (relatives.length > 0) {
+      if (this.victim.actor.player == null) {
+        return
+      }
+      const first = relatives[0]
+      const oldest = relatives.reduce((a, b) => a.createdAt < b.createdAt ? a : b, first)
+      if (oldest == null) {
+        throw new Error('There is no oldest relative')
+      }
+      this.victim.actor.player.organism = oldest
+      oldest.player = this.victim.actor.player
+      return
+    }
+    this.victim.actor.respawning = true
+    const spawn: OrganismSpawn = {
+      color: this.victim.actor.color,
+      gene: this.victim.actor.gene,
+      player: this.victim.actor.player
+    }
+    this.stage.respawnQueue.push(spawn)
+  }
 
   trim (props: { base: Vec2, lookBox: AABB }): AABB {
     const widthTrimmedBox = this.trimWidth(props)
@@ -61,36 +93,5 @@ export class Death {
   getArea (box: AABB): number {
     const extents = box.getExtents()
     return extents.x * extents.y
-  }
-
-  respawn (): void {
-    const actors = [...this.stage.actors.values()]
-    const organisms = actors.filter((actor) => actor instanceof Organism) as Organism[]
-    const relatives = organisms.filter((actor) => {
-      const self = actor === this.victim.actor
-      if (self) return false
-      const related = actor.color === this.victim.color
-      return related
-    })
-    if (relatives.length > 0) {
-      if (this.victim.actor.player == null) {
-        return
-      }
-      const first = relatives[0]
-      const oldest = relatives.reduce((a, b) => a.createdAt < b.createdAt ? a : b, first)
-      if (oldest == null) {
-        throw new Error('There is no oldest relative')
-      }
-      this.victim.actor.player.organism = oldest
-      oldest.player = this.victim.actor.player
-      return
-    }
-    this.victim.actor.respawning = true
-    const spawn: OrganismSpawn = {
-      color: this.victim.actor.color,
-      gene: this.victim.actor.gene,
-      player: this.victim.actor.player
-    }
-    this.stage.respawnQueue.push(spawn)
   }
 }

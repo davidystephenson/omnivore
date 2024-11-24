@@ -1,6 +1,6 @@
 import { CircleShape, PolygonShape, Vec2 } from 'planck'
 import { Feature } from './feature/feature'
-import { Stage } from './stage'
+import { Stage } from './stage/stage'
 import { directionFromTo } from './math'
 
 export function getNearestOtherPoint (stage: Stage, sourceFeature: Feature, otherFeatures: Feature[]): Vec2 {

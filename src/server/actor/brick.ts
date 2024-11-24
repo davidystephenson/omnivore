@@ -1,5 +1,5 @@
 import { Vec2 } from 'planck'
-import { Stage } from '../stage'
+import { Stage } from '../stage/stage'
 import { Actor } from './actor'
 import { Crate } from '../feature/crate'
 import { Rgb } from '../../shared/color'
@@ -28,7 +28,9 @@ export class Brick extends Actor {
     this.features.push(this.crate)
   }
 
-  onStep (stepSize: number): void {
-    super.onStep(stepSize)
+  onStep (props: {
+    stepSize: number
+  }): void {
+    super.onStep({ stepSize: props.stepSize })
   }
 }

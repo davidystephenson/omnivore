@@ -111,6 +111,12 @@ export class Debugger {
       const joined = this.join({ values: props.vs })
       return joined
     }
+    if (props.k != null) {
+      const key = props.k != null ? `${props.k}:` : ''
+      const values = [key, props.v]
+      const joined = this.join({ values })
+      return joined
+    }
     return this.stringify({ value: props.v })
   }
 

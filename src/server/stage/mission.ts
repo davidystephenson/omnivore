@@ -1,5 +1,5 @@
 import { Vec2 } from 'planck'
-import { Flags } from './flags'
+import { Flags } from '../flags'
 import { Playhouse } from './playhouse'
 
 export class Mission extends Playhouse {

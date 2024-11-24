@@ -1,6 +1,6 @@
 import { CircleShape, RopeJoint } from 'planck'
 import { Feature } from '../feature/feature'
-import { Stage } from '../stage'
+import { Stage } from '../stage/stage'
 import { GRAY } from '../../shared/color'
 
 export class Actor {
@@ -31,12 +31,14 @@ export class Actor {
     this.joints.forEach(joint => this.stage.world.destroyJoint(joint))
   }
 
-  onStep (stepSize: number): void {
+  onStep (props: {
+    stepSize: number
+  }): void {
     if (this.stage.flags.actors) {
       const position = this.features[0].body.getPosition()
       const circle = new CircleShape(position, 0.5)
       this.stage.debugCircle({ circle, color: GRAY })
     }
-    this.features.forEach(feature => feature.onStep(stepSize))
+    this.features.forEach(feature => feature.onStep(props.stepSize))
   }
 }
