@@ -19,7 +19,7 @@ export class Food extends Actor {
       color: GREEN,
       actor: this
     })
-    this.sculpture.health = 0.00000000000000001
+    this.sculpture.combatDamage = 0.99999999999
     this.features.push(this.sculpture)
     this.stage.food.push(this)
   }

@@ -14,9 +14,10 @@ export class Feature {
   borderWidth: number
   center: Vec2
   color: Rgb
+  combatDamage = 0
   contacts: Feature[] = []
   deathPosition = Vec2(0, 0)
-  health = 1
+  health: number
   id: number
   fixture: Fixture
   force = Vec2(0, 0)
@@ -46,7 +47,9 @@ export class Feature {
     borderWidth?: number
   }) {
     this.actor = props.actor
+    this.health = this.maximumHealth
     this.body = this.actor.stage.world.createBody(props.bodyDef)
+    this.position = this.body.getPosition()
     this.body.setUserData(this)
     this.label = props.label ?? this.label
     this.fixture = this.body.createFixture(props.fixtureDef)
@@ -63,7 +66,6 @@ export class Feature {
       : { vertices: [] }
     this.color = props.color
     this.borderWidth = props.borderWidth ?? 0.1
-    this.position = this.body.getPosition()
   }
 
   addSensor (): Fixture {
@@ -91,13 +93,14 @@ export class Feature {
     const position = roundVector({ vector: this.position })
     const angle = this.body.getAngle()
     const n = roundNumber({ number: angle, decimals: 3 })
+    const a = this.getHealth()
     const element: Element = {
       i: this.id,
       x: position.x,
       y: position.y,
       n,
       s: 1,
-      a: this.health
+      a
     }
     if (!seen) {
       element.r = this.color.red
@@ -122,7 +125,13 @@ export class Feature {
     return element
   }
 
+  getHealth (): number {
+    const health = this.maximumHealth - this.combatDamage
+    return health
+  }
+
   onStep (stepSize: number): void {
+    this.health = this.getHealth()
     this.position = this.body.getPosition()
   }
 }

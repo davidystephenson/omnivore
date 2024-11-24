@@ -26,7 +26,7 @@ io.on('connection', socket => {
   if (player.organism == null) {
     throw new Error('player.organism is undefined')
   }
-  player.organism.membrane.health = 0.1
+  player.organism.membrane.combatDamage = 0.9
   socket.on('controls', (controls: Controls) => {
     if (player.organism == null) {
       return
@@ -37,7 +37,8 @@ io.on('connection', socket => {
     }
     if (controls.cancel) {
       stage.runner.paused = false
-      player.organism.membrane.health = 1
+      player.organism.membrane.combatDamage = 0
+      player.organism.membrane.hungerDamage = 0
     }
     const summary = stage.runner.getSummary({ player })
     socket.emit('serverUpdateClient', summary)

@@ -40,7 +40,8 @@ export class Mission extends Playhouse {
     // this.addFoodSquare({ position: Vec2(-5, 0) })
     // this.addFoodSquare({ position: Vec2(-5, 5) })
     // this.addFoodSquare({ position: Vec2(0, 5) })
-    this.addBig({ position: Vec2(7, 7) })
-    // this.addTree({ position: Vec2(10, -10) })
+    // this.addBig({ position: Vec2(7, 7) })
+    this.addSmall({ position: Vec2(0, 0) })
+    this.addTree({ position: Vec2(10, -10) })
   }
 }

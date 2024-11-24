@@ -41,7 +41,7 @@ export class Tree extends Actor {
       vertices: this.getVertices(this.seedRadius)
     }
     this.setupVertices()
-    this.sculpture.health = 0.0000000000000000001
+    this.sculpture.combatDamage = 0.999999999999
     this.features.push(this.sculpture)
     this.foodSize = this.seedRadius * 2 * Math.sin(2 / 3 * Math.PI)
     this.seedSideLength = this.seedRadius * 2 * Math.sin(2 / 3 * Math.PI)
@@ -94,12 +94,12 @@ export class Tree extends Actor {
     this.foodPolygons.push(...foodRow1, ...foodRow2, ...foodRow3)
     this.foodLayer += 1
     this.oldSideLength = this.sideLength
-    this.sculpture.health = Math.max(rowCount * 0.2, 1)
+    this.sculpture.combatDamage = 0
   }
 
   fall (): void {
     this.radius = this.seedRadius
-    this.sculpture.health = 0.0000000000000000001
+    this.sculpture.combatDamage = 0.999999999999
     if (this.sculpture.polygon == null) {
       throw new Error('There is no polygon')
     }
