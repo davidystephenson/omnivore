@@ -69,7 +69,8 @@ export class Membrane extends Feature {
       }
     }
     const ratio = this.body.getMass() / target.body.getMass()
-    target.health -= 0.03 * Math.pow(ratio, 2)
+    const factor = 1.5
+    target.health -= 0.05 * Math.pow(ratio, factor)
 
     if (target.health <= 0) {
       if (target instanceof Membrane) {

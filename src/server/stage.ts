@@ -1,6 +1,6 @@
 import { World, Vec2, Contact, Body, AABB, PolygonShape, CircleShape, Shape, Transform, testOverlap } from 'planck'
 import { Runner } from './runner'
-import { OrganismSpawn } from './actor/organism'
+import { Organism, OrganismSpawn } from './actor/organism'
 import { Wall } from './actor/wall'
 import { Actor } from './actor/actor'
 import { Brick } from './actor/brick'
@@ -15,7 +15,6 @@ import { DebugCircle } from '../shared/debugCircle'
 import { Starvation } from './starvation'
 import { LogProps, Debugger } from './debugger'
 import { Navigation } from './navigation'
-import { Bot } from './actor/bot'
 import { Player } from './actor/player'
 import { Gene } from './gene'
 import { Tree } from './actor/tree'
@@ -68,8 +67,8 @@ export class Stage {
     color: Rgb
     position: Vec2
     gene: Gene
-  }): Bot {
-    const organism = new Bot({ stage: this, ...props })
+  }): Organism {
+    const organism = new Organism({ stage: this, ...props })
     return organism
   }
 
@@ -430,7 +429,7 @@ export class Stage {
           if (position == null) {
             return true
           }
-          void new Bot({ ...def, position, stage: this })
+          void new Organism({ ...def, position, stage: this })
           return false
         })
       }

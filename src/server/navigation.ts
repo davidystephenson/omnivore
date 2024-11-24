@@ -8,7 +8,6 @@ import { Feature } from './feature/feature'
 import { Membrane } from './feature/membrane'
 import { Structure } from './feature/structure'
 import { Organism } from './actor/organism'
-import { Bot } from './actor/bot'
 import { CYAN, RED, WHITE } from '../shared/color'
 
 export class Navigation {
@@ -45,19 +44,24 @@ export class Navigation {
     return target
   }
 
-  getPath (start: Vec2, end: Vec2, radius: number, otherRadius?: number): Vec2[] {
-    const largerRadii = this.radii.filter(rad => rad >= radius)
+  getPath (props: {
+    a: Vec2
+    b: Vec2
+    radius: number
+    otherRadius?: number
+  }): Vec2[] {
+    const largerRadii = this.radii.filter(rad => rad >= props.radius)
     const minimumRadius = largerRadii[whichMin(largerRadii)]
     const radiusWaypoints = this.radiiWaypoints.get(minimumRadius)
     if (radiusWaypoints == null) throw new Error('Radius out of bounds')
-    const path = [start]
-    let nextPoint: Waypoint | Vec2 = this.navigate(path[path.length - 1], end, radius)
+    const path = [props.a]
+    let nextPoint: Waypoint | Vec2 = this.navigate(path[path.length - 1], props.b, props.radius)
     if (!(nextPoint instanceof Waypoint)) {
       path.push(nextPoint)
     }
     while (nextPoint instanceof Waypoint) {
       path.push(nextPoint.position)
-      nextPoint = this.navigate(path[path.length - 1], end, radius, otherRadius)
+      nextPoint = this.navigate(path[path.length - 1], props.b, props.radius, props.otherRadius)
       if (!(nextPoint instanceof Waypoint)) path.push(nextPoint)
       if (path.length > radiusWaypoints.length) {
         this.stage.debug({ v: 'The path is too long' })
@@ -331,14 +335,11 @@ export class Navigation {
   }
 
   onStep (): void {
-    const players: Organism[] = []
-    this.stage.actors.forEach(actor => {
-      if (!(actor instanceof Organism)) return
-      if (actor instanceof Bot) return
-      players.push(actor)
+    const playing = [...this.stage.actors.values()].some(actor => {
+      if (!(actor instanceof Organism)) return false
+      return actor.player
     })
-    const player = players[0]
-    if (player == null) return
+    if (!playing) return
     const debugRadius = 1.2
     if (this.stage.flags.waypoints) {
       this.cornerWaypoints.forEach(waypoint => {
