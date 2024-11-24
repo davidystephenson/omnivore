@@ -87,42 +87,6 @@ export class Organism extends Actor {
     this.giveUpTime = 30 / this.membrane.acceleration
   }
 
-  move (): void {
-    let x = 0
-    let y = 0
-    if (this.controls.up) y += 1
-    if (this.controls.down) y -= 1
-    if (this.controls.left) x -= 1
-    if (this.controls.right) {
-      x += 1
-    }
-    const direction = Vec2(x, y)
-    direction.normalize()
-    if (!this.dead && this.membranes.length === 0) {
-      throw new Error('This organism has no membranes')
-    }
-    this.membranes.forEach(membrane => {
-      const forceScale = membrane.acceleration * membrane.body.getMass() * 2
-      membrane.force = Vec2.mul(direction, forceScale)
-    })
-  }
-
-  sortExplorationPoints (): void {
-    const distances = this.explorationIds.map(i => {
-      const point = this.explorationPoints[i]
-      const distance = Vec2.distance(this.membrane.position, point.position)
-      return distance
-    })
-    this.explorationIds.sort((a, b) => {
-      return distances[b] - distances[a]
-    })
-    this.explorationIds.sort((a, b) => {
-      const pointA = this.explorationPoints[a]
-      const pointB = this.explorationPoints[b]
-      return pointA.time - pointB.time
-    })
-  }
-
   addCircles (props: {
     gene: Gene
     circles: CircleShape[]
@@ -254,15 +218,6 @@ export class Organism extends Actor {
       this.grow({ gene: childBranch, parent: membrane })
     }
     return membrane
-  }
-
-  starve (props: {
-    membrane: Membrane
-  }): void {
-    this.stage.starvationQueue.push(new Starvation({
-      stage: this.stage,
-      victim: props.membrane
-    }))
   }
 
   charge (enemy: Feature): Rgb {
@@ -507,6 +462,26 @@ export class Organism extends Actor {
     return this.wander()
   }
 
+  move (): void {
+    let x = 0
+    let y = 0
+    if (this.controls.up) y += 1
+    if (this.controls.down) y -= 1
+    if (this.controls.left) x -= 1
+    if (this.controls.right) {
+      x += 1
+    }
+    const direction = Vec2(x, y)
+    direction.normalize()
+    if (!this.dead && this.membranes.length === 0) {
+      throw new Error('This organism has no membranes')
+    }
+    this.membranes.forEach(membrane => {
+      const forceScale = membrane.acceleration * membrane.body.getMass() * 2
+      membrane.force = Vec2.mul(direction, forceScale)
+    })
+  }
+
   navigate (props: {
     debug?: boolean
     target: Vec2
@@ -574,6 +549,22 @@ export class Organism extends Actor {
     this.debugControls()
   }
 
+  sortExplorationPoints (): void {
+    const distances = this.explorationIds.map(i => {
+      const point = this.explorationPoints[i]
+      const distance = Vec2.distance(this.membrane.position, point.position)
+      return distance
+    })
+    this.explorationIds.sort((a, b) => {
+      return distances[b] - distances[a]
+    })
+    this.explorationIds.sort((a, b) => {
+      const pointA = this.explorationPoints[a]
+      const pointB = this.explorationPoints[b]
+      return pointA.time - pointB.time
+    })
+  }
+
   sortNearest (props: {
     features: Feature[]
   }): Feature[] {
@@ -599,6 +590,16 @@ export class Organism extends Actor {
     const sorted = distances.sort((a, b) => a.distance - b.distance)
     const features = sorted.map(pair => pair.feature)
     return features
+  }
+
+  starve (props: {
+    membrane: Membrane
+  }): void {
+    const starvation = new Starvation({
+      stage: this.stage,
+      victim: props.membrane
+    })
+    this.stage.starvationQueue.push(starvation)
   }
 
   wander (): Rgb {
