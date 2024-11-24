@@ -1,5 +1,5 @@
 import { Vec2 } from 'planck'
-import { Stage } from '../stage'
+import { Stage } from '../stage/stage'
 import { Actor } from './actor'
 import { Sculpture } from '../feature/sculpture'
 
@@ -21,7 +21,9 @@ export class Puppet extends Actor {
     this.features.push(this.sculpture)
   }
 
-  onStep (stepSize: number): void {
-    super.onStep(stepSize)
+  onStep (props: {
+    stepSize: number
+  }): void {
+    super.onStep({ stepSize: props.stepSize })
   }
 }

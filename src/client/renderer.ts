@@ -7,6 +7,7 @@ import { DebugLine } from '../shared/debugLine'
 import { DebugCircle } from '../shared/debugCircle'
 
 export class Renderer {
+  age = 0
   lerp = 0.5
   elements = new Map<number, ClientElement>()
   foodCount = 0
@@ -89,6 +90,10 @@ export class Renderer {
       this.context.arc(debugCircle.position.x, debugCircle.position.y, debugCircle.radius, 0, 2 * Math.PI)
       this.context.fill()
     })
+    this.context.resetTransform()
+    this.context.fillStyle = 'white'
+    this.context.font = '50px Arial'
+    this.context.fillText(String(this.age), 10, 60)
   }
 
   followCamera (): void {
@@ -154,7 +159,8 @@ export class Renderer {
     context.restore()
   }
 
-  updateElements (summary: Summary): void {
+  update (summary: Summary): void {
+    this.age = summary.age
     this.elements.forEach(element => {
       element.visible = false
     })

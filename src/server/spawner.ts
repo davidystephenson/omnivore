@@ -1,6 +1,6 @@
 import { Vec2, Body, Circle } from 'planck'
 import { Spawnpoint } from './spawnpoint'
-import { Stage } from './stage'
+import { Stage } from './stage/stage'
 import { RED, GREEN } from '../shared/color'
 
 export class Spawner {

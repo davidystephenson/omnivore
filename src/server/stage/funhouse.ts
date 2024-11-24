@@ -1,8 +1,8 @@
 import { Vec2 } from 'planck'
-import { Gene } from '../server/gene'
-import { Walled } from '../server/walled'
-import { RED, YELLOW } from '../shared/color'
-import { Flags } from './flags'
+import { Gene } from '../gene'
+import { Walled } from './walled'
+import { RED, YELLOW } from '../../shared/color'
+import { Flags } from '../flags'
 
 export class Funhouse extends Walled {
   constructor () {

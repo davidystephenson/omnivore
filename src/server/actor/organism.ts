@@ -1,12 +1,12 @@
 import { CircleShape, PolygonShape, RopeJoint, Vec2 } from 'planck'
-import { Stage } from '../stage'
+import { Stage } from '../stage/stage'
 import { Actor } from './actor'
 import { Membrane } from '../feature/membrane'
 import { directionFromTo, range, rotate, whichMax, whichMin } from '../math'
 import { Egg } from '../feature/egg'
 import { Feature } from '../feature/feature'
 import { Rope } from '../../shared/rope'
-import { Starvation } from '../starvation'
+import { Starvation } from '../death/starvation'
 import { ExplorationPoint } from '../explorationPoint'
 import { Controls } from '../../shared/input'
 import { Gene } from '../gene'
@@ -497,8 +497,10 @@ export class Organism extends Actor {
     return GRAY
   }
 
-  onStep (stepSize: number): void {
-    super.onStep(stepSize)
+  onStep (props: {
+    stepSize: number
+  }): void {
+    super.onStep({ stepSize: props.stepSize })
     const featuresInRange = this.membrane.getFeaturesInRange()
     this.featuresInVision = featuresInRange.filter(targetFeature => {
       const visible = this.membranes.some(membrane => this.stage.vision.isFeatureVisible(membrane, targetFeature))
@@ -523,7 +525,7 @@ export class Organism extends Actor {
       })
       return
     }
-    this.explore(stepSize)
+    this.explore(props.stepSize)
     this.controlColor = this.maneuver()
   }
 

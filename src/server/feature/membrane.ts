@@ -1,7 +1,7 @@
 import { Vec2, Circle, Fixture } from 'planck'
 import { Feature } from './feature'
 import { Organism } from '../actor/organism'
-import { Killing } from '../killing'
+import { Killing } from '../death/killing'
 import { Structure } from './structure'
 import { directionFromTo } from '../math'
 import { Tree } from '../actor/tree'
@@ -46,8 +46,7 @@ export class Membrane extends Feature {
 
   destroy (): void {
     this.destroyed = true
-    const nutrition = this.maximumHealth / 10
-    const foodRatio = this.combatDamage / nutrition
+    const foodRatio = this.combatDamage / Food.nutrition
     const foodCount = Math.floor(foodRatio)
     for (let i = 0; i < foodCount; i++) {
       this.actor.stage.addFoodSquare({
@@ -82,7 +81,7 @@ export class Membrane extends Feature {
         target.actor.fall()
       } else {
         if (target.actor instanceof Food) {
-          const nutrition = this.maximumHealth / 10
+          const nutrition = this.maximumHealth * Food.nutrition
           this.heal({ value: nutrition })
         }
         target.actor.destroy()

@@ -1,5 +1,5 @@
 import { Fixture, PolygonShape, Vec2 } from 'planck'
-import { Stage } from '../stage'
+import { Stage } from '../stage/stage'
 import { Actor } from './actor'
 import { Sculpture } from '../feature/sculpture'
 import { LIME } from '../../shared/color'
@@ -151,8 +151,10 @@ export class Tree extends Actor {
     }
   }
 
-  onStep (stepSize: number): void {
-    super.onStep(stepSize)
+  onStep (props: {
+    stepSize: number
+  }): void {
+    super.onStep({ stepSize: props.stepSize })
     const features = this.sculpture.getFeaturesInRange()
     const otherFeatures = features.filter(feature => feature !== this.sculpture)
     const nearestOtherPoint = getNearestOtherPoint(this.stage, this.sculpture, otherFeatures)

@@ -1,10 +1,11 @@
 import { Vec2 } from 'planck'
 import { Sculpture } from '../feature/sculpture'
-import { Stage } from '../stage'
+import { Stage } from '../stage/stage'
 import { Actor } from './actor'
 import { GREEN } from '../../shared/color'
 
 export class Food extends Actor {
+  static nutrition = 0.2
   sculpture: Sculpture
 
   constructor (props: {
@@ -24,7 +25,9 @@ export class Food extends Actor {
     this.stage.food.push(this)
   }
 
-  onStep (stepSize: number): void {
-    super.onStep(stepSize)
+  onStep (props: {
+    stepSize: number
+  }): void {
+    super.onStep({ stepSize: props.stepSize })
   }
 }

@@ -1,5 +1,5 @@
 import { Vec2 } from 'planck'
-import { Stage } from '../stage'
+import { Stage } from '../stage/stage'
 import { Actor } from './actor'
 import { Structure } from '../feature/structure'
 

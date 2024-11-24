@@ -1,9 +1,9 @@
 import { AABB, Vec2 } from 'planck'
-import { HALF_SIGHT } from '../shared/sight'
-import { Membrane } from './feature/membrane'
-import { Stage } from './stage'
+import { HALF_SIGHT } from '../../shared/sight'
+import { Membrane } from '../feature/membrane'
+import { Stage } from '../stage/stage'
 import { Death } from './death'
-import { Brick } from './actor/brick'
+import { Brick } from '../actor/brick'
 
 export class Starvation extends Death {
   constructor (props: { stage: Stage, victim: Membrane }) {
@@ -24,6 +24,6 @@ export class Starvation extends Death {
     if (sized) {
       void new Brick({ halfWidth, halfHeight, position: brickPosition, stage: this.stage })
     }
-    this.respawn()
+    super.execute()
   }
 }

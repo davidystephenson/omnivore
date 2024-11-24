@@ -2,7 +2,7 @@
 import { HALF_SIGHT } from '../shared/sight'
 import { Feature } from './feature/feature'
 import { Vec2, CircleShape, PolygonShape, Fixture } from 'planck'
-import { Stage } from './stage'
+import { Stage } from './stage/stage'
 import { BLUE, LIME, RED, YELLOW } from '../shared/color'
 import { directionFromTo, getAngleDifference, getNearestIndex, normalize, rotate, vecToAngle, whichMax } from './math'
 import { RayCastHit } from '../shared/rayCastHit'

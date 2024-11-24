@@ -1,8 +1,8 @@
 import { Vec2 } from 'planck'
 import { Walled } from './walled'
-import { YELLOW, RED } from '../shared/color'
-import { Gene } from './gene'
-import { Organism } from './actor/organism'
+import { YELLOW, RED } from '../../shared/color'
+import { Gene } from '../gene'
+import { Organism } from '../actor/organism'
 
 export class Playhouse extends Walled {
   bigGene = new Gene({

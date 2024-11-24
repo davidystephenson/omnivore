@@ -1,10 +1,10 @@
 import { AABB, Vec2 } from 'planck'
-import { HALF_SIGHT } from '../shared/sight'
-import { Membrane } from './feature/membrane'
-import { getCompass, whichMax } from './math'
-import { Stage } from './stage'
+import { HALF_SIGHT } from '../../shared/sight'
+import { Membrane } from '../feature/membrane'
+import { getCompass, whichMax } from '../math'
+import { Stage } from '../stage/stage'
 import { Death } from './death'
-import { Puppet } from './actor/puppet'
+import { Puppet } from '../actor/puppet'
 
 export class Killing extends Death {
   killer: Membrane
@@ -57,6 +57,6 @@ export class Killing extends Death {
     if (Math.min(halfWidth, halfHeight) > 0) {
       void new Puppet({ stage: this.stage, vertices: localPuppetCorners, position: brickPosition })
     }
-    this.respawn()
+    super.execute()
   }
 }

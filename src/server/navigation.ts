@@ -1,5 +1,5 @@
 import { Circle, Vec2 } from 'planck'
-import { Stage } from './stage'
+import { Stage } from './stage/stage'
 import { Waypoint } from './waypoint'
 import { HALF_SIGHT } from '../shared/sight'
 import { directionFromTo, normalize, range, rotate, whichMin } from './math'

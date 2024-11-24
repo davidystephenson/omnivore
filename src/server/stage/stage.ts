@@ -1,47 +1,48 @@
 import { World, Vec2, Contact, Body, AABB, PolygonShape, CircleShape, Shape, Transform, testOverlap } from 'planck'
-import { Runner } from './runner'
-import { Organism, OrganismSpawn } from './actor/organism'
-import { Wall } from './actor/wall'
-import { Actor } from './actor/actor'
-import { Brick } from './actor/brick'
-import { Feature } from './feature/feature'
-import { Killing } from './killing'
-import { Rgb, RED, Rgba } from '../shared/color'
-import { DebugLine } from '../shared/debugLine'
-import { Vision } from './vision'
-import { Puppet } from './actor/puppet'
-import { range, shuffle } from './math'
-import { DebugCircle } from '../shared/debugCircle'
-import { Starvation } from './starvation'
-import { LogProps, Debugger } from './debugger'
-import { Navigation } from './navigation'
-import { Player } from './actor/player'
-import { Gene } from './gene'
-import { Tree } from './actor/tree'
-import { Food } from './actor/food'
-import { Spawner } from './spawner'
-import { Spawnpoint } from './spawnpoint'
-import { Flags } from './flags'
+import { Runner } from '../runner'
+import { Organism, OrganismSpawn } from '../actor/organism'
+import { Wall } from '../actor/wall'
+import { Actor } from '../actor/actor'
+import { Brick } from '../actor/brick'
+import { Feature } from '../feature/feature'
+import { Killing } from '../death/killing'
+import { Rgb, RED, Rgba } from '../../shared/color'
+import { DebugLine } from '../../shared/debugLine'
+import { Vision } from '../vision'
+import { Puppet } from '../actor/puppet'
+import { range, shuffle } from '../math'
+import { DebugCircle } from '../../shared/debugCircle'
+import { Starvation } from '../death/starvation'
+import { LogProps, Debugger } from '../debugger'
+import { Navigation } from '../navigation'
+import { Player } from '../actor/player'
+import { Gene } from '../gene'
+import { Tree } from '../actor/tree'
+import { Food } from '../actor/food'
+import { Spawner } from '../spawner'
+import { Spawnpoint } from '../spawnpoint'
+import { Flags } from '../flags'
 
 export class Stage {
   actors = new Map<number, Actor>()
+  debugger: Debugger
   destructionQueue: Body[] = []
+  fallQueue: Tree[] = []
   flags: Flags
+  food: Food[] = []
   halfHeight: number
   halfWidth: number
   killingQueue: Killing[] = []
-  debugger: Debugger
+  navigation: Navigation
+  players = new Map<string, Player>()
   respawnQueue: OrganismSpawn[] = []
   runner: Runner
+  spawner: Spawner
   starvationQueue: Starvation[] = []
-  fallQueue: Tree[] = []
+  virtualBoxes: AABB[] = []
   vision: Vision
   walls: Wall[] = []
-  food: Food[] = []
   world: World
-  virtualBoxes: AABB[] = []
-  navigation: Navigation
-  spawner: Spawner
 
   constructor (props: {
     flags: Flags
@@ -84,6 +85,7 @@ export class Stage {
 
   addPlayer (props: {
     color: Rgb
+    id: string
     position: Vec2
     gene: Gene
   }): Player {
@@ -396,11 +398,14 @@ export class Stage {
     this.debug(props)
   }
 
-  onStep (stepSize: number): void {
+  onStep (props: {
+    stepSize: number
+  }): void {
     this.debugger.onStep()
     this.navigation.onStep()
     this.spawner.onStep()
-    this.actors.forEach(actor => actor.onStep(stepSize))
+    this.players.forEach(player => player.onStep({ stepSize: props.stepSize }))
+    this.actors.forEach(actor => actor.onStep({ stepSize: props.stepSize }))
     this.destructionQueue.forEach(body => {
       this.world.destroyBody(body)
     })
@@ -422,6 +427,7 @@ export class Stage {
       const clearSpawnPoints = this.spawner.spawnPoints.filter(spawnPoint => spawnPoint.collideCount < 1)
       this.flag({ f: 'respawn', vs: ['clearSpawnPoints.length', clearSpawnPoints.length] })
       const clearSpawnPositions = clearSpawnPoints.map(spawnPoint => spawnPoint.location)
+      // TODO longest path away
       const shuffled = shuffle(clearSpawnPositions)
       if (clearSpawnPositions.length > 0) {
         this.respawnQueue = this.respawnQueue.filter(def => {

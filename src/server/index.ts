@@ -5,21 +5,20 @@ import { Gene } from './gene'
 // import { Funhouse } from './funhouse'
 import { GREEN } from '../shared/color'
 // import { Mission } from './mission'
-import { GrandRehearsal } from './grandRehearsal'
+import { GrandRehearsal } from './stage/grandRehearsal'
 // import { Rehearsal } from './rehearsal'
 
 const stage = new GrandRehearsal()
 
 io.on('connection', socket => {
-  stage.debug({
-    vs: ['connection:', socket.id]
-  })
+  stage.debug({ vs: ['connection:', socket.id] })
   socket.emit('connected')
   const gene = new Gene({
     radius: 0.9
   })
   const player = stage.addPlayer({
     color: GREEN,
+    id: socket.id,
     gene,
     position: Vec2(0, 0)
   })

@@ -5,6 +5,7 @@ import { DebugCircle } from './debugCircle'
 import { Controls } from './input'
 
 export interface Summary {
+  age: number
   elements: Element[]
   ropes: Rope[]
   debugLines: DebugLine[]
