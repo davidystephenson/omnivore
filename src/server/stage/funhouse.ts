@@ -1,7 +1,5 @@
 import { Vec2 } from 'planck'
-import { Gene } from '../gene'
 import { Walled } from './walled'
-import { RED, YELLOW } from '../../shared/color'
 import { Flags } from '../flags'
 
 export class Funhouse extends Walled {
@@ -302,37 +300,6 @@ export class Funhouse extends Walled {
     //   halfWidth: 1,
     //   position: Vec2(rightPropX - 5, 16)
     // })
-    const smallGene = new Gene({
-      radius: 0.6
-    })
-    this.addBot({
-      color: YELLOW,
-      position: Vec2(-10, 15),
-      gene: smallGene
-    })
-    this.addBot({
-      color: YELLOW,
-      position: Vec2(-10, 20),
-      gene: smallGene
-    })
-    this.addBot({
-      color: YELLOW,
-      position: Vec2(-10, 25),
-      gene: smallGene
-    })
-    const bigGene = new Gene({
-      radius: 1.2
-    })
-    this.addBot({
-      color: RED,
-      position: Vec2(0, 10),
-      gene: bigGene
-    })
-    this.addBot({
-      color: RED,
-      position: Vec2(-10, -50),
-      gene: bigGene
-    })
     // this.addBrick({
     //   halfHeight: 1,
     //   halfWidth: 1,

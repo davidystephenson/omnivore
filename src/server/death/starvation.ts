@@ -17,12 +17,15 @@ export class Starvation extends Death {
     const lookUpperBound = Vec2(victimPosition.x + HALF_SIGHT.x, victimPosition.y + HALF_SIGHT.y)
     const lookBox = new AABB(lookLowerBound, lookUpperBound)
     const brickBox = this.trim({ base: victimPosition, lookBox })
-    const halfWidth = brickBox.getExtents().x
-    const halfHeight = brickBox.getExtents().y
+    // scale by speed
+    const length = this.victim.body.getLinearVelocity().length()
+    const scale = 1 / length // this.victim.body.getLinearVelocity().length()
+    const halfWidth = brickBox.getExtents().x * scale
+    const halfHeight = brickBox.getExtents().y * scale
     const brickPosition = brickBox.getCenter()
-    const sized = Math.min(halfWidth, halfHeight) > 0
+    const sized = Math.min(halfWidth, halfHeight) > 0.1
     if (sized) {
-      void new Brick({ halfWidth, halfHeight, position: brickPosition, stage: this.stage })
+      // void new Brick({ halfWidth, halfHeight, position: brickPosition, stage: this.stage })
     }
     super.execute()
   }

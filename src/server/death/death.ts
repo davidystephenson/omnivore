@@ -16,9 +16,6 @@ export class Death {
   }
 
   execute (): void {
-    if (this.victim.actor instanceof Organism && this.victim.actor.player != null) {
-      this.victim.actor.player.age = 0
-    }
     const actors = [...this.stage.actors.values()]
     const organisms = actors.filter((actor) => actor instanceof Organism) as Organism[]
     const relatives = organisms.filter((actor) => {
@@ -45,6 +42,9 @@ export class Death {
       color: this.victim.actor.color,
       gene: this.victim.actor.gene,
       player: this.victim.actor.player
+    }
+    if (this.victim.actor instanceof Organism && this.victim.actor.player != null) {
+      this.victim.actor.player.age = 0
     }
     this.stage.respawnQueue.push(spawn)
   }

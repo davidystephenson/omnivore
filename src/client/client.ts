@@ -34,7 +34,6 @@ socket.on('connected', () => {
 socket.on('serverUpdateClient', (summary: Summary) => {
   lastSummary = summary
   renderer.update(summary)
-  console.log('up', summary.controls.up)
 })
 
 function updateServer (): void {

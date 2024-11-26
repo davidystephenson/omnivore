@@ -16,6 +16,7 @@ export class Killing extends Death {
 
   execute (): void {
     this.stage.flag({ f: 'death', v: 'Killing.execute' })
+    // TODO Spawn brick
     const killerPosition = this.killer.body.getPosition()
     const brickDirection = getCompass(Vec2.sub(this.victim.deathPosition, killerPosition))
     const brickLookDistance = (brickDirection.x !== 0 ? HALF_SIGHT.x : HALF_SIGHT.y) - this.killer.radius
@@ -55,6 +56,7 @@ export class Killing extends Death {
       return index !== nearestIndex
     })
     if (Math.min(halfWidth, halfHeight) > 0) {
+      // TODO scale by speed
       void new Puppet({ stage: this.stage, vertices: localPuppetCorners, position: brickPosition })
     }
     super.execute()

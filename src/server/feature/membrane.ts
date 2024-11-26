@@ -6,13 +6,13 @@ import { Structure } from './structure'
 import { directionFromTo } from '../math'
 import { Tree } from '../actor/tree'
 import { Food } from '../actor/food'
+import { Runner } from '../runner'
 
 export class Membrane extends Feature {
   actor: Organism
   destroyed = false
   hungerDamage = 0
   radius: number
-  acceleration = 1
   sensor: Fixture
 
   constructor (props: {
@@ -112,11 +112,11 @@ export class Membrane extends Feature {
     } else if (this.combatDamage > props.value) {
       this.combatDamage -= props.value
     } else {
-      this.reproduce()
+      this.actor.reproduce()
     }
   }
 
-  onStep (): void {
+  onStep (props: { stepSize: number }): void {
     this.handleContacts()
     if (
       this.actor.stage.flags.hungerY &&
@@ -124,8 +124,9 @@ export class Membrane extends Feature {
       !this.destroyed &&
       !this.actor.dead
     ) {
-      const seconds = 180
-      const hunger = 1 / (10 * seconds)
+      const lifeSeconds = 300 * this.actor.gene.stamina
+      const lifeFrames = Runner.Fps * lifeSeconds
+      const hunger = 1 / lifeFrames
       this.hungerDamage += hunger
       this.health = this.getHealth()
       if (this.health <= 0) {
@@ -140,16 +141,5 @@ export class Membrane extends Feature {
     const direction = directionFromTo(this.body.getPosition(), target.body.getPosition())
     const force = Vec2.mul(direction, forceScale)
     target.body.applyForceToCenter(force)
-  }
-
-  reproduce (): void {
-    const bot = this.actor.stage.addBot({
-      color: this.actor.color,
-      gene: this.actor.gene,
-      position: this.position
-    })
-    const half = this.maximumHealth / 2
-    bot.membrane.hungerDamage = half
-    this.hungerDamage = half
   }
 }

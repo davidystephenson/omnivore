@@ -39,6 +39,6 @@ export class Actor {
       const circle = new CircleShape(position, 0.5)
       this.stage.debugCircle({ circle, color: GRAY })
     }
-    this.features.forEach(feature => feature.onStep(props.stepSize))
+    this.features.forEach(feature => feature.onStep({ stepSize: props.stepSize }))
   }
 }

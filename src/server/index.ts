@@ -4,17 +4,20 @@ import { Controls } from '../shared/input'
 import { Gene } from './gene'
 // import { Funhouse } from './funhouse'
 import { GREEN } from '../shared/color'
-// import { Mission } from './mission'
-import { GrandRehearsal } from './stage/grandRehearsal'
-// import { Rehearsal } from './rehearsal'
+// import { Mission } from './stage/mission'
+// import { GrandRehearsal } from './stage/grandRehearsal'
+import { Rehearsal } from './stage/rehearsal'
 
-const stage = new GrandRehearsal()
+const stage = new Rehearsal()
 
 io.on('connection', socket => {
   stage.debug({ vs: ['connection:', socket.id] })
   socket.emit('connected')
   const gene = new Gene({
-    radius: 0.9
+    speed: 0.34,
+    stage,
+    stamina: 0.33,
+    strength: 0.33
   })
   const player = stage.addPlayer({
     color: GREEN,
@@ -22,10 +25,12 @@ io.on('connection', socket => {
     gene,
     position: Vec2(0, 0)
   })
+  stage.addStamina({ position: Vec2(5, 0) })
+  stage.addSpeed({ position: Vec2(0, 5) })
   if (player.organism == null) {
     throw new Error('player.organism is undefined')
   }
-  player.organism.membrane.combatDamage = 0.9
+  // player.organism.membrane.combatDamage = 0.9
   socket.on('controls', (controls: Controls) => {
     if (player.organism == null) {
       return
