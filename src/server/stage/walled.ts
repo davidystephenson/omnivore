@@ -10,24 +10,24 @@ export class Walled extends Stage {
   }) {
     super(props)
     this.addWall({
-      halfWidth: this.halfWidth + 20,
-      halfHeight: 20,
-      position: Vec2(0, this.halfWidth + 21)
+      halfWidth: this.halfWidth,
+      halfHeight: 1,
+      position: Vec2(0, this.halfWidth)
     })
     this.addWall({
-      halfWidth: this.halfWidth + 20,
-      halfHeight: 20,
-      position: Vec2(0, -this.halfWidth - 21)
+      halfWidth: this.halfWidth,
+      halfHeight: 1,
+      position: Vec2(0, -this.halfWidth)
     })
     this.addWall({
-      halfWidth: 20,
-      halfHeight: this.halfHeight + 20,
-      position: Vec2(this.halfHeight + 21, 0)
+      halfWidth: 1,
+      halfHeight: this.halfHeight,
+      position: Vec2(this.halfHeight, 0)
     })
     this.addWall({
-      halfWidth: 20,
-      halfHeight: this.halfHeight + 20,
-      position: Vec2(-this.halfHeight - 21, 0)
+      halfWidth: 1,
+      halfHeight: this.halfHeight,
+      position: Vec2(-this.halfHeight, 0)
     })
   }
 }

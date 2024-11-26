@@ -78,6 +78,9 @@ export class Feature {
   }
 
   getFeaturesInRange (): Feature[] {
+    if (!this.actor.stage.flags.visionRangeY) {
+      return this.actor.stage.runner.features
+    }
     const featuresInRange: Feature[] = []
     this.actor.stage.walls.forEach(wall => featuresInRange.push(wall.structure))
     this.actor.features.forEach(feature => featuresInRange.push(feature))
@@ -130,7 +133,9 @@ export class Feature {
     return health
   }
 
-  onStep (stepSize: number): void {
+  onStep (props: {
+    stepSize: number
+  }): void {
     this.health = this.getHealth()
     this.position = this.body.getPosition()
   }

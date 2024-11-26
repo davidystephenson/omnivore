@@ -10,10 +10,10 @@ import { Player } from './actor/player'
 import { Tree } from './actor/tree'
 
 export class Runner {
-  static FPS = 30
+  static Fps = 30
   // intervalId: NodeJS.Timeout
   stage: Stage
-  timeStep = 1 / Runner.FPS
+  timeStep = 1 / Runner.Fps
   timeScale = 1 // 1
   paused = false
   worldTime = 0

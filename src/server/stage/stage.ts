@@ -64,15 +64,6 @@ export class Stage {
     this.spawner = new Spawner(this)
   }
 
-  addBot (props: {
-    color: Rgb
-    position: Vec2
-    gene: Gene
-  }): Organism {
-    const organism = new Organism({ stage: this, ...props })
-    return organism
-  }
-
   addBrick (props: {
     angle?: number
     halfHeight: number
@@ -81,6 +72,15 @@ export class Stage {
   }): Brick {
     const brick = new Brick({ stage: this, ...props })
     return brick
+  }
+
+  addOrganism (props: {
+    color: Rgb
+    position: Vec2
+    gene: Gene
+  }): Organism {
+    const organism = new Organism({ stage: this, ...props })
+    return organism
   }
 
   addPlayer (props: {
@@ -135,6 +135,7 @@ export class Stage {
     return wall
   }
 
+  // TODO Compare to tree food size
   addFood (props: { vertices: Vec2[], position: Vec2 }): Food {
     const food = new Food({ stage: this, ...props })
     return food
@@ -435,7 +436,8 @@ export class Stage {
           if (position == null) {
             return true
           }
-          void new Organism({ ...def, position, stage: this })
+          const gene = def.gene.mutate()
+          void new Organism({ ...def, gene, position, stage: this })
           return false
         })
       }

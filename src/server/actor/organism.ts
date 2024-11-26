@@ -48,7 +48,7 @@ export class Organism extends Actor {
   membranes: Membrane[] = []
   north = Vec2(0, 1)
   player?: Player
-  radius: number
+  navigationRadius: number
   readyToHatch = false
   respawning = false
   spawnPosition: Vec2
@@ -71,7 +71,7 @@ export class Organism extends Actor {
     const indexOfMinimumValue = whichMin(largerRadii)
     const validRadius = largerRadii[indexOfMinimumValue]
     if (validRadius == null) throw new Error('No valid radius found')
-    this.radius = validRadius
+    this.navigationRadius = validRadius
     this.stage.navigation.waypoints.forEach(waypoint => {
       const isGrid = waypoint.category === 'grid'
       const isSmallRadius = waypoint.radius === validRadius
@@ -84,7 +84,7 @@ export class Organism extends Actor {
     })
     this.explorationIds = range(0, this.explorationPoints.length - 1)
     this.sortExplorationPoints()
-    this.giveUpTime = 30 / this.membrane.acceleration
+    this.giveUpTime = 30 / this.gene.speed
   }
 
   addCircles (props: {
@@ -94,12 +94,13 @@ export class Organism extends Actor {
     parentRadius?: number
   }): void {
     let center = this.spawnPosition
+    const radius = this.getRadius({ gene: props.gene })
     if (props.parentPosition != null && props.parentRadius != null) {
-      const distance = props.parentRadius + props.gene.radius + this.gap
+      const distance = props.parentRadius + radius + this.gap
       const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * props.gene.angle)
       center = Vec2.add(props.parentPosition, offset)
     }
-    const circle = new CircleShape(center, props.gene.radius)
+    const circle = new CircleShape(center, radius)
     props.circles.push(circle)
     for (const childBranch of props.gene.branches) {
       this.addCircles({
@@ -177,16 +178,22 @@ export class Organism extends Actor {
     return new Egg({ actor: this, position, hx, hy })
   }
 
-  getOffset (props: { parent: Membrane, branch: Gene }): Vec2 {
+  getOffset (props: { parent: Membrane, gene: Gene }): Vec2 {
     const parentPosition = props.parent.body.getPosition()
-    const distance = props.parent.radius + props.branch.radius + this.gap
-    const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * props.branch.angle)
+    const radius = this.getRadius({ gene: props.gene })
+    const distance = props.parent.radius + radius + this.gap
+    const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * props.gene.angle)
     const offsetPosition = Vec2.add(parentPosition, offset)
     return offsetPosition
   }
 
-  getRadius (): number {
-    return this.membrane.radius
+  getRadius (props: { gene: Gene }): number {
+    const minimumRadius = this.stage.navigation.radii[this.stage.navigation.radii.length - 1]
+    const maximumRadius = this.stage.navigation.radii[0]
+    const difference = maximumRadius - minimumRadius
+    const bonus = difference * props.gene.strength
+    const radius = minimumRadius + bonus
+    return radius
   }
 
   hatch = (): void => {
@@ -208,11 +215,12 @@ export class Organism extends Actor {
   }): Membrane {
     const position = props.parent == null
       ? this.spawnPosition
-      : this.getOffset({ parent: props.parent, branch: props.gene })
+      : this.getOffset({ parent: props.parent, gene: props.gene })
+    const radius = this.getRadius({ gene: props.gene })
     const membrane = this.addMembrane({
       position,
       cell: props.parent,
-      radius: props.gene.radius
+      radius
     })
     for (const childBranch of props.gene.branches) {
       this.grow({ gene: childBranch, parent: membrane })
@@ -477,7 +485,7 @@ export class Organism extends Actor {
       throw new Error('This organism has no membranes')
     }
     this.membranes.forEach(membrane => {
-      const forceScale = membrane.acceleration * membrane.body.getMass() * 2
+      const forceScale = this.gene.speed * membrane.body.getMass() * 3
       membrane.force = Vec2.mul(direction, forceScale)
     })
   }
@@ -527,6 +535,18 @@ export class Organism extends Actor {
     }
     this.explore(props.stepSize)
     this.controlColor = this.maneuver()
+  }
+
+  reproduce (): void {
+    const gene = this.gene.mutate()
+    const bot = this.stage.addOrganism({
+      color: this.color,
+      gene,
+      position: this.membrane.position
+    })
+    const half = this.membrane.maximumHealth / 2
+    bot.membrane.hungerDamage = half
+    this.membrane.hungerDamage = half
   }
 
   setControls (direction: Vec2): void {

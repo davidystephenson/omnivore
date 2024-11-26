@@ -9,11 +9,12 @@ export class Mission extends Playhouse {
         botChase: true,
         botFlee: true,
         charge: true,
-        hungerY: false,
+        // hungerY: false,
         performance: false,
-        respawn: true,
-        visionY: false,
-        waypointSpawnpointsY: false
+        // respawn: true,
+        visionRangeY: false,
+        visionY: false
+        // waypointSpawnpointsY: false
       }),
       halfHeight: 20,
       halfWidth: 20
@@ -41,7 +42,8 @@ export class Mission extends Playhouse {
     // this.addFoodSquare({ position: Vec2(-5, 5) })
     // this.addFoodSquare({ position: Vec2(0, 5) })
     // this.addBig({ position: Vec2(7, 7) })
-    this.addSmall({ position: Vec2(0, 0) })
-    this.addTree({ position: Vec2(10, -10) })
+    // this.addStamina({ position: Vec2(5, 0) })
+    // this.addSpeed({ position: Vec2(0, 5) })
+    // this.addTree({ position: Vec2(10, -10) })
   }
 }

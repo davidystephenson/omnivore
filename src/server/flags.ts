@@ -15,6 +15,7 @@ export class Flags {
   respawn: boolean
   summary: boolean
   vision: boolean
+  visionRangeY: boolean
   visionY: boolean
   waypoints: boolean
   waypointSpawnpointsY: boolean
@@ -36,6 +37,7 @@ export class Flags {
     respawn?: boolean
     summary?: boolean
     vision?: boolean
+    visionRangeY?: boolean
     visionY?: boolean
     waypoints?: boolean
     waypointSpawnpointsY?: boolean
@@ -56,6 +58,7 @@ export class Flags {
     this.respawn = props.respawn ?? false
     this.summary = props.summary ?? false
     this.vision = props.vision ?? false
+    this.visionRangeY = props.visionRangeY ?? true
     this.visionY = props.visionY ?? true
     this.waypoints = props.waypoints ?? false
     this.waypointSpawnpointsY = props.waypointSpawnpointsY ?? true

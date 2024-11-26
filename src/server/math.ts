@@ -100,6 +100,14 @@ export function choose<Element> (array: Element[]): Element {
   return array[Math.floor(Math.random() * array.length)]
 }
 
+export function floorNumber (props: {
+  number: number
+} & Decimals): number {
+  const decimals = props.decimals ?? 2
+  const factor = Math.pow(10, decimals)
+  return Math.floor((props.number + Number.EPSILON) * factor) / factor
+}
+
 export function shuffle <Element> (array: Element[]): Element[] {
   const seeded = array.map((element) => {
     return { element, seed: Math.random() }
@@ -126,7 +134,6 @@ export function roundNumber (props: {
   number: number
 } & Decimals): number {
   const decimals = props.decimals ?? 2
-  const string = props.number.toFixed(decimals)
-  const number = Number(string)
-  return number
+  const factor = Math.pow(10, decimals)
+  return Math.round((props.number + Number.EPSILON) * factor) / factor
 }

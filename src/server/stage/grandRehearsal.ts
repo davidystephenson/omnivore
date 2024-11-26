@@ -21,15 +21,19 @@ export class GrandRehearsal extends Playhouse {
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
 
-    this.addBig({ position: Vec2(5, 10) })
-    this.addBig({ position: Vec2(10, 20) })
+    this.addBalanced({ position: Vec2(5, 5) })
 
-    this.addSmall({ position: Vec2(-10, -20) })
-    this.addSmall({ position: Vec2(-10, -15) })
-    this.addSmall({ position: Vec2(-10, -10) })
-    this.addSmall({ position: Vec2(-10, -5) })
-    this.addSmall({ position: Vec2(-10, 5) })
-    this.addSmall({ position: Vec2(-10, 10) })
+    this.addSpeed({ position: Vec2(-10, -20) })
+    this.addSpeed({ position: Vec2(-10, -15) })
+    this.addSpeed({ position: Vec2(-10, -10) })
+    this.addSpeed({ position: Vec2(-10, -5) })
+    this.addSpeed({ position: Vec2(-10, 5) })
+    this.addSpeed({ position: Vec2(-10, 10) })
+
+    this.addStamina({ position: Vec2(5, -5) })
+
+    this.addStrength({ position: Vec2(5, 10) })
+    this.addStrength({ position: Vec2(10, 20) })
 
     this.addTree({ position: Vec2(20, 20) })
     this.addTree({ position: Vec2(20, -20) })
