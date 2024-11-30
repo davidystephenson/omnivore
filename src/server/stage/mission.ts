@@ -32,6 +32,7 @@ export class Mission extends Playhouse {
 
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
+    this.addBully({ position: Vec2(5, 5) })
 
     // this.addBrick({ position: Vec2(15, 15), halfHeight: 1, halfWidth: 1 })
     // this.addFoodSquare({ position: Vec2(5, 5) })

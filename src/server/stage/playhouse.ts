@@ -12,6 +12,13 @@ export class Playhouse extends Walled {
     strength: 0.33
   })
 
+  bullyGene = new Gene({
+    speed: 0.33,
+    stage: this,
+    stamina: 0.33,
+    strength: 0.34
+  })
+
   hunterGene = new Gene({
     speed: 0.5,
     stage: this,
@@ -60,6 +67,16 @@ export class Playhouse extends Walled {
     return this.addOrganism({
       color: ORANGE,
       gene: this.balancedGene,
+      position: props.position
+    })
+  }
+
+  addBully (props: {
+    position: Vec2
+  }): Organism {
+    return this.addOrganism({
+      color: RED,
+      gene: this.bullyGene,
       position: props.position
     })
   }
