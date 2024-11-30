@@ -5,22 +5,24 @@ import { Rope } from '../shared/rope'
 import { HALF_SIGHT } from '../shared/sight'
 import { DebugLine } from '../shared/debugLine'
 import { DebugCircle } from '../shared/debugCircle'
+import { LIGHT_GREEN } from '../shared/color'
 
 export class Renderer {
-  age = 0
   lerp = 0.5
   elements = new Map<number, ClientElement>()
   foodCount = 0
   ropes: Rope[] = []
   debugLines: DebugLine[] = []
   debugCircles: DebugCircle[] = []
-  canvas: HTMLCanvasElement
-  context: CanvasRenderingContext2D
-  id: number = 0
   camera = {
     position: new Vec2(0, 0),
     zoom: 0
   }
+
+  canvas: HTMLCanvasElement
+  context: CanvasRenderingContext2D
+  id: number = 0
+  summary?: Summary
 
   constructor () {
     this.canvas = document.getElementById('canvas') as HTMLCanvasElement
@@ -93,7 +95,10 @@ export class Renderer {
     this.context.resetTransform()
     this.context.fillStyle = 'white'
     this.context.font = '50px Arial'
-    this.context.fillText(String(this.age), 10, 60)
+    if (this.summary == null) {
+      return
+    }
+    this.context.fillText(String(this.summary.age), 10, 60)
   }
 
   followCamera (): void {
@@ -135,6 +140,9 @@ export class Renderer {
   }
 
   drawCircle (element: ClientElement): void {
+    if (this.summary == null) {
+      throw new Error('Missing summary')
+    }
     if (element.z == null) {
       throw new Error('Missing circle center x')
     }
@@ -151,7 +159,11 @@ export class Renderer {
     context.arc(element.z, element.w, element.u, 0, 2 * Math.PI)
     context.fill()
     context.clip()
-    this.context.strokeStyle = `rgba(${element.r},${element.g},${element.b},1)`
+    const self = element.i === this.summary.id
+    const red = self ? LIGHT_GREEN.red : element.r
+    const green = self ? LIGHT_GREEN.green : element.g
+    const blue = self ? LIGHT_GREEN.blue : element.b
+    this.context.strokeStyle = `rgba(${red},${green},${blue},1)`
     this.context.lineWidth = 5 * element.o
     context.beginPath()
     context.arc(element.z, element.w, element.u, 0, 2 * Math.PI)
@@ -160,7 +172,7 @@ export class Renderer {
   }
 
   update (summary: Summary): void {
-    this.age = summary.age
+    this.summary = summary
     this.elements.forEach(element => {
       element.visible = false
     })

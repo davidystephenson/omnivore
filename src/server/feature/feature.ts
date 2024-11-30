@@ -77,17 +77,6 @@ export class Feature {
     return this.sensor
   }
 
-  getFeaturesInRange (): Feature[] {
-    if (!this.actor.stage.flags.visionRangeY) {
-      return this.actor.stage.runner.features
-    }
-    const featuresInRange: Feature[] = []
-    this.actor.stage.walls.forEach(wall => featuresInRange.push(wall.structure))
-    this.actor.features.forEach(feature => featuresInRange.push(feature))
-    this.sensorFeatures.forEach(feature => featuresInRange.push(feature))
-    return featuresInRange
-  }
-
   destroy (): void {
     this.actor.stage.destructionQueue.push(this.body)
   }
@@ -126,6 +115,17 @@ export class Feature {
       }
     }
     return element
+  }
+
+  getFeaturesInRange (): Feature[] {
+    if (!this.actor.stage.flags.visionRangeY) {
+      return this.actor.stage.runner.features
+    }
+    const featuresInRange: Feature[] = []
+    this.actor.stage.walls.forEach(wall => featuresInRange.push(wall.structure))
+    this.actor.features.forEach(feature => featuresInRange.push(feature))
+    this.sensorFeatures.forEach(feature => featuresInRange.push(feature))
+    return featuresInRange
   }
 
   getHealth (): number {

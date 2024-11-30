@@ -13,6 +13,8 @@ import { Gene } from '../gene'
 import { BLUE, GRAY, GREEN, LIME, MAGENTA, PINK, PURPLE, RED, Rgb, WHITE } from '../../shared/color'
 import { Player } from './player'
 import { Waypoint } from '../waypoint'
+import { Food } from './food'
+import { Tree } from './tree'
 
 export interface OrganismSpawn {
   color: Rgb
@@ -417,25 +419,25 @@ export class Organism extends Actor {
   }
 
   judge ({ feature }: { feature: Feature }): boolean | undefined {
-    switch (feature.actor.label) {
-      case 'organism': {
-        const allied = feature.color === this.color
-        if (allied) return undefined
-        const theirMass = feature.body.getMass()
-        const myMass = this.membrane.body.getMass()
-        const tied = theirMass === myMass
-        if (tied) return undefined
-        const prey = theirMass < myMass
-        return prey
-      }
-      case 'tree': {
-        const unhealthy = feature.health < 0.1
-        if (unhealthy) return undefined
-        return true
-      }
-      case 'food': return true
-      default: return undefined
+    if (feature instanceof Membrane) {
+      const allied = feature.color === this.color
+      if (allied) return undefined
+      const theirMass = feature.body.getMass()
+      const myMass = this.membrane.body.getMass()
+      const tied = theirMass === myMass
+      if (tied) return undefined
+      const theirJaw = this.membrane.getJaw({ target: feature })
+      const myJaw = feature.getJaw({ target: this.membrane })
+      const prey = myJaw > theirJaw
+      return prey
+    } else if (feature.actor instanceof Tree) {
+      const unhealthy = feature.health < 0.1
+      if (unhealthy) return undefined
+      return true
+    } else if (feature.actor instanceof Food) {
+      return true
     }
+    return undefined
   }
 
   maneuver (): Rgb {
@@ -485,7 +487,7 @@ export class Organism extends Actor {
       throw new Error('This organism has no membranes')
     }
     this.membranes.forEach(membrane => {
-      const forceScale = this.gene.speed * membrane.body.getMass() * 3
+      const forceScale = this.gene.speed * membrane.body.getMass() * 5
       membrane.force = Vec2.mul(direction, forceScale)
     })
   }

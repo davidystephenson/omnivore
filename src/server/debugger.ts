@@ -10,9 +10,9 @@ interface K {
 }
 type Pair <Value> = Vx<Value> & K
 
-interface Frames { frames: number, seconds?: undefined }
-interface Seconds { frames?: undefined, seconds: number }
-interface Default { frames?: undefined, seconds?: undefined }
+interface Frames { frames: number, seconds?: number }
+interface Seconds { frames?: number, seconds: number }
+interface Default { frames?: number, seconds?: number }
 type Time = Frames | Seconds | Default
 export type LogProps<Value> = Pair<Value> & Time
 interface Interval {
@@ -82,7 +82,7 @@ export class Debugger {
     if (sources.length === 0) {
       return lines[0]
     }
-    const internals = ['log', 'debug', 'getCaller', 'getLine']
+    const internals = ['log', 'debug', 'getCaller', 'getLine', 'flag']
     const externals = sources.filter(line => {
       const method = this.getMethod({ line })
       const internal = internals.includes(method)

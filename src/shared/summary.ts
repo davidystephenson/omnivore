@@ -6,11 +6,12 @@ import { Controls } from './input'
 
 export interface Summary {
   age: number
-  elements: Element[]
-  ropes: Rope[]
+  controls: Controls
   debugLines: DebugLine[]
   debugCircles: DebugCircle[]
+  elements: Element[]
   foodCount: number
+  fps: number
   id: number
-  controls: Controls
+  ropes: Rope[]
 }

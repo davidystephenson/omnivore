@@ -10,20 +10,24 @@ import { Player } from './actor/player'
 import { Tree } from './actor/tree'
 
 export class Runner {
-  static Fps = 30
+  static FPS = 30
   // intervalId: NodeJS.Timeout
-  stage: Stage
-  timeStep = 1 / Runner.Fps
-  timeScale = 1 // 1
+
   paused = false
-  worldTime = 0
   debugLines: DebugLine[] = []
   debugCircles: DebugCircle[] = []
   features: Feature[] = []
+  fps = 0
   oldStepDate?: number
+  stage: Stage
+
   stepDate = performance.now()
   stepCount = 0
   stepCountInterval = 100
+  timeStep = 1 / Runner.FPS
+  timeScale = 1 // 1
+  worldTime = 0
+
   constructor (props: {
     stage: Stage
   }) {
@@ -35,10 +39,10 @@ export class Runner {
     this.oldStepDate = this.stepDate
     this.stepDate = performance.now()
     if (this.paused) return
+    const difference = this.stepDate - this.oldStepDate
+    this.fps = 1000 / difference
     if (this.stage.flags.performance && this.stepCount % this.stepCountInterval === 0) {
-      const difference = this.stepDate - this.oldStepDate
-      const fps = 1000 / difference
-      const fpsString = fps.toFixed(2)
+      const fpsString = this.fps.toFixed(2)
       console.info('fps', fpsString)
     }
     this.worldTime += this.timeStep
@@ -79,6 +83,7 @@ export class Runner {
     const summary: Summary = {
       age,
       elements,
+      fps: this.fps,
       foodCount: this.stage.food.length,
       ropes: this.getRopes(props.player),
       debugLines: this.debugLines,
