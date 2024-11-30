@@ -4,9 +4,10 @@ import { Controls } from '../shared/input'
 import { Gene } from './gene'
 // import { Funhouse } from './funhouse'
 import { GREEN } from '../shared/color'
-// import { Mission } from './stage/mission'
 // import { GrandRehearsal } from './stage/grandRehearsal'
 import { Rehearsal } from './stage/rehearsal'
+// import { Mission } from './stage/mission'
+// import { GrandRehearsal } from './stage/grandRehearsal'
 
 const stage = new Rehearsal()
 
@@ -25,8 +26,6 @@ io.on('connection', socket => {
     gene,
     position: Vec2(0, 0)
   })
-  stage.addStamina({ position: Vec2(5, 0) })
-  stage.addSpeed({ position: Vec2(0, 5) })
   if (player.organism == null) {
     throw new Error('player.organism is undefined')
   }

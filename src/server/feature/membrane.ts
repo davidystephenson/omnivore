@@ -2,16 +2,21 @@ import { Vec2, Circle, Fixture } from 'planck'
 import { Feature } from './feature'
 import { Organism } from '../actor/organism'
 import { Killing } from '../death/killing'
-import { Structure } from './structure'
 import { directionFromTo } from '../math'
 import { Tree } from '../actor/tree'
 import { Food } from '../actor/food'
 import { Runner } from '../runner'
+import { Prop } from './prop'
 
 export class Membrane extends Feature {
+  static BASE_DAMAGE = 0.1
+  static DAMAGE_FACTOR = 3
+  static MINIMUM_LIFE_SECONDS = 10
+  static GENETIC_LIFE_SECONDS = 300
   actor: Organism
   destroyed = false
   hungerDamage = 0
+  mass: number
   radius: number
   sensor: Fixture
 
@@ -40,13 +45,14 @@ export class Membrane extends Feature {
       color: props.actor.color
     })
     this.actor = props.actor
+    this.mass = this.body.getMass()
     this.radius = radius
     this.sensor = this.addSensor()
   }
 
   destroy (): void {
     this.destroyed = true
-    const foodRatio = this.combatDamage / Food.nutrition
+    const foodRatio = this.combatDamage / Food.NUTRITION
     const foodCount = Math.floor(foodRatio)
     for (let i = 0; i < foodCount; i++) {
       this.actor.stage.addFoodSquare({
@@ -57,16 +63,10 @@ export class Membrane extends Feature {
   }
 
   doDamage (target: Feature): void {
-    if (target instanceof Membrane) {
-      if (target.actor.color === this.actor.color) {
-        return
-      }
-    }
     const ratio = this.body.getMass() / target.body.getMass()
-    const factor = 1.5
+    const factor = 3
     target.combatDamage += 0.05 * Math.pow(ratio, factor)
     target.health = target.getHealth()
-
     if (target.health <= 0) {
       if (target instanceof Membrane) {
         const killing = new Killing({
@@ -75,18 +75,19 @@ export class Membrane extends Feature {
           killer: this
         })
         this.actor.stage.killingQueue.push(killing)
-        return
-      }
-      if (target.actor instanceof Tree) {
-        target.actor.fall()
       } else {
-        if (target.actor instanceof Food) {
-          const nutrition = this.maximumHealth * Food.nutrition
-          this.heal({ value: nutrition })
-        }
         target.actor.destroy()
       }
     }
+  }
+
+  getDamage (props: {
+    target: Membrane
+  }): number {
+    const ratio = this.mass / props.target.mass
+    const power = Math.pow(ratio, Membrane.DAMAGE_FACTOR)
+    const damage = Membrane.BASE_DAMAGE * power
+    return damage
   }
 
   getHealth (): number {
@@ -95,13 +96,27 @@ export class Membrane extends Feature {
     return health
   }
 
+  getJaw (props: {
+    target: Membrane
+  }): number {
+    const damage = this.getDamage({ target: props.target })
+    const jaw = props.target.health / damage
+    return jaw
+  }
+
   handleContacts (): void {
     this.contacts.forEach(target => {
-      if (target instanceof Structure) return
-      if (target.actor === this.actor) return
-      this.doDamage(target)
-      if (target instanceof Membrane) {
-        this.push(target)
+      if (target.actor instanceof Food) {
+        const nutrition = this.maximumHealth * target.actor.nutrition
+        this.heal({ value: nutrition })
+        target.actor.destroy()
+      } else if (target.actor instanceof Tree) {
+        target.actor.fall()
+      } else if (target instanceof Membrane && target.actor.color !== this.actor.color) {
+        this.doDamage(target)
+        this.shove(target)
+      } else if (target instanceof Prop) {
+        this.doDamage(target)
       }
     })
   }
@@ -116,28 +131,35 @@ export class Membrane extends Feature {
     }
   }
 
-  onStep (props: { stepSize: number }): void {
-    this.handleContacts()
+  hunger (): void {
     if (
-      this.actor.stage.flags.hungerY &&
-      this.health > 0 &&
-      !this.destroyed &&
-      !this.actor.dead
+      !this.actor.stage.flags.hungerY ||
+      this.health <= 0 ||
+      this.destroyed ||
+      this.actor.dead
     ) {
-      const lifeSeconds = 300 * this.actor.gene.stamina
-      const lifeFrames = Runner.Fps * lifeSeconds
-      const hunger = 1 / lifeFrames
-      this.hungerDamage += hunger
-      this.health = this.getHealth()
-      if (this.health <= 0) {
-        this.actor.starve({ membrane: this })
-      }
+      return
     }
+    const genetic = Membrane.GENETIC_LIFE_SECONDS * this.actor.gene.stamina
+    const lifeSeconds = Membrane.MINIMUM_LIFE_SECONDS + genetic
+    const lifeFrames = Runner.FPS * lifeSeconds
+    const hunger = 1 / lifeFrames
+    this.hungerDamage += hunger
+    this.health = this.getHealth()
+    if (this.health > 0) {
+      return
+    }
+    this.actor.starve({ membrane: this })
   }
 
-  push (target: Feature): void {
-    const ratio = this.body.getMass() / target.body.getMass()
-    const forceScale = 100 * ratio
+  onStep (props: { stepSize: number }): void {
+    this.handleContacts()
+    this.hunger()
+  }
+
+  shove (target: Membrane): void {
+    const ratio = this.mass / target.mass
+    const forceScale = 50 * ratio
     const direction = directionFromTo(this.body.getPosition(), target.body.getPosition())
     const force = Vec2.mul(direction, forceScale)
     target.body.applyForceToCenter(force)
