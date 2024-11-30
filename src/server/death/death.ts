@@ -1,7 +1,7 @@
 import { AABB, Fixture, Vec2 } from 'planck'
 import { Membrane } from '../feature/membrane'
 import { Stage } from '../stage/stage'
-import { Organism, OrganismSpawn } from '../actor/organism'
+import { Obituary, Organism } from '../actor/organism'
 
 export class Death {
   stage: Stage
@@ -38,15 +38,16 @@ export class Death {
       return
     }
     this.victim.actor.respawning = true
-    const spawn: OrganismSpawn = {
+    const spawn: Obituary = {
       color: this.victim.actor.color,
       gene: this.victim.actor.gene,
-      player: this.victim.actor.player
+      player: this.victim.actor.player,
+      position: this.victim.deathPosition
     }
     if (this.victim.actor instanceof Organism && this.victim.actor.player != null) {
       this.victim.actor.player.age = 0
     }
-    this.stage.respawnQueue.push(spawn)
+    this.stage.spawner.queue.push(spawn)
   }
 
   trim (props: { base: Vec2, lookBox: AABB }): AABB {

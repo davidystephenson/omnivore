@@ -22,6 +22,10 @@ export interface OrganismSpawn {
   player?: Player
 }
 
+export interface Obituary extends OrganismSpawn {
+  position: Vec2
+}
+
 export class Organism extends Actor {
   controlColor = LIME
   chasePoint: Vec2 | undefined

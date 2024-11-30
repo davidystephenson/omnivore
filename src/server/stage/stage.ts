@@ -1,6 +1,6 @@
 import { World, Vec2, Contact, Body, AABB, PolygonShape, CircleShape, Shape, Transform, testOverlap } from 'planck'
 import { Runner } from '../runner'
-import { Organism, OrganismSpawn } from '../actor/organism'
+import { Organism } from '../actor/organism'
 import { Wall } from '../actor/wall'
 import { Actor } from '../actor/actor'
 import { Brick } from '../actor/brick'
@@ -10,7 +10,7 @@ import { Rgb, RED, Rgba } from '../../shared/color'
 import { DebugLine } from '../../shared/debugLine'
 import { Vision } from '../vision'
 import { Puppet } from '../actor/puppet'
-import { range, shuffle } from '../math'
+import { range } from '../math'
 import { DebugCircle } from '../../shared/debugCircle'
 import { Starvation } from '../death/starvation'
 import { LogProps, Debugger } from '../debugger'
@@ -35,7 +35,6 @@ export class Stage {
   killingQueue: Killing[] = []
   navigation: Navigation
   players = new Map<string, Player>()
-  respawnQueue: OrganismSpawn[] = []
   runner: Runner
   spawner: Spawner
   starvationQueue: Starvation[] = []
@@ -420,28 +419,6 @@ export class Stage {
       tree.fall()
     })
     this.fallQueue = []
-    const living = this.killingQueue.length === 0 && this.starvationQueue.length === 0
-    const respawnable = living && this.respawnQueue.length > 0
-    if (respawnable) {
-      this.flag({ f: 'respawn', vs: ['respawnQueue.length', this.respawnQueue.length] })
-      this.flag({ f: 'respawn', vs: ['spawnPoints.length', this.spawner.spawnPoints.length] })
-      const clearSpawnPoints = this.spawner.spawnPoints.filter(spawnPoint => spawnPoint.collideCount < 1)
-      this.flag({ f: 'respawn', vs: ['clearSpawnPoints.length', clearSpawnPoints.length] })
-      const clearSpawnPositions = clearSpawnPoints.map(spawnPoint => spawnPoint.location)
-      // TODO longest path away
-      const shuffled = shuffle(clearSpawnPositions)
-      if (clearSpawnPositions.length > 0) {
-        this.respawnQueue = this.respawnQueue.filter(def => {
-          const position = shuffled.pop()
-          if (position == null) {
-            return true
-          }
-          const gene = def.gene.mutate()
-          void new Organism({ ...def, gene, position, stage: this })
-          return false
-        })
-      }
-    }
     this.killingQueue = []
     this.starvationQueue = []
     this.destructionQueue = []

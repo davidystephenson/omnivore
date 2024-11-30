@@ -11,7 +11,7 @@ export class Mission extends Playhouse {
         charge: true,
         // hungerY: false,
         performance: false,
-        // respawn: true,
+        respawn: true,
         visionRangeY: false,
         visionY: false
         // waypointSpawnpointsY: false
