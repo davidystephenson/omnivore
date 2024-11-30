@@ -3,14 +3,14 @@ import { Spawner } from './spawner'
 
 export class Spawnpoint {
   spawner: Spawner
-  location: Vec2
+  position: Vec2
   fixture: Fixture
   collideCount = 0
 
-  constructor (spawner: Spawner, location: Vec2) {
+  constructor (spawner: Spawner, position: Vec2) {
     this.spawner = spawner
-    this.location = location
-    const circleShape = new CircleShape(location, 1.25)
+    this.position = position
+    const circleShape = new CircleShape(position, 1.25)
     this.fixture = this.spawner.body.createFixture({
       shape: circleShape,
       isSensor: true
