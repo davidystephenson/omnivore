@@ -5,11 +5,11 @@ import { Gene } from './gene'
 // import { Funhouse } from './funhouse'
 import { GREEN } from '../shared/color'
 // import { GrandRehearsal } from './stage/grandRehearsal'
-import { Rehearsal } from './stage/rehearsal'
-// import { Mission } from './stage/mission'
+// import { Rehearsal } from './stage/rehearsal'
+import { Mission } from './stage/mission'
 // import { GrandRehearsal } from './stage/grandRehearsal'
 
-const stage = new Rehearsal()
+const stage = new Mission()
 
 io.on('connection', socket => {
   stage.debug({ vs: ['connection:', socket.id] })
@@ -29,6 +29,7 @@ io.on('connection', socket => {
   if (player.organism == null) {
     throw new Error('player.organism is undefined')
   }
+  player.organism.membrane.hungerDamage = 0.5
   // player.organism.membrane.combatDamage = 0.9
   socket.on('controls', (controls: Controls) => {
     if (player.organism == null) {
