@@ -1,6 +1,6 @@
 import { Vec2 } from 'planck'
 import { Walled } from './walled'
-import { YELLOW, RED, PURPLE, ORANGE, BROWN, MAGENTA, PINK } from '../../shared/color'
+import { YELLOW, RED, PURPLE, ORANGE, BROWN, MAGENTA, PINK, GRAY } from '../../shared/color'
 import { Gene } from '../gene'
 import { Organism } from '../actor/organism'
 
@@ -75,7 +75,7 @@ export class Playhouse extends Walled {
     position: Vec2
   }): Organism {
     return this.addOrganism({
-      color: RED,
+      color: GRAY,
       gene: this.bullyGene,
       position: props.position
     })

@@ -5,11 +5,11 @@ import { Gene } from './gene'
 // import { Funhouse } from './funhouse'
 import { GREEN } from '../shared/color'
 // import { GrandRehearsal } from './stage/grandRehearsal'
-import { Rehearsal } from './stage/rehearsal'
+// import { Rehearsal } from './stage/rehearsal'
 // import { Mission } from './stage/mission'
-// import { GrandRehearsal } from './stage/grandRehearsal'
+import { GrandRehearsal } from './stage/grandRehearsal'
 
-const stage = new Rehearsal()
+const stage = new GrandRehearsal()
 
 io.on('connection', socket => {
   stage.debug({ vs: ['connection:', socket.id] })

@@ -135,19 +135,24 @@ export class Stage {
   }
 
   // TODO Compare to tree food size
-  addFood (props: { vertices: Vec2[], position: Vec2 }): Food {
+  addFood (props: {
+    nutrition?: number
+    position: Vec2
+    vertices: Vec2[]
+  }): Food {
     const food = new Food({ stage: this, ...props })
     return food
   }
 
   addFoodSquare (props: {
+    halfSize: number
+    nutrition?: number
     position: Vec2
   }): Food {
-    const halfSize = 1.25
-    const y0 = 0 - halfSize
-    const y1 = 0 + halfSize
-    const x0 = 0 - halfSize
-    const x1 = 0 + halfSize
+    const y0 = 0 - props.halfSize
+    const y1 = 0 + props.halfSize
+    const x0 = 0 - props.halfSize
+    const x1 = 0 + props.halfSize
     const vertices = [
       Vec2(x0, y0),
       Vec2(x1, y0),
@@ -155,7 +160,17 @@ export class Stage {
       Vec2(x0, y1)
     ]
     return this.addFood({
-      vertices,
+      position: props.position,
+      nutrition: props.nutrition,
+      vertices
+    })
+  }
+
+  addFruit (props: {
+    position: Vec2
+  }): Food {
+    return this.addFoodSquare({
+      halfSize: 1.25,
       position: props.position
     })
   }

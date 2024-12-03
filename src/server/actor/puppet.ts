@@ -6,6 +6,7 @@ import { Sculpture } from '../feature/sculpture'
 export class Puppet extends Actor {
   sculpture: Sculpture
 
+  // TODO add movement
   constructor (props: {
     stage: Stage
     vertices: Vec2[] // [Vec2, Vec2, Vec2]
