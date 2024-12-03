@@ -43,7 +43,7 @@ export class Tree extends Actor {
     this.setupVertices()
     this.sculpture.combatDamage = 0.999999999999
     this.features.push(this.sculpture)
-    this.foodSize = this.seedRadius * 2 * Math.sin(2 / 3 * Math.PI)
+    this.foodSize = this.seedRadius * Math.sin(2 / 3 * Math.PI)
     this.seedSideLength = this.seedRadius * 2 * Math.sin(2 / 3 * Math.PI)
     this.seedInnerRadius = Math.sqrt(this.seedRadius ** 2 - 0.25 * this.seedSideLength ** 2)
     this.radius = this.seedRadius
@@ -70,7 +70,7 @@ export class Tree extends Actor {
     }
   }
 
-  addFood (): void {
+  addFoodLayer (): void {
     const rowCount = 1 + Math.floor(this.oldSideLength / this.foodSize)
     const seedBottomY = this.seedRadius * Math.sin(2 * Math.PI * 7 / 12)
     const y0 = seedBottomY - this.foodLayer * this.foodSize
@@ -147,7 +147,7 @@ export class Tree extends Actor {
     }
     const gapSize = this.innerRadius - this.seedInnerRadius - this.foodLayer * this.foodSize
     if (gapSize > this.foodSize) {
-      this.addFood()
+      this.addFoodLayer()
     }
   }
 

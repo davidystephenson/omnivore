@@ -15,10 +15,10 @@ io.on('connection', socket => {
   stage.debug({ vs: ['connection:', socket.id] })
   socket.emit('connected')
   const gene = new Gene({
-    speed: 0.34,
+    speed: 0.33,
     stage,
-    stamina: 0.33,
-    strength: 0.33
+    stamina: 0,
+    strength: 0.67
   })
   const player = stage.addPlayer({
     color: GREEN,

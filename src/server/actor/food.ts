@@ -5,7 +5,7 @@ import { Actor } from './actor'
 import { GREEN } from '../../shared/color'
 
 export class Food extends Actor {
-  static NUTRITION = 0.2
+  static NUTRITION = 0.1
   nutrition: number
   sculpture: Sculpture
 

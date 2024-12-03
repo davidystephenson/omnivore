@@ -95,6 +95,8 @@ export class Stage {
   addPuppet (props: {
     vertices: [Vec2, Vec2, Vec2]
     position: Vec2
+    force: Vec2
+    speed: number
   }): Puppet {
     const puppet = new Puppet({ stage: this, ...props })
     return puppet
@@ -113,7 +115,7 @@ export class Stage {
       const offset = props.spacing * offsetIndex
       const position = props.position.clone()
       position.y += offset
-      this.addPuppet({ vertices: props.vertices, position })
+      this.addPuppet({ vertices: props.vertices, position, force: Vec2(0, 0), speed: 0 })
     })
   }
 

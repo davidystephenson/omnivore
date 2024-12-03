@@ -5,14 +5,14 @@ import { Playhouse } from './playhouse'
 export class GrandRehearsal extends Playhouse {
   constructor () {
     const flags = new Flags({
-      death: true,
+      // death: true,
       // mutation: true,
       visionY: false
     })
     super({
       flags,
-      halfHeight: 25,
-      halfWidth: 25
+      halfHeight: 50,
+      halfWidth: 50
     })
     this.addWall({
       halfWidth: 10,
@@ -44,14 +44,14 @@ export class GrandRehearsal extends Playhouse {
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
 
-    this.addBalanced({ position: Vec2(5, 5) })
-    this.addBully({ position: Vec2(-5, 5) })
-    this.addHunter({ position: Vec2(-5, -5) })
-    this.addScavenger({ position: Vec2(-5, 5) })
+    this.addBalanced({ position: Vec2(45, 45) })
+    this.addBully({ position: Vec2(-35, 35) })
+    this.addHunter({ position: Vec2(-25, -25) })
+    this.addScavenger({ position: Vec2(-15, 15) })
     this.addSpeed({ position: Vec2(0, -5) })
-    this.addStamina({ position: Vec2(5, -5) })
-    this.addStrength({ position: Vec2(5, 10) })
-    this.addTrapper({ position: Vec2(5, 10) })
+    this.addStamina({ position: Vec2(15, -15) })
+    this.addStrength({ position: Vec2(25, 10) })
+    this.addTrapper({ position: Vec2(35, 10) })
 
     this.addTree({ position: Vec2(20, 20) })
     this.addTree({ position: Vec2(20, -20) })
