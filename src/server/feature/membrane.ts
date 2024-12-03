@@ -11,8 +11,8 @@ import { Prop } from './prop'
 export class Membrane extends Feature {
   static BASE_DAMAGE = 0.1
   static DAMAGE_FACTOR = 3
-  static MINIMUM_LIFE_SECONDS = 10
-  static GENETIC_LIFE_SECONDS = 300
+  static MINIMUM_LIFE_SECONDS = 30
+  static GENETIC_LIFE_SECONDS = 150
   actor: Organism
   destroyed = false
   hungerDamage = 0
@@ -52,7 +52,7 @@ export class Membrane extends Feature {
 
   destroy (): void {
     this.destroyed = true
-    if (this.combatDamage > 0) {
+    if (this.actor.stage.flags.meatY && this.combatDamage > 0) {
       const size = this.radius * Math.SQRT2
       const halfSize = size / 2
       this.actor.stage.addFoodSquare({
@@ -66,8 +66,8 @@ export class Membrane extends Feature {
 
   doDamage (target: Feature): void {
     const ratio = this.body.getMass() / target.body.getMass()
-    const factor = 3
-    target.combatDamage += 0.05 * Math.pow(ratio, factor)
+    const factor = 25
+    target.combatDamage += 0.004 * Math.pow(ratio, factor)
     target.health = target.getHealth()
     if (target.health <= 0) {
       if (target instanceof Membrane) {

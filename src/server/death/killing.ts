@@ -1,7 +1,7 @@
 import { AABB, Vec2 } from 'planck'
 import { HALF_SIGHT } from '../../shared/sight'
 import { Membrane } from '../feature/membrane'
-import { getCompass, whichMax } from '../math'
+import { directionFromTo, getCompass, whichMax } from '../math'
 import { Stage } from '../stage/stage'
 import { Death } from './death'
 import { Puppet } from '../actor/puppet'
@@ -54,8 +54,17 @@ export class Killing extends Death {
     const localPuppetCorners = localBrickCorners.filter((corner, index) => {
       return index !== nearestIndex
     })
-    if (Math.min(halfWidth, halfHeight) > 0) {
-      void new Puppet({ stage: this.stage, vertices: localPuppetCorners, position: brickPosition })
+    const minimum = Math.min(halfWidth, halfHeight)
+    this.stage.flag({ f: 'death', k: 'minimum', v: minimum })
+    if (minimum > 0) {
+      const killerSpeed = this.killer.body.getLinearVelocity().length()
+      const victimSpeed = this.victim.body.getLinearVelocity().length()
+      const victimPosition = this.victim.body.getPosition()
+      const power = Math.max(killerSpeed, victimSpeed) * 5
+      const direction = directionFromTo(killerPosition, victimPosition)
+      const force = Vec2.mul(power, direction)
+      const speed = Math.min(killerSpeed, victimSpeed)
+      void new Puppet({ stage: this.stage, vertices: localPuppetCorners, position: brickPosition, force, speed })
     }
     super.execute()
   }

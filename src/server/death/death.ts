@@ -2,6 +2,7 @@ import { AABB, Fixture, Vec2 } from 'planck'
 import { Membrane } from '../feature/membrane'
 import { Stage } from '../stage/stage'
 import { Obituary, Organism } from '../actor/organism'
+import { Spawnpoint } from '../spawnpoint'
 
 export class Death {
   stage: Stage
@@ -67,6 +68,8 @@ export class Death {
     const extended = new AABB(lowerBound, upperBound)
     extended.extend(-0.2)
     this.stage.world.queryAABB(extended, (fixture: Fixture): boolean => {
+      const fixtureData = fixture.getUserData()
+      if (fixtureData instanceof Spawnpoint) return true
       const fixtureBox = fixture.getAABB(0)
       if (fixtureBox.lowerBound.x > props.base.x) upperBound.x = Math.min(upperBound.x, fixtureBox.lowerBound.x)
       if (fixtureBox.upperBound.x < props.base.x) lowerBound.x = Math.max(lowerBound.x, fixtureBox.upperBound.x)
@@ -82,6 +85,8 @@ export class Death {
     const extended = new AABB(lowerBound, upperBound)
     extended.extend(-0.2)
     this.stage.world.queryAABB(extended, (fixture: Fixture): boolean => {
+      const fixtureData = fixture.getUserData()
+      if (fixtureData instanceof Spawnpoint) return true
       const fixtureBox = fixture.getAABB(0)
       if (fixtureBox.lowerBound.y > props.base.y) upperBound.y = Math.min(upperBound.y, fixtureBox.lowerBound.y)
       if (fixtureBox.upperBound.y < props.base.y) lowerBound.y = Math.max(lowerBound.y, fixtureBox.upperBound.y)
