@@ -52,11 +52,13 @@ export class Membrane extends Feature {
 
   destroy (): void {
     this.destroyed = true
-    const foodRatio = this.combatDamage / Food.NUTRITION
-    const foodCount = Math.floor(foodRatio)
-    for (let i = 0; i < foodCount; i++) {
+    if (this.combatDamage > 0) {
+      const size = this.radius * Math.SQRT2
+      const halfSize = size / 2
       this.actor.stage.addFoodSquare({
-        position: this.position
+        nutrition: this.combatDamage,
+        position: this.position,
+        halfSize
       })
     }
     super.destroy()

@@ -11,7 +11,7 @@ export class Rehearsal extends Playhouse {
         // respawn: true,
         // mutation: true,
         // vision: false,
-        visionY: false
+        // visionY: false
       }),
       halfHeight: 25,
       halfWidth: 25
@@ -41,6 +41,7 @@ export class Rehearsal extends Playhouse {
     this.spawner.setupSpawnPoints()
 
     this.addBalanced({ position: Vec2(5, 5) })
+    this.addBully({ position: Vec2(-5, 5) })
     this.addHunter({ position: Vec2(5, -5) })
     this.addScavenger({ position: Vec2(5, -5) })
     this.addStamina({ position: Vec2(-5, -5) })
