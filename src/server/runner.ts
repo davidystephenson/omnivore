@@ -23,7 +23,7 @@ export class Runner {
 
   stepDate = performance.now()
   stepCount = 0
-  stepCountInterval = 300
+  stepCountInterval = 30
   timeStep = 1 / Runner.FPS
   timeScale = 1 // 1
   worldTime = 0
