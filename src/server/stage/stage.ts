@@ -42,6 +42,18 @@ export class Stage {
   vision: Vision
   walls: Wall[] = []
   world: World
+  timings = {
+    vision: 0,
+    movement: 0,
+    explore: 0,
+    isVisible: 0,
+    isPointInRange: 0,
+    sort: 0,
+    target: 0,
+    maneuver: 0,
+    sortNearest: 0,
+    maneuverElse: 0
+  }
 
   constructor (props: {
     flags: Flags
@@ -415,14 +427,34 @@ export class Stage {
     this.debug(props)
   }
 
+  time (props: {
+    label: string
+  }): void {
+    if (!this.flags.performance || !this.runner.timing) return
+    console.time(props.label)
+  }
+
+  timeEnd (props: {
+    label: string
+  }): void {
+    if (!this.flags.performance || !this.runner.timing) return
+    console.timeEnd(props.label)
+  }
+
   onStep (props: {
     stepSize: number
   }): void {
+    this.timings = { vision: 0, movement: 0, explore: 0, isPointInRange: 0, sort: 0, isVisible: 0, target: 0, maneuver: 0, sortNearest: 0, maneuverElse: 0 }
     this.debugger.onStep()
     this.navigation.onStep()
     this.spawner.onStep()
     this.players.forEach(player => player.onStep({ stepSize: props.stepSize }))
-    this.actors.forEach(actor => actor.onStep({ stepSize: props.stepSize }))
+    const bots = [...this.actors.values()].filter(actor => actor instanceof Organism && actor.player == null)
+    this.time({ label: 'bots' })
+    bots.forEach(actor => actor.onStep({ stepSize: props.stepSize }))
+    this.timeEnd({ label: 'bots' })
+    const nonBots = [...this.actors.values()].filter(actor => !(actor instanceof Organism) || actor.player != null)
+    nonBots.forEach(actor => actor.onStep({ stepSize: props.stepSize }))
     this.destructionQueue.forEach(body => {
       this.world.destroyBody(body)
     })
@@ -442,5 +474,10 @@ export class Stage {
     this.virtualBoxes.forEach(box => {
       this.debugBox({ box, color: RED })
     })
+    if (this.runner.timing) {
+      console.log('maneuver', this.timings.maneuver.toFixed(2))
+      console.log('sortNearest', this.timings.sortNearest.toFixed(2))
+      console.log('maneuverElse', this.timings.maneuverElse.toFixed(2))
+    }
   }
 }
