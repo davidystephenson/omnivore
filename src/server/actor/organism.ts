@@ -330,6 +330,7 @@ export class Organism extends Actor {
   }
 
   explore (stepSize: number): void {
+    const isVisibleStart = performance.now()
     this.giveUpTimer += stepSize
     const position = this.membrane.body.getPosition()
     this.explorationPoints.forEach(point => {
@@ -337,12 +338,27 @@ export class Organism extends Actor {
       point.visible = visible
       if (visible) point.time = Date.now()
     })
+    const isVisibleEnd = performance.now()
+    const isVisibleDifference = isVisibleEnd - isVisibleStart
+    if (this.stage.runner.timing) {
+      this.stage.timings.isVisible += isVisibleDifference
+    }
     const targetPoint = this.explorationPoints[this.explorationIds[0]]
     const targetVisible = this.stage.vision.isVisible(position, targetPoint.position)
     if (targetVisible || this.giveUpTimer > this.giveUpTime) {
       this.giveUpTimer = 0
       targetPoint.time = Date.now()
+      const sortStart = performance.now()
       this.sortExplorationPoints()
+      const sortEnd = performance.now()
+      if (this.stage.runner.timing) {
+        this.stage.timings.sort += sortEnd - sortStart
+      }
+    }
+    const targetEnd = performance.now()
+    const targetDifference = targetEnd - isVisibleEnd
+    if (this.stage.runner.timing) {
+      this.stage.timings.target += targetDifference
     }
   }
 
@@ -445,8 +461,24 @@ export class Organism extends Actor {
   }
 
   maneuver (): Rgb {
+    const sortNearestStart = performance.now()
     const sorted = this.sortNearest({ features: this.featuresInVision })
-    for (const feature of sorted) {
+    const sortNearestEnd = performance.now()
+    if (this.stage.runner.timing) {
+      this.stage.timings.sortNearest += sortNearestEnd - sortNearestStart
+    }
+    const maneuverElseStart = performance.now()
+    const color = this.maneuverElse({ sorted })
+    if (this.stage.runner.timing) {
+      this.stage.timings.maneuverElse += performance.now() - maneuverElseStart
+    }
+    return color
+  }
+
+  maneuverElse (props: {
+    sorted: Feature[]
+  }): Rgb {
+    for (const feature of props.sorted) {
       const judgement = this.judge({ feature })
       if (judgement == null) {
         this.debugManeuverLine({ color: GRAY, feature })
@@ -515,11 +547,17 @@ export class Organism extends Actor {
     stepSize: number
   }): void {
     super.onStep({ stepSize: props.stepSize })
+    const visionStart = performance.now()
     const featuresInRange = this.membrane.getFeaturesInRange()
     this.featuresInVision = featuresInRange.filter(targetFeature => {
       const visible = this.membranes.some(membrane => this.stage.vision.isFeatureVisible(membrane, targetFeature))
       return visible
     })
+    const visionEnd = performance.now()
+    const visionDifference = visionEnd - visionStart
+    if (this.stage.runner.timing) {
+      this.stage.timings.vision += visionDifference
+    }
     if (!this.hatched) this.eggFlee()
     if (this.readyToHatch && !this.hatched) this.hatch()
     this.move()
@@ -539,8 +577,23 @@ export class Organism extends Actor {
       })
       return
     }
+    const movementEnd = performance.now()
+    const movementDifference = movementEnd - visionEnd
+    if (this.stage.runner.timing) {
+      this.stage.timings.movement += movementDifference
+    }
     this.explore(props.stepSize)
+    const exploreEnd = performance.now()
+    const exploreDifference = exploreEnd - movementEnd
+    if (this.stage.runner.timing) {
+      this.stage.timings.explore += exploreDifference
+    }
     this.controlColor = this.maneuver()
+    const maneuverEnd = performance.now()
+    const maneuverDifference = maneuverEnd - exploreEnd
+    if (this.stage.runner.timing) {
+      this.stage.timings.maneuver += maneuverDifference
+    }
   }
 
   reproduce (): void {

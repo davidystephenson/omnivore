@@ -26,6 +26,7 @@ export class Runner {
   stepCountInterval = 30
   timeStep = 1 / Runner.FPS
   timeScale = 1 // 1
+  timing = false
   worldTime = 0
 
   constructor (props: {
@@ -41,9 +42,12 @@ export class Runner {
     if (this.paused) return
     const difference = this.stepDate - this.oldStepDate
     this.fps = 1000 / difference
-    if (this.stage.flags.performance && this.stepCount % this.stepCountInterval === 0) {
+    this.timing = this.stepCount % this.stepCountInterval === 0
+    if (this.stage.flags.performance && this.timing) {
       const fpsString = this.fps.toFixed(2)
       console.info('fps', fpsString)
+      const msString = difference.toFixed(2)
+      console.info('ms', msString)
     }
     this.worldTime += this.timeStep
     const bodies = this.getBodies()
@@ -61,14 +65,20 @@ export class Runner {
     const worldStepBefore = performance.now()
     this.stage.world.step(stepSize)
     const worldStepAfter = performance.now()
-    if (this.stage.flags.performance && this.stepCount % this.stepCountInterval === 0) {
+    if (this.stage.flags.performance && this.timing) {
       const worldStepDifference = worldStepAfter - worldStepBefore
       const worldStepDifferenceString = worldStepDifference.toFixed(2)
       console.info('planck', worldStepDifferenceString)
     }
     this.debugLines = []
     this.debugCircles = []
+    if (this.stage.flags.performance && this.timing) {
+      console.time('stageStep')
+    }
     this.stage.onStep({ stepSize })
+    if (this.stage.flags.performance && this.timing) {
+      console.timeEnd('stageStep')
+    }
     this.features = this.getFeatures()
   }
 

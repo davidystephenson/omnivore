@@ -19,7 +19,7 @@ export class Flags {
   summary: boolean
   vision: boolean
   visionRangeY: boolean
-  visionY: boolean
+  visionGame: boolean
   waypoints: boolean
   waypointSpawnpointsY: boolean
 
@@ -68,7 +68,7 @@ export class Flags {
     this.summary = props.summary ?? false
     this.vision = props.vision ?? false
     this.visionRangeY = props.visionRangeY ?? true
-    this.visionY = props.visionY ?? true
+    this.visionGame = props.visionY ?? true
     this.waypoints = props.waypoints ?? false
     this.waypointSpawnpointsY = props.waypointSpawnpointsY ?? true
   }

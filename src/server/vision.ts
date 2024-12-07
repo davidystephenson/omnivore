@@ -47,7 +47,13 @@ export class Vision {
   }
 
   isVisible (sourcePoint: Vec2, targetPoint: Vec2, excludeIds?: number[], debug?: boolean): boolean {
+    const isPointInRangeStart = performance.now()
     const inRange = this.isPointInRange(sourcePoint, targetPoint)
+    const isPointInRangeEnd = performance.now()
+    if (this.stage.runner.timing) {
+      const isPointInRangeDifference = isPointInRangeEnd - isPointInRangeStart
+      this.stage.timings.isPointInRange += isPointInRangeDifference
+    }
     if (!inRange) {
       if (this.stage.flags.vision || debug === true) {
         this.stage.debugLine({
@@ -58,6 +64,7 @@ export class Vision {
       }
       return false
     }
+    if (!this.stage.flags.visionGame) return inRange
     const clear = this.isClear(sourcePoint, targetPoint, excludeIds, debug)
     return clear
   }
@@ -387,7 +394,7 @@ export class Vision {
   }
 
   isFeatureVisible (sourceFeature: Feature, targetFeature: Feature): boolean {
-    if (!this.stage.flags.visionY) {
+    if (!this.stage.flags.visionGame) {
       return true
     }
     if (targetFeature.label === 'structure') {
