@@ -235,6 +235,7 @@ export class Organism extends Actor {
   }
 
   charge (enemy: Feature): Rgb {
+    const chargeStart = performance.now()
     const enemyPosition = enemy.body.getPosition()
     const navPoint = this.stage.navigation.navigate(this.membrane.position, enemyPosition, this.membrane.radius, enemy.radius)
     const navPosition = navPoint instanceof Vec2 ? navPoint : navPoint.position
@@ -250,6 +251,7 @@ export class Organism extends Actor {
     this.setControls(dirToEnemy)
     this.chasePoint = enemyPosition.clone()
     this.chaseRadius = enemy.radius
+    this.stage.runner.endTiming({ key: 'charge', start: chargeStart })
     return MAGENTA
   }
 
@@ -338,11 +340,9 @@ export class Organism extends Actor {
       point.visible = visible
       if (visible) point.time = Date.now()
     })
-    const isVisibleEnd = performance.now()
-    const isVisibleDifference = isVisibleEnd - isVisibleStart
-    if (this.stage.runner.timing) {
-      this.stage.timings.isVisible += isVisibleDifference
-    }
+    const isVisibleEnd = this.stage.runner.endTiming({
+      key: 'isVisible', start: isVisibleStart
+    })
     const targetPoint = this.explorationPoints[this.explorationIds[0]]
     const targetVisible = this.stage.vision.isVisible(position, targetPoint.position)
     if (targetVisible || this.giveUpTimer > this.giveUpTime) {
@@ -350,19 +350,13 @@ export class Organism extends Actor {
       targetPoint.time = Date.now()
       const sortStart = performance.now()
       this.sortExplorationPoints()
-      const sortEnd = performance.now()
-      if (this.stage.runner.timing) {
-        this.stage.timings.sort += sortEnd - sortStart
-      }
+      this.stage.runner.endTiming({ key: 'sort', start: sortStart })
     }
-    const targetEnd = performance.now()
-    const targetDifference = targetEnd - isVisibleEnd
-    if (this.stage.runner.timing) {
-      this.stage.timings.target += targetDifference
-    }
+    this.stage.runner.endTiming({ key: 'target', start: isVisibleEnd })
   }
 
   flee (enemy: Feature): Rgb {
+    const fleeStart = performance.now()
     const enemyPosition = enemy.body.getPosition()
     const myPosition = this.membrane.body.getPosition()
     const dirFromEnemy = directionFromTo(enemyPosition, myPosition)
@@ -413,6 +407,7 @@ export class Organism extends Actor {
       return PINK
     }
     this.setControls(dirFromEnemy)
+    this.stage.runner.endTiming({ key: 'flee', start: fleeStart })
     return PINK
   }
 
@@ -463,41 +458,81 @@ export class Organism extends Actor {
   maneuver (): Rgb {
     const sortNearestStart = performance.now()
     const sorted = this.sortNearest({ features: this.featuresInVision })
-    const sortNearestEnd = performance.now()
-    if (this.stage.runner.timing) {
-      this.stage.timings.sortNearest += sortNearestEnd - sortNearestStart
-    }
-    const maneuverElseStart = performance.now()
+    const sortNearestEnd = this.stage.runner.endTiming({
+      key: 'sortNearest', start: sortNearestStart
+    })
     const color = this.maneuverElse({ sorted })
-    if (this.stage.runner.timing) {
-      this.stage.timings.maneuverElse += performance.now() - maneuverElseStart
-    }
+    this.stage.runner.endTiming({
+      key: 'maneuverElse', start: sortNearestEnd
+    })
     return color
   }
 
   maneuverElse (props: {
     sorted: Feature[]
   }): Rgb {
+    const maneuverLoopStart = performance.now()
     for (const feature of props.sorted) {
+      const maneuverStepStart = performance.now()
       const judgement = this.judge({ feature })
       if (judgement == null) {
         this.debugManeuverLine({ color: GRAY, feature })
+        this.stage.runner.endTiming({
+          key: 'reachable', start: maneuverStepStart
+        })
+        this.stage.runner.endTiming({
+          key: 'maneuverStep', start: maneuverStepStart
+        })
         continue
       }
       const reachable = this.isFeatureReachable({ feature })
       if (!reachable) {
         this.debugManeuverLine({ color: RED, feature })
+        this.stage.runner.endTiming({
+          key: 'reachable', start: maneuverStepStart
+        })
+        this.stage.runner.endTiming({
+          key: 'maneuverStep', start: maneuverStepStart
+        })
         continue
       }
-      if (judgement) return this.charge(feature)
-      return this.flee(feature)
+      const reachableEnd = this.stage.runner.endTiming({
+        key: 'reachable', start: maneuverStepStart
+      })
+      if (judgement) {
+        const color = this.charge(feature)
+        this.stage.runner.endTiming({
+          key: 'postReachable', start: reachableEnd
+        })
+        this.stage.runner.endTiming({
+          key: 'maneuverStep', start: maneuverStepStart
+        })
+        this.stage.runner.endTiming({
+          key: 'maneuverLoop', start: maneuverLoopStart
+        })
+        return color
+      }
+      const color = this.flee(feature)
+      this.stage.runner.endTiming({
+        key: 'postReachable', start: reachableEnd
+      })
+      this.stage.runner.endTiming({
+        key: 'maneuverStep', start: maneuverStepStart
+      })
+      this.stage.runner.endTiming({
+        key: 'maneuverLoop', start: maneuverLoopStart
+      })
+      return color
     }
+    const maneuverLoopEnd = this.stage.runner.endTiming({
+      key: 'maneuverLoop', start: maneuverLoopStart
+    })
     if (this.chasePoint != null) {
       const reached = this.isTouching({ point: this.chasePoint })
       if (!reached) {
         const reachable = this.isPointReachable(this.chasePoint, this.chaseRadius)
         if (reachable) {
-          return this.navigate({
+          return this.chase({
             debug: this.stage.flags.botChase,
             target: this.chasePoint
           })
@@ -505,7 +540,11 @@ export class Organism extends Actor {
       }
       this.chasePoint = undefined
     }
-    return this.wander()
+    const color = this.wander()
+    this.stage.runner.endTiming({
+      key: 'afterManeuverLoop', start: maneuverLoopEnd
+    })
+    return color
   }
 
   move (): void {
@@ -528,10 +567,11 @@ export class Organism extends Actor {
     })
   }
 
-  navigate (props: {
+  chase (props: {
     debug?: boolean
     target: Vec2
   }): Rgb {
+    const chaseStart = performance.now()
     if (props.debug === true) {
       this.debugPath(props)
     }
@@ -540,6 +580,7 @@ export class Organism extends Actor {
     const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
     const direction = directionFromTo(myPosition, nextPosition)
     this.setControls(direction)
+    this.stage.runner.endTiming({ key: 'chase', start: chaseStart })
     return GRAY
   }
 
@@ -553,11 +594,7 @@ export class Organism extends Actor {
       const visible = this.membranes.some(membrane => this.stage.vision.isFeatureVisible(membrane, targetFeature))
       return visible
     })
-    const visionEnd = performance.now()
-    const visionDifference = visionEnd - visionStart
-    if (this.stage.runner.timing) {
-      this.stage.timings.vision += visionDifference
-    }
+    const visionEnd = this.stage.runner.endTiming({ key: 'vision', start: visionStart })
     if (!this.hatched) this.eggFlee()
     if (this.readyToHatch && !this.hatched) this.hatch()
     this.move()
@@ -577,23 +614,15 @@ export class Organism extends Actor {
       })
       return
     }
-    const movementEnd = performance.now()
-    const movementDifference = movementEnd - visionEnd
-    if (this.stage.runner.timing) {
-      this.stage.timings.movement += movementDifference
-    }
+    const movementEnd = this.stage.runner.endTiming({
+      key: 'movement', start: visionEnd
+    })
     this.explore(props.stepSize)
-    const exploreEnd = performance.now()
-    const exploreDifference = exploreEnd - movementEnd
-    if (this.stage.runner.timing) {
-      this.stage.timings.explore += exploreDifference
-    }
+    const exploreEnd = this.stage.runner.endTiming({
+      key: 'explore', start: movementEnd
+    })
     this.controlColor = this.maneuver()
-    const maneuverEnd = performance.now()
-    const maneuverDifference = maneuverEnd - exploreEnd
-    if (this.stage.runner.timing) {
-      this.stage.timings.maneuver += maneuverDifference
-    }
+    this.stage.runner.endTiming({ key: 'maneuver', start: exploreEnd })
   }
 
   reproduce (): void {
@@ -684,6 +713,7 @@ export class Organism extends Actor {
   }
 
   wander (): Rgb {
+    const wanderStart = performance.now()
     const explorationId = this.explorationIds[0]
     const explorationPoint = this.explorationPoints[explorationId]
     const end = explorationPoint.position
@@ -705,6 +735,7 @@ export class Organism extends Actor {
     const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
     const directionToNext = directionFromTo(this.membrane.position, nextPosition)
     this.setControls(directionToNext)
+    this.stage.runner.endTiming({ key: 'wander', start: wanderStart })
     return BLUE
   }
 }

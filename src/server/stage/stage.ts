@@ -42,18 +42,6 @@ export class Stage {
   vision: Vision
   walls: Wall[] = []
   world: World
-  timings = {
-    vision: 0,
-    movement: 0,
-    explore: 0,
-    isVisible: 0,
-    isPointInRange: 0,
-    sort: 0,
-    target: 0,
-    maneuver: 0,
-    sortNearest: 0,
-    maneuverElse: 0
-  }
 
   constructor (props: {
     flags: Flags
@@ -83,6 +71,47 @@ export class Stage {
   }): Brick {
     const brick = new Brick({ stage: this, ...props })
     return brick
+  }
+
+  addFood (props: {
+    nutrition?: number
+    position: Vec2
+    vertices: Vec2[]
+  }): Food {
+    const food = new Food({ stage: this, ...props })
+    return food
+  }
+
+  addFoodSquare (props: {
+    halfSize: number
+    nutrition?: number
+    position: Vec2
+  }): Food {
+    const y0 = 0 - props.halfSize
+    const y1 = 0 + props.halfSize
+    const x0 = 0 - props.halfSize
+    const x1 = 0 + props.halfSize
+    const vertices = [
+      Vec2(x0, y0),
+      Vec2(x1, y0),
+      Vec2(x1, y1),
+      Vec2(x0, y1)
+    ]
+    return this.addFood({
+      position: props.position,
+      nutrition: props.nutrition,
+      vertices
+    })
+  }
+
+  // TODO Compare to tree food size
+  addFruit (props: {
+    position: Vec2
+  }): Food {
+    return this.addFoodSquare({
+      halfSize: 1.25,
+      position: props.position
+    })
   }
 
   addOrganism (props: {
@@ -146,47 +175,6 @@ export class Stage {
     const wall = new Wall({ stage: this, ...props })
     this.walls.push(wall)
     return wall
-  }
-
-  // TODO Compare to tree food size
-  addFood (props: {
-    nutrition?: number
-    position: Vec2
-    vertices: Vec2[]
-  }): Food {
-    const food = new Food({ stage: this, ...props })
-    return food
-  }
-
-  addFoodSquare (props: {
-    halfSize: number
-    nutrition?: number
-    position: Vec2
-  }): Food {
-    const y0 = 0 - props.halfSize
-    const y1 = 0 + props.halfSize
-    const x0 = 0 - props.halfSize
-    const x1 = 0 + props.halfSize
-    const vertices = [
-      Vec2(x0, y0),
-      Vec2(x1, y0),
-      Vec2(x1, y1),
-      Vec2(x0, y1)
-    ]
-    return this.addFood({
-      position: props.position,
-      nutrition: props.nutrition,
-      vertices
-    })
-  }
-
-  addFruit (props: {
-    position: Vec2
-  }): Food {
-    return this.addFoodSquare({
-      halfSize: 1.25,
-      position: props.position
-    })
   }
 
   addBricks (props: {
@@ -275,71 +263,6 @@ export class Stage {
     })
   }
 
-  endContact (contact: Contact): void {
-    const fixtureA = contact.getFixtureA()
-    const fixtureB = contact.getFixtureB()
-    const pairs = [
-      [fixtureA, fixtureB],
-      [fixtureB, fixtureA]
-    ]
-    pairs.forEach(pair => {
-      const fixture = pair[0]
-      const otherFixture = pair[1]
-      const feature = fixture.getBody().getUserData()
-      const otherFeature = otherFixture.getBody().getUserData()
-      if (!(otherFeature instanceof Feature)) return
-      if (feature instanceof Spawner && !otherFixture.isSensor()) {
-        const spawnPoint = fixture.getUserData()
-        if (!(spawnPoint instanceof Spawnpoint)) {
-          throw new Error('spawnPoint is not a SpawnPoint')
-        }
-        if (otherFeature.actor.label === 'food') {
-          return false
-        }
-        spawnPoint.collideCount -= 1
-      }
-      if (!(feature instanceof Feature)) return
-      feature.contacts = feature.contacts.filter(contact => contact.id !== otherFeature.id)
-      if (fixture.isSensor() && !otherFixture.isSensor()) {
-        feature.sensorFeatures = feature.sensorFeatures.filter(contact => contact.id !== otherFeature.id)
-      }
-    })
-  }
-
-  flag <Value> (props: {
-    f: keyof Flags
-  } & LogProps<Value>): void {
-    const raised = this.flags[props.f]
-    if (!raised) {
-      return
-    }
-    this.debug(props)
-  }
-
-  preSolve (contact: Contact): void {
-    const fixtureA = contact.getFixtureA()
-    const fixtureB = contact.getFixtureB()
-    const pairs = [
-      [fixtureA, fixtureB],
-      [fixtureB, fixtureA]
-    ]
-    pairs.forEach(pair => {
-      const fixture = pair[0]
-      const otherFixture = pair[1]
-      const sensorContact = fixture.isSensor() || otherFixture.isSensor()
-      const feature = fixture.getBody().getUserData()
-      const otherFeature = otherFixture.getBody().getUserData()
-      if (!(feature instanceof Feature)) return
-      if (!(otherFeature instanceof Feature)) return
-      const actor = feature.actor
-      const otherActor = otherFeature.actor
-      if (!sensorContact) {
-        if (actor instanceof Tree) this.fallQueue.push(actor)
-        if (otherActor instanceof Tree) this.fallQueue.push(otherActor)
-      }
-    })
-  }
-
   debug<Value>(props: LogProps<Value>): void {
     this.debugger.debug(props)
   }
@@ -409,6 +332,47 @@ export class Stage {
     })
   }
 
+  endContact (contact: Contact): void {
+    const fixtureA = contact.getFixtureA()
+    const fixtureB = contact.getFixtureB()
+    const pairs = [
+      [fixtureA, fixtureB],
+      [fixtureB, fixtureA]
+    ]
+    pairs.forEach(pair => {
+      const fixture = pair[0]
+      const otherFixture = pair[1]
+      const feature = fixture.getBody().getUserData()
+      const otherFeature = otherFixture.getBody().getUserData()
+      if (!(otherFeature instanceof Feature)) return
+      if (feature instanceof Spawner && !otherFixture.isSensor()) {
+        const spawnPoint = fixture.getUserData()
+        if (!(spawnPoint instanceof Spawnpoint)) {
+          throw new Error('spawnPoint is not a SpawnPoint')
+        }
+        if (otherFeature.actor.label === 'food') {
+          return false
+        }
+        spawnPoint.collideCount -= 1
+      }
+      if (!(feature instanceof Feature)) return
+      feature.contacts = feature.contacts.filter(contact => contact.id !== otherFeature.id)
+      if (fixture.isSensor() && !otherFixture.isSensor()) {
+        feature.sensorFeatures = feature.sensorFeatures.filter(contact => contact.id !== otherFeature.id)
+      }
+    })
+  }
+
+  flag <Value> (props: {
+    f: keyof Flags
+  } & LogProps<Value>): void {
+    const raised = this.flags[props.f]
+    if (!raised) {
+      return
+    }
+    this.debug(props)
+  }
+
   getFeaturesInShape (shape: Shape): Feature[] {
     const featuresInShape: Feature[] = []
     const origin = new Transform()
@@ -427,24 +391,9 @@ export class Stage {
     this.debug(props)
   }
 
-  time (props: {
-    label: string
-  }): void {
-    if (!this.flags.performance || !this.runner.timing) return
-    console.time(props.label)
-  }
-
-  timeEnd (props: {
-    label: string
-  }): void {
-    if (!this.flags.performance || !this.runner.timing) return
-    console.timeEnd(props.label)
-  }
-
   onStep (props: {
     stepSize: number
   }): void {
-    this.timings = { vision: 0, movement: 0, explore: 0, isPointInRange: 0, sort: 0, isVisible: 0, target: 0, maneuver: 0, sortNearest: 0, maneuverElse: 0 }
     this.debugger.onStep()
     this.navigation.onStep()
     this.spawner.onStep()
@@ -474,10 +423,43 @@ export class Stage {
     this.virtualBoxes.forEach(box => {
       this.debugBox({ box, color: RED })
     })
-    if (this.runner.timing) {
-      console.log('maneuver', this.timings.maneuver.toFixed(2))
-      console.log('sortNearest', this.timings.sortNearest.toFixed(2))
-      console.log('maneuverElse', this.timings.maneuverElse.toFixed(2))
-    }
+  }
+
+  preSolve (contact: Contact): void {
+    const fixtureA = contact.getFixtureA()
+    const fixtureB = contact.getFixtureB()
+    const pairs = [
+      [fixtureA, fixtureB],
+      [fixtureB, fixtureA]
+    ]
+    pairs.forEach(pair => {
+      const fixture = pair[0]
+      const otherFixture = pair[1]
+      const sensorContact = fixture.isSensor() || otherFixture.isSensor()
+      const feature = fixture.getBody().getUserData()
+      const otherFeature = otherFixture.getBody().getUserData()
+      if (!(feature instanceof Feature)) return
+      if (!(otherFeature instanceof Feature)) return
+      const actor = feature.actor
+      const otherActor = otherFeature.actor
+      if (!sensorContact) {
+        if (actor instanceof Tree) this.fallQueue.push(actor)
+        if (otherActor instanceof Tree) this.fallQueue.push(otherActor)
+      }
+    })
+  }
+
+  time (props: {
+    label: string
+  }): void {
+    if (!this.flags.performance || !this.runner.timing) return
+    console.time(props.label)
+  }
+
+  timeEnd (props: {
+    label: string
+  }): void {
+    if (!this.flags.performance || !this.runner.timing) return
+    console.timeEnd(props.label)
   }
 }
