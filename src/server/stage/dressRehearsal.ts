@@ -1,110 +1,30 @@
-import { Vec2 } from 'planck'
 import { Flags } from '../flags'
-import { Playhouse } from './playhouse'
+import Procedural from './procedural'
 
-export class DressRehearsal extends Playhouse {
+export class DressRehearsal extends Procedural {
   constructor () {
     super({
       flags: new Flags({
         respawn: true
       }),
-      halfHeight: 50,
-      halfWidth: 50
-    })
-    this.addWall({
-      halfWidth: 10,
-      halfHeight: 5,
-      position: Vec2(-15, -15)
+      halfHeight: 20,
+      halfWidth: 20
     })
 
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
-    this.addBricks({
-      count: 20,
-      gap: 0.1,
-      halfHeight: 1,
-      halfWidth: 1,
-      position: Vec2(-45, 0)
-    })
-    this.addBricks({
-      count: 20,
-      gap: 0.1,
-      halfHeight: 1,
-      halfWidth: 1,
-      position: Vec2(5, 0)
-    })
-    this.addBricks({
-      count: 20,
-      gap: 0.1,
-      halfHeight: 1,
-      halfWidth: 1,
-      position: Vec2(10, 0)
-    })
-    this.addBricks({
-      count: 20,
-      gap: 0.1,
-      halfHeight: 1,
-      halfWidth: 1,
-      position: Vec2(15, 0)
-    })
-    this.addBricks({
-      count: 20,
-      gap: 0.1,
-      halfHeight: 1,
-      halfWidth: 1,
-      position: Vec2(20, 0)
-    })
-    this.addBricks({
-      count: 20,
-      gap: 0.1,
-      halfHeight: 1,
-      halfWidth: 1,
-      position: Vec2(25, 0)
-    })
-    this.addBricks({
-      count: 20,
-      gap: 0.1,
-      halfHeight: 1,
-      halfWidth: 1,
-      position: Vec2(30, 0)
-    })
-    this.addBricks({
-      count: 20,
-      gap: 0.1,
-      halfHeight: 1,
-      halfWidth: 1,
-      position: Vec2(35, 0)
-    })
-    this.addBricks({
-      count: 20,
-      gap: 0.1,
-      halfHeight: 1,
-      halfWidth: 1,
-      position: Vec2(40, 0)
-    })
-    this.addBricks({
-      count: 20,
-      gap: 0.1,
-      halfHeight: 1,
-      halfWidth: 1,
-      position: Vec2(45, 0)
-    })
 
-    this.addStrength({ position: Vec2(0, 10) })
-    this.addStrength({ position: Vec2(0, 20) })
-    this.addStrength({ position: Vec2(-10, -50) })
-    this.addStrength({ position: Vec2(20, 20) })
+    // this.addBalanced({ position: Vec2(5, 5) })
+    // this.addBully({ position: Vec2(-5, 5) })
+    // this.addHunter({ position: Vec2(5, -5) })
+    // this.addScavenger({ position: Vec2(5, -5) })
+    // this.addStamina({ position: Vec2(-5, -5) })
+    // this.addStrength({ position: Vec2(0, 5) })
+    // this.addSpeed({ position: Vec2(5, 0) })
+    // this.addTrapper({ position: Vec2(0, -5) })
 
-    this.addSpeed({ position: Vec2(-10, 15) })
-    this.addSpeed({ position: Vec2(-10, 20) })
-    this.addSpeed({ position: Vec2(-10, 25) })
-    this.addSpeed({ position: Vec2(-10, 30) })
-    this.addSpeed({ position: Vec2(-10, 35) })
-    this.addSpeed({ position: Vec2(-10, 35) })
-
-    this.addTree({ position: Vec2(20, 20) })
-    this.addTree({ position: Vec2(20, -20) })
-    this.addTree({ position: Vec2(-20, -20) })
-    this.addTree({ position: Vec2(-20, -20) })
+    // this.addTree({ position: Vec2(20, -20) })
+    // this.addTree({ position: Vec2(-20, -20) })
+    // this.addTree({ position: Vec2(-20, 20) })
   }
 }

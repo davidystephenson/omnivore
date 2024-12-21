@@ -387,6 +387,20 @@ export class Stage {
     return featuresInShape
   }
 
+  getInnerWalls (): Wall[] {
+    return this.walls.filter(wall => {
+      const top = wall.position.y + wall.halfHeight
+      const bottom = wall.position.y - wall.halfHeight
+      const right = wall.position.x + wall.halfWidth
+      const left = wall.position.x - wall.halfWidth
+      if (top > this.halfHeight) return false
+      if (bottom < -this.halfHeight) return false
+      if (right > this.halfWidth) return false
+      if (left < -this.halfWidth) return false
+      return true
+    })
+  }
+
   log<Value>(props: LogProps<Value>): void {
     this.debug(props)
   }
