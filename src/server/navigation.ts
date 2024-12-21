@@ -1,14 +1,14 @@
-import { Circle, Vec2 } from 'planck'
+import { AABB, Circle, Vec2 } from 'planck'
 import { Stage } from './stage/stage'
 import { Waypoint } from './waypoint'
 import { HALF_SIGHT } from '../shared/sight'
 import { directionFromTo, normalize, range, rotate, whichMin } from './math'
 import { Wall } from './actor/wall'
 import { Feature } from './feature/feature'
-import { Membrane } from './feature/membrane'
 import { Structure } from './feature/structure'
 import { Organism } from './actor/organism'
 import { CYAN, RED, WHITE } from '../shared/color'
+import { NavArea } from './navArea'
 
 export class Navigation {
   static spacing = {
@@ -23,6 +23,7 @@ export class Navigation {
   wallOffset = 0.4
   wallWaypoints: Waypoint[] = []
   cornerWaypoints: Waypoint[] = []
+  navAreas: AABB[] = []
   radiiWaypoints = new Map<number, Waypoint[]>()
 
   constructor (props: {
@@ -112,6 +113,38 @@ export class Navigation {
     this.stage.debug({ v: 'Starting the runner...' })
     setInterval(() => { this.stage.runner.step() }, 1000 * this.stage.runner.timeStep)
     this.stage.debug({ v: 'Runner started!' })
+  }
+
+  getBigWaypoints (): Waypoint[] {
+    const maximumRadius = Math.max(...this.radii)
+    const waypointArray = [...this.waypoints.values()]
+    return waypointArray.filter(waypoint => waypoint.radius === maximumRadius)
+  }
+
+  getTopNavArea (innerWall: Wall): NavArea {
+    const maximumRadius = Math.max(...this.radii)
+    const topPoint = innerWall.topWaypoints[0]
+    if (topPoint == null) throw new Error('topPoint == null')
+    const otherInnerWalls = this.stage.getInnerWalls().filter(other => {
+      return other !== innerWall
+    })
+    const otherPoints: Waypoint[] = []
+    otherInnerWalls.forEach(otherWall => {
+      otherWall.bottomWaypoints.forEach(otherWaypoint => {
+        const open = this.isOpen({
+          fromPosition: topPoint.position,
+          toPosition: otherWaypoint.position,
+          radius: maximumRadius
+        })
+        if (open) otherPoints.push(otherWaypoint)
+      })
+      // FIND THE REST OF THE OTHER POINTS (TOP, LEFT, RIGHT)
+    })
+    const areaTop = Math.max(...otherPoints.map(waypoint => waypoint.position.y))
+    const areaBottom = topPoint.position.y
+    // const areaLeft = ...
+    // const areaRight = ...
+    // Construct the NavArea and return it
   }
 
   preCalculate (): void {
@@ -296,7 +329,8 @@ export class Navigation {
       this.radii.forEach(radius => {
         const offset = Math.sqrt(2) * (radius + this.wallOffset)
         const position = Vec2.combine(1, corner, offset, direction)
-        this.stage.navigation.addWaypoint(position, 'wall', radius)
+        const waypoint = this.addWaypoint(position, 'wall', radius)
+        wall.cornerWaypoints.push(waypoint)
       })
     })
     range(1, corners.length).forEach(index => {
@@ -304,7 +338,8 @@ export class Navigation {
       const end = corners[index % corners.length]
       const next = corners[(index + 1) % corners.length]
       const length = Vec2.distance(start, end)
-      const blockCount = Math.ceil(length / Navigation.spacing.y)
+      const ceil = Math.ceil(length / Navigation.spacing.y)
+      const blockCount = Math.max(ceil, 2)
       const stepCount = blockCount - 1
       if (stepCount < 1) return
       range(1, stepCount).forEach(step => {
@@ -313,7 +348,19 @@ export class Navigation {
         const point = Vec2.combine(weight, start, 1 - weight, end)
         this.radii.forEach(radius => {
           const position = Vec2.combine(1, point, radius + this.wallOffset, away)
-          this.addWaypoint(position, 'wall', radius)
+          const waypoint = this.addWaypoint(position, 'wall', radius)
+          if (start.y > wall.position.y && end.y > wall.position.y) {
+            wall.topWaypoints.push(waypoint)
+          }
+          if (start.y < wall.position.y && end.y < wall.position.y) {
+            wall.bottomWaypoints.push(waypoint)
+          }
+          if (start.x > wall.position.x && end.x > wall.position.x) {
+            wall.rightWaypoints.push(waypoint)
+          }
+          if (start.x < wall.position.x && end.x < wall.position.x) {
+            wall.leftWaypoints.push(waypoint)
+          }
         })
       })
     })
