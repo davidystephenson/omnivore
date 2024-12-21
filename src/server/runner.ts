@@ -8,6 +8,7 @@ import { DebugLine } from '../shared/debugLine'
 import { DebugCircle } from '../shared/debugCircle'
 import { Player } from './actor/player'
 import { Tree } from './actor/tree'
+import { Timings } from './timings'
 
 export class Runner {
   static FPS = 30
@@ -27,12 +28,127 @@ export class Runner {
   timeStep = 1 / Runner.FPS
   timeScale = 1 // 1
   timing = false
+  timings: Timings = {}
+
   worldTime = 0
 
   constructor (props: {
     stage: Stage
   }) {
     this.stage = props.stage
+  }
+
+  debugTiming (props: {
+    key: keyof Runner['timings']
+  }): void {
+    const value = this.timings[props.key] ?? 0
+    const fixed = value.toFixed(2)
+    console.debug(props.key, fixed)
+  }
+
+  endTiming (props: {
+    key: keyof Runner['timings']
+    start: number
+  }): number {
+    const now = performance.now()
+    if (this.timing) {
+      const difference = now - props.start
+      const current = this.timings[props.key]
+      if (current == null) {
+        this.timings[props.key] = difference
+      } else {
+        const total = current + difference
+        this.timings[props.key] = total
+      }
+    }
+    return now
+  }
+
+  getBodies (): Body[] {
+    const bodies = []
+    for (
+      let body = this.stage.world.getBodyList();
+      body != null;
+      body = body.getNext()
+    ) {
+      bodies.push(body)
+    }
+    return bodies
+  }
+
+  getElements (player: Player): Element[] {
+    if (player.organism == null) {
+      throw new Error('Player organism is null')
+    }
+    const idsInVision = player.organism.featuresInVision.map(feature => feature.id)
+    const filteredFeatures = this.features.filter(feature => idsInVision.includes(feature.id))
+    const elements: Element[] = filteredFeatures.map(feature => {
+      const tree = feature.actor instanceof Tree
+      const seen = player.seenIds.includes(feature.id)
+      if (!seen) player.seenIds.push(feature.id)
+      return feature.getElement(seen && !tree)
+    })
+    return elements
+  }
+
+  getFeatures (): Feature[] {
+    const bodies = this.getBodies()
+    const features: Feature[] = []
+    bodies.forEach(body => {
+      const feature = body.getUserData()
+      if (feature instanceof Feature) {
+        features.push(feature)
+      }
+    })
+    return features
+  }
+
+  getRopes (player: Player): Rope[] {
+    if (player.organism == null) {
+      throw new Error('Player organism is null')
+    }
+    const ropes: Rope[] = []
+    player.organism.featuresInVision.forEach(feature => {
+      feature.ropes.forEach(rope => {
+        ropes.push(rope)
+      })
+    })
+    /*
+    this.stage.actors.forEach(actor => {
+      actor.joints.forEach(joint => {
+        const rope = new Rope({ joint })
+        ropes.push(rope)
+      })
+    })
+    */
+    return ropes
+  }
+
+  getSummary (props: {
+    player: Player
+  }): Summary {
+    if (props.player.organism == null) {
+      throw new Error('Player organism is null')
+    }
+    const elements = this.getElements(props.player)
+    const age = Math.floor(props.player.age)
+    const summary: Summary = {
+      age,
+      elements,
+      fps: this.fps,
+      foodCount: this.stage.food.length,
+      ropes: this.getRopes(props.player),
+      debugLines: this.debugLines,
+      debugCircles: this.debugCircles,
+      id: props.player.organism.membrane.id,
+      controls: props.player.organism.controls
+    }
+    if (this.stage.flags.summary) {
+      this.stage.debug({ vs: ['getSummary elements.length', elements.length], seconds: 10 })
+      const json = JSON.stringify(summary)
+      this.stage.debug({ vs: ['getSummary json.length', json.length], seconds: 10 })
+    }
+    return summary
   }
 
   step (): void {
@@ -75,97 +191,18 @@ export class Runner {
     if (this.stage.flags.performance && this.timing) {
       console.time('stageStep')
     }
+    this.timings = {}
     this.stage.onStep({ stepSize })
+    if (this.timing) {
+      this.debugTiming({ key: 'navigate' })
+      this.debugTiming({ key: 'charge' })
+      this.debugTiming({ key: 'chase' })
+      this.debugTiming({ key: 'wander' })
+      this.debugTiming({ key: 'flee' })
+    }
     if (this.stage.flags.performance && this.timing) {
       console.timeEnd('stageStep')
     }
     this.features = this.getFeatures()
-  }
-
-  getSummary (props: {
-    player: Player
-  }): Summary {
-    if (props.player.organism == null) {
-      throw new Error('Player organism is null')
-    }
-    const elements = this.getElements(props.player)
-    const age = Math.floor(props.player.age)
-    const summary: Summary = {
-      age,
-      elements,
-      fps: this.fps,
-      foodCount: this.stage.food.length,
-      ropes: this.getRopes(props.player),
-      debugLines: this.debugLines,
-      debugCircles: this.debugCircles,
-      id: props.player.organism.membrane.id,
-      controls: props.player.organism.controls
-    }
-    if (this.stage.flags.summary) {
-      this.stage.debug({ vs: ['getSummary elements.length', elements.length], seconds: 10 })
-      const json = JSON.stringify(summary)
-      this.stage.debug({ vs: ['getSummary json.length', json.length], seconds: 10 })
-    }
-    return summary
-  }
-
-  getElements (player: Player): Element[] {
-    if (player.organism == null) {
-      throw new Error('Player organism is null')
-    }
-    const idsInVision = player.organism.featuresInVision.map(feature => feature.id)
-    const filteredFeatures = this.features.filter(feature => idsInVision.includes(feature.id))
-    const elements: Element[] = filteredFeatures.map(feature => {
-      const tree = feature.actor instanceof Tree
-      const seen = player.seenIds.includes(feature.id)
-      if (!seen) player.seenIds.push(feature.id)
-      return feature.getElement(seen && !tree)
-    })
-    return elements
-  }
-
-  getRopes (player: Player): Rope[] {
-    if (player.organism == null) {
-      throw new Error('Player organism is null')
-    }
-    const ropes: Rope[] = []
-    player.organism.featuresInVision.forEach(feature => {
-      feature.ropes.forEach(rope => {
-        ropes.push(rope)
-      })
-    })
-    /*
-    this.stage.actors.forEach(actor => {
-      actor.joints.forEach(joint => {
-        const rope = new Rope({ joint })
-        ropes.push(rope)
-      })
-    })
-    */
-    return ropes
-  }
-
-  getFeatures (): Feature[] {
-    const bodies = this.getBodies()
-    const features: Feature[] = []
-    bodies.forEach(body => {
-      const feature = body.getUserData()
-      if (feature instanceof Feature) {
-        features.push(feature)
-      }
-    })
-    return features
-  }
-
-  getBodies (): Body[] {
-    const bodies = []
-    for (
-      let body = this.stage.world.getBodyList();
-      body != null;
-      body = body.getNext()
-    ) {
-      bodies.push(body)
-    }
-    return bodies
   }
 }

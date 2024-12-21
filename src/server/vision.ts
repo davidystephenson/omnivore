@@ -49,11 +49,10 @@ export class Vision {
   isVisible (sourcePoint: Vec2, targetPoint: Vec2, excludeIds?: number[], debug?: boolean): boolean {
     const isPointInRangeStart = performance.now()
     const inRange = this.isPointInRange(sourcePoint, targetPoint)
-    const isPointInRangeEnd = performance.now()
-    if (this.stage.runner.timing) {
-      const isPointInRangeDifference = isPointInRangeEnd - isPointInRangeStart
-      this.stage.timings.isPointInRange += isPointInRangeDifference
-    }
+    this.stage.runner.endTiming({
+      key: 'isVisible',
+      start: isPointInRangeStart
+    })
     if (!inRange) {
       if (this.stage.flags.vision || debug === true) {
         this.stage.debugLine({

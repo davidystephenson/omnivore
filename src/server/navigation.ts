@@ -31,19 +31,6 @@ export class Navigation {
     this.stage = props.stage
   }
 
-  navigateFromMembrane (membrane: Membrane, end: Vec2): Vec2 {
-    const start = membrane.body.getPosition()
-    const target = this.navigate(start, end, membrane.radius)
-    if (target instanceof Waypoint) return target.position
-    return target
-  }
-
-  navigateFromWaypoint (waypoint: Waypoint, end: Vec2): Waypoint | Vec2 {
-    const start = waypoint.position
-    const target = this.navigate(start, end, waypoint.radius)
-    return target
-  }
-
   getPath (props: {
     a: Vec2
     b: Vec2
@@ -72,6 +59,7 @@ export class Navigation {
   }
 
   navigate (start: Vec2, end: Vec2, radius: number, otherRadius?: number): Waypoint | Vec2 {
+    const navigateStart = performance.now()
     const largerRadii = this.radii.filter(rad => rad >= radius)
     const validRadius = largerRadii[whichMin(largerRadii)]
     const directPositions = [
@@ -110,6 +98,7 @@ export class Navigation {
         }
       })
     })
+    this.stage.runner.endTiming({ key: 'navigate', start: navigateStart })
     return target
   }
 
