@@ -123,25 +123,48 @@ export class Navigation {
 
   getTopNavArea (innerWall: Wall): NavArea {
     const maximumRadius = Math.max(...this.radii)
-    const topPoint = innerWall.topWaypoints[0]
-    if (topPoint == null) throw new Error('topPoint == null')
+    const lookPoint = innerWall.topWaypoints[0]
+    if (lookPoint == null) throw new Error('topPoint == null')
     const otherInnerWalls = this.stage.getInnerWalls().filter(other => {
       return other !== innerWall
     })
-    const otherPoints: Waypoint[] = []
+    const otherBottomPoints: Waypoint[] = []
     otherInnerWalls.forEach(otherWall => {
       otherWall.bottomWaypoints.forEach(otherWaypoint => {
         const open = this.isOpen({
-          fromPosition: topPoint.position,
+          fromPosition: lookPoint.position,
           toPosition: otherWaypoint.position,
           radius: maximumRadius
         })
-        if (open) otherPoints.push(otherWaypoint)
+        if (open) otherBottomPoints.push(otherWaypoint)
       })
-      // FIND THE REST OF THE OTHER POINTS (TOP, LEFT, RIGHT)
     })
-    const areaTop = Math.max(...otherPoints.map(waypoint => waypoint.position.y))
-    const areaBottom = topPoint.position.y
+    const otherRightPoints: Waypoint[] = []
+    otherInnerWalls.forEach(otherWall => {
+      otherWall.rightWaypoints.forEach(otherWaypoint => {
+        const open = this.isOpen({
+          fromPosition: lookPoint.position,
+          toPosition: otherWaypoint.position,
+          radius: maximumRadius
+        })
+        if (open) otherRightPoints.push(otherWaypoint)
+      })
+    })
+    const otherLeftPoints: Waypoint[] = []
+    otherInnerWalls.forEach(otherWall => {
+      otherWall.leftWaypoints.forEach(otherWaypoint => {
+        const open = this.isOpen({
+          fromPosition: lookPoint.position,
+          toPosition: otherWaypoint.position,
+          radius: maximumRadius
+        })
+        if (open) otherLeftPoints.push(otherWaypoint)
+      })
+    })
+    const areaTop = Math.min(...otherBottomPoints.map(point => point.position.y))
+    const areaBottom = lookPoint.position.y
+    const areaRight = Math.min(...otherLeftPoints.map(point => point.position.x))
+    const areaLeft = Math.max(...otherRightPoints.map(point => point.position.x))
     // const areaLeft = ...
     // const areaRight = ...
     // Construct the NavArea and return it
