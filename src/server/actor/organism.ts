@@ -155,91 +155,13 @@ export class Organism extends Actor {
     }
   }
 
-  // destroyMembrane (props: {
-  //   membrane: Membrane
-  // }): void {
-  //   // this.membranes = this.membranes.filter(membrane => membrane !== props.membrane)
-  //   this.membranes = this.membranes.filter(membrane => {
-  //     const destroyed = membrane === props.membrane
-  //     if (destroyed) {
-  //       membrane.destroy()
-  //       return false
-  //     }
-  //     return true
-  //   })
-  //   this.features = this.features.filter(feature => feature !== props.membrane)
-  //   this.stage.world.destroyBody(props.membrane.body)
-  // }
-
-  getEgg (): Egg {
-    const circles: CircleShape[] = []
-    this.addCircles({ gene: this.gene, circles })
-    const top = Math.max(...circles.map(circle => circle.getCenter().y + circle.getRadius()))
-    const bottom = Math.min(...circles.map(circle => circle.getCenter().y - circle.getRadius()))
-    const right = Math.max(...circles.map(circle => circle.getCenter().x + circle.getRadius()))
-    const left = Math.min(...circles.map(circle => circle.getCenter().x - circle.getRadius()))
-    const position = Vec2(0.5 * right + 0.5 * left, 0.5 * top + 0.5 * bottom)
-    const hx = 0.5 * (right - left)
-    const hy = 0.5 * (top - bottom)
-    return new Egg({ actor: this, position, hx, hy })
-  }
-
-  getOffset (props: { parent: Membrane, gene: Gene }): Vec2 {
-    const parentPosition = props.parent.body.getPosition()
-    const radius = this.getRadius({ gene: props.gene })
-    const distance = props.parent.radius + radius + this.gap
-    const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * props.gene.angle)
-    const offsetPosition = Vec2.add(parentPosition, offset)
-    return offsetPosition
-  }
-
-  getRadius (props: { gene: Gene }): number {
-    const minimumRadius = this.stage.navigation.radii[this.stage.navigation.radii.length - 1]
-    const maximumRadius = this.stage.navigation.radii[0]
-    const difference = maximumRadius - minimumRadius
-    const bonus = difference * props.gene.strength
-    const radius = minimumRadius + bonus
-    return radius
-  }
-
-  hatch = (): void => {
-    // if(this.eye.body.getContactList() != null)
-    this.hatched = true
-    this.stage.destructionQueue.push(this.membrane.body)
-    this.spawnPosition = this.membrane.body.getPosition()
-    this.membrane = this.grow({ gene: this.gene })
-    this.membrane.borderWidth = 0.2
-  }
-
-  eggFlee (): void {
-    throw new Error('Not implemented')
-  }
-
-  grow (props: {
-    gene: Gene
-    parent?: Membrane
-  }): Membrane {
-    const position = props.parent == null
-      ? this.spawnPosition
-      : this.getOffset({ parent: props.parent, gene: props.gene })
-    const radius = this.getRadius({ gene: props.gene })
-    const membrane = this.addMembrane({
-      position,
-      cell: props.parent,
-      radius
-    })
-    for (const childBranch of props.gene.branches) {
-      this.grow({ gene: childBranch, parent: membrane })
-    }
-    return membrane
-  }
-
   charge (enemy: Feature): Rgb {
     const chargeStart = performance.now()
     const enemyPosition = enemy.body.getPosition()
     const navPoint = this.stage.navigation.navigate(this.membrane.position, enemyPosition, this.membrane.radius, enemy.radius)
     const navPosition = navPoint instanceof Vec2 ? navPoint : navPoint.position
     if (this.stage.flags.charge) {
+      this.debugPath({ target: enemyPosition })
       this.stage.debugLine({
         a: this.membrane.position,
         b: navPosition,
@@ -322,6 +244,14 @@ export class Organism extends Actor {
       radius: this.membrane.radius,
       otherRadius: this.chaseRadius
     })
+    if (path.length < 2) {
+      throw new Error('Path is too short')
+    }
+    const distance = Vec2.distance(path[0], path[1])
+    if (distance === 0) {
+      this.stage.log({ k: 'path', v: path })
+      // throw new Error('Path distance is zero')
+    }
     const circle = new CircleShape(props.target, this.chaseRadius)
     this.stage.debugCircle({ circle, color: RED })
     range(0, path.length - 2).forEach(index => {
@@ -411,6 +341,83 @@ export class Organism extends Actor {
     return PINK
   }
 
+  // destroyMembrane (props: {
+  //   membrane: Membrane
+  // }): void {
+  //   // this.membranes = this.membranes.filter(membrane => membrane !== props.membrane)
+  //   this.membranes = this.membranes.filter(membrane => {
+  //     const destroyed = membrane === props.membrane
+  //     if (destroyed) {
+  //       membrane.destroy()
+  //       return false
+  //     }
+  //     return true
+  //   })
+  //   this.features = this.features.filter(feature => feature !== props.membrane)
+  //   this.stage.world.destroyBody(props.membrane.body)
+  // }
+
+  getEgg (): Egg {
+    const circles: CircleShape[] = []
+    this.addCircles({ gene: this.gene, circles })
+    const top = Math.max(...circles.map(circle => circle.getCenter().y + circle.getRadius()))
+    const bottom = Math.min(...circles.map(circle => circle.getCenter().y - circle.getRadius()))
+    const right = Math.max(...circles.map(circle => circle.getCenter().x + circle.getRadius()))
+    const left = Math.min(...circles.map(circle => circle.getCenter().x - circle.getRadius()))
+    const position = Vec2(0.5 * right + 0.5 * left, 0.5 * top + 0.5 * bottom)
+    const hx = 0.5 * (right - left)
+    const hy = 0.5 * (top - bottom)
+    return new Egg({ actor: this, position, hx, hy })
+  }
+
+  getOffset (props: { parent: Membrane, gene: Gene }): Vec2 {
+    const parentPosition = props.parent.body.getPosition()
+    const radius = this.getRadius({ gene: props.gene })
+    const distance = props.parent.radius + radius + this.gap
+    const offset = rotate(Vec2.mul(this.north, distance), -2 * Math.PI * props.gene.angle)
+    const offsetPosition = Vec2.add(parentPosition, offset)
+    return offsetPosition
+  }
+
+  getRadius (props: { gene: Gene }): number {
+    const difference = this.stage.navigation.bigRadius - this.stage.navigation.smallRadius
+    const bonus = difference * props.gene.strength
+    const radius = this.stage.navigation.smallRadius + bonus
+    return radius
+  }
+
+  hatch = (): void => {
+    // if(this.eye.body.getContactList() != null)
+    this.hatched = true
+    this.stage.destructionQueue.push(this.membrane.body)
+    this.spawnPosition = this.membrane.body.getPosition()
+    this.membrane = this.grow({ gene: this.gene })
+    this.membrane.borderWidth = 0.2
+  }
+
+  eggFlee (): void {
+    throw new Error('Not implemented')
+  }
+
+  grow (props: {
+    gene: Gene
+    parent?: Membrane
+  }): Membrane {
+    const position = props.parent == null
+      ? this.spawnPosition
+      : this.getOffset({ parent: props.parent, gene: props.gene })
+    const radius = this.getRadius({ gene: props.gene })
+    const membrane = this.addMembrane({
+      position,
+      cell: props.parent,
+      radius
+    })
+    for (const childBranch of props.gene.branches) {
+      this.grow({ gene: childBranch, parent: membrane })
+    }
+    return membrane
+  }
+
   isFeatureReachable (props: {
     feature: Feature
     otherRadius?: number
@@ -485,25 +492,8 @@ export class Organism extends Actor {
         })
         continue
       }
-      const reachable = this.isFeatureReachable({ feature })
-      if (!reachable) {
-        this.debugManeuverLine({ color: RED, feature })
-        this.stage.runner.endTiming({
-          key: 'reachable', start: maneuverStepStart
-        })
-        this.stage.runner.endTiming({
-          key: 'maneuverStep', start: maneuverStepStart
-        })
-        continue
-      }
-      const reachableEnd = this.stage.runner.endTiming({
-        key: 'reachable', start: maneuverStepStart
-      })
       if (judgement) {
         const color = this.charge(feature)
-        this.stage.runner.endTiming({
-          key: 'postReachable', start: reachableEnd
-        })
         this.stage.runner.endTiming({
           key: 'maneuverStep', start: maneuverStepStart
         })
@@ -513,9 +503,6 @@ export class Organism extends Actor {
         return color
       }
       const color = this.flee(feature)
-      this.stage.runner.endTiming({
-        key: 'postReachable', start: reachableEnd
-      })
       this.stage.runner.endTiming({
         key: 'maneuverStep', start: maneuverStepStart
       })
@@ -603,15 +590,15 @@ export class Organism extends Actor {
       const bigCircle = new CircleShape(position, 0.5)
       this.stage.debugCircle({ circle: bigCircle, color: WHITE })
     }
-    if (this.player != null) {
-      return
-    }
     if (this.stage.flags.players && this.player != null) {
       const circle = new CircleShape(this.membrane.body.getPosition(), 0.3)
       this.stage.debugCircle({
         circle,
         color: PURPLE
       })
+      return
+    }
+    if (this.player != null) {
       return
     }
     const movementEnd = this.stage.runner.endTiming({

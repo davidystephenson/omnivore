@@ -7,7 +7,7 @@ import { Wall } from './actor/wall'
 import { Feature } from './feature/feature'
 import { Structure } from './feature/structure'
 import { Organism } from './actor/organism'
-import { CYAN, RED, WHITE } from '../shared/color'
+import { CYAN, LIME, RED, WHITE } from '../shared/color'
 import { NavArea } from './navArea'
 
 export class Navigation {
@@ -17,19 +17,26 @@ export class Navigation {
   }
 
   radii = [1.2, 1.1, 1.0, 0.9, 0.8, 0.7, 0.6]
+  margin: number
+  bigRadius: number
+  smallRadius: number
   stage: Stage
   waypoints = new Map<number, Waypoint>()
   gridWaypoints: Waypoint[] = []
   wallOffset = 0.4
   wallWaypoints: Waypoint[] = []
   cornerWaypoints: Waypoint[] = []
-  navAreas: AABB[] = []
+  navAreas: NavArea[] = []
   radiiWaypoints = new Map<number, Waypoint[]>()
 
   constructor (props: {
     stage: Stage
   }) {
     this.stage = props.stage
+    this.bigRadius = Math.max(...this.radii)
+    this.smallRadius = Math.min(...this.radii)
+    const bigDiameter = 2 * this.bigRadius
+    this.margin = bigDiameter + 0.1
   }
 
   getPath (props: {
@@ -83,6 +90,8 @@ export class Navigation {
     }
     const startNeighbors = this.getNeighbors(start, validRadius)
     const endNeighbors = this.getNeighbors(end, validRadius)
+    this.stage.log({ k: 'startNeighbors', v: startNeighbors.length })
+    this.stage.log({ k: 'endNeighbors', v: endNeighbors.length })
     let minDistance = Infinity
     let target: Waypoint | Vec2 = start
     startNeighbors.forEach(startNeighbor => {
@@ -100,6 +109,7 @@ export class Navigation {
       })
     })
     this.stage.runner.endTiming({ key: 'navigate', start: navigateStart })
+    this.stage.log({k: 'minDistance', v: minDistance})
     return target
   }
 
@@ -108,6 +118,9 @@ export class Navigation {
     this.createWaypoints()
     this.stage.debug({ v: 'Setting up neighbors...' })
     this.setupNeighbors()
+    this.stage.debug({ v: 'Setting up navAreas...' })
+    this.navAreas = this.getNavAreas()
+    console.log(`${this.navAreas.length} navAreas`)
     this.stage.debug({ v: 'Calculating distances...' })
     this.preCalculate()
     this.stage.debug({ v: 'Starting the runner...' })
@@ -121,53 +134,42 @@ export class Navigation {
     return waypointArray.filter(waypoint => waypoint.radius === maximumRadius)
   }
 
-  getTopNavArea (innerWall: Wall): NavArea {
-    const maximumRadius = Math.max(...this.radii)
-    const lookPoint = innerWall.topWaypoints[0]
-    if (lookPoint == null) throw new Error('topPoint == null')
-    const otherInnerWalls = this.stage.getInnerWalls().filter(other => {
-      return other !== innerWall
-    })
-    const otherBottomPoints: Waypoint[] = []
-    otherInnerWalls.forEach(otherWall => {
-      otherWall.bottomWaypoints.forEach(otherWaypoint => {
-        const open = this.isOpen({
-          fromPosition: lookPoint.position,
-          toPosition: otherWaypoint.position,
-          radius: maximumRadius
+  getNavAreas (): NavArea[] {
+    const areaBoxes: AABB[] = []
+    const wallTops = this.stage.walls.map(wall => wall.top + 0.001)
+    const wallBottoms = this.stage.walls.map(wall => wall.bottom - 0.001)
+    const wallRights = this.stage.walls.map(wall => wall.right + 0.001)
+    const wallLefts = this.stage.walls.map(wall => wall.left - 0.001)
+    wallTops.sort((a, b) => a - b)
+    wallBottoms.sort((a, b) => a - b)
+    wallRights.sort((a, b) => a - b)
+    wallLefts.sort((a, b) => a - b)
+    wallTops.forEach(areaBottom => {
+      wallBottoms.forEach(areaTop => {
+        wallLefts.forEach(areaRight => {
+          wallRights.forEach(areaLeft => {
+            if (areaRight - areaLeft < this.margin) return
+            if (areaTop - areaBottom < this.margin) return
+            const aabb = new AABB(Vec2(areaLeft, areaBottom), Vec2(areaRight, areaTop))
+            for (const wall of this.stage.walls) {
+              const overlap = AABB.testOverlap(wall.aabb, aabb)
+              if (overlap) return
+            }
+            areaBoxes.push(aabb)
+          })
         })
-        if (open) otherBottomPoints.push(otherWaypoint)
       })
     })
-    const otherRightPoints: Waypoint[] = []
-    otherInnerWalls.forEach(otherWall => {
-      otherWall.rightWaypoints.forEach(otherWaypoint => {
-        const open = this.isOpen({
-          fromPosition: lookPoint.position,
-          toPosition: otherWaypoint.position,
-          radius: maximumRadius
-        })
-        if (open) otherRightPoints.push(otherWaypoint)
-      })
+    const navAreas: NavArea[] = []
+    areaBoxes.forEach(areaBox => {
+      for (const otherAreaBox of areaBoxes) {
+        const otherContainsSelf = otherAreaBox.contains(areaBox)
+        const selfContainsOther = areaBox.contains(otherAreaBox)
+        if (otherContainsSelf && !selfContainsOther) return
+      }
+      navAreas.push(new NavArea(this.stage, areaBox))
     })
-    const otherLeftPoints: Waypoint[] = []
-    otherInnerWalls.forEach(otherWall => {
-      otherWall.leftWaypoints.forEach(otherWaypoint => {
-        const open = this.isOpen({
-          fromPosition: lookPoint.position,
-          toPosition: otherWaypoint.position,
-          radius: maximumRadius
-        })
-        if (open) otherLeftPoints.push(otherWaypoint)
-      })
-    })
-    const areaTop = Math.min(...otherBottomPoints.map(point => point.position.y))
-    const areaBottom = lookPoint.position.y
-    const areaRight = Math.min(...otherLeftPoints.map(point => point.position.x))
-    const areaLeft = Math.max(...otherRightPoints.map(point => point.position.x))
-    // const areaLeft = ...
-    // const areaRight = ...
-    // Construct the NavArea and return it
+    return navAreas
   }
 
   preCalculate (): void {
@@ -216,7 +218,7 @@ export class Navigation {
   setupNeighbors (): void {
     this.waypoints.forEach(waypoint => {
       this.radii.forEach(radius => {
-        const neighbors = this.getNeighbors(waypoint.position, radius)
+        const neighbors = this.getNeighborsRaycast(waypoint.position, radius)
         waypoint.neighbors.set(radius, neighbors)
       })
     })
@@ -283,6 +285,13 @@ export class Navigation {
   }
 
   getNeighbors (position: Vec2, radius: number): Waypoint[] {
+    const navAreas = this.navAreas.filter(navArea => {
+      return navArea.testPoint(position)
+    })
+    return navAreas.flatMap(navArea => navArea.waypoints)
+  }
+
+  getNeighborsRaycast (position: Vec2, radius: number): Waypoint[] {
     const validWaypoints = this.radiiWaypoints.get(radius)
     if (validWaypoints == null) return []
     const neighbors = validWaypoints.filter(otherWaypoint => {
@@ -400,6 +409,14 @@ export class Navigation {
     })
     if (!playing) return
     const debugRadius = 1.2
+    if (this.stage.flags.navAreas) {
+      this.navAreas.forEach(navArea => {
+        this.stage.debugBox({
+          box: navArea.aabb,
+          color: LIME
+        })
+      })
+    }
     if (this.stage.flags.waypoints) {
       this.cornerWaypoints.forEach(waypoint => {
         if (waypoint.radius === debugRadius) {

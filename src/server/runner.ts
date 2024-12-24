@@ -193,14 +193,15 @@ export class Runner {
     }
     this.timings = {}
     this.stage.onStep({ stepSize })
-    if (this.timing) {
-      this.debugTiming({ key: 'navigate' })
-      this.debugTiming({ key: 'charge' })
-      this.debugTiming({ key: 'chase' })
-      this.debugTiming({ key: 'wander' })
-      this.debugTiming({ key: 'flee' })
-    }
+
     if (this.stage.flags.performance && this.timing) {
+      if (this.stage.flags.timings) {
+        this.debugTiming({ key: 'navigate' })
+        this.debugTiming({ key: 'charge' })
+        this.debugTiming({ key: 'chase' })
+        this.debugTiming({ key: 'wander' })
+        this.debugTiming({ key: 'flee' })
+      }
       console.timeEnd('stageStep')
     }
     this.features = this.getFeatures()

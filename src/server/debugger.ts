@@ -6,7 +6,7 @@ interface Vs <Value> {
 }
 type Vx <Value> = V<Value> | Vs<Value>
 interface K {
-  k?: string
+  k?: string | number
 }
 type Pair <Value> = Vx<Value> & K
 

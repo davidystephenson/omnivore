@@ -12,8 +12,6 @@ export interface Rectangle {
 
 export default class Procedural extends Playhouse {
   static FILL = 0.5
-  static MARGIN = 1.25
-  static MINIMUM = 1.25
   static FAILS = 100000
   static DEBUG = 10000
 
@@ -33,7 +31,10 @@ export default class Procedural extends Playhouse {
       this.debugging = remainder === 0
       if (this.debugging) {
         const fill = this.getFill()
-        console.info('Proceeding...', this.fails, fill)
+        const percent = fill * 100
+        const percentFixed = percent.toFixed(2)
+        const percentString = `${percentFixed}%`
+        console.info('Proceeding...', this.fails, percentString)
       }
       this.guardWall()
     }
@@ -42,11 +43,8 @@ export default class Procedural extends Playhouse {
   getCoordinate (props: {
     halfSize: number
   }): number {
-    if (this.debugging) {
-      console.debug('halfSize', props.halfSize)
-    }
     const size = props.halfSize
-    const difference = size - Procedural.MINIMUM
+    const difference = size - this.navigation.margin
     const maximum = difference * 2
     const random = this.getRandom({ maximum })
     const coordinate = random - difference
@@ -68,10 +66,10 @@ export default class Procedural extends Playhouse {
     minimum?: number
     maximum: number
   }): number {
-    const difference = props.maximum - Procedural.MINIMUM
+    const difference = props.maximum - this.navigation.margin
     const random = Math.random()
     const scaled = random * difference
-    const shifted = Procedural.MINIMUM + scaled
+    const shifted = this.navigation.margin + scaled
     return shifted
   }
 
@@ -86,14 +84,14 @@ export default class Procedural extends Playhouse {
       halfHeight,
       halfWidth
     }
-    if (this.debugging) {
+    if (this.flags.procedural && this.debugging) {
       console.debug('rectangle', rectangle)
     }
     return rectangle
   }
 
   getSize (): number {
-    const margins = Procedural.MARGIN * 2
+    const margins = this.navigation.margin * 2
     const minimum = Math.min(this.halfWidth, this.halfHeight)
     const difference = minimum - margins
     const maximum = difference / 2
@@ -121,9 +119,6 @@ export default class Procedural extends Playhouse {
       const blocked = this.isBlocked({ rectangle, wall })
       return blocked
     })
-    if (this.debugging) {
-      console.debug('blocked', blocked)
-    }
     if (blocked) {
       this.fails += 1
       return undefined
@@ -150,16 +145,16 @@ export default class Procedural extends Playhouse {
     wall: Wall
   }): boolean {
     const xDist = Math.abs(props.rectangle.x - props.wall.position.x)
-    const xSpread = props.rectangle.halfWidth + props.wall.halfWidth + Procedural.MARGIN
+    const xSpread = props.rectangle.halfWidth + props.wall.halfWidth + this.navigation.margin
     const yDist = Math.abs(props.rectangle.y - props.wall.position.y)
-    const ySpread = props.rectangle.halfHeight + props.wall.halfHeight + Procedural.MARGIN
+    const ySpread = props.rectangle.halfHeight + props.wall.halfHeight + this.navigation.margin
     const blocked = xDist < xSpread && yDist < ySpread
-    if (blocked && this.debugging) {
+    if (blocked && this.flags.procedural && this.debugging) {
       console.log('blocking wall:')
       console.log('position:', props.wall.position)
       console.log('halfWidth:', props.wall.halfWidth)
       console.log('halfHeight:', props.wall.halfHeight)
-      console.log('margin:', Procedural.MARGIN)
+      console.log('margin:', this.navigation.margin)
     }
     return blocked
   }
@@ -176,7 +171,7 @@ export default class Procedural extends Playhouse {
   isFailed (): boolean {
     const failed = this.fails >= Procedural.FAILS
     if (failed) {
-      console.info('Procedural is failed')
+      console.info('Procedure complete!')
     }
     return failed
   }
@@ -184,9 +179,6 @@ export default class Procedural extends Playhouse {
   isFull (): boolean {
     const fill = this.getFill()
     const full = fill > Procedural.FILL
-    if (full) {
-      console.info('Procedural is full')
-    }
     return full
   }
 }
