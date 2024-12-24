@@ -1,4 +1,4 @@
-import { Vec2 } from 'planck'
+import { AABB, Vec2 } from 'planck'
 import { Stage } from '../stage/stage'
 import { Actor } from './actor'
 import { Structure } from '../feature/structure'
@@ -14,6 +14,11 @@ export class Wall extends Actor {
   bottomWaypoints: Waypoint[] = []
   rightWaypoints: Waypoint[] = []
   leftWaypoints: Waypoint[] = []
+  top: number
+  bottom: number
+  left: number
+  right: number
+  aabb: AABB
 
   constructor (props: {
     stage: Stage
@@ -32,5 +37,10 @@ export class Wall extends Actor {
       actor: this
     })
     this.features.push(this.structure)
+    this.top = this.position.y + this.halfHeight
+    this.bottom = this.position.y - this.halfHeight
+    this.right = this.position.x + this.halfWidth
+    this.left = this.position.x - this.halfWidth
+    this.aabb = new AABB(Vec2(this.left, this.bottom), Vec2(this.right, this.top))
   }
 }

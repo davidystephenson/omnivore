@@ -3,6 +3,7 @@ import { Membrane } from '../feature/membrane'
 import { Stage } from '../stage/stage'
 import { Obituary, Organism } from '../actor/organism'
 import { Spawnpoint } from '../spawnpoint'
+import { LogProps } from '../debugger'
 
 export class Death {
   stage: Stage
@@ -51,6 +52,15 @@ export class Death {
     this.stage.spawner.queue.push(spawn)
   }
 
+  getArea (box: AABB): number {
+    const extents = box.getExtents()
+    return extents.x * extents.y
+  }
+
+  log <Value> (props: LogProps<Value>): void {
+    this.stage.flag({ f: 'death', ...props })
+  }
+
   trim (props: { base: Vec2, lookBox: AABB }): AABB {
     const widthTrimmedBox = this.trimWidth(props)
     const heightTrimmedBox = this.trimHeight(props)
@@ -60,23 +70,6 @@ export class Death {
     const heightFirstArea = this.getArea(heightFirstBox)
     if (widthFirstArea > heightFirstArea) return widthFirstBox
     return heightFirstBox
-  }
-
-  trimWidth (props: { base: Vec2, lookBox: AABB }): AABB {
-    const lowerBound = props.lookBox.lowerBound.clone()
-    const upperBound = props.lookBox.upperBound.clone()
-    const extended = new AABB(lowerBound, upperBound)
-    extended.extend(-0.2)
-    this.stage.world.queryAABB(extended, (fixture: Fixture): boolean => {
-      const fixtureData = fixture.getUserData()
-      if (fixtureData instanceof Spawnpoint) return true
-      const fixtureBox = fixture.getAABB(0)
-      if (fixtureBox.lowerBound.x > props.base.x) upperBound.x = Math.min(upperBound.x, fixtureBox.lowerBound.x)
-      if (fixtureBox.upperBound.x < props.base.x) lowerBound.x = Math.max(lowerBound.x, fixtureBox.upperBound.x)
-      return true
-    })
-    const trimmed = new AABB(lowerBound, upperBound)
-    return trimmed
   }
 
   trimHeight (props: { base: Vec2, lookBox: AABB }): AABB {
@@ -96,8 +89,20 @@ export class Death {
     return trimmed
   }
 
-  getArea (box: AABB): number {
-    const extents = box.getExtents()
-    return extents.x * extents.y
+  trimWidth (props: { base: Vec2, lookBox: AABB }): AABB {
+    const lowerBound = props.lookBox.lowerBound.clone()
+    const upperBound = props.lookBox.upperBound.clone()
+    const extended = new AABB(lowerBound, upperBound)
+    extended.extend(-0.2)
+    this.stage.world.queryAABB(extended, (fixture: Fixture): boolean => {
+      const fixtureData = fixture.getUserData()
+      if (fixtureData instanceof Spawnpoint) return true
+      const fixtureBox = fixture.getAABB(0)
+      if (fixtureBox.lowerBound.x > props.base.x) upperBound.x = Math.min(upperBound.x, fixtureBox.lowerBound.x)
+      if (fixtureBox.upperBound.x < props.base.x) lowerBound.x = Math.max(lowerBound.x, fixtureBox.upperBound.x)
+      return true
+    })
+    const trimmed = new AABB(lowerBound, upperBound)
+    return trimmed
   }
 }

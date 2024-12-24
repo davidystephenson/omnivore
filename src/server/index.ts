@@ -1,7 +1,6 @@
 import { io } from './server'
 import { Vec2 } from 'planck'
 import { Controls } from '../shared/input'
-import { Gene } from './gene'
 // import { Funhouse } from './funhouse'
 import { GREEN } from '../shared/color'
 // import { GrandRehearsal } from './stage/grandRehearsal'
@@ -15,16 +14,10 @@ const stage = new DressRehearsal()
 io.on('connection', socket => {
   stage.debug({ vs: ['connection:', socket.id] })
   socket.emit('connected')
-  const gene = new Gene({
-    speed: 0.33,
-    stage,
-    stamina: 0,
-    strength: 0.67
-  })
   const player = stage.addPlayer({
     color: GREEN,
     id: socket.id,
-    gene,
+    gene: stage.balancedGene,
     position: Vec2(0, 0)
   })
   if (player.organism == null) {

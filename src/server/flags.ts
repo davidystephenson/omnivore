@@ -10,13 +10,16 @@ export class Flags {
   maneuverLines: boolean
   meatY: boolean
   mutation: boolean
+  navAreas: boolean
   navigation: boolean
   organisms: boolean
   performance: boolean
   players: boolean
+  procedural: boolean
   respawn: boolean
   starveBricksY: boolean
   summary: boolean
+  timings: boolean
   vision: boolean
   visionRangeY: boolean
   visionGame: boolean
@@ -35,13 +38,16 @@ export class Flags {
     maneuverLines?: boolean
     meatY?: boolean
     mutation?: boolean
+    navAreas?: boolean
     navigation?: boolean
     organisms?: boolean
     performance?: boolean
     players?: boolean
+    procedural?: boolean
     respawn?: boolean
     starveBricksY?: boolean
     summary?: boolean
+    timings?: boolean
     vision?: boolean
     visionRangeY?: boolean
     visionY?: boolean
@@ -59,13 +65,16 @@ export class Flags {
     this.maneuverLines = props.maneuverLines ?? false
     this.meatY = props.meatY ?? true
     this.mutation = props.mutation ?? false
+    this.navAreas = props.navAreas ?? false
     this.navigation = props.navigation ?? false
     this.organisms = props.organisms ?? false
     this.performance = props.performance ?? true
     this.players = props.players ?? false
+    this.procedural = props.procedural ?? false
     this.respawn = props.respawn ?? false
     this.starveBricksY = props.starveBricksY ?? true
     this.summary = props.summary ?? false
+    this.timings = props.timings ?? false
     this.vision = props.vision ?? false
     this.visionRangeY = props.visionRangeY ?? true
     this.visionGame = props.visionY ?? true
