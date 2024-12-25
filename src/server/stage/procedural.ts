@@ -17,7 +17,7 @@ export default class Procedural extends Playhouse {
 
   debugging = false
   fails = 0
-  proceduralWalls: Wall[] = []
+  treeRectangles: Rectangle[] = []
 
   constructor (props: {
     flags: Flags
@@ -116,7 +116,7 @@ export default class Procedural extends Playhouse {
   guardRectangle (): Rectangle | undefined {
     const rectangle = this.getRectangle()
     const blocked = this.walls.some((wall) => {
-      const blocked = this.isBlocked({ rectangle, wall })
+      const blocked = this.isBlockedByWall({ rectangle, wall })
       return blocked
     })
     if (blocked) {
@@ -132,30 +132,47 @@ export default class Procedural extends Playhouse {
       return
     }
     const position = Vec2(rectangle.x, rectangle.y)
-    const wall = this.addWall({
+    this.addWall({
       halfWidth: rectangle.halfWidth,
       halfHeight: rectangle.halfHeight,
       position
     })
-    this.proceduralWalls.push(wall)
   }
 
   isBlocked (props: {
+    halfHeight: number
+    halfWidth: number
     rectangle: Rectangle
-    wall: Wall
+    x: number
+    y: number
   }): boolean {
-    const xDist = Math.abs(props.rectangle.x - props.wall.position.x)
-    const xSpread = props.rectangle.halfWidth + props.wall.halfWidth + this.navigation.margin
-    const yDist = Math.abs(props.rectangle.y - props.wall.position.y)
-    const ySpread = props.rectangle.halfHeight + props.wall.halfHeight + this.navigation.margin
+    const xDist = Math.abs(props.rectangle.x - props.x)
+    const xSpread = props.rectangle.halfWidth + props.halfWidth + this.navigation.margin
+    const yDist = Math.abs(props.rectangle.y - props.y)
+    const ySpread = props.rectangle.halfHeight + props.halfHeight + this.navigation.margin
     const blocked = xDist < xSpread && yDist < ySpread
     if (blocked && this.flags.procedural && this.debugging) {
       console.log('blocking wall:')
-      console.log('position:', props.wall.position)
-      console.log('halfWidth:', props.wall.halfWidth)
-      console.log('halfHeight:', props.wall.halfHeight)
+      console.log('x:', props.y)
+      console.log('y:', props.x)
+      console.log('halfWidth:', props.halfWidth)
+      console.log('halfHeight:', props.halfHeight)
       console.log('margin:', this.navigation.margin)
     }
+    return blocked
+  }
+
+  isBlockedByWall (props: {
+    rectangle: Rectangle
+    wall: Wall
+  }): boolean {
+    const blocked = this.isBlocked({
+      halfHeight: props.wall.halfHeight,
+      halfWidth: props.wall.halfWidth,
+      rectangle: props.rectangle,
+      x: props.wall.position.x,
+      y: props.wall.position.y
+    })
     return blocked
   }
 

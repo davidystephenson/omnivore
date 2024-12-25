@@ -90,8 +90,8 @@ export class Navigation {
     }
     const startNeighbors = this.getNeighbors(start, validRadius)
     const endNeighbors = this.getNeighbors(end, validRadius)
-    this.stage.log({ k: 'startNeighbors', v: startNeighbors.length })
-    this.stage.log({ k: 'endNeighbors', v: endNeighbors.length })
+    this.stage.flag({ f: 'navigation', k: 'startNeighbors', v: startNeighbors.length })
+    this.stage.flag({ f: 'navigation', k: 'endNeighbors', v: endNeighbors.length })
     let minDistance = Infinity
     let target: Waypoint | Vec2 = start
     startNeighbors.forEach(startNeighbor => {
@@ -109,7 +109,7 @@ export class Navigation {
       })
     })
     this.stage.runner.endTiming({ key: 'navigate', start: navigateStart })
-    this.stage.log({k: 'minDistance', v: minDistance})
+    this.stage.flag({ f: 'navigation', k: 'minDistance', v: minDistance })
     return target
   }
 
@@ -269,7 +269,7 @@ export class Navigation {
       })
     })
     const allOpen = opens.every(x => x)
-    if (this.stage.flags.navigation) {
+    if (this.stage.flags.isOpen) {
       range(0, 2).forEach(index => {
         const start = starts[index]
         const end = ends[index]

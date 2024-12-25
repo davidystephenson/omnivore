@@ -7,11 +7,12 @@ export class Flags {
   controlLines: boolean
   death: boolean
   hungerY: boolean
+  isOpen: boolean
   maneuverLines: boolean
   meatY: boolean
   mutation: boolean
-  navAreas: boolean
   navigation: boolean
+  navAreas: boolean
   organisms: boolean
   performance: boolean
   players: boolean
@@ -35,6 +36,7 @@ export class Flags {
     controlLines?: boolean
     death?: boolean
     hungerY?: boolean
+    isOpen?: boolean
     maneuverLines?: boolean
     meatY?: boolean
     mutation?: boolean
@@ -62,6 +64,7 @@ export class Flags {
     this.controlLines = props.controlLines ?? false
     this.death = props.death ?? false
     this.hungerY = props.hungerY ?? true
+    this.isOpen = props.isOpen ?? false
     this.maneuverLines = props.maneuverLines ?? false
     this.meatY = props.meatY ?? true
     this.mutation = props.mutation ?? false
