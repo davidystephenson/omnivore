@@ -16,6 +16,8 @@ export class Navigation {
     y: HALF_SIGHT.y
   }
 
+  static gridStep = 5
+
   radii = [1.2, 1.1, 1.0, 0.9, 0.8, 0.7, 0.6]
   margin: number
   bigRadius: number
@@ -247,7 +249,7 @@ export class Navigation {
         waypoint.pathDistances.set(radius, distances)
       })
       // Compute the minimal path distance from each waypoint to each other waypoint
-      const radiusWaypoints = this.radiiWaypoints.get(radius)
+      const radiusWaypoints = this.waypoints // this.radiiWaypoints.get(radius)
       if (radiusWaypoints == null) throw new Error('No waypoints found for this radius')
       // Why are there two for loops?
       /*
@@ -266,7 +268,7 @@ export class Navigation {
         const remainder = index % divisor
         const divisible = remainder === 0
         if (divisible && index !== 0) {
-          this.stage.debug({ v: `Path length ${index}/${radiusWaypoints.length}...` })
+          this.stage.debug({ v: `Path length ${index}/${radiusWaypoints.size}...` })
         }
         if (index === nextDivisor) {
           divisor = nextDivisor
@@ -405,37 +407,16 @@ export class Navigation {
   }
 
   createWaypoints (): void {
-    const xCount = Math.ceil(2 * this.stage.halfWidth / Navigation.spacing.x)
-    const yCount = Math.ceil(2 * this.stage.halfHeight / Navigation.spacing.y)
-    const xStep = 2 * this.stage.halfWidth / xCount
-    const yStep = 2 * this.stage.halfHeight / yCount
+    const xCount = Math.ceil(2 * this.stage.halfWidth / Navigation.gridStep)
+    const yCount = Math.ceil(2 * this.stage.halfHeight / Navigation.gridStep)
     range(0, xCount).forEach(i => {
       range(0, yCount).forEach(j => {
-        const x = i * xStep - this.stage.halfWidth
-        const y = j * yStep - this.stage.halfHeight
+        const x = i * Navigation.gridStep - this.stage.halfWidth
+        const y = j * Navigation.gridStep - this.stage.halfHeight
         this.radii.forEach(radius => {
           this.addWaypoint(Vec2(x, y), 'grid', radius)
         })
       })
-    })
-    this.stage.walls.forEach(wall => this.addWallWaypoints(wall))
-    this.radii.forEach(radius => {
-      const cornerX = this.stage.halfWidth - radius
-      const cornerY = this.stage.halfHeight - radius
-      this.addWaypoint(Vec2(+cornerX, +cornerY), 'corner', radius)
-      this.addWaypoint(Vec2(+cornerX, -cornerY), 'corner', radius)
-      this.addWaypoint(Vec2(-cornerX, +cornerY), 'corner', radius)
-      this.addWaypoint(Vec2(-cornerX, -cornerY), 'corner', radius)
-    })
-    this.radii.forEach(radius => {
-      const waypointArray = [...this.waypoints.values()]
-      const validWaypoints = waypointArray.filter(waypoint => waypoint.radius === radius)
-      this.radiiWaypoints.set(radius, validWaypoints)
-    })
-    this.waypoints.forEach(waypoint => {
-      if (waypoint.category === 'grid') this.gridWaypoints.push(waypoint)
-      if (waypoint.category === 'wall') this.wallWaypoints.push(waypoint)
-      if (waypoint.category === 'corner') this.cornerWaypoints.push(waypoint)
     })
   }
 
@@ -455,21 +436,7 @@ export class Navigation {
       })
     }
     if (this.stage.flags.waypoints) {
-      this.cornerWaypoints.forEach(waypoint => {
-        if (waypoint.radius === debugRadius) {
-          this.stage.debugCircle({
-            circle: new Circle(waypoint.position, 0.2),
-            color: WHITE
-          })
-        }
-      })
-      this.gridWaypoints.forEach(waypoint => {
-        this.stage.debugCircle({
-          circle: new Circle(waypoint.position, 0.2),
-          color: WHITE
-        })
-      })
-      this.wallWaypoints.forEach(waypoint => {
+      this.waypoints.forEach(waypoint => {
         if (waypoint.radius === debugRadius) {
           this.stage.debugCircle({
             circle: new Circle(waypoint.position, 0.2),
