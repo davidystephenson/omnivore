@@ -549,7 +549,7 @@ export class Organism extends Actor {
       throw new Error('This organism has no membranes')
     }
     this.membranes.forEach(membrane => {
-      const forceScale = this.gene.speed * membrane.body.getMass() * 5
+      const forceScale = 0.2 + this.gene.speed * membrane.body.getMass() * 5
       membrane.force = Vec2.mul(direction, forceScale)
     })
   }
@@ -612,7 +612,9 @@ export class Organism extends Actor {
     this.stage.runner.endTiming({ key: 'maneuver', start: exploreEnd })
   }
 
-  reproduce (): void {
+  reproduce (props: {
+    health: number
+  }): void {
     const gene = this.gene.mutate()
     const bot = this.stage.addOrganism({
       color: this.color,
@@ -621,7 +623,9 @@ export class Organism extends Actor {
     })
     const half = this.membrane.maximumHealth / 2
     bot.membrane.hungerDamage = half
-    this.membrane.hungerDamage = half
+    this.membrane.hungerDamage = half - props.health
+    // TODO maintain combat damage
+    this.membrane.combatDamage = 0
   }
 
   setControls (direction: Vec2): void {

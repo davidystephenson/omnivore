@@ -81,6 +81,13 @@ export class Feature {
     this.actor.stage.destructionQueue.push(this.body)
   }
 
+  getCombatDamage (target: Feature): number {
+    const ratio = this.body.getMass() / target.body.getMass()
+    const factor = 5
+    const combatDamage = 0.1 * Math.pow(ratio, factor)
+    return combatDamage
+  }
+
   getElement (seen: boolean): Element {
     const position = roundVector({ vector: this.position })
     const angle = this.body.getAngle()
@@ -133,10 +140,21 @@ export class Feature {
     return health
   }
 
+  handleContact (props: {
+    target: Feature
+  }): void {}
+
+  handleContacts (): void {
+    this.contacts.forEach(target => {
+      this.handleContact({ target })
+    })
+  }
+
   onStep (props: {
     stepSize: number
   }): void {
     this.health = this.getHealth()
     this.position = this.body.getPosition()
+    this.handleContacts()
   }
 }

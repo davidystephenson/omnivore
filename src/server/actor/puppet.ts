@@ -8,7 +8,6 @@ export class Puppet extends Actor {
   force: Vec2
   speed: number
 
-  // TODO add movement
   constructor (props: {
     stage: Stage
     vertices: Vec2[] // [Vec2, Vec2, Vec2]
@@ -33,7 +32,6 @@ export class Puppet extends Actor {
   }): void {
     super.onStep({ stepSize: props.stepSize })
     const speed = this.sculpture.body.getLinearVelocity().length()
-    this.stage.flag({ f: 'death', k: 'speed:', v: speed })
     if (speed < this.speed) {
       this.sculpture.body.applyForceToCenter(this.force)
     }

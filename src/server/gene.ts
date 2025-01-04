@@ -120,7 +120,7 @@ export class Gene {
     this.debug({ k: 'getMutated value', v: value })
     const remaining = 1 - value
     this.debug({ k: 'getMutated remaining', v: remaining })
-    const random = Math.round(Math.random() * 0.5)
+    const random = Math.round(Math.random() * 0.75)
     this.debug({ k: 'getMutated random', v: random })
     const others = STATS.filter(stat => stat !== props.stat)
     this.debug({ k: 'getMutated others', v: others })

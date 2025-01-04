@@ -9,6 +9,7 @@ import { DebugCircle } from '../shared/debugCircle'
 import { Player } from './actor/player'
 import { Tree } from './actor/tree'
 import { Timings } from './timings'
+import { Organism } from './actor/organism'
 
 export class Runner {
   static FPS = 30
@@ -77,11 +78,8 @@ export class Runner {
   }
 
   getElements (player: Player): Element[] {
-    if (player.organism == null) {
-      throw new Error('Player organism is null')
-    }
-    const idsInVision = player.organism.featuresInVision.map(feature => feature.id)
-    const filteredFeatures = this.features.filter(feature => idsInVision.includes(feature.id))
+    const idsInVision = player.organism?.featuresInVision.map(feature => feature.id)
+    const filteredFeatures = this.features.filter(feature => idsInVision?.includes(feature.id))
     const elements: Element[] = filteredFeatures.map(feature => {
       const tree = feature.actor instanceof Tree
       const seen = player.seenIds.includes(feature.id)
@@ -104,11 +102,8 @@ export class Runner {
   }
 
   getRopes (player: Player): Rope[] {
-    if (player.organism == null) {
-      throw new Error('Player organism is null')
-    }
     const ropes: Rope[] = []
-    player.organism.featuresInVision.forEach(feature => {
+    player.organism?.featuresInVision.forEach(feature => {
       feature.ropes.forEach(rope => {
         ropes.push(rope)
       })
@@ -127,9 +122,6 @@ export class Runner {
   getSummary (props: {
     player: Player
   }): Summary {
-    if (props.player.organism == null) {
-      throw new Error('Player organism is null')
-    }
     const elements = this.getElements(props.player)
     const age = Math.floor(props.player.age)
     const summary: Summary = {
@@ -140,9 +132,16 @@ export class Runner {
       ropes: this.getRopes(props.player),
       debugLines: this.debugLines,
       debugCircles: this.debugCircles,
-      id: props.player.organism.membrane.id,
-      controls: props.player.organism.controls
+      respawn: -1
     }
+    if (props.player.organism != null) {
+      summary.id = props.player.organism.membrane.id
+      summary.controls = props.player.organism.controls
+    }
+    this.stage.spawner.queue.forEach((obituary, index) => {
+      if (obituary.player !== props.player) return
+      summary.respawn = index
+    })
     if (this.stage.flags.summary) {
       this.stage.debug({ vs: ['getSummary elements.length', elements.length], seconds: 10 })
       const json = JSON.stringify(summary)
@@ -201,7 +200,20 @@ export class Runner {
         this.debugTiming({ key: 'chase' })
         this.debugTiming({ key: 'wander' })
         this.debugTiming({ key: 'flee' })
+        this.debugTiming({ key: 'isOpen' })
+        this.debugTiming({ key: 'afterIsOpen' })
+        this.debugTiming({ key: 'distances' })
+        this.debugTiming({ key: 'neighborToEnd' })
+        this.debugTiming({ key: 'afterDistances' })
       }
+      const organisms: Organism[] = []
+      this.stage.actors.forEach(actor => {
+        if (!(actor instanceof Organism)) {
+          return
+        }
+        organisms.push(actor)
+      })
+      this.stage.flag({ f: 'organismsCount', k: 'organismsCount', v: organisms.length })
       console.timeEnd('stageStep')
     }
     this.features = this.getFeatures()

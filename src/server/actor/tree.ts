@@ -7,7 +7,7 @@ import { directionFromTo, mean, range, rotate } from '../math'
 import { getNearestOtherPoint } from '../geometry'
 
 export class Tree extends Actor {
-  seedRadius = 1.25
+  seedRadius: number
   seedSideLength: number
   seedInnerRadius: number
   radius: number
@@ -31,6 +31,9 @@ export class Tree extends Actor {
     super({ stage: props.stage, label: 'tree' })
     this.tree = true
     this.growing = props.growing ?? true
+    this.foodSize = this.stage.navigation.margin
+    this.seedSideLength = 1 * this.foodSize
+    this.seedRadius = this.seedSideLength / Math.sin(2 / 3 * Math.PI)
     this.sculpture = new Sculpture({
       actor: this,
       color: LIME,
@@ -43,8 +46,6 @@ export class Tree extends Actor {
     this.setupVertices()
     this.sculpture.combatDamage = 0.999999999999
     this.features.push(this.sculpture)
-    this.foodSize = this.seedRadius * Math.sin(2 / 3 * Math.PI)
-    this.seedSideLength = this.seedRadius * 2 * Math.sin(2 / 3 * Math.PI)
     this.seedInnerRadius = Math.sqrt(this.seedRadius ** 2 - 0.25 * this.seedSideLength ** 2)
     this.radius = this.seedRadius
     this.sideLength = this.seedSideLength
@@ -127,8 +128,7 @@ export class Tree extends Actor {
   grow (stepSize: number): void {
     this.step += 1
     this.radius = this.radius + stepSize * this.growthRate
-    this.seedSideLength = this.seedRadius * 2 * Math.sin(2 / 3 * Math.PI)
-    this.sideLength = this.radius * 2 * Math.sin(2 / 3 * Math.PI)
+    this.sideLength = this.radius * Math.sin(2 / 3 * Math.PI)
     this.innerRadius = Math.sqrt(this.radius ** 2 - 0.25 * this.sideLength ** 2)
     if (this.step % 2 === 0) {
       this.sculpture.body.destroyFixture(this.sculpture.fixture)

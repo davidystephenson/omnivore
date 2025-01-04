@@ -11,7 +11,7 @@ import { Prop } from './prop'
 export class Membrane extends Feature {
   static BASE_DAMAGE = 0.1
   static DAMAGE_FACTOR = 3
-  static MINIMUM_LIFE_SECONDS = 30
+  static MINIMUM_LIFE_SECONDS = 15
   static GENETIC_LIFE_SECONDS = 150
   actor: Organism
   destroyed = false
@@ -65,9 +65,8 @@ export class Membrane extends Feature {
   }
 
   doDamage (target: Feature): void {
-    const ratio = this.body.getMass() / target.body.getMass()
-    const factor = 5
-    target.combatDamage += 0.1 * Math.pow(ratio, factor)
+    const combatDamage = this.getCombatDamage(target)
+    target.combatDamage += combatDamage
     target.health = target.getHealth()
     if (target.health <= 0) {
       if (target instanceof Membrane) {
@@ -106,31 +105,43 @@ export class Membrane extends Feature {
     return jaw
   }
 
-  handleContacts (): void {
-    this.contacts.forEach(target => {
-      if (target.actor instanceof Food) {
-        const nutrition = this.maximumHealth * target.actor.nutrition
-        this.heal({ value: nutrition })
-        target.actor.destroy()
-      } else if (target.actor instanceof Tree) {
-        target.actor.fall()
-      } else if (target instanceof Membrane && target.actor.color !== this.actor.color) {
-        this.doDamage(target)
-        this.shove(target)
-      } else if (target instanceof Prop) {
-        this.doDamage(target)
-      }
-    })
+  handleContact (props: {
+    target: Feature
+  }): void {
+    super.handleContact({ target: props.target })
+    if (props.target.actor instanceof Food) {
+      const nutrition = this.maximumHealth * props.target.actor.nutrition
+      this.heal({ health: nutrition })
+      props.target.actor.destroy()
+    } else if (props.target.actor instanceof Tree) {
+      props.target.actor.fall()
+    } else if (props.target instanceof Membrane && props.target.actor.color !== this.actor.color) {
+      this.doDamage(props.target)
+      this.shove(props.target)
+    } else if (props.target instanceof Prop) {
+      this.doDamage(props.target)
+    }
   }
 
-  heal (props: { value: number }): void {
-    if (this.hungerDamage >= 0) {
-      this.hungerDamage -= props.value
-    } else if (this.combatDamage > props.value) {
-      this.combatDamage -= props.value
-    } else {
-      this.actor.reproduce()
+  heal (props: { health: number }): void {
+    let remaining = props.health
+    if (this.hungerDamage > 0) {
+      const minimum = Math.min(remaining, this.hungerDamage)
+      remaining -= this.hungerDamage
+      this.hungerDamage -= minimum
+      if (remaining < 0) {
+        return
+      }
     }
+    if (this.combatDamage > 0) {
+      const minimum = Math.min(remaining, this.combatDamage)
+      remaining -= this.combatDamage
+      this.combatDamage -= minimum
+      if (remaining < 0) {
+        return
+      }
+    }
+    this.actor.reproduce({ health: remaining })
   }
 
   hunger (): void {
@@ -155,7 +166,6 @@ export class Membrane extends Feature {
   }
 
   onStep (props: { stepSize: number }): void {
-    this.handleContacts()
     this.hunger()
   }
 

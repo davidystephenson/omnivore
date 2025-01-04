@@ -24,7 +24,7 @@ export class Mission extends Playhouse {
     this.addWall({
       halfWidth: 10,
       halfHeight: 5,
-      position: Vec2(5, 13)
+      position: Vec2(5, 15)
     })
     // this.addWall({
     //   halfWidth: 10,
@@ -45,8 +45,9 @@ export class Mission extends Playhouse {
     // this.addFoodSquare({ position: Vec2(-5, 5) })
     // this.addFoodSquare({ position: Vec2(0, 5) })
     // this.addBig({ position: Vec2(7, 7) })
-    this.addTrapper({ position: Vec2(5, 0) })
+    // this.addTrapper({ position: Vec2(5, 0) })
     // this.addSpeed({ position: Vec2(0, 5) })
     // this.addTree({ position: Vec2(10, -10) })
+    this.addScavenger({ position: Vec2(0, 0) })
   }
 }

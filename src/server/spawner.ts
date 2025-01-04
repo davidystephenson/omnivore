@@ -1,7 +1,7 @@
 import { Vec2, Body, Circle } from 'planck'
 import { Spawnpoint } from './spawnpoint'
 import { Stage } from './stage/stage'
-import { RED, GREEN } from '../shared/color'
+import { RED, GREEN, Rgb } from '../shared/color'
 import { Obituary, Organism } from './actor/organism'
 
 export class Spawner {
@@ -44,8 +44,20 @@ export class Spawner {
       })
     }
 
+    const organisms: Organism[] = []
+    const families = new Set<Rgb>()
+    this.stage.actors.forEach(actor => {
+      if (!(actor instanceof Organism)) {
+        return
+      }
+      organisms.push(actor)
+      families.add(actor.color)
+    })
+    const organismsNeeded = organisms.length < 10
+    const familiesNeeded = families.size < 5
+    const needed = organismsNeeded || familiesNeeded
     const living = this.stage.killingQueue.length === 0 && this.stage.starvationQueue.length === 0
-    const respawnable = living && this.queue.length > 0
+    const respawnable = living && this.queue.length > 0 && needed
     if (respawnable) {
       this.stage.flag({ f: 'respawn', vs: ['respawnQueue.length', this.queue.length] })
       this.stage.flag({ f: 'respawn', vs: ['spawnPoints.length', this.spawnPoints.length] })
