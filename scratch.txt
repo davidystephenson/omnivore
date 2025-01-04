@@ -1,0 +1,79 @@
+Strength = Size, Damage
+MaxHealth = 1
+Speed
+Stamina
+
+
+Meat = Maxhealth
+Fruit = ???
+
+Strength = MaxHealth
+Combat = Damage
+Speed = Acceleration
+Stamina = Inverse of Hunger
+Strength + Combat + Speed + Stamina = 1
+
+f(x,y,z) = A + B*x + C*Y + D*z
+
+
+
+Max Health (Size) = 0.3
+Damage (????) = 
+Speed (Acceration) = 0.1
+Stamina (1 / Hunger) = 
+
+Damage = Size
+Speed
+Stamina
+
+Meat = maxHealth
+Fruit = 
+
+/*
+    onst genetic = Membrane.GENETIC_LIFE_SECONDS * this.actor.gene.stamina
+    const lifeSeconds = Membrane.MINIMUM_LIFE_SECONDS + genetic
+    const lifeFrames = Runner.FPS * lifeSeconds
+    const hunger = 1 / lifeFrames
+    this.health -= hunger
+*/
+
+strength + combat + speed + stamina = 1
+
+base_lifetime = f(stamina, strength)
+
+f (strength, combat, speed, stamina) {
+  acceleration = speed
+  damage = combat
+  maxHealth = strength
+  const genetic = Membrane.GENETIC_LIFE_SECONDS * this.actor.gene.stamina
+  const lifeSeconds = Membrane.MINIMUM_LIFE_SECONDS + genetic
+  const lifeFrames = Runner.FPS * lifeSeconds
+  const hunger = 1 / stamina
+  return {
+    maxHealth,
+    damage,
+    acceleration,
+    hunger
+  }
+}
+
+Max Health (Size) = 0.03
+Damage (????) = 
+Speed (Acceration) = 0.1
+Stamina (1 / Hunger) = SMALL
+Hunger = 0.003
+
+Max Health (Size) = 0.2
+Damage (????) = 0.3
+Speed (Acceration) = 0.3
+Stamina (100 / Hunger) = 0.0
+Hunger = 1 + 10
+
+Lifespan = 15 + 100 - HUNGER = 15
+
+Max Health (Size) = 0.2
+Damage (????) = 0.0
+Speed (Acceration) = 0.3
+Stamina (1 / Hunger) = 0.3
+Hunger = 33
+Lifespan = 15 + 100 - HUNGER = 82

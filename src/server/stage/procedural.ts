@@ -11,7 +11,7 @@ export interface Rectangle {
 }
 
 export default class Procedural extends Playhouse {
-  static FILL = 0.5
+  static FILL = 0.3
   static FAILS = 100000
   static DEBUG = 10000
 

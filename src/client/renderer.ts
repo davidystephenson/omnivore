@@ -36,6 +36,7 @@ export class Renderer {
     window.requestAnimationFrame(t => this.render())
     this.context.resetTransform()
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    if (this.summary == null) return
     this.followCamera()
     const eye = this.elements.get(this.id)
     if (eye == null) {
@@ -95,10 +96,10 @@ export class Renderer {
     this.context.resetTransform()
     this.context.fillStyle = 'white'
     this.context.font = '50px Arial'
-    if (this.summary == null) {
-      return
-    }
     this.context.fillText(String(this.summary.age), 10, 60)
+    if (this.summary.respawn != null) {
+      this.context.fillText(`Respawning... ${String(this.summary.respawn)}`, 10, this.canvas.height * 0.95)
+    }
   }
 
   followCamera (): void {
@@ -176,7 +177,7 @@ export class Renderer {
     this.elements.forEach(element => {
       element.visible = false
     })
-    summary.elements.forEach(element => {
+    summary.elements?.forEach(element => {
       const oldElement = this.elements.get(element.i)
       if (oldElement != null) {
         const oldPosition = new Vec2(oldElement.x, oldElement.y)
@@ -224,10 +225,20 @@ export class Renderer {
         this.camera.position = new Vec2(element.x, element.y)
       }
     })
-    this.foodCount = summary.foodCount
-    this.ropes = summary.ropes
-    this.debugLines = summary.debugLines
-    this.debugCircles = summary.debugCircles
-    this.id = summary.id
+    if (summary.foodCount != null) {
+      this.foodCount = summary.foodCount
+    }
+    if (summary.ropes != null) {
+      this.ropes = summary.ropes
+    }
+    if (summary.debugLines != null) {
+      this.debugLines = summary.debugLines
+    }
+    if (summary.debugCircles != null) {
+      this.debugCircles = summary.debugCircles
+    }
+    if (summary.id != null) {
+      this.id = summary.id
+    }
   }
 }

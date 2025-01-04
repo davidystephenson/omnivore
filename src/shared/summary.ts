@@ -5,13 +5,14 @@ import { DebugCircle } from './debugCircle'
 import { Controls } from './input'
 
 export interface Summary {
-  age: number
-  controls: Controls
-  debugLines: DebugLine[]
-  debugCircles: DebugCircle[]
-  elements: Element[]
-  foodCount: number
+  age?: number
+  controls?: Controls
+  debugLines?: DebugLine[]
+  debugCircles?: DebugCircle[]
+  elements?: Element[]
+  foodCount?: number
   fps: number
-  id: number
-  ropes: Rope[]
+  id?: number
+  ropes?: Rope[]
+  respawn?: number
 }

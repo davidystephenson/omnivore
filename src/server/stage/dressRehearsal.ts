@@ -6,16 +6,18 @@ export class DressRehearsal extends Procedural {
   constructor () {
     super({
       flags: new Flags({
-        // performance: false,
+        performance: true,
         visionY: false,
+        navigation: true,
+        organismsCount: true,
         // botChase: true,
         // botPath: true,
-        controlLines: true,
+        // controlLines: true,
         // charge: true,
         timings: true
       }),
-      halfHeight: 50,
-      halfWidth: 50
+      halfHeight: 30,
+      halfWidth: 30
     })
 
     this.navigation.setupWaypoints()
@@ -30,8 +32,13 @@ export class DressRehearsal extends Procedural {
     this.addSpeed({ position: Vec2(5, 0) })
     this.addTrapper({ position: Vec2(0, -5) })
 
-    this.addTree({ position: Vec2(0, 0) })
-    // this.addTree({ position: Vec2(-20, -20) })
-    // this.addTree({ position: Vec2(-20, 20) })
+    const minimum = Math.min(this.halfWidth, this.halfHeight)
+    const half = minimum / 2
+    const negative = -half
+
+    this.addTree({ position: Vec2(half, half) })
+    this.addTree({ position: Vec2(negative, half) })
+    this.addTree({ position: Vec2(half, negative) })
+    this.addTree({ position: Vec2(negative, negative) })
   }
 }

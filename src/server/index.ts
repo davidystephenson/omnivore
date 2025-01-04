@@ -26,18 +26,18 @@ io.on('connection', socket => {
   player.organism.membrane.hungerDamage = 0.5
   // player.organism.membrane.combatDamage = 0.9
   socket.on('controls', (controls: Controls) => {
-    if (player.organism == null) {
-      return
+    if (player.organism != null) {
+      player.organism.controls = controls
+      if (controls.select) {
+        stage.runner.paused = true
+      }
+      if (controls.cancel) {
+        stage.runner.paused = false
+        player.organism.membrane.combatDamage = 0
+        player.organism.membrane.hungerDamage = 0
+      }
     }
-    player.organism.controls = controls
-    if (controls.select) {
-      stage.runner.paused = true
-    }
-    if (controls.cancel) {
-      stage.runner.paused = false
-      player.organism.membrane.combatDamage = 0
-      player.organism.membrane.hungerDamage = 0
-    }
+
     const summary = stage.runner.getSummary({ player })
     socket.emit('serverUpdateClient', summary)
   })
