@@ -23,14 +23,18 @@ export class Waypoint {
     this.radius = props.radius
     const keys = [0, ...this.navigation.waypoints.keys()]
     this.id = Math.max(...keys) + 1
-    const aabb = new AABB(this.position, this.position)
-    const xInside = Math.abs(this.position.x) < this.navigation.stage.halfWidth
-    const yInside = Math.abs(this.position.y) < this.navigation.stage.halfHeight
-    let open = xInside && yInside
-    this.navigation.stage.world.queryAABB(aabb, (fixture: Fixture) => {
-      open = false
-      return false
-    })
-    if (open) this.navigation.waypoints.set(this.id, this)
+    // const offset = 0.5 * Navigation.gridStep
+    // const offsetVector = Vec2(offset, offset)
+    // const topRight = Vec2.add(this.position, offsetVector)
+    // const bottomLeft = Vec2.sub(this.position, offsetVector)
+    // const aabb = new AABB(bottomLeft, topRight)
+    // const xInside = Math.abs(this.position.x) < this.navigation.stage.halfWidth
+    // const yInside = Math.abs(this.position.y) < this.navigation.stage.halfHeight
+    // let open = xInside && yInside
+    // this.navigation.stage.world.queryAABB(aabb, (fixture: Fixture) => {
+    //   open = false
+    //   return false
+    // })
+    this.navigation.waypoints.set(this.id, this)
   }
 }

@@ -14,7 +14,8 @@ export class DressRehearsal extends Procedural {
         // botPath: true,
         // controlLines: true,
         // charge: true,
-        timings: true
+        timings: true,
+        waypoints: true
       }),
       halfHeight: 30,
       halfWidth: 30
