@@ -247,9 +247,20 @@ export class Navigation {
       })
     })
     this.radii.forEach(radius => {
-      this.stage.debug({ v: `Radius ${radius}...` })
+      this.stage.debug({ v: `Initializing radius ${radius}...` })
       // Initialize distance array for each waypoint for this radius
-      this.waypoints.forEach(waypoint => {
+      let distanceDivisor = 10
+      let distanceNextDivisor = 100
+      this.waypoints.forEach((waypoint, index) => {
+        const remainder = index % distanceDivisor
+        const divisible = remainder === 0
+        if (divisible && index !== 0) {
+          this.stage.debug({ v: `Waypoint ${index}/${radiusWaypoints.size}...` })
+        }
+        if (index === distanceNextDivisor) {
+          distanceDivisor = distanceNextDivisor
+          distanceNextDivisor *= 10
+        }
         const distances = range(1, this.waypoints.size).map(i => Infinity)
         waypoint.pathDistances.set(radius, distances)
       })
@@ -267,17 +278,18 @@ export class Navigation {
       Becuase the length of the longest possible non-cyclical path is equal to:
         the number of waypoints.
       */
-      let divisor = 10
-      let nextDivisor = 100
+      this.stage.debug({ v: 'Pathing...' })
+      let pathDivisor = 10
+      let pathNextDivisor = 100
       radiusWaypoints.forEach((step, index) => {
-        const remainder = index % divisor
+        const remainder = index % pathDivisor
         const divisible = remainder === 0
         if (divisible && index !== 0) {
           this.stage.debug({ v: `Path length ${index}/${radiusWaypoints.size}...` })
         }
-        if (index === nextDivisor) {
-          divisor = nextDivisor
-          nextDivisor *= 10
+        if (index === pathNextDivisor) {
+          pathDivisor = pathNextDivisor
+          pathNextDivisor *= 10
         }
         radiusWaypoints.forEach(waypoint => {
           const pathDistances = waypoint.pathDistances.get(radius)
