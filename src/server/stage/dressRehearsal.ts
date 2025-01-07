@@ -8,6 +8,7 @@ export class DressRehearsal extends Procedural {
       flags: new Flags({
         performance: true,
         visionY: false,
+        navAreas: true,
         navigation: true,
         organismsCount: true,
         // botChase: true,

@@ -16,7 +16,7 @@ export class Navigation {
     y: HALF_SIGHT.y
   }
 
-  static gridStep = 5
+  static gridStep = HALF_SIGHT.y
 
   radii = [1.2, 1.1, 1.0, 0.9, 0.8, 0.7, 0.6]
   margin: number
@@ -149,6 +149,12 @@ export class Navigation {
     const isOpenEnd = this.stage.runner.endTiming({ key: 'isOpen', start: navigateStart })
     const startNeighbors = this.getNeighbors(start, validRadius)
     const endNeighbors = this.getNeighbors(end, validRadius)
+    // const startNeighbors = this.getNeighbors(start, validRadius).filter(point => {
+    //   return this.stage.vision.isPointInRange(start, point.position)
+    // })
+    // const endNeighbors = this.getNeighbors(end, validRadius).filter(point => {
+    //   return this.stage.vision.isPointInRange(start, point.position)
+    // })
     this.stage.flag({ f: 'navigation', k: 'startNeighbors', v: startNeighbors.length })
     this.stage.flag({ f: 'navigation', k: 'endNeighbors', v: endNeighbors.length })
     let minDistance = Infinity
@@ -171,7 +177,6 @@ export class Navigation {
       })
     })
     this.stage.runner.endTiming({ key: 'navigate', start: navigateStart })
-    this.stage.flag({ f: 'navigation', k: 'minDistance', v: minDistance })
     this.stage.runner.endTiming({ key: 'afterIsOpen', start: isOpenEnd })
     return target
   }
