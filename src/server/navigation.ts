@@ -412,16 +412,37 @@ export class Navigation {
   }
 
   createWaypoints (): void {
-    const xCount = Math.ceil(2 * this.stage.halfWidth / Navigation.gridStep)
-    const yCount = Math.ceil(2 * this.stage.halfHeight / Navigation.gridStep)
+    const xCount = Math.ceil(2 * this.stage.halfWidth / Navigation.spacing.x)
+    const yCount = Math.ceil(2 * this.stage.halfHeight / Navigation.spacing.y)
+    const xStep = 2 * this.stage.halfWidth / xCount
+    const yStep = 2 * this.stage.halfHeight / yCount
     range(0, xCount).forEach(i => {
       range(0, yCount).forEach(j => {
-        const x = i * Navigation.gridStep - this.stage.halfWidth
-        const y = j * Navigation.gridStep - this.stage.halfHeight
+        const x = i * xStep - this.stage.halfWidth
+        const y = j * yStep - this.stage.halfHeight
         this.radii.forEach(radius => {
           this.addWaypoint(Vec2(x, y), 'grid', radius)
         })
       })
+    })
+    this.stage.walls.forEach(wall => this.addWallWaypoints(wall))
+    this.radii.forEach(radius => {
+      const cornerX = this.stage.halfWidth - radius
+      const cornerY = this.stage.halfHeight - radius
+      this.addWaypoint(Vec2(+cornerX, +cornerY), 'corner', radius)
+      this.addWaypoint(Vec2(+cornerX, -cornerY), 'corner', radius)
+      this.addWaypoint(Vec2(-cornerX, +cornerY), 'corner', radius)
+      this.addWaypoint(Vec2(-cornerX, -cornerY), 'corner', radius)
+    })
+    this.radii.forEach(radius => {
+      const waypointArray = [...this.waypoints.values()]
+      const validWaypoints = waypointArray.filter(waypoint => waypoint.radius === radius)
+      this.radiiWaypoints.set(radius, validWaypoints)
+    })
+    this.waypoints.forEach(waypoint => {
+      if (waypoint.category === 'grid') this.gridWaypoints.push(waypoint)
+      if (waypoint.category === 'wall') this.wallWaypoints.push(waypoint)
+      if (waypoint.category === 'corner') this.cornerWaypoints.push(waypoint)
     })
   }
 

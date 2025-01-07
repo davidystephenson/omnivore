@@ -166,6 +166,7 @@ export class Membrane extends Feature {
   }
 
   onStep (props: { stepSize: number }): void {
+    super.onStep({ stepSize: props.stepSize })
     this.hunger()
   }
 
