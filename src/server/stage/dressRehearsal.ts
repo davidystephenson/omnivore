@@ -6,16 +6,16 @@ export class DressRehearsal extends Procedural {
   constructor () {
     super({
       flags: new Flags({
-        performance: true,
+        performance: false,
         visionY: false,
         navAreas: true,
-        navigation: true,
-        organismsCount: true,
+        // navigation: true,
+        // organismsCount: true,
         // botChase: true,
         // botPath: true,
         // controlLines: true,
         // charge: true,
-        timings: true,
+        // timings: true,
         waypoints: true
       }),
       halfHeight: 30,
