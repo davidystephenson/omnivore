@@ -3,6 +3,7 @@ import { Rgb } from '../../shared/color'
 import { Actor } from '../actor/actor'
 import { Prop } from './prop'
 import { Feature } from './feature'
+import { Crate } from './crate'
 
 export class Sculpture extends Prop {
   constructor (props: {
@@ -24,7 +25,7 @@ export class Sculpture extends Prop {
     target: Feature
   }): void {
     super.handleContact({ target: props.target })
-    if (!(props.target instanceof Prop)) {
+    if (!(props.target instanceof Crate)) {
       return
     }
     const combatDamage = this.getCombatDamage(props.target)

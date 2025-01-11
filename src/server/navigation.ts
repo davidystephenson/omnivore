@@ -16,9 +16,7 @@ export class Navigation {
     y: HALF_SIGHT.y
   }
 
-  static gridStep = HALF_SIGHT.y
-
-  radii = [1.2, 1.1, 1.0, 0.9, 0.8, 0.7, 0.6]
+  radii = [1.2, 0.9, 0.6]
   margin: number
   bigRadius: number
   smallRadius: number
@@ -184,11 +182,11 @@ export class Navigation {
   setupWaypoints (): void {
     this.stage.debug({ v: 'Setting up waypoints...' })
     this.createWaypoints()
-    this.stage.debug({ v: 'Setting up neighbors...' })
-    this.setupNeighbors()
     this.stage.debug({ v: 'Setting up navAreas...' })
     this.navAreas = this.getNavAreas()
     console.log(`${this.navAreas.length} navAreas`)
+    this.stage.debug({ v: 'Setting up neighbors...' })
+    this.setupNeighbors()
     this.stage.debug({ v: 'Calculating distances...' })
     this.preCalculate()
     this.stage.debug({ v: 'Starting the runner...' })
@@ -255,7 +253,7 @@ export class Navigation {
         const remainder = index % distanceDivisor
         const divisible = remainder === 0
         if (divisible && index !== 0) {
-          this.stage.debug({ v: `Waypoint ${index}/${radiusWaypoints.size}...` })
+          this.stage.debug({ v: `Waypoint ${index}/${this.waypoints.size}...` })
         }
         if (index === distanceNextDivisor) {
           distanceDivisor = distanceNextDivisor
@@ -278,7 +276,7 @@ export class Navigation {
       Becuase the length of the longest possible non-cyclical path is equal to:
         the number of waypoints.
       */
-      this.stage.debug({ v: 'Pathing...' })
+      this.stage.debug({ v: `Pathing ${radiusWaypoints.size} waypoints...` })
       let pathDivisor = 10
       let pathNextDivisor = 100
       radiusWaypoints.forEach((step, index) => {
