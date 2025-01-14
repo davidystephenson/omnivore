@@ -16,7 +16,7 @@ export class Navigation {
     y: HALF_SIGHT.y
   }
 
-  radii = [1.2, 0.9, 0.6]
+  radii = [1.2, 0.6]
   margin: number
   bigRadius: number
   smallRadius: number
