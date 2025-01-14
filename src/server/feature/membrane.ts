@@ -32,7 +32,7 @@ export class Membrane extends Feature {
         position: props.position,
         bullet: true,
         fixedRotation: true,
-        linearDamping: 0.0
+        linearDamping: 0.1
       },
       fixtureDef: {
         shape: new Circle(Vec2(0, 0), radius),

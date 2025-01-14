@@ -7,7 +7,7 @@ export class DressRehearsal extends Procedural {
     super({
       flags: new Flags({
         // performance: false,
-        visionY: false
+        visionY: false,
         // navAreas: true,
         // navigation: true,
         // organismsCount: true,
@@ -15,7 +15,7 @@ export class DressRehearsal extends Procedural {
         // botPath: true,
         // controlLines: true,
         // charge: true,
-        // timings: true,
+        timings: true
         // waypoints: true
       }),
       halfHeight: 30,
@@ -25,14 +25,14 @@ export class DressRehearsal extends Procedural {
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
 
-    // this.addBalanced({ position: Vec2(5, 5) })
-    // this.addBully({ position: Vec2(-5, 5) })
-    // this.addHunter({ position: Vec2(5, -5) })
-    // this.addScavenger({ position: Vec2(5, -5) })
-    // this.addStamina({ position: Vec2(-5, -5) })
-    // this.addStrength({ position: Vec2(0, 5) })
-    // this.addSpeed({ position: Vec2(5, 0) })
-    // this.addTrapper({ position: Vec2(0, -5) })
+    this.addBalanced({ position: Vec2(5, 5) })
+    this.addBully({ position: Vec2(-5, 5) })
+    this.addHunter({ position: Vec2(5, -5) })
+    this.addScavenger({ position: Vec2(5, -5) })
+    this.addStamina({ position: Vec2(-5, -5) })
+    this.addStrength({ position: Vec2(0, 5) })
+    this.addSpeed({ position: Vec2(5, 0) })
+    this.addTrapper({ position: Vec2(0, -5) })
 
     const minimum = Math.min(this.halfWidth, this.halfHeight)
     const half = minimum / 2

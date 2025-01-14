@@ -63,19 +63,15 @@ export class Spawner {
       this.stage.flag({ f: 'respawn', vs: ['spawnPoints.length', this.spawnPoints.length] })
       const clearSpawnPoints = this.stage.spawner.spawnPoints.filter(spawnPoint => spawnPoint.collideCount < 1)
       this.stage.flag({ f: 'respawn', vs: ['clearSpawnPoints.length', clearSpawnPoints.length] })
-      let clearSpawnPositions = clearSpawnPoints.map(spawnPoint => spawnPoint.position)
       // TODO longest path away
-      if (clearSpawnPositions.length > 0) {
-        this.stage.spawner.queue = this.stage.spawner.queue.filter(obituary => {
-          if (clearSpawnPositions.length < 1) {
-            return true
-          }
-          const spawnpoint = this.getFarthest({ obituary, spawnpoints: clearSpawnPoints })
-          clearSpawnPositions = clearSpawnPositions.filter(position => position !== spawnpoint.position)
-          const gene = obituary.gene.mutate()
-          void new Organism({ ...obituary, gene, position: spawnpoint.position, stage: this.stage })
-          return false
-        })
+      if (clearSpawnPoints.length > 0) {
+        const first = this.stage.spawner.queue.shift()
+        if (first == null) {
+          throw new Error('There is no first')
+        }
+        const spawnpoint = this.getFarthest({ obituary: first, spawnpoints: clearSpawnPoints })
+        const gene = first.gene.mutate()
+        void new Organism({ ...first, gene, position: spawnpoint.position, stage: this.stage })
       }
     }
   }
