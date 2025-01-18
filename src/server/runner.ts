@@ -214,6 +214,12 @@ export class Runner {
         organisms.push(actor)
       })
       this.stage.flag({ f: 'organismsCount', k: 'organismsCount', v: organisms.length })
+      const familyCounts: Record<string, number> = {}
+      const entries = [...this.stage.families.entries()]
+      entries.forEach((entry) => {
+        familyCounts[entry[0]] = entry[1].length
+      })
+      console.log('familyCounts', familyCounts)
       console.timeEnd('stageStep')
     }
     this.features = this.getFeatures()

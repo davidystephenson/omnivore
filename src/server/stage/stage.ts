@@ -28,6 +28,7 @@ export class Stage {
   debugger: Debugger
   destructionQueue: Body[] = []
   fallQueue: Tree[] = []
+  families: Map<string, Organism[]> = new Map()
   flags: Flags
   food: Food[] = []
   halfHeight: number
@@ -436,6 +437,17 @@ export class Stage {
     this.destructionQueue = []
     this.virtualBoxes.forEach(box => {
       this.debugBox({ box, color: RED })
+    })
+    this.families = new Map()
+    this.actors.forEach(actor => {
+      if (!(actor instanceof Organism)) return
+      const label = `${actor.color.red},${actor.color.green},${actor.color.blue}`
+      const family = this.families.get(label)
+      if (family != null) {
+        family.push(actor)
+      } else {
+        this.families.set(label, [actor])
+      }
     })
   }
 
