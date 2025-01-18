@@ -276,7 +276,7 @@ export class Navigation {
       Becuase the length of the longest possible non-cyclical path is equal to:
         the number of waypoints.
       */
-      this.stage.debug({ v: `Pathing ${radiusWaypoints.size} waypoints...` })
+      this.stage.debug({ v: `Pathing waypoints for ${radius}...` })
       let pathDivisor = 10
       let pathNextDivisor = 100
       radiusWaypoints.forEach((step, index) => {

@@ -18,8 +18,8 @@ export class DressRehearsal extends Procedural {
         timings: true
         // waypoints: true
       }),
-      halfHeight: 30,
-      halfWidth: 30
+      halfHeight: 100,
+      halfWidth: 100
     })
 
     this.navigation.setupWaypoints()
