@@ -6,10 +6,10 @@ export class Flags {
   charge: boolean
   controlLines: boolean
   death: boolean
-  hungerY: boolean
+  hungerGame: boolean
   isOpen: boolean
   maneuverLines: boolean
-  meatY: boolean
+  meatGame: boolean
   mutation: boolean
   navigation: boolean
   navAreas: boolean
@@ -19,14 +19,14 @@ export class Flags {
   players: boolean
   procedural: boolean
   respawn: boolean
-  starveBricksY: boolean
+  starveBricksGame: boolean
   summary: boolean
   timings: boolean
   vision: boolean
-  visionRangeY: boolean
+  visionRangeGame: boolean
   visionGame: boolean
   waypoints: boolean
-  waypointSpawnpointsY: boolean
+  waypointSpawnpointsGame: boolean
 
   constructor (props: {
     actors?: boolean
@@ -36,10 +36,10 @@ export class Flags {
     botPath?: boolean
     controlLines?: boolean
     death?: boolean
-    hungerY?: boolean
+    hungerGame?: boolean
     isOpen?: boolean
     maneuverLines?: boolean
-    meatY?: boolean
+    meatGame?: boolean
     mutation?: boolean
     navAreas?: boolean
     navigation?: boolean
@@ -49,14 +49,14 @@ export class Flags {
     players?: boolean
     procedural?: boolean
     respawn?: boolean
-    starveBricksY?: boolean
+    starveBricksGame?: boolean
     summary?: boolean
     timings?: boolean
     vision?: boolean
-    visionRangeY?: boolean
-    visionY?: boolean
+    visionRangeGame?: boolean
+    visionGame?: boolean
     waypoints?: boolean
-    waypointSpawnpointsY?: boolean
+    waypointSpawnpointsGame?: boolean
   }) {
     this.actors = props.actors ?? false
     this.botChase = props.botChase ?? false
@@ -65,10 +65,10 @@ export class Flags {
     this.charge = props.charge ?? false
     this.controlLines = props.controlLines ?? false
     this.death = props.death ?? false
-    this.hungerY = props.hungerY ?? true
+    this.hungerGame = props.hungerGame ?? true
     this.isOpen = props.isOpen ?? false
     this.maneuverLines = props.maneuverLines ?? false
-    this.meatY = props.meatY ?? true
+    this.meatGame = props.meatGame ?? true
     this.mutation = props.mutation ?? false
     this.navAreas = props.navAreas ?? false
     this.navigation = props.navigation ?? false
@@ -78,13 +78,13 @@ export class Flags {
     this.players = props.players ?? false
     this.procedural = props.procedural ?? false
     this.respawn = props.respawn ?? false
-    this.starveBricksY = props.starveBricksY ?? true
+    this.starveBricksGame = props.starveBricksGame ?? true
     this.summary = props.summary ?? false
     this.timings = props.timings ?? false
     this.vision = props.vision ?? false
-    this.visionRangeY = props.visionRangeY ?? true
-    this.visionGame = props.visionY ?? true
+    this.visionRangeGame = props.visionRangeGame ?? true
+    this.visionGame = props.visionGame ?? true
     this.waypoints = props.waypoints ?? false
-    this.waypointSpawnpointsY = props.waypointSpawnpointsY ?? true
+    this.waypointSpawnpointsGame = props.waypointSpawnpointsGame ?? true
   }
 }

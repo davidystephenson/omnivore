@@ -1,8 +1,8 @@
 import { Vec2 } from 'planck'
 import { Flags } from '../flags'
-import { Playhouse } from './playhouse'
+import { Walled } from './walled'
 
-export class Mission extends Playhouse {
+export class Mission extends Walled {
   constructor () {
     super({
       flags: new Flags({
@@ -10,13 +10,14 @@ export class Mission extends Playhouse {
         botFlee: true,
         charge: true,
         death: true,
-        hungerY: false,
-        meatY: false,
+        hungerGame: false,
+        // meatY: false,
         performance: false,
         respawn: true,
-        visionRangeY: false,
-        visionY: false
+        visionRangeGame: false,
+        visionGame: false,
         // waypointSpawnpointsY: false
+        controlLines: true
       }),
       halfHeight: 20,
       halfWidth: 20
@@ -48,6 +49,8 @@ export class Mission extends Playhouse {
     // this.addTrapper({ position: Vec2(5, 0) })
     // this.addSpeed({ position: Vec2(0, 5) })
     // this.addTree({ position: Vec2(10, -10) })
-    this.addScavenger({ position: Vec2(0, 0) })
+    // this.addScavenger({ position: Vec2(0, 0) })
+    this.addHunter({ position: Vec2(0, 0) })
+    this.saveLayout()
   }
 }

@@ -125,7 +125,7 @@ export class Feature {
   }
 
   getFeaturesInRange (): Feature[] {
-    if (!this.actor.stage.flags.visionRangeY) {
+    if (!this.actor.stage.flags.visionRangeGame) {
       return this.actor.stage.runner.features
     }
     const featuresInRange: Feature[] = []

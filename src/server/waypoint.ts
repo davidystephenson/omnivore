@@ -1,6 +1,13 @@
 import { AABB, Fixture, Vec2 } from 'planck'
 import { Navigation } from './navigation'
 
+export interface WaypointDef {
+  position: { x: number, y: number }
+  radius: number
+  category?: string
+  id: number
+}
+
 export class Waypoint {
   navigation: Navigation
   position: Vec2
@@ -12,17 +19,13 @@ export class Waypoint {
   radius: number
 
   constructor (props: {
-    position: Vec2
     navigation: Navigation
-    radius: number
-    category?: string
-  }) {
+  } & WaypointDef) {
     this.category = props.category ?? ''
-    this.position = props.position
+    this.position = Vec2(props.position.x, props.position.y)
     this.navigation = props.navigation
     this.radius = props.radius
-    const keys = [0, ...this.navigation.waypoints.keys()]
-    this.id = Math.max(...keys) + 1
+    this.id = props.id
     const aabb = new AABB(this.position, this.position)
     const xInside = Math.abs(this.position.x) < this.navigation.stage.halfWidth
     const yInside = Math.abs(this.position.y) < this.navigation.stage.halfHeight
@@ -31,6 +34,8 @@ export class Waypoint {
       open = false
       return false
     })
-    if (open) this.navigation.waypoints.set(this.id, this)
+    if (open) {
+      this.navigation.waypoints.set(this.id, this)
+    }
   }
 }

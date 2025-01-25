@@ -2,14 +2,23 @@ import { AABB, Vec2 } from 'planck'
 import { Waypoint } from './waypoint'
 import { Stage } from './stage/stage'
 
+export interface NavAreaDef {
+  aabb: {
+    upperBound: { x: number, y: number }
+    lowerBound: { x: number, y: number }
+  }
+}
+
 export class NavArea {
   stage: Stage
   waypoints: Waypoint[] = []
   aabb: AABB
 
-  constructor (stage: Stage, aabb: AABB) {
-    this.stage = stage
-    this.aabb = aabb
+  constructor (props: {
+    stage: Stage
+  } & NavAreaDef) {
+    this.stage = props.stage
+    this.aabb = new AABB(props.aabb.upperBound, props.aabb.lowerBound)
     this.stage.navigation.waypoints.forEach(waypoint => {
       if (waypoint.radius === this.stage.navigation.bigRadius) return
       if (this.testPoint(waypoint.position)) this.waypoints.push(waypoint)

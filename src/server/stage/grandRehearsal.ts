@@ -7,7 +7,7 @@ export class GrandRehearsal extends Playhouse {
     const flags = new Flags({
       // death: true,
       // mutation: true,
-      visionY: false
+      visionGame: false
     })
     super({
       flags,

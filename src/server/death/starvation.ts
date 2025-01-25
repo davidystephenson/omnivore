@@ -12,7 +12,7 @@ export class Starvation extends Death {
 
   execute (): void {
     this.log({ v: 'Starvation.execute' })
-    if (this.stage.flags.starveBricksY) {
+    if (this.stage.flags.starveBricksGame) {
       const victimPosition = this.victim.body.getPosition()
       const lookLowerBound = Vec2(victimPosition.x - HALF_SIGHT.x, victimPosition.y - HALF_SIGHT.y)
       const lookUpperBound = Vec2(victimPosition.x + HALF_SIGHT.x, victimPosition.y + HALF_SIGHT.y)
@@ -27,7 +27,7 @@ export class Starvation extends Death {
       const brickPosition = brickBox.getCenter()
       const minimum = Math.min(halfWidth, halfHeight)
       this.log({ k: 'minimum', v: minimum })
-      const sized = minimum > 0.6
+      const sized = minimum > 2
       this.log({ k: 'sized', v: sized })
       if (sized) {
         void new Brick({ halfWidth, halfHeight, position: brickPosition, stage: this.stage })
