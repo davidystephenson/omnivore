@@ -7,7 +7,7 @@ export class DressRehearsal extends Procedural {
     super({
       flags: new Flags({
         // performance: false,
-        visionY: false,
+        visionGame: false,
         // navAreas: true,
         // navigation: true,
         // organismsCount: true,
@@ -18,8 +18,8 @@ export class DressRehearsal extends Procedural {
         timings: true
         // waypoints: true
       }),
-      halfHeight: 100,
-      halfWidth: 100
+      halfHeight: 30,
+      halfWidth: 30
     })
 
     this.navigation.setupWaypoints()
@@ -43,14 +43,14 @@ export class DressRehearsal extends Procedural {
     this.addTree({ position: Vec2(negative, half) })
     this.addTree({ position: Vec2(half, negative) })
     this.addTree({ position: Vec2(negative, negative) })
-    this.addTree({ position: Vec2(half, half) })
-    this.addTree({ position: Vec2(negative, half) })
-    this.addTree({ position: Vec2(half, negative) })
-    this.addTree({ position: Vec2(negative, negative) })
-    this.addTree({ position: Vec2(half, half) })
-    this.addTree({ position: Vec2(negative, half) })
-    this.addTree({ position: Vec2(half, negative) })
-    this.addTree({ position: Vec2(negative, negative) })
+    // this.addTree({ position: Vec2(half, half) })
+    // this.addTree({ position: Vec2(negative, half) })
+    // this.addTree({ position: Vec2(half, negative) })
+    // this.addTree({ position: Vec2(negative, negative) })
+    // this.addTree({ position: Vec2(half, half) })
+    // this.addTree({ position: Vec2(negative, half) })
+    // this.addTree({ position: Vec2(half, negative) })
+    // this.addTree({ position: Vec2(negative, negative) })
     this.addTree({ position: Vec2(0, 0) })
   }
 }

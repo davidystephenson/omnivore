@@ -92,7 +92,9 @@ export class Navigation {
   }
 
   addWaypoint (position: Vec2, category: string, radius: number): Waypoint {
-    return new Waypoint({ position, navigation: this, radius, category })
+    const keys = [0, ...this.waypoints.keys()]
+    const id = Math.max(...keys) + 1
+    return new Waypoint({ position, navigation: this, radius, category, id })
   }
 
   getPath (props: {
@@ -104,7 +106,10 @@ export class Navigation {
     const largerRadii = this.radii.filter(rad => rad >= props.radius)
     const minimumRadius = largerRadii[whichMin(largerRadii)]
     const radiusWaypoints = this.radiiWaypoints.get(minimumRadius)
-    if (radiusWaypoints == null) throw new Error('Radius out of bounds')
+    if (radiusWaypoints == null) {
+      const message = `No waypoints found for radius ${minimumRadius}`
+      throw new Error(message)
+    }
     const path = [props.a]
     let nextPoint: Waypoint | Vec2 = this.navigate(path[path.length - 1], props.b, props.radius)
     if (!(nextPoint instanceof Waypoint)) {
@@ -164,7 +169,10 @@ export class Navigation {
         const neighborToEnd = Vec2.distance(end, endNeighbor.position)
         const endDistances = this.stage.runner.endTiming({ key: 'distances', start: distancesStart })
         const pathDistances = startNeighbor.pathDistances.get(validRadius)
-        if (pathDistances == null) throw new Error('Missing path distances')
+        if (pathDistances == null) {
+          const message = `Missing path distances for radius ${validRadius}`
+          throw new Error(message)
+        }
         const waypointDistance = pathDistances[endNeighbor.id]
         const distance = startToNeighbor + waypointDistance + neighborToEnd
         if (distance < minDistance) {
@@ -233,7 +241,7 @@ export class Navigation {
         const selfContainsOther = areaBox.contains(otherAreaBox)
         if (otherContainsSelf && !selfContainsOther) return
       }
-      navAreas.push(new NavArea(this.stage, areaBox))
+      navAreas.push(new NavArea({ stage: this.stage, aabb: areaBox }))
     })
     return navAreas
   }

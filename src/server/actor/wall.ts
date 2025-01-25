@@ -4,6 +4,12 @@ import { Actor } from './actor'
 import { Structure } from '../feature/structure'
 import { Waypoint } from '../waypoint'
 
+export interface WallDef {
+  halfHeight: number
+  halfWidth: number
+  position: { x: number, y: number }
+}
+
 export class Wall extends Actor {
   halfHeight: number
   halfWidth: number
@@ -22,16 +28,13 @@ export class Wall extends Actor {
 
   constructor (props: {
     stage: Stage
-    halfHeight: number
-    halfWidth: number
-    position: Vec2
-  }) {
+  } & WallDef) {
     super({ stage: props.stage, label: 'wall' })
     this.halfHeight = props.halfHeight
     this.halfWidth = props.halfWidth
-    this.position = props.position
+    this.position = Vec2(props.position.x, props.position.y)
     this.structure = new Structure({
-      position: props.position,
+      position: this.position,
       halfHeight: props.halfHeight,
       halfWidth: props.halfWidth,
       actor: this

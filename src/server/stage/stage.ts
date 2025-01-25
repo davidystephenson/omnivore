@@ -22,6 +22,8 @@ import { Food } from '../actor/food'
 import { Spawner } from '../spawner'
 import { Spawnpoint } from '../spawnpoint'
 import { Flags } from '../flags'
+import { Layout } from '../layout'
+import fs from 'fs'
 
 export class Stage {
   actors = new Map<number, Actor>()
@@ -62,6 +64,12 @@ export class Stage {
     this.runner = new Runner({ stage: this })
     this.vision = new Vision({ stage: this })
     this.spawner = new Spawner(this)
+  }
+
+  saveLayout (): void {
+    const layout = new Layout(this)
+    const layoutData = layout.getLayoutData()
+    fs.writeFileSync('layout.json', JSON.stringify(layoutData))
   }
 
   addBrick (props: {

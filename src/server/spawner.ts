@@ -77,7 +77,7 @@ export class Spawner {
   }
 
   setupSpawnPoints (): void {
-    if (this.stage.flags.waypointSpawnpointsY) {
+    if (this.stage.flags.waypointSpawnpointsGame) {
       const waypoints = [...this.stage.navigation.waypoints.values()]
       if (waypoints == null) {
         throw new Error('There are no waypoints')

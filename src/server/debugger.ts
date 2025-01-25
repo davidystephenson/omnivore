@@ -33,7 +33,7 @@ export class Debugger {
     const message = this.getMessage(props)
     const frames = props.frames == null
       ? props.seconds == null
-        ? 30
+        ? 300
         : props.seconds * 30
       : props.frames
 

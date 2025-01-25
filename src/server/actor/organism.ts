@@ -170,7 +170,9 @@ export class Organism extends Actor {
       })
     }
     const dirToEnemy = directionFromTo(this.membrane.position, navPosition)
-    this.setControls(dirToEnemy)
+    const targetVelocity = Vec2.mul(10, dirToEnemy)
+    const moveDir = Vec2.sub(targetVelocity, this.membrane.body.getLinearVelocity())
+    this.setControls(moveDir)
     this.chasePoint = enemyPosition.clone()
     this.chaseRadius = enemy.radius
     this.stage.runner.endTiming({ key: 'charge', start: chargeStart })

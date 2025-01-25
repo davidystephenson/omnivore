@@ -52,7 +52,7 @@ export class Membrane extends Feature {
 
   destroy (): void {
     this.destroyed = true
-    if (this.actor.stage.flags.meatY && this.combatDamage > 0) {
+    if (this.actor.stage.flags.meatGame && this.combatDamage > 0) {
       const size = this.radius * Math.SQRT2
       const halfSize = size / 2
       this.actor.stage.addFoodSquare({
@@ -146,7 +146,7 @@ export class Membrane extends Feature {
 
   hunger (): void {
     if (
-      !this.actor.stage.flags.hungerY ||
+      !this.actor.stage.flags.hungerGame ||
       this.health <= 0 ||
       this.destroyed ||
       this.actor.dead

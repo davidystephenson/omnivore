@@ -1,10 +1,10 @@
 import { Vec2 } from 'planck'
-import { Walled } from './walled'
 import { YELLOW, RED, PURPLE, ORANGE, BROWN, MAGENTA, PINK, GRAY } from '../../shared/color'
 import { Gene } from '../gene'
 import { Organism } from '../actor/organism'
+import { Stage } from './stage'
 
-export class Playhouse extends Walled {
+export class Playhouse extends Stage {
   balancedGene = new Gene({
     speed: 0.34,
     stage: this,
