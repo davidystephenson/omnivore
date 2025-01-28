@@ -24,8 +24,8 @@ export class Mission extends Walled {
     })
     this.addWall({
       halfWidth: 10,
-      halfHeight: 5,
-      position: Vec2(5, 15)
+      halfHeight: 3,
+      position: Vec2(5, 12)
     })
     // this.addWall({
     //   halfWidth: 10,
