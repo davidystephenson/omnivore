@@ -28,6 +28,7 @@ export class Navigation {
   cornerWaypoints: Waypoint[] = []
   navAreas: NavArea[] = []
   radiiWaypoints = new Map<number, Waypoint[]>()
+  blockedPairs: Waypoint[][] = []
 
   constructor (props: {
     stage: Stage
@@ -152,12 +153,6 @@ export class Navigation {
     const isOpenEnd = this.stage.runner.endTiming({ key: 'isOpen', start: navigateStart })
     const startNeighbors = this.getNeighbors(start, validRadius)
     const endNeighbors = this.getNeighbors(end, validRadius)
-    // const startNeighbors = this.getNeighbors(start, validRadius).filter(point => {
-    //   return this.stage.vision.isPointInRange(start, point.position)
-    // })
-    // const endNeighbors = this.getNeighbors(end, validRadius).filter(point => {
-    //   return this.stage.vision.isPointInRange(start, point.position)
-    // })
     this.stage.flag({ f: 'navigation', k: 'startNeighbors', v: startNeighbors.length })
     this.stage.flag({ f: 'navigation', k: 'endNeighbors', v: endNeighbors.length })
     let minDistance = Infinity
@@ -203,12 +198,12 @@ export class Navigation {
     })
     this.stage.walls.forEach(wall => this.addWallWaypoints(wall))
     this.radii.forEach(radius => {
-      // const cornerX = this.stage.halfWidth - radius
-      // const cornerY = this.stage.halfHeight - radius
-      // this.addWaypoint(Vec2(+cornerX, +cornerY), 'corner', radius)
-      // this.addWaypoint(Vec2(+cornerX, -cornerY), 'corner', radius)
-      // this.addWaypoint(Vec2(-cornerX, +cornerY), 'corner', radius)
-      // this.addWaypoint(Vec2(-cornerX, -cornerY), 'corner', radius)
+      const cornerX = this.stage.halfWidth - 1.5 - radius
+      const cornerY = this.stage.halfHeight - 1.5 - radius
+      this.addWaypoint(Vec2(+cornerX, +cornerY), 'corner', radius)
+      this.addWaypoint(Vec2(+cornerX, -cornerY), 'corner', radius)
+      this.addWaypoint(Vec2(-cornerX, +cornerY), 'corner', radius)
+      this.addWaypoint(Vec2(-cornerX, -cornerY), 'corner', radius)
     })
     this.radii.forEach(radius => {
       const waypointArray = [...this.waypoints.values()]
@@ -242,8 +237,11 @@ export class Navigation {
           const pathDistances = fromWaypoint.pathDistances.get(radius)
           if (pathDistances == null) return new Error('distances == null')
           const pathDistance = pathDistances[toWaypoint.id]
-          if (isNaN(pathDistance)) {
+          if (pathDistance === Infinity) {
+            this.blockedPairs.push([fromWaypoint, toWaypoint])
             console.log(
+              fromWaypoint.id,
+              toWaypoint.id,
               fromWaypoint.category,
               toWaypoint.category,
               fromWaypoint.radius,
@@ -255,38 +253,75 @@ export class Navigation {
         })
       })
     })
+  }
 
-    const pathDistances = waypointArray.flatMap(waypoint => {
-      return [...waypoint.pathDistances.values()].flat()
+  preCalculate (): void {
+    this.waypoints.forEach(waypoint => {
+      this.waypoints.forEach(otherWaypoint => {
+        waypoint.distances[otherWaypoint.id] = Vec2.distance(waypoint.position, otherWaypoint.position)
+      })
     })
-    const fromIds = waypointArray.flatMap(waypoint => {
-      return [...waypoint.pathDistances.values()].flat().map(() => waypoint.id)
-    })
-    const toIds = waypointArray.flatMap(waypoint => {
-      return [...waypoint.pathDistances.values()].map(numArray => [...numArray.keys()]).flat()
-    })
-    const flatRadii = waypointArray.flatMap(waypoint => {
-      const radii = [...waypoint.pathDistances.keys()]
-      const distanceArrays = [...waypoint.pathDistances.values()]
-      const radiiArrays = distanceArrays.map((distanceArray, i) => distanceArray.map(() => radii[i]))
-      return radiiArrays.flat()
-    })
-
-    pathDistances.forEach((distance, i) => {
-      if (isNaN(distance)) {
-        const fromId = fromIds[i]
-        const toId = toIds[i]
-        const fromWaypoint = this.waypoints.get(fromId)
-        const toWaypoint = this.waypoints.get(toId)
-        console.log(
-          fromWaypoint?.category,
-          toWaypoint?.category,
-          fromWaypoint?.radius,
-          toWaypoint?.radius,
-          flatRadii[i],
-          distance
-        )
-      }
+    this.radii.forEach(radius => {
+      this.stage.debug({ v: `Initializing radius ${radius}...` })
+      // Initialize distance array for each waypoint for this radius
+      let distanceDivisor = 10
+      let distanceNextDivisor = 100
+      this.waypoints.forEach((waypoint, index) => {
+        const remainder = index % distanceDivisor
+        const divisible = remainder === 0
+        if (divisible && index !== 0) {
+          this.stage.debug({ v: `Waypoint ${index}/${this.waypoints.size}...` })
+        }
+        if (index === distanceNextDivisor) {
+          distanceDivisor = distanceNextDivisor
+          distanceNextDivisor *= 10
+        }
+        const distances = range(0, this.waypoints.size + 1).map(i => Infinity)
+        waypoint.pathDistances.set(radius, distances)
+      })
+      // Compute the minimal path distance from each waypoint to each other waypoint
+      const radiusWaypoints = this.waypoints
+      if (radiusWaypoints == null) throw new Error('No waypoints found for this radius')
+      this.stage.debug({ v: `Pathing waypoints for ${radius}...` })
+      let pathDivisor = 10
+      let pathNextDivisor = 100
+      radiusWaypoints.forEach((step, index) => {
+        const remainder = index % pathDivisor
+        const divisible = remainder === 0
+        if (divisible && index !== 0) {
+          this.stage.debug({ v: `Path length ${index}/${radiusWaypoints.size}...` })
+        }
+        if (index === pathNextDivisor) {
+          pathDivisor = pathNextDivisor
+          pathNextDivisor *= 10
+        }
+        radiusWaypoints.forEach(waypoint => {
+          const pathDistances = waypoint.pathDistances.get(radius)
+          if (pathDistances == null) throw new Error('Missing distances')
+          const neighbors = waypoint.neighbors.get(radius)
+          if (neighbors == null) throw new Error('Missing neighbors')
+          radiusWaypoints.forEach(otherWaypoint => {
+            if (waypoint.id === otherWaypoint.id) {
+              pathDistances[otherWaypoint.id] = 0
+              return
+            }
+            if (neighbors.includes(otherWaypoint)) {
+              pathDistances[otherWaypoint.id] = waypoint.distances[otherWaypoint.id]
+              return
+            }
+            neighbors.forEach(neighbor => {
+              const neighborDistances = neighbor.pathDistances.get(radius)
+              if (neighborDistances == null) throw new Error('Missing neighbor distances')
+              const neighborDistance = neighborDistances[otherWaypoint.id]
+              if (neighborDistance == null) {
+                throw new Error(`Missing neighbor distance at ${otherWaypoint.id}/ ${this.waypoints.size}`)
+              }
+              const distanceThroughNeighbor = waypoint.distances[neighbor.id] + neighborDistance
+              pathDistances[otherWaypoint.id] = Math.min(pathDistances[otherWaypoint.id], distanceThroughNeighbor)
+            })
+          })
+        })
+      })
     })
   }
 
@@ -332,76 +367,6 @@ export class Navigation {
       navAreas.push(new NavArea({ stage: this.stage, aabb: areaBox }))
     })
     return navAreas
-  }
-
-  preCalculate (): void {
-    this.waypoints.forEach(waypoint => {
-      this.waypoints.forEach(otherWaypoint => {
-        waypoint.distances[otherWaypoint.id] = Vec2.distance(waypoint.position, otherWaypoint.position)
-      })
-    })
-    this.radii.forEach(radius => {
-      this.stage.debug({ v: `Initializing radius ${radius}...` })
-      // Initialize distance array for each waypoint for this radius
-      let distanceDivisor = 10
-      let distanceNextDivisor = 100
-      this.waypoints.forEach((waypoint, index) => {
-        const remainder = index % distanceDivisor
-        const divisible = remainder === 0
-        if (divisible && index !== 0) {
-          this.stage.debug({ v: `Waypoint ${index}/${this.waypoints.size}...` })
-        }
-        if (index === distanceNextDivisor) {
-          distanceDivisor = distanceNextDivisor
-          distanceNextDivisor *= 10
-        }
-        const distances = range(0, this.waypoints.size).map(i => Infinity)
-        waypoint.pathDistances.set(radius, distances)
-      })
-      // Compute the minimal path distance from each waypoint to each other waypoint
-      const radiusWaypoints = this.waypoints // this.radiiWaypoints.get(radius)
-      if (radiusWaypoints == null) throw new Error('No waypoints found for this radius')
-      this.stage.debug({ v: `Pathing waypoints for ${radius}...` })
-      let pathDivisor = 10
-      let pathNextDivisor = 100
-      radiusWaypoints.forEach((step, index) => {
-        const remainder = index % pathDivisor
-        const divisible = remainder === 0
-        if (divisible && index !== 0) {
-          this.stage.debug({ v: `Path length ${index}/${radiusWaypoints.size}...` })
-        }
-        if (index === pathNextDivisor) {
-          pathDivisor = pathNextDivisor
-          pathNextDivisor *= 10
-        }
-        radiusWaypoints.forEach(waypoint => {
-          const pathDistances = waypoint.pathDistances.get(radius)
-          if (pathDistances == null) throw new Error('Missing distances')
-          const neighbors = waypoint.neighbors.get(radius)
-          if (neighbors == null) throw new Error('Missing neighbors')
-          radiusWaypoints.forEach(otherWaypoint => {
-            if (waypoint.id === otherWaypoint.id) {
-              pathDistances[otherWaypoint.id] = 0
-              return
-            }
-            if (neighbors.includes(otherWaypoint)) {
-              pathDistances[otherWaypoint.id] = waypoint.distances[otherWaypoint.id]
-              return
-            }
-            neighbors.forEach(neighbor => {
-              const neighborDistances = neighbor.pathDistances.get(radius)
-              if (neighborDistances == null) throw new Error('Missing neighbor distances')
-              const neighborDistance = neighborDistances[otherWaypoint.id]
-              if (neighborDistance == null) {
-                throw new Error(`Missing neighbor distance at ${otherWaypoint.id}/ ${this.waypoints.size}`)
-              }
-              const distanceThroughNeighbor = waypoint.distances[neighbor.id] + neighborDistance
-              pathDistances[otherWaypoint.id] = Math.min(pathDistances[otherWaypoint.id], distanceThroughNeighbor)
-            })
-          })
-        })
-      })
-    })
   }
 
   setupNeighbors (): void {
@@ -491,9 +456,9 @@ export class Navigation {
   }
 
   getNeighborsRaycast (position: Vec2, radius: number): Waypoint[] {
-    const validWaypoints = this.radiiWaypoints.get(radius)
-    if (validWaypoints == null) return []
-    const neighbors = validWaypoints.filter(otherWaypoint => {
+    const waypointArray = [...this.waypoints.values()]
+    if (waypointArray == null) return []
+    const neighbors = waypointArray.filter(otherWaypoint => {
       if (Vec2.distance(position, otherWaypoint.position) === 0) return false
       const open1 = this.isOpen({
         fromPosition: position,

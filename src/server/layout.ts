@@ -45,7 +45,6 @@ export class Layout {
 
   getWaypointData (waypoint: Waypoint): WaypointData {
     const radii = [...waypoint.neighbors.keys()]
-    this.stage.log({ k: 'radii', v: radii })
     const neighbors: Record<number, number[]> = {}
     radii.forEach(radius => {
       const waypointArray = waypoint.neighbors.get(radius)
@@ -58,7 +57,6 @@ export class Layout {
       if (distanceArray == null) throw new Error(`Missing pathDistances for radius ${radius}`)
       pathDistances[radius] = distanceArray
     })
-    // SOME OF THE PATH DISTANCES SEEM TO BE INFINITE. WHy?
     return {
       position: { x: waypoint.position.x, y: waypoint.position.y },
       id: waypoint.id,
