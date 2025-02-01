@@ -124,8 +124,10 @@ export class Feature {
     return element
   }
 
-  getFeaturesInRange (): Feature[] {
-    if (!this.actor.stage.flags.visionRangeGame) {
+  getFeaturesInRange (props?: {
+    playing: boolean
+  }): Feature[] {
+    if (!this.actor.stage.flags.visionRangeGame && props?.playing === true) {
       return this.actor.stage.runner.features
     }
     const featuresInRange: Feature[] = []
