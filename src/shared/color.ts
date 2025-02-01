@@ -25,3 +25,22 @@ export const ORANGE: Rgb = { red: 255, green: 165, blue: 0 }
 export const PURPLE: Rgb = { red: 128, green: 0, blue: 128 }
 export const PINK: Rgb = { red: 255, green: 192, blue: 203 }
 export const BROWN: Rgb = { red: 111, green: 78, blue: 55 }
+
+export const COLOR = {
+  BLACK,
+  BLUE,
+  CYAN,
+  LIME,
+  GRAY,
+  GREY,
+  WHITE,
+  LIGHT_GREEN,
+  GREEN,
+  MAGENTA,
+  RED,
+  YELLOW,
+  ORANGE,
+  PURPLE,
+  PINK,
+  BROWN
+}

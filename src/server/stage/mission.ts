@@ -27,11 +27,6 @@ export class Mission extends Walled {
       halfHeight: 3,
       position: Vec2(5, 12)
     })
-    // this.addWall({
-    //   halfWidth: 10,
-    //   halfHeight: 1,
-    //   position: Vec2(-5, -10)
-    // })
 
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()

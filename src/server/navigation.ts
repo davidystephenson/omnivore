@@ -230,29 +230,29 @@ export class Navigation {
     this.stage.debug({ v: 'Starting the runner...' })
     setInterval(() => { this.stage.runner.step() }, 1000 * this.stage.runner.timeStep)
     this.stage.debug({ v: 'Runner started!' })
-    const waypointArray = [...this.waypoints.values()]
-    waypointArray.forEach(fromWaypoint => {
-      waypointArray.forEach(toWaypoint => {
-        this.radii.forEach(radius => {
-          const pathDistances = fromWaypoint.pathDistances.get(radius)
-          if (pathDistances == null) return new Error('distances == null')
-          const pathDistance = pathDistances[toWaypoint.id]
-          if (pathDistance === Infinity) {
-            this.blockedPairs.push([fromWaypoint, toWaypoint])
-            console.log(
-              fromWaypoint.id,
-              toWaypoint.id,
-              fromWaypoint.category,
-              toWaypoint.category,
-              fromWaypoint.radius,
-              toWaypoint.radius,
-              radius,
-              pathDistance
-            )
-          }
-        })
-      })
-    })
+    // const waypointArray = [...this.waypoints.values()]
+    // waypointArray.forEach(fromWaypoint => {
+    //   waypointArray.forEach(toWaypoint => {
+    //     this.radii.forEach(radius => {
+    //       const pathDistances = fromWaypoint.pathDistances.get(radius)
+    //       if (pathDistances == null) return new Error('distances == null')
+    //       const pathDistance = pathDistances[toWaypoint.id]
+    //       if (pathDistance > 0) {
+    //         this.blockedPairs.push([fromWaypoint, toWaypoint])
+    //         console.log(
+    //           fromWaypoint.id,
+    //           toWaypoint.id,
+    //           fromWaypoint.category,
+    //           toWaypoint.category,
+    //           fromWaypoint.radius,
+    //           toWaypoint.radius,
+    //           radius,
+    //           pathDistance
+    //         )
+    //       }
+    //     })
+    //   })
+    // })
   }
 
   preCalculate (): void {

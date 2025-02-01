@@ -10,7 +10,7 @@ import { Starvation } from '../death/starvation'
 import { ExplorationPoint } from '../explorationPoint'
 import { Controls } from '../../shared/input'
 import { Gene } from '../gene'
-import { BLUE, GRAY, GREEN, LIME, MAGENTA, PINK, PURPLE, RED, Rgb, WHITE } from '../../shared/color'
+import { BLUE, COLOR, GRAY, GREEN, LIME, MAGENTA, PINK, PURPLE, RED, Rgb, WHITE } from '../../shared/color'
 import { Player } from './player'
 import { Waypoint } from '../waypoint'
 import { Food } from './food'
@@ -29,7 +29,7 @@ export interface Obituary extends OrganismSpawn {
 export class Organism extends Actor {
   controlColor = LIME
   chasePoint: Vec2 | undefined
-  chaseRadius = 0
+  chaseRadius = 0.2
   giveUpTime: number
   giveUpTimer = 0
   color: Rgb
@@ -179,6 +179,28 @@ export class Organism extends Actor {
     return MAGENTA
   }
 
+  chase (props: {
+    debug?: boolean
+    target: Vec2
+  }): Rgb {
+    const chaseStart = performance.now()
+    if (props.debug === true) {
+      this.debugPath(props)
+    }
+    const myPosition = this.membrane.body.getPosition()
+    const nextPoint = this.stage.navigation.navigate(myPosition, props.target, this.membrane.radius, this.chaseRadius)
+    const nextPointPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
+    this.stage.debugCircle({
+      circle: new CircleShape(nextPointPosition, 0.3),
+      color: COLOR.ORANGE
+    })
+    const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
+    const direction = directionFromTo(myPosition, nextPosition)
+    this.setControls(direction)
+    this.stage.runner.endTiming({ key: 'chase', start: chaseStart })
+    return GRAY
+  }
+
   debugControlLine (props: {
     point: Vec2
   }): void {
@@ -249,18 +271,17 @@ export class Organism extends Actor {
     if (path.length < 2) {
       throw new Error('Path is too short')
     }
-    const distance = Vec2.distance(path[0], path[1])
-    if (distance === 0) {
-      this.stage.log({ k: 'path', v: path })
-      // throw new Error('Path distance is zero')
-    }
-    const circle = new CircleShape(props.target, this.chaseRadius)
+    const circle = new CircleShape(props.target, 0.1)
     this.stage.debugCircle({ circle, color: RED })
     range(0, path.length - 2).forEach(index => {
       const currentPoint = path[index]
       const nextPoint = path[index + 1]
       this.stage.debugLine({ a: currentPoint, b: nextPoint, color: GREEN, width: 0.2 })
     })
+  }
+
+  eggFlee (): void {
+    throw new Error('Not implemented')
   }
 
   explore (stepSize: number): void {
@@ -388,19 +409,6 @@ export class Organism extends Actor {
     return radius
   }
 
-  hatch = (): void => {
-    // if(this.eye.body.getContactList() != null)
-    this.hatched = true
-    this.stage.destructionQueue.push(this.membrane.body)
-    this.spawnPosition = this.membrane.body.getPosition()
-    this.membrane = this.grow({ gene: this.gene })
-    this.membrane.borderWidth = 0.2
-  }
-
-  eggFlee (): void {
-    throw new Error('Not implemented')
-  }
-
   grow (props: {
     gene: Gene
     parent?: Membrane
@@ -418,6 +426,15 @@ export class Organism extends Actor {
       this.grow({ gene: childBranch, parent: membrane })
     }
     return membrane
+  }
+
+  hatch = (): void => {
+    // if(this.eye.body.getContactList() != null)
+    this.hatched = true
+    this.stage.destructionQueue.push(this.membrane.body)
+    this.spawnPosition = this.membrane.body.getPosition()
+    this.membrane = this.grow({ gene: this.gene })
+    this.membrane.borderWidth = 0.2
   }
 
   isFeatureReachable (props: {
@@ -470,7 +487,7 @@ export class Organism extends Actor {
     const sortNearestEnd = this.stage.runner.endTiming({
       key: 'sortNearest', start: sortNearestStart
     })
-    const color = this.maneuverElse({ sorted })
+    const color = this.maneuverElse({ sortedVisibleFeatures: sorted })
     this.stage.runner.endTiming({
       key: 'maneuverElse', start: sortNearestEnd
     })
@@ -478,10 +495,10 @@ export class Organism extends Actor {
   }
 
   maneuverElse (props: {
-    sorted: Feature[]
+    sortedVisibleFeatures: Feature[]
   }): Rgb {
     const maneuverLoopStart = performance.now()
-    for (const feature of props.sorted) {
+    for (const feature of props.sortedVisibleFeatures) {
       const maneuverStepStart = performance.now()
       const judgement = this.judge({ feature })
       if (judgement == null) {
@@ -556,29 +573,13 @@ export class Organism extends Actor {
     })
   }
 
-  chase (props: {
-    debug?: boolean
-    target: Vec2
-  }): Rgb {
-    const chaseStart = performance.now()
-    if (props.debug === true) {
-      this.debugPath(props)
-    }
-    const myPosition = this.membrane.body.getPosition()
-    const nextPoint = this.stage.navigation.navigate(myPosition, props.target, this.membrane.radius, this.chaseRadius)
-    const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
-    const direction = directionFromTo(myPosition, nextPosition)
-    this.setControls(direction)
-    this.stage.runner.endTiming({ key: 'chase', start: chaseStart })
-    return GRAY
-  }
-
   onStep (props: {
     stepSize: number
   }): void {
     super.onStep({ stepSize: props.stepSize })
     const visionStart = performance.now()
-    const featuresInRange = this.membrane.getFeaturesInRange()
+    const playing = this.player != null
+    const featuresInRange = this.membrane.getFeaturesInRange({ playing })
     this.featuresInVision = featuresInRange.filter(targetFeature => {
       const visible = this.membranes.some(membrane => this.stage.vision.isFeatureVisible(membrane, targetFeature))
       return visible
@@ -721,7 +722,7 @@ export class Organism extends Actor {
         const nextPoint = path[index + 1]
         this.stage.debugLine({ a: currentPoint, b: nextPoint, color: WHITE, width: 0.1 })
       })
-      const circle = new CircleShape(end, this.membrane.radius)
+      const circle = new CircleShape(end, 0.2)
       this.stage.debugCircle({ circle, color: RED })
     }
     const nextPoint = this.stage.navigation.navigate(this.membrane.position, end, this.membrane.radius)
