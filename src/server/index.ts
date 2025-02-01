@@ -5,12 +5,12 @@ import { Controls } from '../shared/input'
 import { GREEN } from '../shared/color'
 // import { GrandRehearsal } from './stage/grandRehearsal'
 // import { Rehearsal } from './stage/rehearsal'
-import { Mission } from './stage/mission'
-// import { TestProduction } from './stage/testProduction'
+// import { Mission } from './stage/mission'
+import { TestProduction } from './stage/testProduction'
 // import { GrandRehearsal } from './stage/grandRehearsal'
 // import { DressRehearsal } from './stage/dressRehearsal'
 
-const stage = new Mission()
+const stage = new TestProduction()
 
 io.on('connection', socket => {
   stage.debug({ vs: ['connection:', socket.id] })

@@ -568,7 +568,7 @@ export class Organism extends Actor {
       throw new Error('This organism has no membranes')
     }
     this.membranes.forEach(membrane => {
-      const forceScale = 0.5 + this.gene.speed * membrane.body.getMass() * 10
+      const forceScale = 1 + this.gene.speed * membrane.body.getMass() * 10
       membrane.force = Vec2.mul(direction, forceScale)
     })
   }
