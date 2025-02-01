@@ -22,6 +22,6 @@ export class TestProduction extends Production {
       })
     })
     this.addHunter({ position: new Vec2(0, 0) })
-    this.addTree({ position: new Vec2(0, 0) })
+    // this.addTree({ position: new Vec2(0, 0) })
   }
 }

@@ -11,7 +11,7 @@ import { Prop } from './prop'
 export class Membrane extends Feature {
   static BASE_DAMAGE = 0.1
   static DAMAGE_FACTOR = 3
-  static MINIMUM_LIFE_SECONDS = 30
+  static MINIMUM_LIFE_SECONDS = 60
   static GENETIC_LIFE_SECONDS = 150
   actor: Organism
   destroyed = false
