@@ -2,16 +2,16 @@ import { Vec2 } from 'planck'
 import { Flags } from '../flags'
 import { Walled } from './walled'
 
-export class Rehearsal extends Walled {
+export class Lab extends Walled {
   constructor () {
     super({
       flags: new Flags({
         // botChase: true,
         // botFlee: true,
-        // mutation: true,
         // respawn: true,
-        timings: true
+        // mutation: true,
         // vision: false,
+        visionGame: true
       }),
       halfHeight: 25,
       halfWidth: 25
@@ -40,11 +40,11 @@ export class Rehearsal extends Walled {
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
 
-    // this.addBalanced({ position: Vec2(5, 5) })
-    // this.addBully({ position: Vec2(-5, 5) })
+    this.addBalanced({ position: Vec2(5, 5) })
+    this.addBully({ position: Vec2(-5, 5) })
     this.addHunter({ position: Vec2(5, -5) })
     this.addScavenger({ position: Vec2(5, -5) })
-    // this.addStamina({ position: Vec2(-5, -5) })
+    this.addStamina({ position: Vec2(-5, -5) })
     this.addStrength({ position: Vec2(0, 5) })
     this.addSpeed({ position: Vec2(5, 0) })
     this.addTrapper({ position: Vec2(0, -5) })

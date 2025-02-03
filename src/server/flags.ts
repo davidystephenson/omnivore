@@ -83,7 +83,7 @@ export class Flags {
     this.timings = props.timings ?? false
     this.vision = props.vision ?? false
     this.visionRangeGame = props.visionRangeGame ?? true
-    this.visionGame = props.visionGame ?? true
+    this.visionGame = props.visionGame ?? false
     this.waypoints = props.waypoints ?? false
     this.waypointSpawnpointsGame = props.waypointSpawnpointsGame ?? true
   }

@@ -27,6 +27,7 @@ export interface Obituary extends OrganismSpawn {
 }
 
 export class Organism extends Actor {
+  static MINIMUM_FORCE = 10
   controlColor = LIME
   chasePoint: Vec2 | undefined
   chaseRadius = 0.2
@@ -190,10 +191,12 @@ export class Organism extends Actor {
     const myPosition = this.membrane.body.getPosition()
     const nextPoint = this.stage.navigation.navigate(myPosition, props.target, this.membrane.radius, this.chaseRadius)
     const nextPointPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
-    this.stage.debugCircle({
-      circle: new CircleShape(nextPointPosition, 0.3),
-      color: COLOR.ORANGE
-    })
+    if (this.stage.flags.botChase) {
+      this.stage.debugCircle({
+        circle: new CircleShape(nextPointPosition, 0.3),
+        color: COLOR.ORANGE
+      })
+    }
     const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
     const direction = directionFromTo(myPosition, nextPosition)
     this.setControls(direction)
@@ -568,7 +571,7 @@ export class Organism extends Actor {
       throw new Error('This organism has no membranes')
     }
     this.membranes.forEach(membrane => {
-      const forceScale = 1 + this.gene.speed * membrane.body.getMass() * 10
+      const forceScale = Organism.MINIMUM_FORCE + this.gene.speed * membrane.body.getMass() * 10
       membrane.force = Vec2.mul(direction, forceScale)
     })
   }
