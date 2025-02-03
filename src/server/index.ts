@@ -6,11 +6,12 @@ import { GREEN } from '../shared/color'
 // import { GrandRehearsal } from './stage/grandRehearsal'
 // import { Rehearsal } from './stage/rehearsal'
 // import { Mission } from './stage/mission'
-import { TestProduction } from './stage/testProduction'
+// import { TestProduction } from './stage/testProduction'
+import { Rehearsal } from './stage/rehearsal'
 // import { GrandRehearsal } from './stage/grandRehearsal'
 // import { DressRehearsal } from './stage/dressRehearsal'
 
-const stage = new TestProduction()
+const stage = new Rehearsal()
 
 io.on('connection', socket => {
   stage.debug({ vs: ['connection:', socket.id] })
