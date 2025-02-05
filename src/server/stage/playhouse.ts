@@ -1,5 +1,5 @@
 import { Vec2 } from 'planck'
-import { YELLOW, RED, PURPLE, ORANGE, BROWN, MAGENTA, PINK, GRAY } from '../../shared/color'
+import { YELLOW, RED, PURPLE, ORANGE, BROWN, MAGENTA, PINK, GRAY, CYAN } from '../../shared/color'
 import { Gene } from '../gene'
 import { Organism } from '../actor/organism'
 import { Stage } from './stage'
@@ -33,25 +33,32 @@ export class Playhouse extends Stage {
     strength: 0
   })
 
-  speedGene = new Gene({
+  flyGene = new Gene({
     speed: 1,
     stage: this,
     stamina: 0,
     strength: 0
   })
 
-  staminaGene = new Gene({
+  trisolaranGene = new Gene({
     speed: 0,
     stage: this,
     stamina: 1,
     strength: 0
   })
 
-  strengthGene = new Gene({
+  bruteGene = new Gene({
     speed: 0,
     stage: this,
     stamina: 0,
     strength: 1
+  })
+
+  bruteVictimGene = new Gene({
+    speed: 0.0,
+    stamina: 0.01,
+    strength: 0.99,
+    stage: this
   })
 
   trapperGene = new Gene({
@@ -71,12 +78,42 @@ export class Playhouse extends Stage {
     })
   }
 
+  addBrute (props: {
+    position: Vec2
+  }): Organism {
+    return this.addOrganism({
+      color: MAGENTA,
+      gene: this.bruteGene,
+      position: props.position
+    })
+  }
+
+  addBruteVictim (props: {
+    position: Vec2
+  }): Organism {
+    return this.addOrganism({
+      color: CYAN,
+      gene: this.bruteVictimGene,
+      position: props.position
+    })
+  }
+
   addBully (props: {
     position: Vec2
   }): Organism {
     return this.addOrganism({
       color: GRAY,
       gene: this.bullyGene,
+      position: props.position
+    })
+  }
+
+  addFly (props: {
+    position: Vec2
+  }): Organism {
+    return this.addOrganism({
+      color: YELLOW,
+      gene: this.flyGene,
       position: props.position
     })
   }
@@ -101,32 +138,12 @@ export class Playhouse extends Stage {
     })
   }
 
-  addSpeed (props: {
-    position: Vec2
-  }): Organism {
-    return this.addOrganism({
-      color: YELLOW,
-      gene: this.speedGene,
-      position: props.position
-    })
-  }
-
   addStamina (props: {
     position: Vec2
   }): Organism {
     return this.addOrganism({
       color: PURPLE,
-      gene: this.staminaGene,
-      position: props.position
-    })
-  }
-
-  addStrength (props: {
-    position: Vec2
-  }): Organism {
-    return this.addOrganism({
-      color: MAGENTA,
-      gene: this.strengthGene,
+      gene: this.trisolaranGene,
       position: props.position
     })
   }
@@ -139,5 +156,28 @@ export class Playhouse extends Stage {
       gene: this.trapperGene,
       position: props.position
     })
+  }
+
+  addStarTrees (): void {
+    const minimum = Math.min(this.halfWidth, this.halfHeight)
+    const half = minimum / 2
+    const negative = -half
+
+    this.addTree({ position: Vec2(half, half) })
+    this.addTree({ position: Vec2(negative, half) })
+    this.addTree({ position: Vec2(half, negative) })
+    this.addTree({ position: Vec2(negative, negative) })
+    this.addTree({ position: Vec2(0, 0) })
+  }
+
+  addFamilies (): void {
+    this.addBalanced({ position: Vec2(45, 45) })
+    this.addBully({ position: Vec2(-35, 35) })
+    this.addHunter({ position: Vec2(-25, -25) })
+    this.addScavenger({ position: Vec2(-15, 15) })
+    this.addFly({ position: Vec2(0, -5) })
+    this.addStamina({ position: Vec2(15, -15) })
+    this.addBrute({ position: Vec2(25, 10) })
+    this.addTrapper({ position: Vec2(35, 10) })
   }
 }

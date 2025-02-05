@@ -11,8 +11,9 @@ import { Prop } from './prop'
 export class Membrane extends Feature {
   static BASE_DAMAGE = 0.1
   static DAMAGE_FACTOR = 3
-  static MINIMUM_LIFE_SECONDS = 60
-  static GENETIC_LIFE_SECONDS = 150
+  static MINIMUM_DAMAGE = 0.1
+  static MINIMUM_LIFE_SECONDS = 30
+  static GENETIC_LIFE_SECONDS = 60
   actor: Organism
   destroyed = false
   hungerDamage = 0
@@ -32,7 +33,7 @@ export class Membrane extends Feature {
         position: props.position,
         bullet: true,
         fixedRotation: true,
-        linearDamping: 0.1
+        linearDamping: Feature.DAMPING
       },
       fixtureDef: {
         shape: new Circle(Vec2(0, 0), radius),
@@ -66,8 +67,23 @@ export class Membrane extends Feature {
 
   doDamage (target: Feature): void {
     const combatDamage = this.getCombatDamage(target)
+    console.log('combatDamage', combatDamage)
+    if (combatDamage < Feature.MINIMUM_DAMAGE) {
+      const message = `combatDamage < Feature.MINIMUM_DAMAGE: ${combatDamage}`
+      throw new Error(message)
+    }
+    const oldHealth = target.getHealth()
+    if (oldHealth > 1) {
+      const message = `oldHealth > 1: ${oldHealth}`
+      throw new Error(message)
+    }
     target.combatDamage += combatDamage
     target.health = target.getHealth()
+    console.log('targetHealth', target.health)
+    if (target.health > oldHealth - Feature.MINIMUM_DAMAGE + 0.001) {
+      const message = `Invalid target.health: ${target.health} > ${oldHealth} - ${Feature.MINIMUM_DAMAGE}`
+      throw new Error(message)
+    }
     if (target.health <= 0) {
       if (target instanceof Membrane) {
         const killing = new Killing({
@@ -82,17 +98,20 @@ export class Membrane extends Feature {
     }
   }
 
-  getDamage (props: {
-    target: Membrane
-  }): number {
-    const ratio = this.mass / props.target.mass
-    const power = Math.pow(ratio, Membrane.DAMAGE_FACTOR)
-    const damage = Membrane.BASE_DAMAGE * power
+  getCombatDamage (target: Feature): number {
+    const damage = super.getCombatDamage(target)
+    if (target instanceof Membrane && damage < Membrane.MINIMUM_DAMAGE) {
+      return Membrane.MINIMUM_DAMAGE
+    }
     return damage
   }
 
   getHealth (): number {
     const combatHealth = super.getHealth()
+    if (this.hungerDamage < 0) {
+      const message = `hungerDamage < 0: ${this.hungerDamage}`
+      throw new Error(message)
+    }
     const health = combatHealth - this.hungerDamage
     return health
   }
@@ -100,7 +119,7 @@ export class Membrane extends Feature {
   getJaw (props: {
     target: Membrane
   }): number {
-    const damage = this.getDamage({ target: props.target })
+    const damage = this.getCombatDamage(props.target)
     const jaw = props.target.health / damage
     return jaw
   }
@@ -129,17 +148,25 @@ export class Membrane extends Feature {
       const minimum = Math.min(remaining, this.hungerDamage)
       remaining -= this.hungerDamage
       this.hungerDamage -= minimum
-      if (remaining < 0) {
-        return
+      if (this.hungerDamage < 0) {
+        const message = `heal hungerDamage < 0: ${this.hungerDamage}`
+        throw new Error(message)
       }
+    }
+    if (remaining < 0) {
+      return
     }
     if (this.combatDamage > 0) {
       const minimum = Math.min(remaining, this.combatDamage)
       remaining -= this.combatDamage
       this.combatDamage -= minimum
-      if (remaining < 0) {
-        return
+      if (this.combatDamage < 0) {
+        const message = `heal combatDamage < 0: ${this.combatDamage}`
+        throw new Error(message)
       }
+    }
+    if (remaining < 0) {
+      return
     }
     this.actor.reproduce({ health: remaining })
   }

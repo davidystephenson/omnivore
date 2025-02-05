@@ -5,6 +5,7 @@ export class Flags {
   botPath: boolean
   charge: boolean
   controlLines: boolean
+  damage: boolean
   death: boolean
   hungerGame: boolean
   isOpen: boolean
@@ -18,6 +19,7 @@ export class Flags {
   performance: boolean
   players: boolean
   procedural: boolean
+  reproduceGame: boolean
   respawn: boolean
   starveBricksGame: boolean
   summary: boolean
@@ -31,6 +33,7 @@ export class Flags {
   constructor (props: {
     actors?: boolean
     charge?: boolean
+    damage?: boolean
     botChase?: boolean
     botFlee?: boolean
     botPath?: boolean
@@ -48,6 +51,7 @@ export class Flags {
     performance?: boolean
     players?: boolean
     procedural?: boolean
+    reproduceGame?: boolean
     respawn?: boolean
     starveBricksGame?: boolean
     summary?: boolean
@@ -77,6 +81,7 @@ export class Flags {
     this.performance = props.performance ?? true
     this.players = props.players ?? false
     this.procedural = props.procedural ?? false
+    this.reproduceGame = props.reproduceGame ?? true
     this.respawn = props.respawn ?? false
     this.starveBricksGame = props.starveBricksGame ?? true
     this.summary = props.summary ?? false

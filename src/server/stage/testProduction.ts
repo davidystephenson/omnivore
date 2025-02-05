@@ -12,12 +12,9 @@ export class TestProduction extends Production {
         charge: true,
         death: true,
         hungerGame: false,
-        // meatY: false,
         performance: false,
         respawn: true,
         visionRangeGame: false,
-        visionGame: false,
-        // waypointSpawnpointsY: false
         controlLines: true
       })
     })

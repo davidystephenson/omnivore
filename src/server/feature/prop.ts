@@ -17,8 +17,8 @@ export class Prop extends Feature {
         type: 'dynamic',
         position: props.position,
         bullet: true,
-        linearDamping: 0.1,
-        angularDamping: 0.1
+        linearDamping: Feature.DAMPING,
+        angularDamping: Feature.DAMPING
       },
       fixtureDef: {
         shape: props.shape,

@@ -1,13 +1,12 @@
 import { Vec2 } from 'planck'
 import { Flags } from '../flags'
-import { Playhouse } from './playhouse'
+import { Walled } from './walled'
 
-export class GrandRehearsal extends Playhouse {
+export class GrandRehearsal extends Walled {
   constructor () {
     const flags = new Flags({
       // death: true,
       // mutation: true,
-      visionGame: false
     })
     super({
       flags,
@@ -48,14 +47,16 @@ export class GrandRehearsal extends Playhouse {
     this.addBully({ position: Vec2(-35, 35) })
     this.addHunter({ position: Vec2(-25, -25) })
     this.addScavenger({ position: Vec2(-15, 15) })
-    this.addSpeed({ position: Vec2(0, -5) })
+    this.addFly({ position: Vec2(0, -5) })
     this.addStamina({ position: Vec2(15, -15) })
-    this.addStrength({ position: Vec2(25, 10) })
+    this.addBrute({ position: Vec2(25, 10) })
     this.addTrapper({ position: Vec2(35, 10) })
 
     this.addTree({ position: Vec2(20, 20) })
     this.addTree({ position: Vec2(20, -20) })
     this.addTree({ position: Vec2(-20, -20) })
     this.addTree({ position: Vec2(-20, -20) })
+
+    this.saveLayout()
   }
 }
