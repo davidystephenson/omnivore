@@ -3,6 +3,7 @@ import { Vec2 } from 'planck'
 import { Controls } from '../shared/input'
 // import { Funhouse } from './funhouse'
 import { GREEN } from '../shared/color'
+// import { PublicProduction } from './stage/publicProduction'
 // import { GrandRehearsal } from './stage/grandRehearsal'
 // import { Rehearsal } from './stage/rehearsal'
 // import { Mission } from './stage/mission'
@@ -10,6 +11,8 @@ import { GREEN } from '../shared/color'
 import { Rehearsal } from './stage/rehearsal'
 // import { GrandRehearsal } from './stage/grandRehearsal'
 // import { DressRehearsal } from './stage/dressRehearsal'
+// import { PublicProduction } from './stage/publicProduction'
+// import { PrivateProduction } from './stage/privateProductoin'
 
 const stage = new Rehearsal()
 

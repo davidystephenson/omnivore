@@ -137,3 +137,20 @@ export function roundNumber (props: {
   const factor = Math.pow(10, decimals)
   return Math.round((props.number + Number.EPSILON) * factor) / factor
 }
+
+export function roundAdd (props: {
+  a: number
+  b: number
+} & Decimals): number {
+  const sum = props.a + props.b
+  const rounded = roundNumber({ number: sum, ...props })
+  return rounded
+}
+
+export function roundSubtract (props: {
+  a: number
+  b: number
+} & Decimals): number {
+  const { b, ...rest } = props
+  return roundAdd({ b: -props.b, ...rest })
+}

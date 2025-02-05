@@ -1,5 +1,5 @@
 import { LogProps } from './debugger'
-import { roundNumber } from './math'
+import { roundAdd, roundSubtract } from './math'
 import { ONE_THIRD, TWO_THIRDS } from './numbers'
 import { Stage } from './stage/stage'
 
@@ -35,69 +35,84 @@ export class Gene {
   }
 
   changeStats (props: {
-    gene: Gene
+    decrease: number
     increase: number
     stat: keyof Stats
   }): Gene {
+    const gene = new Gene({
+      angle: this.angle,
+      speed: this.speed,
+      stage: this.stage,
+      stamina: this.stamina,
+      strength: this.strength,
+      branches: this.branches
+    })
     this.debug({ k: 'CHANGESTATS props.stat', v: props.stat })
     this.debug({ k: 'changeStats props.increase', v: props.increase })
+    this.debug({ k: 'changeStats props.decrease', v: props.decrease })
     const stats = {
-      speed: props.gene.speed,
-      stamina: props.gene.stamina,
-      strength: props.gene.strength
+      speed: gene.speed,
+      stamina: gene.stamina,
+      strength: gene.strength
     }
     this.debug({ k: 'changeStats stats', v: stats })
-
-    const half = props.increase / 2
-    this.debug({ k: 'changeStats half', v: half })
     STATS.forEach(stat => {
       this.debug({ k: 'changeStats stat', v: stat })
-      const value = props.gene[stat]
+      const value = gene[stat]
       this.debug({ k: 'changeStats value', v: value })
       if (stat === props.stat) {
-        const increased = value + props.increase
-        this.debug({ k: 'changeStats increased', v: increased })
-        const rounded = roundNumber({ number: increased, decimals: 3 })
-        props.gene[stat] = rounded
-        this.debug({ k: 'changeStats newValue', v: props.gene[stat] })
+        gene[stat] = roundAdd({ a: value, b: props.increase })
+        this.debug({ k: 'changeStats newValue', v: gene[stat] })
       } else {
         const other = STATS.find(other => other !== props.stat && other !== stat)
         if (other == null) throw new Error('There is no other')
         this.debug({ k: 'changeStats other', v: other })
         const otherValue = stats[other]
         this.debug({ k: 'changeStats otherValue', v: otherValue })
-        if (otherValue < half) {
-          const remaining = half - otherValue
+        if (otherValue < props.decrease) {
+          const remaining = props.decrease - otherValue
           this.debug({ k: 'changeStats remaining', v: remaining })
-          const decrease = half + remaining
+          const decrease = props.decrease + remaining
           this.debug({ k: 'changeStats decrease', v: decrease })
-          const decreased = value - decrease
-          this.debug({ k: 'changeStats decreased', v: decreased })
-          const rounded = roundNumber({ number: decreased, decimals: 3 })
-          props.gene[stat] = rounded
-          this.debug({ k: 'changeStats newValue', v: props.gene[stat] })
+          gene[stat] = roundSubtract({ a: value, b: decrease })
+          this.debug({ k: 'changeStats newValue', v: gene[stat] })
         } else {
-          if (value < half) {
-            props.gene[stat] = 0
-            this.debug({ k: 'changeStats zeroed', v: props.gene[stat] })
+          if (value < props.decrease) {
+            gene[stat] = 0
+            this.debug({ k: 'changeStats zeroed', v: gene[stat] })
           } else {
-            const decreased = value - half
-            this.debug({ k: 'changeStats half decreased', v: decreased })
-            const rounded = roundNumber({ number: decreased, decimals: 3 })
-            props.gene[stat] = rounded
-            this.debug({ k: 'changeStats newValue', v: props.gene[stat] })
+            gene[stat] = roundSubtract({ a: value, b: props.decrease })
+            this.debug({ k: 'changeStats newValue', v: gene[stat] })
           }
         }
       }
     })
-    props.gene.validateSum()
-    if (props.gene.speed < 0) throw new Error('speed is negative')
-    if (props.gene.stamina < 0) throw new Error('stamina is negative')
-    if (props.gene.strength < 0) throw new Error('strength is negative')
-    if (props.gene.speed > 1) throw new Error('speed is greater than 1')
-    if (props.gene.stamina > 1) throw new Error('stamina is greater than 1')
-    if (props.gene.strength > 1) throw new Error('strength is greater than 1')
-    return props.gene
+    gene.validateSum()
+    if (gene.speed < 0) {
+      const message = `speed is negative: ${gene.speed}`
+      throw new Error(message)
+    }
+    if (gene.stamina < 0) {
+      const message = `stamina is negative: ${gene.stamina}`
+      throw new Error(message)
+    }
+    if (gene.strength < 0) {
+      const message = `strength is negative: ${gene.strength}`
+      throw new Error(message)
+    }
+    if (gene.speed > 1) {
+      const message = `speed is greater than 1: ${gene.speed}`
+      throw new Error(message)
+    }
+    if (gene.stamina > 1) {
+      const message = `stamina is greater than 1: ${gene.stamina}`
+      throw new Error(message)
+    }
+    if (gene.strength > 1) {
+      const message = `strength is greater than 1: ${gene.strength}`
+      throw new Error(message)
+    }
+    return gene
   }
 
   debug (props: LogProps<unknown>): void {
@@ -108,19 +123,12 @@ export class Gene {
     stat: keyof Stats
   }): Gene {
     this.debug({ k: 'GETMUTATED props.stat', v: props.stat })
-    const gene = new Gene({
-      angle: this.angle,
-      speed: this.speed,
-      stage: this.stage,
-      stamina: this.stamina,
-      strength: this.strength,
-      branches: this.branches
-    })
+
     const value = this[props.stat]
     this.debug({ k: 'getMutated value', v: value })
     const remaining = 1 - value
     this.debug({ k: 'getMutated remaining', v: remaining })
-    const random = Math.round(Math.random() * 0.75)
+    const random = Math.random() * 0.75
     this.debug({ k: 'getMutated random', v: random })
     const others = STATS.filter(stat => stat !== props.stat)
     this.debug({ k: 'getMutated others', v: others })
@@ -128,9 +136,22 @@ export class Gene {
     this.debug({ k: 'getMutated total', v: total })
     const minimum = Math.min(random, remaining, total)
     this.debug({ k: 'getMutated minimum', v: minimum })
-    const increase = roundNumber({ number: minimum })
+    const scaledUp = minimum * 100
+    const rounded = Math.floor(scaledUp)
+    const even = rounded % 2 === 0
+    const increase = even ? rounded : rounded - 1
+    const decrease = increase / 2
     this.debug({ k: 'getMutated increase', v: increase })
-    const changed = this.changeStats({ gene, increase, stat: props.stat })
+    this.debug({ k: 'getMutated decrease', v: decrease })
+    const scaledIncrease = increase / 100
+    this.debug({ k: 'getMutated scaledIncrease', v: scaledIncrease })
+    const scaledDecrease = decrease / 100
+    this.debug({ k: 'getMutated scaledDecrease', v: scaledDecrease })
+    const changed = this.changeStats({
+      decrease: scaledDecrease,
+      increase: scaledIncrease,
+      stat: props.stat
+    })
     return changed
   }
 

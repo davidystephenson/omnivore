@@ -27,6 +27,7 @@ export interface Obituary extends OrganismSpawn {
 }
 
 export class Organism extends Actor {
+  static GENETIC_FORCE_SCALE = 5
   static MINIMUM_FORCE = 10
   controlColor = LIME
   chasePoint: Vec2 | undefined
@@ -571,7 +572,7 @@ export class Organism extends Actor {
       throw new Error('This organism has no membranes')
     }
     this.membranes.forEach(membrane => {
-      const forceScale = Organism.MINIMUM_FORCE + this.gene.speed * membrane.body.getMass() * 10
+      const forceScale = Organism.MINIMUM_FORCE + this.gene.speed * membrane.body.getMass() * Organism.GENETIC_FORCE_SCALE
       membrane.force = Vec2.mul(direction, forceScale)
     })
   }
@@ -621,6 +622,7 @@ export class Organism extends Actor {
   reproduce (props: {
     health: number
   }): void {
+    if (!this.stage.flags.reproduceGame) return
     const gene = this.gene.mutate()
     const bot = this.stage.addOrganism({
       color: this.color,
@@ -629,7 +631,8 @@ export class Organism extends Actor {
     })
     const half = this.membrane.maximumHealth / 2
     bot.membrane.hungerDamage = half
-    this.membrane.hungerDamage = half - props.health
+    const childHungerDamage = half - props.health
+    this.membrane.hungerDamage = Math.max(0, childHungerDamage)
     // TODO maintain combat damage
     this.membrane.combatDamage = 0
   }

@@ -53,8 +53,19 @@ export class Spawner {
       organisms.push(actor)
       families.add(actor.color)
     })
-    const organismsNeeded = organisms.length < 10
-    const familiesNeeded = families.size < 5
+    const area = this.stage.halfHeight * this.stage.halfWidth * 4
+    this.stage.flag({ f: 'respawn', k: 'area', v: area })
+    const organismCap = area / 100
+    this.stage.flag({ f: 'respawn', k: 'organismCap', v: organismCap })
+    function sigmoid (x: number): number {
+      return 1 / (1 + Math.exp(-x))
+    }
+    const sigmaArea = sigmoid(area / 1000)
+    this.stage.flag({ f: 'respawn', k: 'sigmaArea', v: sigmaArea })
+    const familyCap = 8 - (3 * sigmaArea)
+    this.stage.flag({ f: 'respawn', k: 'familyCap', v: familyCap })
+    const organismsNeeded = organisms.length < organismCap
+    const familiesNeeded = families.size < familyCap
     const needed = organismsNeeded || familiesNeeded
     const living = this.stage.killingQueue.length === 0 && this.stage.starvationQueue.length === 0
     const respawnable = living && this.queue.length > 0 && needed

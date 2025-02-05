@@ -45,8 +45,8 @@ export class Rehearsal extends Walled {
     this.addHunter({ position: Vec2(5, -5) })
     this.addScavenger({ position: Vec2(5, -5) })
     // this.addStamina({ position: Vec2(-5, -5) })
-    this.addStrength({ position: Vec2(0, 5) })
-    this.addSpeed({ position: Vec2(5, 0) })
+    this.addBrute({ position: Vec2(0, 5) })
+    this.addFly({ position: Vec2(5, 0) })
     this.addTrapper({ position: Vec2(0, -5) })
 
     this.addTree({ position: Vec2(20, -20) })

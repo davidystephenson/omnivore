@@ -9,6 +9,8 @@ import { HALF_SIGHT } from '../../shared/sight'
 let featureCount = 0
 
 export class Feature {
+  static MINIMUM_DAMAGE = 0.0001
+  static DAMPING = 0.05
   actor: Actor
   body: Body
   borderWidth: number
@@ -85,6 +87,9 @@ export class Feature {
     const ratio = this.body.getMass() / target.body.getMass()
     const factor = 5
     const combatDamage = 0.1 * Math.pow(ratio, factor)
+    if (combatDamage < Feature.MINIMUM_DAMAGE) {
+      return Feature.MINIMUM_DAMAGE
+    }
     return combatDamage
   }
 
@@ -139,6 +144,10 @@ export class Feature {
 
   getHealth (): number {
     const health = this.maximumHealth - this.combatDamage
+    if (this.combatDamage < 0) {
+      const message = `this.combatDamage < 0: ${this.combatDamage}`
+      throw new Error(message)
+    }
     return health
   }
 

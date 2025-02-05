@@ -1,13 +1,12 @@
 import { Vec2 } from 'planck'
 import { Flags } from '../flags'
-import Procedural from './procedural'
+import { Walled } from './walled'
 
-export class DressRehearsal extends Procedural {
+export class DressRehearsal extends Walled {
   constructor () {
     super({
       flags: new Flags({
         // performance: false,
-        visionGame: false,
         // navAreas: true,
         // navigation: true,
         // organismsCount: true,
@@ -18,8 +17,8 @@ export class DressRehearsal extends Procedural {
         timings: true
         // waypoints: true
       }),
-      halfHeight: 30,
-      halfWidth: 30
+      halfHeight: 100,
+      halfWidth: 100
     })
 
     this.navigation.setupWaypoints()
@@ -30,8 +29,8 @@ export class DressRehearsal extends Procedural {
     this.addHunter({ position: Vec2(5, -5) })
     this.addScavenger({ position: Vec2(5, -5) })
     this.addStamina({ position: Vec2(-5, -5) })
-    this.addStrength({ position: Vec2(0, 5) })
-    this.addSpeed({ position: Vec2(5, 0) })
+    this.addBrute({ position: Vec2(0, 5) })
+    this.addFly({ position: Vec2(5, 0) })
     this.addTrapper({ position: Vec2(0, -5) })
 
     const minimum = Math.min(this.halfWidth, this.halfHeight)
@@ -52,5 +51,7 @@ export class DressRehearsal extends Procedural {
     // this.addTree({ position: Vec2(half, negative) })
     // this.addTree({ position: Vec2(negative, negative) })
     this.addTree({ position: Vec2(0, 0) })
+
+    this.saveLayout()
   }
 }

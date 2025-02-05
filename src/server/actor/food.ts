@@ -16,7 +16,8 @@ export class Food extends Actor {
     position: Vec2
   }) {
     super({ stage: props.stage, label: 'food' })
-    this.nutrition = props.nutrition ?? Food.NUTRITION
+    const nutrition = props.nutrition ?? Food.NUTRITION
+    this.nutrition = Math.min(nutrition, 1)
     this.sculpture = new Sculpture({
       position: props.position,
       vertices: props.vertices,
