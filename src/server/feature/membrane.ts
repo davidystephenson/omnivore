@@ -67,7 +67,7 @@ export class Membrane extends Feature {
 
   doDamage (target: Feature): void {
     const combatDamage = this.getCombatDamage(target)
-    console.log('combatDamage', combatDamage)
+    this.actor.stage.flag({ f: 'damage', k: 'combat', v: combatDamage })
     if (combatDamage < Feature.MINIMUM_DAMAGE) {
       const message = `combatDamage < Feature.MINIMUM_DAMAGE: ${combatDamage}`
       throw new Error(message)
@@ -79,7 +79,6 @@ export class Membrane extends Feature {
     }
     target.combatDamage += combatDamage
     target.health = target.getHealth()
-    console.log('targetHealth', target.health)
     if (target.health > oldHealth - Feature.MINIMUM_DAMAGE + 0.001) {
       const message = `Invalid target.health: ${target.health} > ${oldHealth} - ${Feature.MINIMUM_DAMAGE}`
       throw new Error(message)

@@ -1,7 +1,7 @@
 import { Vec2 } from 'planck'
 import { Wall } from '../actor/wall'
-import { Playhouse } from './playhouse'
 import { Flags } from '../flags'
+import { Walled } from './walled'
 
 export interface Rectangle {
   x: number
@@ -10,7 +10,7 @@ export interface Rectangle {
   halfHeight: number
 }
 
-export default class Procedural extends Playhouse {
+export default class Procedural extends Walled {
   static FILL = 0.3
   static FAILS = 100000
   static DEBUG = 10000
@@ -25,9 +25,11 @@ export default class Procedural extends Playhouse {
     halfWidth: number
   }) {
     super(props)
+    console.log('Procedural')
 
     while (!this.isDone()) {
       const remainder = this.fails % Procedural.DEBUG
+      console.log('remainder', remainder)
       this.debugging = remainder === 0
       if (this.debugging) {
         const fill = this.getFill()
@@ -52,9 +54,12 @@ export default class Procedural extends Playhouse {
   }
 
   getFill (): number {
-    const wallsHalfArea = this.walls.reduce((sum, wall) => {
+    const wallsHalfArea = this.walls.reduce((wallsHalfArea, wall) => {
+      if (wall.outer) {
+        return wallsHalfArea
+      }
       const halfArea = wall.halfHeight * wall.halfWidth
-      const total = sum + halfArea
+      const total = wallsHalfArea + halfArea
       return total
     }, 0)
     const halfArea = this.halfHeight * this.halfWidth
@@ -132,7 +137,7 @@ export default class Procedural extends Playhouse {
       return
     }
     const position = Vec2(rectangle.x, rectangle.y)
-    this.addWall({
+    this.addInnerWall({
       halfWidth: rectangle.halfWidth,
       halfHeight: rectangle.halfHeight,
       position
@@ -195,6 +200,7 @@ export default class Procedural extends Playhouse {
 
   isFull (): boolean {
     const fill = this.getFill()
+    console.log('fill', fill)
     const full = fill > Procedural.FILL
     return full
   }

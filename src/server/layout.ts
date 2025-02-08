@@ -39,6 +39,7 @@ export class Layout {
     return {
       halfHeight: wall.halfHeight,
       halfWidth: wall.halfWidth,
+      outer: wall.outer,
       position: { x: wall.position.x, y: wall.position.y }
     }
   }

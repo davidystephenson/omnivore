@@ -1,8 +1,8 @@
 import { Vec2 } from 'planck'
 import { Flags } from '../flags'
-import { Walled } from './walled'
+import Procedural from './procedural'
 
-export class DressRehearsal extends Walled {
+export class DressRehearsal extends Procedural {
   constructor () {
     super({
       flags: new Flags({

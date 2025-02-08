@@ -12,26 +12,27 @@ export class Rehearsal extends Walled {
         // respawn: true,
         timings: true
         // vision: false,
+        // performance: false
       }),
       halfHeight: 25,
       halfWidth: 25
     })
-    this.addWall({
+    this.addInnerWall({
       halfWidth: 5,
       halfHeight: 1,
       position: Vec2(-10, -10)
     })
-    this.addWall({
+    this.addInnerWall({
       halfWidth: 1,
       halfHeight: 5,
       position: Vec2(-10, 10)
     })
-    this.addWall({
+    this.addInnerWall({
       halfWidth: 4,
       halfHeight: 6,
       position: Vec2(10, 10)
     })
-    this.addWall({
+    this.addInnerWall({
       halfWidth: 5,
       halfHeight: 5,
       position: Vec2(10, -10)

@@ -13,28 +13,27 @@ export class GrandRehearsal extends Walled {
       halfHeight: 50,
       halfWidth: 50
     })
-    this.addWall({
+    this.addInnerWall({
       halfWidth: 10,
       halfHeight: 1,
       position: Vec2(-10, -10)
     })
-    this.addWall({
+    this.addInnerWall({
       halfWidth: 5,
       halfHeight: 1,
       position: Vec2(-20, 10)
     })
-    this.addWall({
+    this.addInnerWall({
       halfWidth: 1,
       halfHeight: 10,
       position: Vec2(10, 10)
     })
-    this.addWall({
+    this.addInnerWall({
       halfWidth: 1,
       halfHeight: 1,
       position: Vec2(10, 20)
     })
-
-    this.addWall({
+    this.addInnerWall({
       halfWidth: 1,
       halfHeight: 10,
       position: Vec2(20, 10)
