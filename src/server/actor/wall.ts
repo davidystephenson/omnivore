@@ -7,24 +7,26 @@ import { Waypoint } from '../waypoint'
 export interface WallDef {
   halfHeight: number
   halfWidth: number
+  outer: boolean
   position: { x: number, y: number }
 }
 
 export class Wall extends Actor {
+  aabb: AABB
+  bottom: number
+  bottomWaypoints: Waypoint[] = []
+  cornerWaypoints: Waypoint[] = []
   halfHeight: number
   halfWidth: number
-  position: Vec2
-  structure: Structure
-  cornerWaypoints: Waypoint[] = []
-  topWaypoints: Waypoint[] = []
-  bottomWaypoints: Waypoint[] = []
-  rightWaypoints: Waypoint[] = []
-  leftWaypoints: Waypoint[] = []
-  top: number
-  bottom: number
   left: number
+  leftWaypoints: Waypoint[] = []
+  outer: boolean
+  position: Vec2
   right: number
-  aabb: AABB
+  rightWaypoints: Waypoint[] = []
+  structure: Structure
+  top: number
+  topWaypoints: Waypoint[] = []
 
   constructor (props: {
     stage: Stage
@@ -32,6 +34,7 @@ export class Wall extends Actor {
     super({ stage: props.stage, label: 'wall' })
     this.halfHeight = props.halfHeight
     this.halfWidth = props.halfWidth
+    this.outer = props.outer
     this.position = Vec2(props.position.x, props.position.y)
     this.structure = new Structure({
       position: this.position,

@@ -1,0 +1,8 @@
+---
+description: Keep could functions code in the top level functions directory
+globs: 
+---
+# Cloud functions code belongs in the `/functions` directory
+
+- All code that will be deployed to the Google Firebase Cloud Functions service belongs in the top-level `/functions` directory
+- Don't create a functions directory in the top level `/src` directory

@@ -11,22 +11,22 @@ export class Walled extends Playhouse {
     halfWidth: number
   }) {
     super(props)
-    this.addWall({
+    this.addOuterWall({
       halfWidth: this.halfWidth + Walled.SIZE,
       halfHeight: Walled.HALF_SIZE,
       position: Vec2(0, this.halfHeight + Walled.HALF_SIZE)
     })
-    this.addWall({
+    this.addOuterWall({
       halfWidth: this.halfWidth + Walled.SIZE,
       halfHeight: Walled.HALF_SIZE,
       position: Vec2(0, -this.halfHeight - Walled.HALF_SIZE)
     })
-    this.addWall({
+    this.addOuterWall({
       halfWidth: Walled.HALF_SIZE,
       halfHeight: this.halfHeight + Walled.SIZE,
       position: Vec2(this.halfHeight + Walled.HALF_SIZE, 0)
     })
-    this.addWall({
+    this.addOuterWall({
       halfWidth: Walled.HALF_SIZE,
       halfHeight: this.halfHeight + Walled.SIZE,
       position: Vec2(-this.halfHeight - Walled.HALF_SIZE, 0)

@@ -16,22 +16,22 @@ export class Lab extends Walled {
       halfHeight: 25,
       halfWidth: 25
     })
-    this.addWall({
+    this.addInnerWall({
       halfWidth: 5,
       halfHeight: 1,
       position: Vec2(-10, -10)
     })
-    this.addWall({
+    this.addInnerWall({
       halfWidth: 1,
       halfHeight: 5,
       position: Vec2(-10, 10)
     })
-    this.addWall({
+    this.addInnerWall({
       halfWidth: 4,
       halfHeight: 6,
       position: Vec2(10, 10)
     })
-    this.addWall({
+    this.addInnerWall({
       halfWidth: 5,
       halfHeight: 5,
       position: Vec2(10, -10)

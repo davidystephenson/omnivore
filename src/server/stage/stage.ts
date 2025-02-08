@@ -123,6 +123,14 @@ export class Stage {
     })
   }
 
+  addInnerWall (props: {
+    halfWidth: number
+    halfHeight: number
+    position: Vec2
+  }): Wall {
+    return this.addWall({ ...props, outer: false })
+  }
+
   addOrganism (props: {
     color: Rgb
     position: Vec2
@@ -130,6 +138,14 @@ export class Stage {
   }): Organism {
     const organism = new Organism({ stage: this, ...props })
     return organism
+  }
+
+  addOuterWall (props: {
+    halfWidth: number
+    halfHeight: number
+    position: Vec2
+  }): Wall {
+    return this.addWall({ ...props, outer: true })
   }
 
   addPlayer (props: {
@@ -180,7 +196,12 @@ export class Stage {
     return puppet
   }
 
-  addWall (props: { halfWidth: number, halfHeight: number, position: Vec2 }): Wall {
+  addWall (props: {
+    halfWidth: number
+    halfHeight: number
+    outer: boolean
+    position: Vec2
+  }): Wall {
     const wall = new Wall({ stage: this, ...props })
     this.walls.push(wall)
     return wall
@@ -228,7 +249,7 @@ export class Stage {
       const offset = offsetHeight * offsetIndex
       const position = props.position.clone()
       position.y += offset
-      this.addWall({ halfWidth: props.halfWidth, halfHeight: props.halfHeight, position })
+      this.addInnerWall({ halfWidth: props.halfWidth, halfHeight: props.halfHeight, position })
     })
   }
 

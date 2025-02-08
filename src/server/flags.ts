@@ -9,6 +9,7 @@ export class Flags {
   death: boolean
   hungerGame: boolean
   isOpen: boolean
+  killingGame: boolean
   maneuverLines: boolean
   meatGame: boolean
   mutation: boolean
@@ -41,6 +42,7 @@ export class Flags {
     death?: boolean
     hungerGame?: boolean
     isOpen?: boolean
+    killingGame?: boolean
     maneuverLines?: boolean
     meatGame?: boolean
     mutation?: boolean
@@ -68,8 +70,10 @@ export class Flags {
     this.botPath = props.botPath ?? false
     this.charge = props.charge ?? false
     this.controlLines = props.controlLines ?? false
+    this.damage = props.damage ?? false
     this.death = props.death ?? false
     this.hungerGame = props.hungerGame ?? true
+    this.killingGame = props.killingGame ?? true
     this.isOpen = props.isOpen ?? false
     this.maneuverLines = props.maneuverLines ?? false
     this.meatGame = props.meatGame ?? true
