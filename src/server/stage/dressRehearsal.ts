@@ -28,7 +28,7 @@ export class DressRehearsal extends Procedural {
     this.addBully({ position: Vec2(-5, 5) })
     this.addHunter({ position: Vec2(5, -5) })
     this.addScavenger({ position: Vec2(5, -5) })
-    this.addStamina({ position: Vec2(-5, -5) })
+    this.addTrisolaran({ position: Vec2(-5, -5) })
     this.addBrute({ position: Vec2(0, 5) })
     this.addFly({ position: Vec2(5, 0) })
     this.addTrapper({ position: Vec2(0, -5) })

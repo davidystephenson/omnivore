@@ -79,7 +79,9 @@ export class Runner {
 
   getElements (player: Player): Element[] {
     const idsInVision = player.organism?.featuresInVision.map(feature => feature.id)
-    const filteredFeatures = this.features.filter(feature => idsInVision?.includes(feature.id))
+    const filteredFeatures = this.features.filter(feature => {
+      return idsInVision?.includes(feature.id)
+    })
     const elements: Element[] = filteredFeatures.map(feature => {
       const tree = feature.actor instanceof Tree
       const seen = player.seenIds.includes(feature.id)
@@ -175,6 +177,9 @@ export class Runner {
     this.stage.actors.forEach(actor => {
       if (actor instanceof Tree) {
         actor.grow(stepSize)
+      }
+      if (actor instanceof Organism) {
+        if (actor.membrane.collideFeatures.size === 0) actor.membrane.grow(stepSize)
       }
     })
     const worldStepBefore = performance.now()

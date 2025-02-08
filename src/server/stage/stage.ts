@@ -1,4 +1,4 @@
-import { World, Vec2, Contact, Body, AABB, PolygonShape, CircleShape, Shape, Transform, testOverlap } from 'planck'
+import { World, Vec2, Body, AABB, PolygonShape, CircleShape, Shape, Transform, testOverlap } from 'planck'
 import { Runner } from '../runner'
 import { Organism } from '../actor/organism'
 import { Wall } from '../actor/wall'
@@ -20,10 +20,10 @@ import { Gene } from '../gene'
 import { Tree } from '../actor/tree'
 import { Food } from '../actor/food'
 import { Spawner } from '../spawner'
-import { Spawnpoint } from '../spawnpoint'
 import { Flags } from '../flags'
 import { Layout } from '../layout'
 import fs from 'fs'
+import { Collider } from '../collider'
 
 export class Stage {
   actors = new Map<number, Actor>()
@@ -45,6 +45,7 @@ export class Stage {
   vision: Vision
   walls: Wall[] = []
   world: World
+  collider: Collider
 
   constructor (props: {
     flags: Flags
@@ -54,16 +55,13 @@ export class Stage {
     this.flags = props.flags
     this.debugger = new Debugger()
     this.world = new World({ gravity: Vec2(0, 0) })
-    this.world.on('pre-solve', contact => this.preSolve(contact))
-    this.world.on('begin-contact', contact => this.beginContact(contact))
-    this.world.on('end-contact', contact => this.endContact(contact))
-
     this.halfHeight = props.halfHeight
     this.halfWidth = props.halfWidth
     this.navigation = new Navigation({ stage: this })
     this.runner = new Runner({ stage: this })
     this.vision = new Vision({ stage: this })
     this.spawner = new Spawner(this)
+    this.collider = new Collider(this)
   }
 
   saveLayout (): void {
@@ -253,46 +251,6 @@ export class Stage {
     })
   }
 
-  beginContact (contact: Contact): void {
-    const fixtureA = contact.getFixtureA()
-    const fixtureB = contact.getFixtureB()
-    const pairs = [
-      [fixtureA, fixtureB],
-      [fixtureB, fixtureA]
-    ]
-    pairs.forEach(pair => {
-      const fixture = pair[0]
-      const otherFixture = pair[1]
-      const sensorContact = fixture.isSensor() || otherFixture.isSensor()
-      const feature = fixture.getBody().getUserData()
-      const otherFeature = otherFixture.getBody().getUserData()
-      if (!(otherFeature instanceof Feature)) return
-      if (feature instanceof Spawner && !otherFixture.isSensor()) {
-        const spawnPoint = fixture.getUserData()
-        if (!(spawnPoint instanceof Spawnpoint)) {
-          throw new Error('spawnPoint is not a SpawnPoint')
-        }
-        if (otherFeature.actor.label === 'food') {
-          return false
-        }
-        spawnPoint.collideCount += 1
-      }
-      if (!(feature instanceof Feature)) return
-      const actor = feature.actor
-      const otherActor = otherFeature.actor
-      if (sensorContact) {
-        if (fixture.isSensor() && !otherFixture.isSensor()) {
-          feature.sensorFeatures.push(otherFeature)
-        }
-        return
-      } else {
-        if (actor instanceof Tree) this.fallQueue.push(actor)
-        if (otherActor instanceof Tree) this.fallQueue.push(otherActor)
-      }
-      feature.contacts.push(otherFeature)
-    })
-  }
-
   debug<Value>(props: LogProps<Value>): void {
     this.debugger.debug(props)
   }
@@ -359,37 +317,6 @@ export class Stage {
       const point1 = props.polygon.m_vertices[i]
       const point2 = props.polygon.m_vertices[j]
       this.debugLine({ a: point1, b: point2, color: props.color })
-    })
-  }
-
-  endContact (contact: Contact): void {
-    const fixtureA = contact.getFixtureA()
-    const fixtureB = contact.getFixtureB()
-    const pairs = [
-      [fixtureA, fixtureB],
-      [fixtureB, fixtureA]
-    ]
-    pairs.forEach(pair => {
-      const fixture = pair[0]
-      const otherFixture = pair[1]
-      const feature = fixture.getBody().getUserData()
-      const otherFeature = otherFixture.getBody().getUserData()
-      if (!(otherFeature instanceof Feature)) return
-      if (feature instanceof Spawner && !otherFixture.isSensor()) {
-        const spawnPoint = fixture.getUserData()
-        if (!(spawnPoint instanceof Spawnpoint)) {
-          throw new Error('spawnPoint is not a SpawnPoint')
-        }
-        if (otherFeature.actor.label === 'food') {
-          return false
-        }
-        spawnPoint.collideCount -= 1
-      }
-      if (!(feature instanceof Feature)) return
-      feature.contacts = feature.contacts.filter(contact => contact.id !== otherFeature.id)
-      if (fixture.isSensor() && !otherFixture.isSensor()) {
-        feature.sensorFeatures = feature.sensorFeatures.filter(contact => contact.id !== otherFeature.id)
-      }
     })
   }
 
@@ -476,30 +403,6 @@ export class Stage {
         family.push(actor)
       } else {
         this.families.set(label, [actor])
-      }
-    })
-  }
-
-  preSolve (contact: Contact): void {
-    const fixtureA = contact.getFixtureA()
-    const fixtureB = contact.getFixtureB()
-    const pairs = [
-      [fixtureA, fixtureB],
-      [fixtureB, fixtureA]
-    ]
-    pairs.forEach(pair => {
-      const fixture = pair[0]
-      const otherFixture = pair[1]
-      const sensorContact = fixture.isSensor() || otherFixture.isSensor()
-      const feature = fixture.getBody().getUserData()
-      const otherFeature = otherFixture.getBody().getUserData()
-      if (!(feature instanceof Feature)) return
-      if (!(otherFeature instanceof Feature)) return
-      const actor = feature.actor
-      const otherActor = otherFeature.actor
-      if (!sensorContact) {
-        if (actor instanceof Tree) this.fallQueue.push(actor)
-        if (otherActor instanceof Tree) this.fallQueue.push(otherActor)
       }
     })
   }

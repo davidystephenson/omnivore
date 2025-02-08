@@ -138,7 +138,7 @@ export class Playhouse extends Stage {
     })
   }
 
-  addStamina (props: {
+  addTrisolaran (props: {
     position: Vec2
   }): Organism {
     return this.addOrganism({
@@ -176,7 +176,7 @@ export class Playhouse extends Stage {
     this.addHunter({ position: Vec2(-25, -25) })
     this.addScavenger({ position: Vec2(-15, 15) })
     this.addFly({ position: Vec2(0, -5) })
-    this.addStamina({ position: Vec2(15, -15) })
+    this.addTrisolaran({ position: Vec2(15, -15) })
     this.addBrute({ position: Vec2(25, 10) })
     this.addTrapper({ position: Vec2(35, 10) })
   }

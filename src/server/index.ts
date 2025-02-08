@@ -11,10 +11,10 @@ import { GREEN } from '../shared/color'
 // import { Rehearsal } from './stage/rehearsal'
 // import { GrandRehearsal } from './stage/grandRehearsal'
 // import { DressRehearsal } from './stage/dressRehearsal'
-import { PublicProduction } from './stage/publicProduction'
-// import { PrivateProduction } from './stage/privateProductoin'
+// import { PublicProduction } from './stage/publicProduction'
+import { PrivateProduction } from './stage/privateProduction'
 
-const stage = new PublicProduction()
+const stage = new PrivateProduction()
 
 io.on('connection', socket => {
   stage.debug({ vs: ['connection:', socket.id] })
