@@ -11,15 +11,19 @@ import { Prop } from './prop'
 export class Membrane extends Feature {
   static BASE_DAMAGE = 0.1
   static DAMAGE_FACTOR = 3
+  static INITIAL_RADIUS = 0.6 / Math.sqrt(2)
   static MINIMUM_DAMAGE = 0.1
   static MINIMUM_LIFE_SECONDS = 30
   static GENETIC_LIFE_SECONDS = 60
   actor: Organism
   destroyed = false
   hungerDamage = 0
+  collideFeatures = new Set<Feature>()
   mass: number
+  targetRadius: number
   radius: number
   sensor: Fixture
+  step = 0
 
   constructor (props: {
     position: Vec2
@@ -36,7 +40,7 @@ export class Membrane extends Feature {
         linearDamping: Feature.DAMPING
       },
       fixtureDef: {
-        shape: new Circle(Vec2(0, 0), radius),
+        shape: new Circle(Vec2(0, 0), Membrane.INITIAL_RADIUS),
         density: 1,
         restitution: 0,
         friction: 0
@@ -47,7 +51,8 @@ export class Membrane extends Feature {
     })
     this.actor = props.actor
     this.mass = this.body.getMass()
-    this.radius = radius
+    this.radius = Membrane.INITIAL_RADIUS
+    this.targetRadius = radius
     this.sensor = this.addSensor()
   }
 
@@ -123,6 +128,23 @@ export class Membrane extends Feature {
     return jaw
   }
 
+  grow (stepSize: number): void {
+    if (this.radius === this.targetRadius) return
+    this.step += 1
+    if (this.step % 2 === 0) {
+      this.radius = Math.min(this.radius + 0.5 * stepSize, this.targetRadius)
+      this.body.destroyFixture(this.fixture)
+      this.fixture = this.body.createFixture({
+        shape: new Circle(Vec2(0, 0), this.radius),
+        density: 1,
+        restitution: 0,
+        friction: 0
+      })
+    }
+    this.body.setUserData(this)
+    this.fixture.setUserData(this)
+  }
+
   handleContact (props: {
     target: Feature
   }): void {
@@ -194,6 +216,7 @@ export class Membrane extends Feature {
   onStep (props: { stepSize: number }): void {
     super.onStep({ stepSize: props.stepSize })
     this.hunger()
+    this.collideFeatures = new Set<Feature>()
   }
 
   shove (target: Membrane): void {

@@ -106,6 +106,7 @@ export class Feature {
       s: 1,
       a
     }
+    element.u = this.radius
     if (!seen) {
       element.r = this.color.red
       element.g = this.color.green
@@ -114,7 +115,6 @@ export class Feature {
       if (this.radius > 0) {
         element.z = this.center.x
         element.w = this.center.y
-        element.u = this.radius
       } else {
         element.v = this.polygon.vertices.map(vertex => {
           return roundVector({ vector: vertex })
@@ -139,6 +139,13 @@ export class Feature {
     this.actor.stage.walls.forEach(wall => featuresInRange.push(wall.structure))
     this.actor.features.forEach(feature => featuresInRange.push(feature))
     this.sensorFeatures.forEach(feature => featuresInRange.push(feature))
+    // this.actor.stage.actors.forEach(actor => {
+    //   actor.features.forEach(feature => {
+    //     if (feature.label === 'membrane') {
+    //       featuresInRange.push(feature)
+    //     }
+    //   })
+    // })
     return featuresInRange
   }
 
