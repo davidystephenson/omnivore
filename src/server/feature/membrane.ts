@@ -70,40 +70,8 @@ export class Membrane extends Feature {
     super.destroy()
   }
 
-  doDamage (target: Feature): void {
-    const combatDamage = this.getCombatDamage(target)
-    this.actor.stage.flag({ f: 'damage', k: 'combat', v: combatDamage })
-    if (combatDamage < Feature.MINIMUM_DAMAGE) {
-      const message = `combatDamage < Feature.MINIMUM_DAMAGE: ${combatDamage}`
-      throw new Error(message)
-    }
-    const oldHealth = target.getHealth()
-    if (oldHealth > 1) {
-      const message = `oldHealth > 1: ${oldHealth}`
-      throw new Error(message)
-    }
-    target.combatDamage += combatDamage
-    target.health = target.getHealth()
-    if (target.health > oldHealth - Feature.MINIMUM_DAMAGE + 0.001) {
-      const message = `Invalid target.health: ${target.health} > ${oldHealth} - ${Feature.MINIMUM_DAMAGE}`
-      throw new Error(message)
-    }
-    if (target.health <= 0) {
-      if (target instanceof Membrane) {
-        const killing = new Killing({
-          victim: target,
-          stage: this.actor.stage,
-          killer: this
-        })
-        this.actor.stage.killingQueue.push(killing)
-      } else {
-        target.actor.destroy()
-      }
-    }
-  }
-
-  getCombatDamage (target: Feature): number {
-    const damage = super.getCombatDamage(target)
+  getDamageDealt (target: Feature): number {
+    const damage = super.getDamageDealt(target)
     if (target instanceof Membrane && damage < Membrane.MINIMUM_DAMAGE) {
       return Membrane.MINIMUM_DAMAGE
     }
@@ -123,7 +91,7 @@ export class Membrane extends Feature {
   getJaw (props: {
     target: Membrane
   }): number {
-    const damage = this.getCombatDamage(props.target)
+    const damage = this.getDamageDealt(props.target)
     const jaw = props.target.health / damage
     return jaw
   }
@@ -156,10 +124,10 @@ export class Membrane extends Feature {
     } else if (props.target.actor instanceof Tree) {
       props.target.actor.fall()
     } else if (props.target instanceof Membrane && props.target.actor.color !== this.actor.color) {
-      this.doDamage(props.target)
+      this.dealDamage({ target: props.target })
       this.shove(props.target)
     } else if (props.target instanceof Prop) {
-      this.doDamage(props.target)
+      this.dealDamage({ target: props.target })
     }
   }
 
@@ -225,5 +193,16 @@ export class Membrane extends Feature {
     const direction = directionFromTo(this.body.getPosition(), target.body.getPosition())
     const force = Vec2.mul(direction, forceScale)
     target.body.applyForceToCenter(force)
+  }
+
+  succumb (props: {
+    killer: Feature
+  }): void {
+    const killing = new Killing({
+      victim: this,
+      stage: this.actor.stage,
+      killer: props.killer
+    })
+    this.actor.stage.killingQueue.push(killing)
   }
 }

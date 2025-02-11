@@ -14,10 +14,10 @@ export class Production extends Playhouse {
   }) {
     const layoutDataString = fs.readFileSync('layout.json', 'utf-8')
     const layoutData = JSON.parse(layoutDataString) as LayoutData
-    console.log('layoutDataString.length', layoutDataString.length)
-    console.log('layoutData.wallDefs.length', layoutData.wallDefs.length)
-    console.log('layoutData.waypointDatas.length', layoutData.waypointDatas.length)
-    console.log('layoutData.navAreaDefs.length', layoutData.navAreaDefs.length)
+    console.debug('layoutDataString.length', layoutDataString.length)
+    console.debug('layoutData.wallDefs.length', layoutData.wallDefs.length)
+    console.debug('layoutData.waypointDatas.length', layoutData.waypointDatas.length)
+    console.debug('layoutData.navAreaDefs.length', layoutData.navAreaDefs.length)
     super({
       flags: props.flags,
       halfHeight: layoutData.halfHeight,

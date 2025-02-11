@@ -9,8 +9,9 @@ export interface Rgba extends Rgb {
 }
 
 export const BLACK: Rgb = { red: 0, green: 0, blue: 0 }
-export const BLUE: Rgb = { red: 0, green: 0, blue: 255 }
+export const BLUE: Rgb = { red: 25, green: 25, blue: 255 }
 export const CYAN: Rgb = { red: 0, green: 255, blue: 255 }
+export const DARK_BLUE: Rgb = { red: 0, green: 0, blue: 255 }
 export const LIME: Rgb = { red: 0, green: 255, blue: 0 }
 export const GRAY: Rgb = { red: 128, green: 128, blue: 128 }
 export const GREY: Rgb = { red: 128, green: 128, blue: 128 }
@@ -29,6 +30,7 @@ export const BROWN: Rgb = { red: 111, green: 78, blue: 55 }
 export const COLOR = {
   BLACK,
   BLUE,
+  DARK_BLUE,
   CYAN,
   LIME,
   GRAY,

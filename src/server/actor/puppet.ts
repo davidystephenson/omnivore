@@ -21,7 +21,9 @@ export class Puppet extends Actor {
       vertices: props.vertices,
       actor: this
     })
-    this.force = props.force
+    const mass = this.sculpture.body.getMass()
+    const force = Vec2.mul(props.force, mass)
+    this.force = force
     this.speed = props.speed
     this.invincibleTime = 0.1
     this.features.push(this.sculpture)

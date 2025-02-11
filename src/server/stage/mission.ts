@@ -9,6 +9,7 @@ export class Mission extends Walled {
         botChase: true,
         botFlee: true,
         charge: true,
+        damage: true,
         death: true,
         hungerGame: false,
         // meatY: false,
@@ -34,7 +35,17 @@ export class Mission extends Walled {
     this.spawner.setupSpawnPoints()
     // this.addBully({ position: Vec2(5, 5) })
 
-    // this.addBrick({ position: Vec2(15, 15), halfHeight: 1, halfWidth: 1 })
+    this.addBrick({ position: Vec2(15, -5), halfHeight: 5, halfWidth: 5 })
+    this.addPuppet({
+      position: Vec2(10, -10),
+      vertices: [
+        Vec2(-5, 5),
+        Vec2(5, 5),
+        Vec2(0, -5)
+      ],
+      force: Vec2(0, 0),
+      speed: 10
+    })
     // this.addFoodSquare({ position: Vec2(5, 5) })
     // this.addFoodSquare({ position: Vec2(0, -5) })
     // this.addFoodSquare({ position: Vec2(-5, -5) })
@@ -45,10 +56,10 @@ export class Mission extends Walled {
     // this.addBruteVictim({ position: Vec2(7, 7) })
     // this.addTrapper({ position: Vec2(5, 0) })
     // this.addSpeed({ position: Vec2(0, 5) })
-    // this.addTree({ position: Vec2(10, -10) })
+    this.addTree({ position: Vec2(10, -10) })
     // this.addScavenger({ position: Vec2(0, 0) })
     // this.addHunter({ position: Vec2(0, 0) })
-    this.addTrisolaran({ position: Vec2(10, 10) })
+    // this.addTrisolaran({ position: Vec2(10, 10) })
     this.saveLayout()
   }
 }

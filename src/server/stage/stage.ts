@@ -283,6 +283,7 @@ export class Stage {
     const position = { x: center.x, y: center.y }
     const radius = props.circle.getRadius()
     const color: Rgba = { alpha: 1, ...props.color }
+    this.log({ k: 'color', v: color })
     const debugCircle: DebugCircle = {
       position,
       radius,

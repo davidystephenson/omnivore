@@ -35,7 +35,6 @@ export class DressRehearsal extends Procedural {
 
     const minimum = Math.min(this.halfWidth, this.halfHeight)
     const half = minimum / 2
-    console.log('half', half)
     const negative = -half
 
     this.addTree({ position: Vec2(half, half) })

@@ -10,11 +10,12 @@ import { GREEN } from '../shared/color'
 // import { TestProduction } from './stage/testProduction'
 // import { Rehearsal } from './stage/rehearsal'
 // import { GrandRehearsal } from './stage/grandRehearsal'
-// import { DressRehearsal } from './stage/dressRehearsal'
 // import { PublicProduction } from './stage/publicProduction'
-import { PrivateProduction } from './stage/privateProduction'
+// import { DressRehearsal } from './stage/dressRehearsal'
+import { PublicProduction } from './stage/publicProduction'
+// import { PrivateProduction } from './stage/privateProduction'
 
-const stage = new PrivateProduction()
+const stage = new PublicProduction()
 
 io.on('connection', socket => {
   stage.debug({ vs: ['connection:', socket.id] })
@@ -38,8 +39,8 @@ io.on('connection', socket => {
       }
       if (controls.cancel) {
         stage.runner.paused = false
-        player.organism.membrane.combatDamage = 0
-        player.organism.membrane.hungerDamage = 0
+        // player.organism.membrane.combatDamage = 0
+        // player.organism.membrane.hungerDamage = 0
       }
     }
 

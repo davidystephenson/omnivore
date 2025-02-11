@@ -25,11 +25,10 @@ export default class Procedural extends Walled {
     halfWidth: number
   }) {
     super(props)
-    console.log('Procedural')
+    console.info('Initiating procedure')
 
     while (!this.isDone()) {
       const remainder = this.fails % Procedural.DEBUG
-      console.log('remainder', remainder)
       this.debugging = remainder === 0
       if (this.debugging) {
         const fill = this.getFill()
@@ -157,12 +156,12 @@ export default class Procedural extends Walled {
     const ySpread = props.rectangle.halfHeight + props.halfHeight + this.navigation.margin
     const blocked = xDist < xSpread && yDist < ySpread
     if (blocked && this.flags.procedural && this.debugging) {
-      console.log('blocking wall:')
-      console.log('x:', props.y)
-      console.log('y:', props.x)
-      console.log('halfWidth:', props.halfWidth)
-      console.log('halfHeight:', props.halfHeight)
-      console.log('margin:', this.navigation.margin)
+      this.debug({ v: 'blocking wall' })
+      this.debug({ k: 'x:', v: props.y })
+      this.debug({ k: 'y:', v: props.x })
+      this.debug({ k: 'halfWidth:', v: props.halfWidth })
+      this.debug({ k: 'halfHeight:', v: props.halfHeight })
+      this.debug({ k: 'margin:', v: this.navigation.margin })
     }
     return blocked
   }
@@ -200,7 +199,6 @@ export default class Procedural extends Walled {
 
   isFull (): boolean {
     const fill = this.getFill()
-    console.log('fill', fill)
     const full = fill > Procedural.FILL
     return full
   }
