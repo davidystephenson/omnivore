@@ -91,8 +91,8 @@ export class Server {
 
   getHttpServer (): https.Server | http.Server {
     if (this.config.secure) {
-      const keyPath = path.join(this.dirname, '../sis-key.pem')
-      const certPath = path.join(this.dirname, '../sis-cert.pem')
+      const keyPath = path.join(this.dirname, '../../sis-key.pem')
+      const certPath = path.join(this.dirname, '../../sis-cert.pem')
       const key = fs.readFileSync(keyPath)
       const cert = fs.readFileSync(certPath)
       const credentials = { key, cert }
