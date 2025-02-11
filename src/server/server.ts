@@ -82,11 +82,9 @@ export class Server {
   }
 
   setupApp (): void {
-    const staticPath = path.join(this.dirname, 'public')
+    const staticPath = path.join(this.dirname, '..', '..', 'dist')
     const staticMiddleware = express.static(staticPath)
     this.app.use(staticMiddleware)
-    const clientHtmlPath = path.join(this.dirname, 'public', 'client.html')
-    this.app.get('/', function (req, res) { res.sendFile(clientHtmlPath) })
   }
 
   getHttpServer (): https.Server | http.Server {
