@@ -9,7 +9,7 @@ import { HALF_SIGHT } from '../../shared/sight'
 let featureCount = 0
 
 export class Feature {
-  static MINIMUM_DAMAGE = 0.0001
+  static MINIMUM_DAMAGE = 0
   static DAMPING = 0.05
   actor: Actor
   body: Body
@@ -79,12 +79,44 @@ export class Feature {
     return this.sensor
   }
 
+  dealDamage (props: {
+    damage?: number
+    target: Feature
+  }): void {
+    this.actor.stage.flag({ f: 'damage', k: 'attacker', v: this.label })
+    this.actor.stage.flag({ f: 'damage', k: 'target', v: props.target.label })
+    const damageDealt = props.damage ?? this.getDamageDealt(props.target)
+    this.actor.stage.flag({ f: 'damage', k: 'damageDealt', v: damageDealt })
+    if (damageDealt < Feature.MINIMUM_DAMAGE) {
+      const message = `combatDamage < Feature.MINIMUM_DAMAGE: ${damageDealt}`
+      throw new Error(message)
+    }
+    const oldHealth = props.target.getHealth()
+    if (oldHealth > 1) {
+      const message = `oldHealth > 1: ${oldHealth}`
+      throw new Error(message)
+    }
+    props.target.combatDamage += damageDealt
+    props.target.health = props.target.getHealth()
+    if (props.target.health > oldHealth - Feature.MINIMUM_DAMAGE + 0.001) {
+      const message = `Invalid target.health: ${props.target.health} > ${oldHealth} - ${Feature.MINIMUM_DAMAGE}`
+      throw new Error(message)
+    }
+    if (props.target.health <= 0) {
+      props.target.succumb({ killer: this })
+    }
+  }
+
   destroy (): void {
     this.actor.stage.destructionQueue.push(this.body)
   }
 
-  getCombatDamage (target: Feature): number {
-    const ratio = this.body.getMass() / target.body.getMass()
+  getDamageDealt (target: Feature): number {
+    const myMass = this.body.getMass()
+    this.actor.stage.flag({ f: 'damage', k: 'myMass', v: 'myMass' })
+    const targetMass = target.body.getMass()
+    this.actor.stage.flag({ f: 'damage', k: 'targetMass', v: targetMass })
+    const ratio = myMass / targetMass
     const factor = 5
     const combatDamage = 0.1 * Math.pow(ratio, factor)
     if (combatDamage < Feature.MINIMUM_DAMAGE) {
@@ -174,5 +206,11 @@ export class Feature {
     this.health = this.getHealth()
     this.position = this.body.getPosition()
     this.handleContacts()
+  }
+
+  succumb (props: {
+    killer: Feature
+  }): void {
+    this.actor.destroy()
   }
 }

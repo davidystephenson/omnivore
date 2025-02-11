@@ -88,6 +88,7 @@ export class Renderer {
     this.debugCircles.forEach(debugCircle => {
       this.followCamera()
       this.context.lineWidth = 0.05
+      console.log('debugCircle.color', debugCircle.color)
       this.context.fillStyle = `rgba(${debugCircle.color.red}, ${debugCircle.color.green}, ${debugCircle.color.blue}, ${debugCircle.color.alpha})`
       this.context.beginPath()
       this.context.arc(debugCircle.position.x, debugCircle.position.y, debugCircle.radius, 0, 2 * Math.PI)

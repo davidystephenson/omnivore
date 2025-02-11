@@ -222,7 +222,7 @@ export class Navigation {
     this.createWaypoints()
     this.stage.debug({ v: 'Setting up navAreas...' })
     this.navAreas = this.getNavAreas()
-    console.log(`${this.navAreas.length} navAreas`)
+    this.stage.debug({ v: `Set up ${this.navAreas.length} navAreas.` })
     this.stage.debug({ v: 'Setting up neighbors...' })
     this.setupNeighbors()
     this.stage.debug({ v: 'Calculating distances...' })

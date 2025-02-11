@@ -13,7 +13,7 @@ export class TestProduction extends Production {
         death: true,
         hungerGame: false,
         performance: false,
-        respawn: true,
+        spawn: true,
         visionRangeGame: false,
         controlLines: true
       })

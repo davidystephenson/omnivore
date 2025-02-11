@@ -7,32 +7,27 @@ import { Crate } from './crate'
 
 export class Sculpture extends Prop {
   constructor (props: {
-    position: Vec2
     actor: Actor
     color?: Rgb
+    label?: string
+    position: Vec2
     vertices: Vec2[]
   }) {
+    const label = props.label ?? 'sculpture'
     super({
       position: props.position,
       actor: props.actor,
       shape: new PolygonShape(props.vertices),
       color: props.color,
-      label: 'sculpture'
+      label
     })
   }
 
   handleContact (props: {
     target: Feature
   }): void {
-    super.handleContact({ target: props.target })
-    if (!(props.target instanceof Crate)) {
-      return
-    }
-    const combatDamage = this.getCombatDamage(props.target)
-    props.target.combatDamage += combatDamage
-    props.target.health = props.target.getHealth()
-    if (props.target.health <= 0) {
-      props.target.actor.destroy()
+    if (props.target instanceof Crate) {
+      this.dealDamage({ target: props.target })
     }
   }
 }

@@ -6,8 +6,9 @@ export class PrivateProduction extends Production {
   constructor () {
     super({
       flags: new Flags({
-        performance: true,
-        timings: true
+        performance: false,
+        spawn: true,
+        timings: false
       })
     })
     this.addTree({ position: Vec2(-10, -10) })

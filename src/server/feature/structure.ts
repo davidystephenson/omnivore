@@ -1,15 +1,18 @@
 import { Vec2, Box } from 'planck'
-import { BLUE } from '../../shared/color'
-import { Actor } from '../actor/actor'
+import { COLOR } from '../../shared/color'
 import { Feature } from './feature'
+import { Wall } from '../actor/wall'
+import { Puppet } from '../actor/puppet'
 
 export class Structure extends Feature {
+  wall: Wall
   constructor (props: {
     position: Vec2
-    actor: Actor
+    actor: Wall
     halfHeight: number
     halfWidth: number
   }) {
+    const color = props.actor.outer ? COLOR.DARK_BLUE : COLOR.BLUE
     super({
       bodyDef: {
         type: 'static',
@@ -23,7 +26,15 @@ export class Structure extends Feature {
       },
       label: 'structure',
       actor: props.actor,
-      color: BLUE
+      color
     })
+    this.wall = props.actor
+  }
+
+  handleContact (props: { target: Feature }): void {
+    super.handleContact({ target: props.target })
+    if (this.wall.outer && props.target.actor instanceof Puppet) {
+      this.dealDamage({ damage: 0.01, target: props.target })
+    }
   }
 }

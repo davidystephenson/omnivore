@@ -2,12 +2,12 @@ import { Vec2 } from 'planck'
 import { Sculpture } from '../feature/sculpture'
 import { Stage } from '../stage/stage'
 import { Actor } from './actor'
-import { GREEN } from '../../shared/color'
+import { Serving } from '../feature/serving'
 
 export class Food extends Actor {
   static NUTRITION = 0.2
   nutrition: number
-  sculpture: Sculpture
+  serving: Sculpture
 
   constructor (props: {
     stage: Stage
@@ -18,14 +18,13 @@ export class Food extends Actor {
     super({ stage: props.stage, label: 'food' })
     const nutrition = props.nutrition ?? Food.NUTRITION
     this.nutrition = Math.min(nutrition, 1)
-    this.sculpture = new Sculpture({
+    this.serving = new Serving({
       position: props.position,
       vertices: props.vertices,
-      color: GREEN,
       actor: this
     })
-    this.sculpture.combatDamage = 1 - this.nutrition
-    this.features.push(this.sculpture)
+    this.serving.combatDamage = 1 - this.nutrition
+    this.features.push(this.serving)
     this.stage.food.push(this)
   }
 }

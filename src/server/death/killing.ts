@@ -5,11 +5,12 @@ import { directionFromTo, getCompass, whichMax } from '../math'
 import { Stage } from '../stage/stage'
 import { Death } from './death'
 import { Puppet } from '../actor/puppet'
+import { Feature } from '../feature/feature'
 
 export class Killing extends Death {
-  killer: Membrane
+  killer: Feature
 
-  constructor (props: { killer: Membrane, stage: Stage, victim: Membrane }) {
+  constructor (props: { killer: Feature, stage: Stage, victim: Membrane }) {
     super({ stage: props.stage, victim: props.victim })
     this.killer = props.killer
   }
@@ -61,7 +62,7 @@ export class Killing extends Death {
         const killerSpeed = this.killer.body.getLinearVelocity().length()
         const victimSpeed = this.victim.body.getLinearVelocity().length()
         const victimPosition = this.victim.body.getPosition()
-        const power = Math.max(killerSpeed, victimSpeed) * 5
+        const power = Math.max(killerSpeed, victimSpeed) * 25
         const direction = directionFromTo(killerPosition, victimPosition)
         const force = Vec2.mul(power, direction)
         const speed = Math.min(killerSpeed, victimSpeed)
