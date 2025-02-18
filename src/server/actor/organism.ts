@@ -27,8 +27,8 @@ export interface Obituary extends OrganismSpawn {
 }
 
 export class Organism extends Actor {
-  static GENETIC_FORCE_SCALE = 1
-  static MINIMUM_FORCE = 10
+  static GENETIC_FORCE_SCALE = 0.5
+  static MINIMUM_FORCE = 20
   controlColor = LIME
   chasePoint: Vec2 | undefined
   chaseRadius = 0.2
