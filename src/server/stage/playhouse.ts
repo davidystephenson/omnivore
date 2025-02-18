@@ -164,6 +164,10 @@ export class Playhouse extends Stage {
     const negative = -half
 
     this.addTree({ position: Vec2(half, half) })
+    this.addTree({ position: Vec2(0, negative) })
+    this.addTree({ position: Vec2(0, half) })
+    this.addTree({ position: Vec2(half, 0) })
+    this.addTree({ position: Vec2(negative, 0) })
     this.addTree({ position: Vec2(negative, half) })
     this.addTree({ position: Vec2(half, negative) })
     this.addTree({ position: Vec2(negative, negative) })
