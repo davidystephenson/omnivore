@@ -205,7 +205,7 @@ export class Runner {
         this.debugTiming({ key: 'chase' })
         this.debugTiming({ key: 'wander' })
         this.debugTiming({ key: 'flee' })
-        this.debugTiming({ key: 'isOpen' })
+        this.debugTiming({ key: 'navigate' })
         this.debugTiming({ key: 'afterIsOpen' })
         this.debugTiming({ key: 'distances' })
         this.debugTiming({ key: 'neighborToEnd' })

@@ -275,6 +275,7 @@ export class Organism extends Actor {
     if (path.length < 2) {
       throw new Error('Path is too short')
     }
+    console.log('path.length', path.length)
     const circle = new CircleShape(props.target, 0.1)
     this.stage.debugCircle({ circle, color: RED })
     range(0, path.length - 2).forEach(index => {

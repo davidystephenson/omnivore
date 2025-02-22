@@ -96,6 +96,10 @@ export function whichMin (array: number[]): number {
   return whichMax(negArray)
 }
 
+export function clamp (a: number, b: number, x: number): number {
+  return Math.max(a, Math.min(x, b))
+}
+
 export function choose<Element> (array: Element[]): Element {
   return array[Math.floor(Math.random() * array.length)]
 }

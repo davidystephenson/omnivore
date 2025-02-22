@@ -35,7 +35,7 @@ export class Mission extends Walled {
 
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
-    this.addBully({ position: Vec2(8, 8) })
+    this.addBrute({ position: Vec2(8, 8) })
 
     // this.addBrick({ position: Vec2(15, -5), halfHeight: 5, halfWidth: 5 })
     // this.addPuppet({

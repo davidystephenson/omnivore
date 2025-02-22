@@ -19,7 +19,6 @@ export interface Timings {
   charge?: number
   chase?: number
   wander?: number
-  isOpen?: number
   afterIsOpen?: number
   distances?: number
   startToNeighbor?: number
