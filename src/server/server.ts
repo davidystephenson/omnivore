@@ -11,7 +11,7 @@ import { GREEN } from '../shared/color'
 // import { GrandRehearsal } from './stage/grandRehearsal'
 // import { PublicProduction } from './stage/publicProduction'
 // import { DressRehearsal } from './stage/dressRehearsal'
-import { PublicProduction } from './stage/publicProduction'
+// import { PublicProduction } from './stage/publicProduction'
 // import { PrivateProduction } from './stage/privateProduction'
 
 import express from 'express'
@@ -22,6 +22,7 @@ import path from 'path'
 import * as SocketIo from 'socket.io'
 import { Config } from './config'
 import { Playhouse } from './stage/playhouse'
+import { Mission } from './stage/mission'
 
 export class Server {
   seed = Math.random().toString()
@@ -37,7 +38,7 @@ export class Server {
     this.setupApp()
     this.httpServer = this.getHttpServer()
     this.io = new SocketIo.Server(this.httpServer)
-    this.playhouse = new PublicProduction()
+    this.playhouse = new Mission() // new PublicProduction()
     void this.start()
   }
 
