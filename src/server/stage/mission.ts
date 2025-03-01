@@ -8,6 +8,7 @@ export class Mission extends Walled {
       flags: new Flags({
         botChase: true,
         botFlee: true,
+        botPath: true,
         charge: true,
         damage: true,
         death: true,
