@@ -159,18 +159,13 @@ export class Navigation {
     const neighbors = waypointArray.filter(otherWaypoint => {
       const distance = Vec2.distance(position, otherWaypoint.position)
       if (distance === 0) return false
-      if (distance > 5) return false
-      const open1 = this.isOpen({
+      // if (distance > 5) return false
+      const open = this.isOpen({
         fromPosition: position,
         toPosition: otherWaypoint.position,
         radius
       })
-      const open2 = this.isOpen({
-        fromPosition: otherWaypoint.position,
-        toPosition: position,
-        radius
-      })
-      return open1 && open2
+      return open
     })
     return neighbors
   }
@@ -181,28 +176,19 @@ export class Navigation {
     radius: number
     otherRadius?: number
   }): Vec2[] {
-    const bigRadii = this.radii.filter(r => r >= props.radius)
-    const bigRadius = Math.min(...bigRadii)
-    const i0 = Math.round(clamp(0, this.xCount, (props.a.x + this.stage.halfWidth) / this.xStep))
-    const j0 = Math.round(clamp(0, this.yCount, (props.a.y + this.stage.halfHeight) / this.yStep))
-    const startWaypoint = this.waypointMatrix[i0][j0]
-    const i1 = Math.round(clamp(0, this.xCount, (props.a.x + this.stage.halfWidth) / this.xStep))
-    const j1 = Math.round(clamp(0, this.yCount, (props.a.y + this.stage.halfHeight) / this.yStep))
-    const endWaypoint = this.waypointMatrix[i1][j1]
-    const nextWaypoints = startWaypoint.nextWaypoints.get(bigRadius)
-    if (nextWaypoints == null) {
-      throw new Error('Missing nextWaypoints')
-    }
-    let nextWaypoint = nextWaypoints[endWaypoint.id]
-    const path = [startWaypoint.position, nextWaypoint.position]
-    while (nextWaypoint.id !== endWaypoint.id) {
-      const nextWaypoints = nextWaypoint.nextWaypoints.get(bigRadius)
-      if (nextWaypoints == null) {
-        throw new Error('Missing nextWaypoints')
-      }
-      nextWaypoint = nextWaypoints[endWaypoint.id]
-      path.push(nextWaypoint.position)
-    }
+    const a = props.a
+    const b = props.b
+    const radius = props.radius
+    const otherRadius = props.otherRadius
+    let nextPoint = this.navigate(a, b, radius, otherRadius)
+    let nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
+    const path = [a, nextPosition]
+    if (nextPoint instanceof Vec2) return path
+    range(1, 7).forEach(() => {
+      nextPoint = this.navigate(nextPosition, b, radius, otherRadius)
+      nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
+      path.push(nextPosition)
+    })
     return path
   }
 
@@ -266,21 +252,43 @@ export class Navigation {
     return allOpen
   }
 
-  navigate (start: Vec2, end: Vec2, radius: number, otherRadius?: number): Waypoint {
+  getNearWaypoint (position: Vec2): Waypoint {
+    const i0 = Math.round(clamp(0, this.xCount, (position.x + this.stage.halfWidth) / this.xStep))
+    const j0 = Math.round(clamp(0, this.yCount, (position.y + this.stage.halfHeight) / this.yStep))
+    return this.waypointMatrix[i0][j0]
+  }
+
+  getPathDistance (start: Vec2, end: Vec2, radius: number): number {
+    const bigRadii = this.radii.filter(r => r >= radius)
+    const bigRadius = Math.min(...bigRadii)
+    const startWaypoint = this.getNearWaypoint(start)
+    const endWaypoint = this.getNearWaypoint(end)
+    const pathDistances = startWaypoint.pathDistances.get(bigRadius)
+    if (pathDistances == null) {
+      throw new Error('Missing path distances')
+    }
+    return pathDistances[endWaypoint.id]
+  }
+
+  navigate (start: Vec2, end: Vec2, radius: number, otherRadius?: number): Waypoint | Vec2 {
+    const open = this.isOpen({
+      fromPosition: start,
+      toPosition: end,
+      radius,
+      otherRadius
+    })
+    if (open) return end
     const bigRadii = this.radii.filter(r => r >= radius)
     const bigRadius = Math.min(...bigRadii)
     const navigateStart = performance.now()
-    const i0 = Math.round(clamp(0, this.xCount, (start.x + this.stage.halfWidth) / this.xStep))
-    const j0 = Math.round(clamp(0, this.yCount, (start.y + this.stage.halfHeight) / this.yStep))
-    const startWaypoint = this.waypointMatrix[i0][j0]
-    const i1 = Math.round(clamp(0, this.xCount, (end.x + this.stage.halfWidth) / this.xStep))
-    const j1 = Math.round(clamp(0, this.yCount, (end.y + this.stage.halfHeight) / this.yStep))
-    const endWaypoint = this.waypointMatrix[i1][j1]
+    const startWaypoint = this.getNearWaypoint(start)
+    const endWaypoint = this.getNearWaypoint(end)
     const keys = [...startWaypoint.nextWaypoints.keys()]
     const nextWaypoints = startWaypoint.nextWaypoints.get(bigRadius)
     if (nextWaypoints == null) {
       console.log('runtime')
       console.log('startWaypoint.id', startWaypoint.id)
+      console.log('endWaypoint.id', endWaypoint.id)
       console.log('startWaypoint.distances', startWaypoint.distances.length)
       console.log({ k: 'bigRadius', v: `${bigRadius}` })
       console.log({ k: 'keys', v: keys })

@@ -7,6 +7,7 @@ export class Layout {
   stage: Stage
   radii: number[]
   wallDefs: WallDef[]
+  waypointMatrix: number[][]
   waypointDatas: WaypointData[]
   navAreaDefs: NavAreaDef[]
   halfHeight: number
@@ -17,6 +18,7 @@ export class Layout {
     this.stage = stage
     this.wallDefs = stage.walls.map(wall => this.getWallDef(wall))
     const waypointArray = [...stage.navigation.waypoints.values()]
+    this.waypointMatrix = this.getWaypointMatrix()
     this.halfWidth = stage.halfWidth
     this.halfHeight = stage.halfHeight
     this.waypointDatas = waypointArray.map(waypoint => this.getWaypointData(waypoint))
@@ -28,6 +30,7 @@ export class Layout {
     return {
       wallDefs: this.wallDefs,
       waypointDatas: this.waypointDatas,
+      waypointMatrix: this.waypointMatrix,
       navAreaDefs: this.navAreaDefs,
       halfHeight: this.halfHeight,
       halfWidth: this.halfWidth,
@@ -45,6 +48,7 @@ export class Layout {
   }
 
   getWaypointData (waypoint: Waypoint): WaypointData {
+    // ADD THE nextWaypoints variable for each waypoint
     const radii = [...waypoint.neighbors.keys()]
     const neighbors: Record<number, number[]> = {}
     radii.forEach(radius => {
@@ -63,10 +67,25 @@ export class Layout {
       id: waypoint.id,
       radius: waypoint.radius,
       category: waypoint.category,
+      distances: waypoint.distances,
       radii,
       neighbors,
       pathDistances
     }
+  }
+
+  getWaypointMatrix (): number[][] {
+    const is = [...this.stage.navigation.waypointMatrix.keys()]
+    const js = [...this.stage.navigation.waypointMatrix[0].keys()]
+    const waypointMatrix: number[][] = []
+    for (const i of is) {
+      waypointMatrix[i] = []
+      for (const j of js) {
+        const waypoint = this.stage.navigation.waypointMatrix[i][j]
+        waypointMatrix[i][j] = waypoint.id
+      }
+    }
+    return waypointMatrix
   }
 
   getNavAreaDef (navArea: NavArea): NavAreaDef {
@@ -85,6 +104,7 @@ interface WaypointData {
   radius: number
   category: string
   radii: number[]
+  distances: number[]
   neighbors: Record<number, number[]>
   pathDistances: Record<number, number[]>
 }
@@ -92,6 +112,7 @@ interface WaypointData {
 export interface LayoutData {
   wallDefs: WallDef[]
   waypointDatas: WaypointData[]
+  waypointMatrix: number[][]
   navAreaDefs: NavAreaDef[]
   halfHeight: number
   halfWidth: number

@@ -191,10 +191,9 @@ export class Organism extends Actor {
     }
     const myPosition = this.membrane.body.getPosition()
     const nextPoint = this.stage.navigation.navigate(myPosition, props.target, this.membrane.radius, this.chaseRadius)
-    const nextPointPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
     if (this.stage.flags.botChase) {
       this.stage.debugCircle({
-        circle: new CircleShape(nextPointPosition, 0.3),
+        circle: new CircleShape(props.target, 0.3),
         color: COLOR.ORANGE
       })
     }
@@ -275,7 +274,6 @@ export class Organism extends Actor {
     if (path.length < 2) {
       throw new Error('Path is too short')
     }
-    console.log('path.length', path.length)
     const circle = new CircleShape(props.target, 0.1)
     this.stage.debugCircle({ circle, color: RED })
     range(0, path.length - 2).forEach(index => {
@@ -731,6 +729,11 @@ export class Organism extends Actor {
       })
       const circle = new CircleShape(end, 0.2)
       this.stage.debugCircle({ circle, color: RED })
+    }
+    const pathDistance = this.stage.navigation.getPathDistance(this.membrane.position, end, this.membrane.radius)
+    const toLong = 4 * Math.max(this.stage.halfWidth, this.stage.halfHeight)
+    if (pathDistance > toLong) {
+      throw new Error('Path is too long')
     }
     const nextPoint = this.stage.navigation.navigate(this.membrane.position, end, this.membrane.radius)
     const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint

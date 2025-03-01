@@ -64,12 +64,6 @@ export class Stage {
     this.collider = new Collider(this)
   }
 
-  saveLayout (): void {
-    const layout = new Layout(this)
-    const layoutData = layout.getLayoutData()
-    fs.writeFileSync('layout.json', JSON.stringify(layoutData))
-  }
-
   addBrick (props: {
     angle?: number
     halfHeight: number
@@ -405,6 +399,12 @@ export class Stage {
         this.families.set(label, [actor])
       }
     })
+  }
+
+  saveLayout (): void {
+    const layout = new Layout(this)
+    const layoutData = layout.getLayoutData()
+    fs.writeFileSync('layout.json', JSON.stringify(layoutData))
   }
 
   time (props: {

@@ -34,11 +34,25 @@ export class Production extends Playhouse {
         category: waypointData.category,
         id: waypointData.id
       })
+      this.navigation.waypoints.set(waypoint.id, waypoint)
       for (const radiusString in waypointData.pathDistances) {
         const radius = Number(radiusString)
         waypoint.pathDistances.set(radius, waypointData.pathDistances[radius])
       }
     })
+    const is = [...layoutData.waypointMatrix.keys()]
+    const js = [...layoutData.waypointMatrix[0].keys()]
+    for (const i of is) {
+      this.navigation.waypointMatrix[i] = []
+      for (const j of js) {
+        const id = layoutData.waypointMatrix[i][j]
+        const waypoint = this.navigation.waypoints.get(id)
+        if (waypoint == null) {
+          throw new Error('missing waypoint')
+        }
+        this.navigation.waypointMatrix[i][j] = waypoint
+      }
+    }
     this.navigation.radii.forEach(radius => {
       const waypointArray = [...this.navigation.waypoints.values()]
       const validWaypoints = waypointArray.filter(waypoint => waypoint.radius === radius)
