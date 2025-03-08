@@ -34,11 +34,30 @@ export class Production extends Playhouse {
         category: waypointData.category,
         id: waypointData.id
       })
-      this.navigation.waypoints.set(waypoint.id, waypoint)
+      this.navigation.waypoints[waypoint.id] = waypoint
       for (const radiusString in waypointData.pathDistances) {
         const radius = Number(radiusString)
-        waypoint.pathDistances.set(radius, waypointData.pathDistances[radius])
+        waypoint.pathDistances[radius] = waypointData.pathDistances[radius]
       }
+    })
+    layoutData.waypointDatas.forEach(waypointData => {
+      console.log('waypointData', waypointData.id, waypointData == null)
+    })
+    layoutData.waypointDatas.forEach(waypointData => {
+      const waypoint = this.navigation.waypoints[waypointData.id]
+      if (waypoint == null) throw new Error(`Missing waypoint ${waypointData.id}`)
+      console.log(`populate nextWaypoints ${waypoint.id}`)
+      if (waypointData == null) return
+      layoutData.radii.forEach(radius => {
+        const waypoints: Record<number, Waypoint> = {}
+        const ids = Object.keys(waypointData.nextWaypoints[radius]).map(s => Number(s))
+        ids.forEach(id => {
+          const waypoint = this.navigation.waypoints[id]
+          if (waypoint == null) throw new Error(`Missing waypoint ${radius} ${id}`)
+          waypoints[id] = waypoint
+        })
+        waypoint.nextWaypoints[radius] = waypoints
+      })
     })
     const is = [...layoutData.waypointMatrix.keys()]
     const js = [...layoutData.waypointMatrix[0].keys()]
@@ -46,18 +65,13 @@ export class Production extends Playhouse {
       this.navigation.waypointMatrix[i] = []
       for (const j of js) {
         const id = layoutData.waypointMatrix[i][j]
-        const waypoint = this.navigation.waypoints.get(id)
+        const waypoint = this.navigation.waypoints[id]
         if (waypoint == null) {
           throw new Error('missing waypoint')
         }
         this.navigation.waypointMatrix[i][j] = waypoint
       }
     }
-    this.navigation.radii.forEach(radius => {
-      const waypointArray = [...this.navigation.waypoints.values()]
-      const validWaypoints = waypointArray.filter(waypoint => waypoint.radius === radius)
-      this.navigation.radiiWaypoints.set(radius, validWaypoints)
-    })
     this.navigation.navAreas = layoutData.navAreaDefs.map(navAreaDef => {
       return new NavArea({ stage: this, ...navAreaDef })
     })

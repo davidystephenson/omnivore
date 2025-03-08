@@ -13,9 +13,9 @@ export class Waypoint {
   position: Vec2
   id: number
   category: string
-  neighbors = new Map<number, Waypoint[]>()
-  nextWaypoints = new Map<number, Waypoint[]>()
-  pathDistances = new Map<number, number[]>()
+  neighbors: Record<number, Record<number, Waypoint>> = {}
+  pathDistances: Record<number, Record<number, number>> = {}
+  nextWaypoints: Record<number, Record<number, Waypoint>> = {}
   distances: number[] = []
   radius: number
 

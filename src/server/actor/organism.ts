@@ -80,7 +80,8 @@ export class Organism extends Actor {
     const validRadius = largerRadii[indexOfMinimumValue]
     if (validRadius == null) throw new Error('No valid radius found')
     this.navigationRadius = validRadius
-    this.stage.navigation.waypoints.forEach(waypoint => {
+    const waypointArray = Object.values(this.stage.navigation.waypoints)
+    waypointArray.forEach(waypoint => {
       const isGrid = waypoint.category === 'grid'
       const isSmallRadius = waypoint.radius === validRadius
       if (isGrid || isSmallRadius) {

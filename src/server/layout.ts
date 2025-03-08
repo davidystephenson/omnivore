@@ -17,13 +17,15 @@ export class Layout {
     if (stage == null) throw new Error('Layout: stage is null')
     this.stage = stage
     this.wallDefs = stage.walls.map(wall => this.getWallDef(wall))
-    const waypointArray = [...stage.navigation.waypoints.values()]
+    const waypointArray = Object.values(stage.navigation.waypoints)
     this.waypointMatrix = this.getWaypointMatrix()
     this.halfWidth = stage.halfWidth
     this.halfHeight = stage.halfHeight
     this.waypointDatas = waypointArray.map(waypoint => this.getWaypointData(waypoint))
     this.navAreaDefs = stage.navigation.navAreas.map(navArea => this.getNavAreaDef(navArea))
     this.radii = stage.navigation.radii
+    console.log('radii', this.radii)
+    console.log('this.waypointDatas[311]', this.waypointDatas[311].id)
   }
 
   getLayoutData (): LayoutData {
@@ -48,19 +50,25 @@ export class Layout {
   }
 
   getWaypointData (waypoint: Waypoint): WaypointData {
-    // ADD THE nextWaypoints variable for each waypoint
-    const radii = [...waypoint.neighbors.keys()]
+    const radii = Object.keys(waypoint.neighbors).map(r => Number(r))
     const neighbors: Record<number, number[]> = {}
     radii.forEach(radius => {
-      const waypointArray = waypoint.neighbors.get(radius)
+      const waypointArray = Object.values(waypoint.neighbors[radius])
       if (waypointArray == null) throw new Error(`Missing neighbors for radius ${radius}`)
       neighbors[radius] = waypointArray.map(waypoint => waypoint.id)
     })
-    const pathDistances: Record<number, number[]> = {}
+    const pathDistances: Record<number, Record<number, number>> = {}
     radii.forEach(radius => {
-      const distanceArray = waypoint.pathDistances.get(radius)
-      if (distanceArray == null) throw new Error(`Missing pathDistances for radius ${radius}`)
+      const distanceArray = waypoint.pathDistances[radius]
       pathDistances[radius] = distanceArray
+    })
+    const nextWaypoints: Record<number, Record<number, number>> = {}
+    radii.forEach(radius => {
+      const radiusNextWaypoints = waypoint.nextWaypoints[radius]
+      const targetIds = Object.keys(radiusNextWaypoints).map(s => Number(s))
+      const radiusNextWaypointIds: Record<number, number> = {}
+      targetIds.forEach(targetId => { radiusNextWaypointIds[targetId] = radiusNextWaypoints[targetId].id })
+      nextWaypoints[radius] = radiusNextWaypointIds
     })
     return {
       position: { x: waypoint.position.x, y: waypoint.position.y },
@@ -68,6 +76,7 @@ export class Layout {
       radius: waypoint.radius,
       category: waypoint.category,
       distances: waypoint.distances,
+      nextWaypoints,
       radii,
       neighbors,
       pathDistances
@@ -105,8 +114,9 @@ interface WaypointData {
   category: string
   radii: number[]
   distances: number[]
-  neighbors: Record<number, number[]>
-  pathDistances: Record<number, number[]>
+  neighbors: Record<number, Record<number, number>>
+  nextWaypoints: Record<number, Record<number, number>>
+  pathDistances: Record<number, Record<number, number>>
 }
 
 export interface LayoutData {
