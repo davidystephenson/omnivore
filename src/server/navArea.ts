@@ -19,7 +19,8 @@ export class NavArea {
   } & NavAreaDef) {
     this.stage = props.stage
     this.aabb = new AABB(props.aabb.lowerBound, props.aabb.upperBound)
-    this.stage.navigation.waypoints.forEach(waypoint => {
+    const waypointArray = Object.values(this.stage.navigation.waypoints)
+    waypointArray.forEach(waypoint => {
       if (waypoint.radius === this.stage.navigation.bigRadius) return
       if (this.testPoint(waypoint.position)) this.waypoints.push(waypoint)
     })

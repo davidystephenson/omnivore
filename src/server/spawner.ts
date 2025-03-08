@@ -90,11 +90,11 @@ export class Spawner {
 
   setupSpawnPoints (): void {
     if (this.stage.flags.waypointSpawnpointsGame) {
-      const waypoints = [...this.stage.navigation.waypoints.values()]
-      if (waypoints == null) {
+      const waypointArray = Object.values(this.stage.navigation.waypoints)
+      if (waypointArray == null) {
         throw new Error('There are no waypoints')
       }
-      this.spawnPoints = waypoints.map(waypoint => {
+      this.spawnPoints = waypointArray.map(waypoint => {
         return new Spawnpoint(this, waypoint.position)
       })
     } else {
