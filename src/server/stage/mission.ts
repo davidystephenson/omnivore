@@ -29,14 +29,24 @@ export class Mission extends Walled {
       halfWidth: 20
     })
     this.addInnerWall({
-      halfWidth: 6,
-      halfHeight: 6,
-      position: Vec2(0, 0)
+      halfWidth: 3,
+      halfHeight: 15,
+      position: Vec2(5, 5)
+    })
+    this.addInnerWall({
+      halfWidth: 3,
+      halfHeight: 10,
+      position: Vec2(-10, 3)
+    })
+    this.addInnerWall({
+      halfWidth: 8,
+      halfHeight: 3,
+      position: Vec2(-4, -6)
     })
 
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
-    this.addBrute({ position: Vec2(8, 8) })
+    // this.addBrute({ position: Vec2(8, 8) })
 
     // this.addBrick({ position: Vec2(15, -5), halfHeight: 5, halfWidth: 5 })
     // this.addPuppet({
@@ -63,6 +73,6 @@ export class Mission extends Walled {
     // this.addScavenger({ position: Vec2(0, 0) })
     // this.addHunter({ position: Vec2(0, 0) })
     // this.addTrisolaran({ position: Vec2(10, 10) })
-    this.saveLayout()
+    // this.saveLayout()
   }
 }

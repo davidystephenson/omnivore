@@ -45,8 +45,8 @@ export class Navigation {
     this.waypointMatrix = range(0, this.xCount).map(i => [])
     range(0, this.xCount).forEach(i => {
       range(0, this.yCount).forEach(j => {
-        const x = i * this.xStep - this.stage.halfWidth
-        const y = j * this.yStep - this.stage.halfHeight
+        const x = i * this.xStep - this.stage.halfWidth + 0.0001 * (Math.random() - 0.5)
+        const y = j * this.yStep - this.stage.halfHeight + 0.0001 * (Math.random() - 0.5)
         const keys = Object.keys(this.waypoints).map(s => Number(s))
         const id = Math.max(0, ...keys) + 1
         const waypoint = new Waypoint({
@@ -174,7 +174,7 @@ export class Navigation {
     let nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
     const path = [a, nextPosition]
     if (nextPoint instanceof Vec2) return path
-    range(1, 7).forEach(() => {
+    range(1, 20).forEach(() => {
       nextPoint = this.navigate(nextPosition, b, radius, otherRadius)
       nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
       path.push(nextPosition)
@@ -316,9 +316,10 @@ export class Navigation {
     })
     this.radii.forEach(radius => {
       // Initialize distance array for each waypoint for this radius
-      const infinities: Record<number, number> = {}
-      waypointArray.forEach(waypoint => { infinities[waypoint.id] = Infinity })
+      console.log('radius', radius)
       waypointArray.forEach((waypoint, index) => {
+        const infinities: Record<number, number> = {}
+        waypointArray.forEach(waypoint => { infinities[waypoint.id] = Infinity })
         waypoint.pathDistances[radius] = infinities
         waypoint.nextWaypoints[radius] = {}
       })
@@ -326,7 +327,7 @@ export class Navigation {
       this.stage.debug({ v: `Pathing waypoints for ${radius}...` })
       let pathDivisor = 1
       let pathNextDivisor = 100
-      const maxPathSize = 5
+      const maxPathSize = 6
       const pathLengths = range(1, maxPathSize)
       pathLengths.forEach(pathLength => {
         const remainder = pathLength % pathDivisor
@@ -339,9 +340,9 @@ export class Navigation {
           pathNextDivisor *= 10
         }
         const maxId = Math.max(...Object.keys(this.waypoints).map(s => Number(s)))
-        waypointArray.forEach((waypoint, waypointId) => {
-          if (waypointId % 100 === 0) {
-            this.stage.debug({ v: `Start Waypoint ${waypointId}/${maxId}` })
+        waypointArray.forEach(waypoint => {
+          if (waypoint.id % 100 === 0) {
+            this.stage.debug({ v: `Start Waypoint ${waypoint.id}/${maxId}` })
           }
           const pathDistances = waypoint.pathDistances[radius]
           if (pathDistances == null) throw new Error('Missing distances')
@@ -371,6 +372,7 @@ export class Navigation {
         })
       })
       this.stage.debug({ v: 'Calculate nextWaypoints' })
+      // NOTE: Check for incorrect next waypoints. Look for loops. Save the results.
       waypointArray.forEach(waypoint => {
         const nextWaypoints = waypoint.nextWaypoints[radius]
         if (nextWaypoints == null) {

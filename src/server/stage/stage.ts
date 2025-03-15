@@ -404,7 +404,6 @@ export class Stage {
   saveLayout (): void {
     const layout = new Layout(this)
     const layoutData = layout.getLayoutData()
-    console.log('layoutData.waypointDatas[0].nextWaypoints', layoutData.waypointDatas[0].nextWaypoints)
     const string = JSON.stringify(layoutData)
     fs.writeFileSync('layout.json', string)
   }

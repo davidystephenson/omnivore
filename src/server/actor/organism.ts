@@ -186,16 +186,28 @@ export class Organism extends Actor {
     debug?: boolean
     target: Vec2
   }): Rgb {
+    this.stage.log({ v: 'chase' })
     const chaseStart = performance.now()
     if (props.debug === true) {
       this.debugPath(props)
     }
     const myPosition = this.membrane.body.getPosition()
+    const nearWaypointEnd = this.stage.navigation.getNearWaypoint(props.target)
+    const nearWaypointStart = this.stage.navigation.getNearWaypoint(myPosition)
     const nextPoint = this.stage.navigation.navigate(myPosition, props.target, this.membrane.radius, this.chaseRadius)
+    this.stage.log({ v: `start: ${nearWaypointStart.id}, end: ${nearWaypointEnd.id}` })
     if (this.stage.flags.botChase) {
       this.stage.debugCircle({
         circle: new CircleShape(props.target, 0.3),
         color: COLOR.ORANGE
+      })
+      this.stage.debugCircle({
+        circle: new CircleShape(nearWaypointEnd.position, 0.3),
+        color: COLOR.MAGENTA
+      })
+      this.stage.debugCircle({
+        circle: new CircleShape(nearWaypointStart.position, 0.3),
+        color: COLOR.LIME
       })
     }
     const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
@@ -606,6 +618,54 @@ export class Organism extends Actor {
       return
     }
     if (this.player != null) {
+      const nearWaypoint = this.stage.navigation.getNearWaypoint(this.membrane.position)
+      const waypointArray = Object.values(this.stage.navigation.waypoints)
+      const maxId = Math.max(...waypointArray.map(w => w.id))
+      const targetWaypoint = this.stage.navigation.waypoints[maxId]
+      this.stage.debugCircle({
+        circle: new CircleShape(nearWaypoint.position, 0.3),
+        color: COLOR.ORANGE
+      })
+      this.stage.debugCircle({
+        circle: new CircleShape(targetWaypoint.position, 0.3),
+        color: COLOR.ORANGE
+      })
+
+      // const bigRadii = this.stage.navigation.radii.filter(r => r >= this.membrane.radius)
+      // const bigRadius = Math.min(...bigRadii)
+      // const neighbors = Object.values(nearWaypoint.neighbors[bigRadius])
+      // neighbors.forEach(neighbor => {
+      //   this.stage.debugLine({
+      //     a: nearWaypoint.position,
+      //     b: neighbor.position,
+      //     color: COLOR.ORANGE
+      //   })
+      // })
+
+      const path = this.stage.navigation.getPath({
+        a: nearWaypoint.position,
+        b: targetWaypoint.position,
+        radius: this.membrane.radius
+      })
+      path.forEach((point, i) => {
+        this.stage.debugCircle({
+          circle: new CircleShape(point, 0.3),
+          color: COLOR.ORANGE
+        })
+        if (i > 0) {
+          this.stage.debugLine({
+            a: path[i - 1],
+            b: path[i],
+            color: COLOR.ORANGE
+          })
+        }
+      })
+      // console.log('path.length', path.length)
+
+      // const bigRadii = this.stage.navigation.radii.filter(r => r >= this.membrane.radius)
+      // const bigRadius = Math.min(...bigRadii)
+      // const pathDistance = nearWaypoint.pathDistances[bigRadius][targetWaypoint.id]
+      // console.log('pathDistance', pathDistance)
       return
     }
     const movementEnd = this.stage.runner.endTiming({

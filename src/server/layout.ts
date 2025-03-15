@@ -25,7 +25,6 @@ export class Layout {
     this.navAreaDefs = stage.navigation.navAreas.map(navArea => this.getNavAreaDef(navArea))
     this.radii = stage.navigation.radii
     console.log('radii', this.radii)
-    console.log('this.waypointDatas[311]', this.waypointDatas[311].id)
   }
 
   getLayoutData (): LayoutData {
@@ -59,8 +58,8 @@ export class Layout {
     })
     const pathDistances: Record<number, Record<number, number>> = {}
     radii.forEach(radius => {
-      const distanceArray = waypoint.pathDistances[radius]
-      pathDistances[radius] = distanceArray
+      const distanceRecord = waypoint.pathDistances[radius]
+      pathDistances[radius] = distanceRecord
     })
     const nextWaypoints: Record<number, Record<number, number>> = {}
     radii.forEach(radius => {
