@@ -78,6 +78,7 @@ export class Runner {
   }
 
   getElements (player: Player): Element[] {
+    
     const idsInVision = player.organism?.featuresInVision.map(feature => feature.id)
     const filteredFeatures = this.features.filter(feature => {
       return idsInVision?.includes(feature.id)
