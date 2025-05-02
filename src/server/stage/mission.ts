@@ -15,6 +15,7 @@ export class Mission extends Walled {
         hungerGame: false,
         // meatY: false,
         performance: false,
+        playerNavigation: false,
         reproduceGame: false,
         // respawn: true,
         timings: false,
@@ -46,7 +47,7 @@ export class Mission extends Walled {
 
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
-    // this.addBrute({ position: Vec2(8, 8) })
+    this.addBrute({ position: Vec2(17, 17) })
 
     // this.addBrick({ position: Vec2(15, -5), halfHeight: 5, halfWidth: 5 })
     // this.addPuppet({
@@ -73,6 +74,6 @@ export class Mission extends Walled {
     // this.addScavenger({ position: Vec2(0, 0) })
     // this.addHunter({ position: Vec2(0, 0) })
     // this.addTrisolaran({ position: Vec2(10, 10) })
-    // this.saveLayout()
+    this.saveLayout()
   }
 }

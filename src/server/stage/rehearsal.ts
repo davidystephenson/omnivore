@@ -14,8 +14,8 @@ export class Rehearsal extends Walled {
         // vision: false,
         // performance: false
       }),
-      halfHeight: 25,
-      halfWidth: 25
+      halfHeight: 50,
+      halfWidth: 50
     })
     this.addInnerWall({
       halfWidth: 5,
