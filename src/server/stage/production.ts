@@ -12,7 +12,7 @@ export class Production extends Playhouse {
   constructor (props: {
     flags: Flags
   }) {
-    const layoutDataString = fs.readFileSync('layout.json', 'utf-8')
+    const layoutDataString = fs.readFileSync('input.json', 'utf-8')
     const layoutData = JSON.parse(layoutDataString) as LayoutData
     console.debug('layoutDataString.length', layoutDataString.length)
     console.debug('layoutData.wallDefs.length', layoutData.wallDefs.length)

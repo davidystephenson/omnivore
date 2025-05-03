@@ -405,7 +405,7 @@ export class Stage {
     const layout = new Layout(this)
     const layoutData = layout.getLayoutData()
     const string = JSON.stringify(layoutData)
-    fs.writeFileSync('layout.json', string)
+    fs.writeFileSync('output.json', string)
   }
 
   time (props: {
