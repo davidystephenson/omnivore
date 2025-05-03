@@ -1,4 +1,4 @@
-import { Body } from 'planck'
+import { Body, Fixture } from 'planck'
 import { Stage } from './stage/stage'
 import { Element } from '../shared/element'
 import { Feature } from './feature/feature'
@@ -66,7 +66,7 @@ export class Runner {
   }
 
   getBodies (): Body[] {
-    const bodies = []
+    const bodies: Body[] = []
     for (
       let body = this.stage.world.getBodyList();
       body != null;
@@ -77,8 +77,21 @@ export class Runner {
     return bodies
   }
 
+  getFixtures (): Fixture[] {
+    const fixtures: Fixture[] = []
+    this.getBodies().forEach(body => {
+      for (
+        let fixture = body.getFixtureList();
+        fixture != null;
+        fixture = fixture.getNext()
+      ) {
+        fixtures.push(fixture)
+      }
+    })
+    return fixtures
+  }
+
   getElements (player: Player): Element[] {
-    
     const idsInVision = player.organism?.featuresInVision.map(feature => feature.id)
     const filteredFeatures = this.features.filter(feature => {
       return idsInVision?.includes(feature.id)
@@ -190,6 +203,12 @@ export class Runner {
       const worldStepDifference = worldStepAfter - worldStepBefore
       const worldStepDifferenceString = worldStepDifference.toFixed(2)
       console.info('planck', worldStepDifferenceString)
+      const bodyCount = this.stage.world.getBodyCount()
+      console.info('bodyCount', bodyCount)
+      const fixtureCount = this.getFixtures().length
+      console.info('fixtureCount', fixtureCount)
+      const contactContact = this.stage.world.getContactCount()
+      console.info('contactContact', contactContact)
     }
     this.debugLines = []
     this.debugCircles = []

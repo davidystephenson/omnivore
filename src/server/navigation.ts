@@ -374,6 +374,9 @@ export class Navigation {
       this.stage.debug({ v: 'Calculate nextWaypoints' })
       // NOTE: Check for incorrect next waypoints. Look for loops. Save the results.
       waypointArray.forEach(waypoint => {
+        if (waypoint.id % 100 === 0) {
+          this.stage.log({ k: 'waypoint', v: `${waypoint.id} / ${waypointArray.length}` })
+        }
         const nextWaypoints = waypoint.nextWaypoints[radius]
         if (nextWaypoints == null) {
           throw new Error(`Missing nextWaypoints for radius ${radius}`)

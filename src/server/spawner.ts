@@ -56,14 +56,14 @@ export class Spawner {
     })
     const area = this.stage.halfHeight * this.stage.halfWidth * 4
     this.stage.flag({ f: 'spawn', k: 'area', v: area })
-    const organismCap = area / 100
+    const organismCap = 6// area / 100
     this.stage.flag({ f: 'spawn', k: 'organismCap', v: organismCap })
     function sigmoid (x: number): number {
       return 1 / (1 + Math.exp(-x))
     }
     const sigmaArea = sigmoid(area / 1000)
     this.stage.flag({ f: 'spawn', k: 'sigmaArea', v: sigmaArea })
-    const familyCap = 8 - (3 * 1 / sigmaArea)
+    const familyCap = 3 // 8 - (3 * 1 / sigmaArea)
     this.stage.flag({ f: 'spawn', k: 'familyCap', v: familyCap })
     const organismsNeeded = organisms.length < organismCap
     const familiesNeeded = families.size < familyCap
@@ -94,7 +94,14 @@ export class Spawner {
       if (waypointArray == null) {
         throw new Error('There are no waypoints')
       }
-      this.spawnPoints = waypointArray.map(waypoint => {
+      const xMax = Math.max(...waypointArray.map(w => Math.abs(w.position.x)))
+      const yMax = Math.max(...waypointArray.map(w => Math.abs(w.position.y)))
+      const edgeWaypoints = waypointArray.filter(waypoint => {
+        const xEdge = Math.abs(waypoint.position.x) === xMax
+        const yEdge = Math.abs(waypoint.position.y) === yMax
+        return xEdge || yEdge
+      })
+      this.spawnPoints = edgeWaypoints.map(waypoint => {
         return new Spawnpoint(this, waypoint.position)
       })
     } else {

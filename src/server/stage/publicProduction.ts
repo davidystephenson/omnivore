@@ -6,7 +6,7 @@ export class PublicProduction extends Production {
     super({
       flags: new Flags({
         // killingGame: false,
-        timings: true
+        // timings: true
       })
     })
     this.addStarTrees()

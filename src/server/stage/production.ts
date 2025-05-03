@@ -46,7 +46,6 @@ export class Production extends Playhouse {
     layoutData.waypointDatas.forEach(waypointData => {
       const waypoint = this.navigation.waypoints[waypointData.id]
       if (waypoint == null) throw new Error(`Missing waypoint ${waypointData.id}`)
-      console.log(`populate nextWaypoints ${waypoint.id}`)
       if (waypointData == null) return
       layoutData.radii.forEach(radius => {
         const waypoints: Record<number, Waypoint> = {}

@@ -158,6 +158,22 @@ export class Playhouse extends Stage {
     })
   }
 
+  addGridTrees (): void {
+    const minimum = Math.min(this.halfWidth, this.halfHeight)
+    const half = minimum / 2
+    const negative = -half
+
+    this.addTree({ position: Vec2(half, half) })
+    this.addTree({ position: Vec2(0, negative) })
+    this.addTree({ position: Vec2(0, half) })
+    this.addTree({ position: Vec2(half, 0) })
+    this.addTree({ position: Vec2(negative, 0) })
+    this.addTree({ position: Vec2(negative, half) })
+    this.addTree({ position: Vec2(half, negative) })
+    this.addTree({ position: Vec2(negative, negative) })
+    this.addTree({ position: Vec2(0, 0) })
+  }
+
   addStarTrees (): void {
     const minimum = Math.min(this.halfWidth, this.halfHeight)
     const half = minimum / 2
