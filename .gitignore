@@ -3,3 +3,5 @@ build
 dist
 config.json
 .parcel-cache
+input.json
+output.json

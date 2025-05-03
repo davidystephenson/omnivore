@@ -6,12 +6,12 @@ export class PrivateProduction extends Production {
   constructor () {
     super({
       flags: new Flags({
-        performance: false,
-        spawn: true,
-        timings: false
+        // performance: false,
+        // spawn: true
+        // timings: false
       })
     })
-    this.addTree({ position: Vec2(-10, -10) })
+    // this.addTree({ position: Vec2(-10, -10) })
     // this.addStarTrees()
     // this.addFamilies()
   }
