@@ -11,7 +11,7 @@ export interface Rectangle {
 }
 
 export default class Procedural extends Walled {
-  static FILL = 0.3
+  static FILL = 0.25
   static FAILS = 100000
   static DEBUG = 10000
 
@@ -31,14 +31,14 @@ export default class Procedural extends Walled {
       const remainder = this.fails % Procedural.DEBUG
       this.debugging = remainder === 0
       if (this.debugging) {
-        const fill = this.getFill()
-        const percent = fill * 100
-        const percentFixed = percent.toFixed(2)
-        const percentString = `${percentFixed}%`
-        console.info('Proceeding...', this.fails, percentString)
+        const fill = this.getFillString()
+        console.info('Proceeding...', this.fails, fill)
       }
       this.guardWall()
     }
+
+    const fill = this.getFillString()
+    console.info('Proceeded:', this.fails, fill)
   }
 
   getCoordinate (props: {
@@ -64,6 +64,14 @@ export default class Procedural extends Walled {
     const halfArea = this.halfHeight * this.halfWidth
     const fill = wallsHalfArea / halfArea
     return fill
+  }
+
+  getFillString (): string {
+    const fill = this.getFill()
+    const percent = fill * 100
+    const percentFixed = percent.toFixed(2)
+    const percentString = `${percentFixed}%`
+    return percentString
   }
 
   getRandom (props: {

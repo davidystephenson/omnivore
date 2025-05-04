@@ -94,13 +94,17 @@ export class Spawner {
       if (waypointArray == null) {
         throw new Error('There are no waypoints')
       }
-      const xMax = Math.max(...waypointArray.map(w => Math.abs(w.position.x)))
-      const yMax = Math.max(...waypointArray.map(w => Math.abs(w.position.y)))
+      console.log('waypointArray.length', waypointArray.length)
+      const xMax = Math.round(Math.max(...waypointArray.map(w => Math.abs(w.position.x))))
+      console.log('xMax', xMax)
+      const yMax = Math.round(Math.max(...waypointArray.map(w => Math.abs(w.position.y))))
+      console.log('yMax', yMax)
       const edgeWaypoints = waypointArray.filter(waypoint => {
-        const xEdge = Math.abs(waypoint.position.x) === xMax
-        const yEdge = Math.abs(waypoint.position.y) === yMax
+        const xEdge = Math.round(Math.abs(waypoint.position.x)) === xMax
+        const yEdge = Math.round(Math.abs(waypoint.position.y)) === yMax
         return xEdge || yEdge
       })
+      console.log('edgeWaypoints.length', edgeWaypoints.length)
       this.spawnPoints = edgeWaypoints.map(waypoint => {
         return new Spawnpoint(this, waypoint.position)
       })

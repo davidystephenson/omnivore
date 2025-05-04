@@ -1,4 +1,3 @@
-import { Vec2 } from 'planck'
 import { Flags } from '../flags'
 import Procedural from './procedural'
 
@@ -14,8 +13,8 @@ export class Rehearsal extends Procedural {
         // vision: false,
         // performance: false
       }),
-      halfHeight: 35,
-      halfWidth: 35
+      halfHeight: 25,
+      halfWidth: 25
     })
 
     this.navigation.setupWaypoints()

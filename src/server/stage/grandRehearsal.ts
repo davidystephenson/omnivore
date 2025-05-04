@@ -1,8 +1,8 @@
 import { Vec2 } from 'planck'
 import { Flags } from '../flags'
-import { Walled } from './walled'
+import Procedural from './procedural'
 
-export class GrandRehearsal extends Walled {
+export class GrandRehearsal extends Procedural {
   constructor () {
     const flags = new Flags({
       // death: true,
@@ -12,31 +12,6 @@ export class GrandRehearsal extends Walled {
       flags,
       halfHeight: 50,
       halfWidth: 50
-    })
-    this.addInnerWall({
-      halfWidth: 10,
-      halfHeight: 1,
-      position: Vec2(-10, -10)
-    })
-    this.addInnerWall({
-      halfWidth: 5,
-      halfHeight: 1,
-      position: Vec2(-20, 10)
-    })
-    this.addInnerWall({
-      halfWidth: 1,
-      halfHeight: 10,
-      position: Vec2(10, 10)
-    })
-    this.addInnerWall({
-      halfWidth: 1,
-      halfHeight: 1,
-      position: Vec2(10, 20)
-    })
-    this.addInnerWall({
-      halfWidth: 1,
-      halfHeight: 10,
-      position: Vec2(20, 10)
     })
 
     this.navigation.setupWaypoints()

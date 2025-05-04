@@ -58,7 +58,7 @@ export class Killing extends Death {
       })
       const minimum = Math.min(halfWidth, halfHeight)
       this.stage.flag({ f: 'death', k: 'minimum', v: minimum })
-      if (minimum > 2) {
+      if (minimum > Death.MINIMUM) {
         const killerSpeed = this.killer.body.getLinearVelocity().length()
         const victimSpeed = this.victim.body.getLinearVelocity().length()
         const victimPosition = this.victim.body.getPosition()

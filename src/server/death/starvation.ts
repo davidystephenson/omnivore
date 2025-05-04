@@ -27,7 +27,7 @@ export class Starvation extends Death {
       const brickPosition = brickBox.getCenter()
       const minimum = Math.min(halfWidth, halfHeight)
       this.log({ k: 'minimum', v: minimum })
-      const sized = minimum > 2
+      const sized = minimum > Death.MINIMUM
       this.log({ k: 'sized', v: sized })
       if (sized) {
         void new Brick({ halfWidth, halfHeight, position: brickPosition, stage: this.stage })

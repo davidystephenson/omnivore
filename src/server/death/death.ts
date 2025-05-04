@@ -6,6 +6,7 @@ import { Spawnpoint } from '../spawnpoint'
 import { LogProps } from '../debugger'
 
 export class Death {
+  static MINIMUM = 0.6
   stage: Stage
   victim: Membrane
 
