@@ -24,6 +24,7 @@ import { Playhouse } from './stage/playhouse'
 import { Mission } from './stage/mission'
 import { Rehearsal } from './stage/rehearsal'
 import { PublicProduction } from './stage/publicProduction'
+import { GrandRehearsal } from './stage/grandRehearsal'
 // import { Mission } from './stage/mission'
 // import { PublicProduction } from './stage/publicProduction'
 
