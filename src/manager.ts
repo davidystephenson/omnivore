@@ -48,13 +48,31 @@ export function isSerializableArray (value: unknown): value is SerializableArray
  */
 export class Manager {
   private readonly outputPath: string
+  private writeCounter: number = 0
+  private readonly logFrequency: number
 
   /**
    * Creates a new Manager instance
    * @param outputPath Optional path to the output file. Defaults to 'output.json'
+   * @param logFrequency How often to log progress (number of writes). Defaults to 10000.
    */
-  constructor (outputPath = 'output.json') {
+  constructor (outputPath = 'output.json', logFrequency = 100000) {
     this.outputPath = outputPath
+    this.logFrequency = logFrequency
+  }
+
+  /**
+   * Track write operations and log progress at specified intervals
+   * @param fd File descriptor
+   * @param data The string data to write
+   */
+  private trackWrite (fd: number, data: string): void {
+    fs.writeSync(fd, data)
+    this.writeCounter++
+
+    if (this.writeCounter % this.logFrequency === 0) {
+      console.info(`${this.writeCounter.toLocaleString()} writes`)
+    }
   }
 
   /**
@@ -66,6 +84,9 @@ export class Manager {
    * @param filePath Optional path to the output file. Defaults to the constructor's outputPath
    */
   saveToFile (data: unknown, filePath?: string): void {
+    // Reset write counter for this operation
+    this.writeCounter = 0
+
     // First validate that data is a serializable object
     if (!isSerializableObject(data)) {
       throw new SerializationError('Data must be a serializable object', 'root')
@@ -90,7 +111,7 @@ export class Manager {
       fd = fs.openSync(targetPath, 'w')
 
       // Start the JSON object
-      fs.writeSync(fd, '{')
+      this.trackWrite(fd, '{')
 
       const keys = Object.keys(data)
       for (let i = 0; i < keys.length; i++) {
@@ -98,19 +119,20 @@ export class Manager {
 
         // Add comma if not the first key
         if (i > 0) {
-          fs.writeSync(fd, ',')
+          this.trackWrite(fd, ',')
         }
 
         // Write the key
-        fs.writeSync(fd, `"${this.escapeJsonString(key)}":`)
+        this.trackWrite(fd, `"${this.escapeJsonString(key)}":`)
 
         // Process the value with path tracking
         this.writeValue(fd, data[key], key)
       }
 
       // Close the JSON object
-      fs.writeSync(fd, '}')
+      this.trackWrite(fd, '}')
 
+      console.info(`Serialization complete: ${this.writeCounter.toLocaleString()} total write operations`)
       console.log(`Successfully saved data to ${targetPath}`)
     } catch (error) {
       if (error instanceof SerializationError) {
@@ -138,20 +160,20 @@ export class Manager {
   private writeValue (fd: number, value: SerializableValue, path: string): void {
     if (value === undefined) {
       // Convert undefined to null
-      fs.writeSync(fd, 'null')
+      this.trackWrite(fd, 'null')
     } else if (value === null) {
-      fs.writeSync(fd, 'null')
+      this.trackWrite(fd, 'null')
     } else if (typeof value === 'string') {
-      fs.writeSync(fd, `"${this.escapeJsonString(value)}"`)
+      this.trackWrite(fd, `"${this.escapeJsonString(value)}"`)
     } else if (typeof value === 'number') {
       // Handle NaN and Infinity by converting to null
       if (isNaN(value) || !isFinite(value)) {
-        fs.writeSync(fd, 'null')
+        this.trackWrite(fd, 'null')
       } else {
-        fs.writeSync(fd, value.toString())
+        this.trackWrite(fd, value.toString())
       }
     } else if (typeof value === 'boolean') {
-      fs.writeSync(fd, value.toString())
+      this.trackWrite(fd, value.toString())
     } else if (Array.isArray(value)) {
       this.writeArray(fd, value, path)
     } else if (typeof value === 'object') {
@@ -170,19 +192,19 @@ export class Manager {
    * @param path Current path in the object structure for error reporting
    */
   private writeArray (fd: number, arr: SerializableArray, path: string): void {
-    fs.writeSync(fd, '[')
+    this.trackWrite(fd, '[')
 
     for (let i = 0; i < arr.length; i++) {
       // Add comma if not the first element
       if (i > 0) {
-        fs.writeSync(fd, ',')
+        this.trackWrite(fd, ',')
       }
 
       // Write the array element with updated path
       this.writeValue(fd, arr[i], `${path}[${i}]`)
     }
 
-    fs.writeSync(fd, ']')
+    this.trackWrite(fd, ']')
   }
 
   /**
@@ -193,7 +215,7 @@ export class Manager {
    * @param path Current path in the object structure for error reporting
    */
   private writeObject (fd: number, obj: SerializableObject, path: string): void {
-    fs.writeSync(fd, '{')
+    this.trackWrite(fd, '{')
 
     const keys = Object.keys(obj)
     for (let i = 0; i < keys.length; i++) {
@@ -201,17 +223,17 @@ export class Manager {
 
       // Add comma if not the first key
       if (i > 0) {
-        fs.writeSync(fd, ',')
+        this.trackWrite(fd, ',')
       }
 
       // Write the key
-      fs.writeSync(fd, `"${this.escapeJsonString(key)}":`)
+      this.trackWrite(fd, `"${this.escapeJsonString(key)}":`)
 
       // Write the value with updated path
       this.writeValue(fd, obj[key], `${path}.${key}`)
     }
 
-    fs.writeSync(fd, '}')
+    this.trackWrite(fd, '}')
   }
 
   /**
