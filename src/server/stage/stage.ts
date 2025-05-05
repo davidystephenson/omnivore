@@ -411,15 +411,15 @@ export class Stage {
       const manager = new Manager('output.json')
 
       // Validate the data before saving
-      console.info('Validating layout data...')
+      console.info('Starting layout data validation...')
       manager.validateObject(layoutData)
 
       // Log validation summary
-      console.info('Saving layout data...')
+      console.info('Validation complete. Starting serialization process...')
 
       // Save the layout data (will convert empty/infinite values to null)
       manager.saveToFile(layoutData)
-      console.log('Layout data saved successfully to output.json')
+      console.info('Layout data saved successfully to output.json')
     } catch (error: unknown) {
       if (error instanceof SerializationError) {
         console.error(`Layout validation failed: ${error.message}`)
