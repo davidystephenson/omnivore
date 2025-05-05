@@ -24,6 +24,7 @@ import { Flags } from '../flags'
 import { Layout } from '../layout'
 import fs from 'fs'
 import { Collider } from '../collider'
+import bigJson from 'big-json'
 
 export class Stage {
   actors = new Map<number, Actor>()
@@ -314,7 +315,7 @@ export class Stage {
     })
   }
 
-  flag <Value> (props: {
+  flag<Value>(props: {
     f: keyof Flags
   } & LogProps<Value>): void {
     const raised = this.flags[props.f]
@@ -404,8 +405,24 @@ export class Stage {
   saveLayout (): void {
     const layout = new Layout(this)
     const layoutData = layout.getLayoutData()
-    const string = JSON.stringify(layoutData)
-    fs.writeFileSync('output.json', string)
+    const stringifyStream = bigJson.createStringifyStream({
+      body: layoutData
+    })
+
+    let index = 1
+    stringifyStream.on('data', function (strChunk) {
+      fs.appendFile('output.json', strChunk, function (err) {
+        if (err != null) throw err
+        if (index % 100000 === 0) {
+          console.log(`LAYOUT CHUNK ${index} SAVED`)
+        }
+        index++
+      })
+    })
+
+    stringifyStream.on('end', function () {
+      console.log('LAYOUT SAVED')
+    })
   }
 
   time (props: {

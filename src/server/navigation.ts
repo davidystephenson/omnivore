@@ -314,9 +314,13 @@ export class Navigation {
         waypoint.distances[otherWaypoint.id] = Vec2.distance(waypoint.position, otherWaypoint.position)
       })
     })
-    this.radii.forEach(radius => {
+    this.radii.forEach((radius, radiusIndex) => {
       // Initialize distance array for each waypoint for this radius
-      console.log('radius', radius)
+      const radiusCount = radiusIndex + 1
+      const radiusLabel = `${radiusCount}/${this.radii.length}`
+      this.stage.debug({
+        v: `Pathing waypoints for ${radius} (${radiusLabel})`
+      })
       waypointArray.forEach((waypoint, index) => {
         const infinities: Record<number, number> = {}
         waypointArray.forEach(waypoint => { infinities[waypoint.id] = Infinity })
@@ -324,7 +328,6 @@ export class Navigation {
         waypoint.nextWaypoints[radius] = {}
       })
       // Compute the minimal path distance from each waypoint to each other waypoint
-      this.stage.debug({ v: `Pathing waypoints for ${radius}...` })
       let pathDivisor = 1
       let pathNextDivisor = 100
       const maxPathSize = 6
@@ -332,8 +335,9 @@ export class Navigation {
       pathLengths.forEach(pathLength => {
         const remainder = pathLength % pathDivisor
         const divisible = remainder === 0
+        const pathLabel = `${pathLength}/${maxPathSize} r${radiusLabel}`
         if (divisible && pathLength !== 0) {
-          this.stage.debug({ v: `Path length ${pathLength}/${maxPathSize}...` })
+          this.stage.debug({ v: `Path length ${pathLabel}` })
         }
         if (pathLength === pathNextDivisor) {
           pathDivisor = pathNextDivisor
@@ -342,7 +346,7 @@ export class Navigation {
         const maxId = Math.max(...Object.keys(this.waypoints).map(s => Number(s)))
         waypointArray.forEach(waypoint => {
           if (waypoint.id % 100 === 0) {
-            this.stage.debug({ v: `Start Waypoint ${waypoint.id}/${maxId}` })
+            this.stage.debug({ v: `Waypoint ${waypoint.id}/${maxId} p${pathLabel}` })
           }
           const pathDistances = waypoint.pathDistances[radius]
           if (pathDistances == null) throw new Error('Missing distances')
@@ -371,11 +375,11 @@ export class Navigation {
           })
         })
       })
-      this.stage.debug({ v: 'Calculate nextWaypoints' })
+      this.stage.debug({ v: `Calculate nextWaypoints r${radiusLabel}` })
       // NOTE: Check for incorrect next waypoints. Look for loops. Save the results.
       waypointArray.forEach(waypoint => {
         if (waypoint.id % 100 === 0) {
-          this.stage.log({ k: 'waypoint', v: `${waypoint.id} / ${waypointArray.length}` })
+          this.stage.log({ k: 'waypoint', v: `${waypoint.id} / ${waypointArray.length} r${radiusLabel}` })
         }
         const nextWaypoints = waypoint.nextWaypoints[radius]
         if (nextWaypoints == null) {
