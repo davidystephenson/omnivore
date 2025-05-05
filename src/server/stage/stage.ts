@@ -22,9 +22,8 @@ import { Food } from '../actor/food'
 import { Spawner } from '../spawner'
 import { Flags } from '../flags'
 import { Layout } from '../layout'
-import fs from 'fs'
 import { Collider } from '../collider'
-import bigJson from 'big-json'
+import { Manager, SerializationError } from '../../manager'
 
 export class Stage {
   actors = new Map<number, Actor>()
@@ -405,24 +404,30 @@ export class Stage {
   saveLayout (): void {
     const layout = new Layout(this)
     const layoutData = layout.getLayoutData()
-    const stringifyStream = bigJson.createStringifyStream({
-      body: layoutData
-    })
+    console.log('layoutData.waypointDatas[0].distances', layoutData.waypointDatas[0].distances)
 
-    let index = 1
-    stringifyStream.on('data', function (strChunk) {
-      fs.appendFile('output.json', strChunk, function (err) {
-        if (err != null) throw err
-        if (index % 100000 === 0) {
-          console.log(`LAYOUT CHUNK ${index} SAVED`)
-        }
-        index++
-      })
-    })
+    try {
+      // Create a new Manager instance with a specific output path
+      const manager = new Manager('output.json')
 
-    stringifyStream.on('end', function () {
-      console.log('LAYOUT SAVED')
-    })
+      // Validate the data before saving
+      console.info('Validating layout data...')
+      manager.validateObject(layoutData)
+
+      // Log validation summary
+      console.info('Saving layout data...')
+
+      // Save the layout data (will convert empty/infinite values to null)
+      manager.saveToFile(layoutData)
+      console.log('Layout data saved successfully to output.json')
+    } catch (error: unknown) {
+      if (error instanceof SerializationError) {
+        console.error(`Layout validation failed: ${error.message}`)
+      } else {
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        console.error(`Failed to save layout: ${errorMessage}`)
+      }
+    }
   }
 
   time (props: {

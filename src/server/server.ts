@@ -41,7 +41,7 @@ export class Server {
     this.setupApp()
     this.httpServer = this.getHttpServer()
     this.io = new SocketIo.Server(this.httpServer)
-    this.playhouse = new Rehearsal()
+    this.playhouse = new PublicProduction()
     void this.start()
   }
 
