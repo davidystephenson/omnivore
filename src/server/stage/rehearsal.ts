@@ -9,9 +9,9 @@ export class Rehearsal extends Procedural {
         // botFlee: true,
         // mutation: true,
         // respawn: true,
-        timings: true
+        // timings: true
         // vision: false,
-        // performance: false
+        performance: false
       }),
       halfHeight: 25,
       halfWidth: 25
