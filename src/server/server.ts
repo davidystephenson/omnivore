@@ -21,7 +21,6 @@ import path from 'path'
 import * as SocketIo from 'socket.io'
 import { Config } from './config'
 import { Playhouse } from './stage/playhouse'
-import { Mission } from './stage/mission'
 import { Rehearsal } from './stage/rehearsal'
 import { PublicProduction } from './stage/publicProduction'
 import { GrandRehearsal } from './stage/grandRehearsal'
@@ -42,7 +41,7 @@ export class Server {
     this.setupApp()
     this.httpServer = this.getHttpServer()
     this.io = new SocketIo.Server(this.httpServer)
-    this.playhouse = new PublicProduction()
+    this.playhouse = new Rehearsal()
     void this.start()
   }
 

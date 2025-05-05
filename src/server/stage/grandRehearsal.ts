@@ -10,8 +10,8 @@ export class GrandRehearsal extends Procedural {
     })
     super({
       flags,
-      halfHeight: 50,
-      halfWidth: 50
+      halfHeight: 60,
+      halfWidth: 60
     })
 
     this.navigation.setupWaypoints()
