@@ -207,8 +207,8 @@ export class Runner {
       console.info('bodyCount', bodyCount)
       const fixtureCount = this.getFixtures().length
       console.info('fixtureCount', fixtureCount)
-      const contactContact = this.stage.world.getContactCount()
-      console.info('contactContact', contactContact)
+      const contactCount = this.stage.world.getContactCount()
+      console.info('contactCount', contactCount)
     }
     this.debugLines = []
     this.debugCircles = []
