@@ -186,7 +186,6 @@ export class Organism extends Actor {
     debug?: boolean
     target: Vec2
   }): Rgb {
-    this.stage.log({ v: 'chase' })
     const chaseStart = performance.now()
     if (props.debug === true) {
       this.debugPath(props)
@@ -195,8 +194,8 @@ export class Organism extends Actor {
     const nearWaypointEnd = this.stage.navigation.getNearWaypoint(props.target)
     const nearWaypointStart = this.stage.navigation.getNearWaypoint(myPosition)
     const nextPoint = this.stage.navigation.navigate(myPosition, props.target, this.membrane.radius, this.chaseRadius)
-    this.stage.log({ v: `start: ${nearWaypointStart.id}, end: ${nearWaypointEnd.id}` })
     if (this.stage.flags.botChase) {
+      this.stage.log({ v: `start: ${nearWaypointStart.id}, end: ${nearWaypointEnd.id}` })
       this.stage.debugCircle({
         circle: new CircleShape(props.target, 0.3),
         color: COLOR.ORANGE

@@ -10,7 +10,8 @@ export class PublicProduction extends Production {
       flags: new Flags({
         // killingGame: false,
         // timings: true,
-        // spawn: true
+        // spawn: true,
+        performance: false
       }),
       layoutData: props.layoutData
     })

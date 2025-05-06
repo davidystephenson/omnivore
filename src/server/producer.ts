@@ -37,7 +37,7 @@ export class Producer extends Server {
       const player = this.playhouse.addPlayer({
         color: GREEN,
         id: socket.id,
-        gene: this.playhouse.balancedGene,
+        gene: this.playhouse.trapperGene,
         position: Vec2(0, 0)
       })
       if (player.organism == null) {
