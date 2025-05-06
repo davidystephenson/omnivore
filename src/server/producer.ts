@@ -1,37 +1,30 @@
-import { Vec2 } from 'planck'
-import { Controls } from '../shared/input'
-import { GREEN } from '../shared/color'
+
 import express from 'express'
 import http from 'http'
 import https from 'https'
 import fs from 'fs-extra'
 import path from 'path'
-import * as SocketIo from 'socket.io'
-import { Config } from './config'
-import { Playhouse } from './stage/playhouse'
-// import { Funhouse } from './funhouse'
-// import { GrandRehearsal } from './stage/grandRehearsal'
-import { Rehearsal } from './stage/rehearsal'
-// import { Mission } from './stage/mission'
+import { Vec2 } from 'planck'
+import { Controls } from '../shared/input'
+import { GREEN } from '../shared/color'
+import { Server } from './server'
+import { Production } from './stage/production'
+import { PublicProduction } from './stage/publicProduction'
+import { LayoutData } from './layout'
 
-export class Server {
-  seed = Math.random().toString()
-  config = new Config()
-  dirname = path.dirname(__filename)
-  app = express()
-  httpServer: https.Server | http.Server
-  io: SocketIoServer
-  playhouse: Playhouse
-  step = 0
+export class Producer extends Server {
+  production: Production
 
-  constructor (props?: {
-    playhouse?: Playhouse
+  constructor (props: {
+    layoutData: LayoutData
   }) {
-    this.setupApp()
-    this.httpServer = this.getHttpServer()
-    this.io = new SocketIo.Server(this.httpServer)
-    this.playhouse = props?.playhouse ?? new Rehearsal()
-    void this.start()
+    const production = new PublicProduction({
+      layoutData: props.layoutData
+    })
+    super({
+      playhouse: production
+    })
+    this.production = production
   }
 
   async start (): Promise<void> {
@@ -93,5 +86,3 @@ export class Server {
     }
   }
 }
-
-type SocketIoServer = SocketIo.Server
