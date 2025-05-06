@@ -15,7 +15,7 @@ export class PublicProduction extends Production {
       }),
       layoutData: props.layoutData
     })
-    this.addStarTrees()
+    this.addGridTrees()
     this.addFamilies()
   }
 }
