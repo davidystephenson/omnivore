@@ -2,7 +2,6 @@ import { Vec2, Body } from 'planck'
 import { Flags } from '../flags'
 import { LayoutData } from '../layout'
 import { Playhouse } from './playhouse'
-import fs from 'fs'
 import { Waypoint } from '../waypoint'
 import { NavArea } from '../navArea'
 import { Feature } from '../feature/feature'
@@ -11,22 +10,17 @@ import { Element } from '../../shared/element'
 export class Production extends Playhouse {
   constructor (props: {
     flags: Flags
+    layoutData: LayoutData
   }) {
-    const layoutDataString = fs.readFileSync('input.json', 'utf-8')
-    const layoutData = JSON.parse(layoutDataString) as LayoutData
-    console.debug('layoutDataString.length', layoutDataString.length)
-    console.debug('layoutData.wallDefs.length', layoutData.wallDefs.length)
-    console.debug('layoutData.waypointDatas.length', layoutData.waypointDatas.length)
-    console.debug('layoutData.navAreaDefs.length', layoutData.navAreaDefs.length)
     super({
       flags: props.flags,
-      halfHeight: layoutData.halfHeight,
-      halfWidth: layoutData.halfWidth
+      halfHeight: props.layoutData.halfHeight,
+      halfWidth: props.layoutData.halfWidth
     })
-    layoutData.wallDefs.forEach(wallDef => {
+    props.layoutData.wallDefs.forEach(wallDef => {
       this.addWall({ ...wallDef, position: new Vec2(wallDef.position.x, wallDef.position.y) })
     })
-    layoutData.waypointDatas.forEach(waypointData => {
+    props.layoutData.waypointDatas.forEach(waypointData => {
       const waypoint = new Waypoint({
         navigation: this.navigation,
         position: waypointData.position,
@@ -40,14 +34,14 @@ export class Production extends Playhouse {
         waypoint.pathDistances[radius] = waypointData.pathDistances[radius]
       }
     })
-    layoutData.waypointDatas.forEach(waypointData => {
-      console.log('waypointData', waypointData.id, waypointData == null)
-    })
-    layoutData.waypointDatas.forEach(waypointData => {
+    // props.layoutData.waypointDatas.forEach(waypointData => {
+    //   console.log('waypointData', waypointData.id, waypointData == null)
+    // })
+    props.layoutData.waypointDatas.forEach(waypointData => {
       const waypoint = this.navigation.waypoints[waypointData.id]
       if (waypoint == null) throw new Error(`Missing waypoint ${waypointData.id}`)
       if (waypointData == null) return
-      layoutData.radii.forEach(radius => {
+      props.layoutData.radii.forEach(radius => {
         const waypoints: Record<number, Waypoint> = {}
         const ids = Object.keys(waypointData.nextWaypoints[radius]).map(s => Number(s))
         ids.forEach(id => {
@@ -58,12 +52,12 @@ export class Production extends Playhouse {
         waypoint.nextWaypoints[radius] = waypoints
       })
     })
-    const is = [...layoutData.waypointMatrix.keys()]
-    const js = [...layoutData.waypointMatrix[0].keys()]
+    const is = [...props.layoutData.waypointMatrix.keys()]
+    const js = [...props.layoutData.waypointMatrix[0].keys()]
     for (const i of is) {
       this.navigation.waypointMatrix[i] = []
       for (const j of js) {
-        const id = layoutData.waypointMatrix[i][j]
+        const id = props.layoutData.waypointMatrix[i][j]
         const waypoint = this.navigation.waypoints[id]
         if (waypoint == null) {
           throw new Error('missing waypoint')
@@ -71,7 +65,7 @@ export class Production extends Playhouse {
         this.navigation.waypointMatrix[i][j] = waypoint
       }
     }
-    this.navigation.navAreas = layoutData.navAreaDefs.map(navAreaDef => {
+    this.navigation.navAreas = props.layoutData.navAreaDefs.map(navAreaDef => {
       return new NavArea({ stage: this, ...navAreaDef })
     })
     this.spawner.setupSpawnPoints()
