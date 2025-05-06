@@ -56,14 +56,14 @@ export class Spawner {
     })
     const area = this.stage.halfHeight * this.stage.halfWidth * 4
     this.stage.flag({ f: 'spawn', k: 'area', v: area })
-    const organismCap = 6// area / 100
+    const organismCap = area / 100
     this.stage.flag({ f: 'spawn', k: 'organismCap', v: organismCap })
     function sigmoid (x: number): number {
       return 1 / (1 + Math.exp(-x))
     }
     const sigmaArea = sigmoid(area / 1000)
     this.stage.flag({ f: 'spawn', k: 'sigmaArea', v: sigmaArea })
-    const familyCap = 3 // 8 - (3 * 1 / sigmaArea)
+    const familyCap = 8 - (3 * 1 / sigmaArea)
     this.stage.flag({ f: 'spawn', k: 'familyCap', v: familyCap })
     const organismsNeeded = organisms.length < organismCap
     const familiesNeeded = families.size < familyCap
