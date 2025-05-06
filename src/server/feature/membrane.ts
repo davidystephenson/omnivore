@@ -127,7 +127,7 @@ export class Membrane extends Feature {
       this.dealDamage({ target: props.target })
       this.shove(props.target)
     } else if (props.target instanceof Prop) {
-      this.dealDamage({ target: props.target })
+      this.dealDamage({ target: props.target, multiplier: 5 })
     }
   }
 

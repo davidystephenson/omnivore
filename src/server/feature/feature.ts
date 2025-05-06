@@ -82,10 +82,11 @@ export class Feature {
   dealDamage (props: {
     damage?: number
     target: Feature
+    multiplier?: number
   }): void {
     this.actor.stage.flag({ f: 'damage', k: 'attacker', v: this.label })
     this.actor.stage.flag({ f: 'damage', k: 'target', v: props.target.label })
-    const damageDealt = props.damage ?? this.getDamageDealt(props.target)
+    const damageDealt = props.damage ?? this.getDamageDealt(props.target) * (props.multiplier ?? 1)
     this.actor.stage.flag({ f: 'damage', k: 'damageDealt', v: damageDealt })
     if (damageDealt < Feature.MINIMUM_DAMAGE) {
       const message = `combatDamage < Feature.MINIMUM_DAMAGE: ${damageDealt}`
