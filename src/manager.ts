@@ -66,8 +66,8 @@ export class Manager {
    * @param fd File descriptor
    * @param data The string data to write
    */
-  private trackWrite (fd: number, data: string): void {
-    fs.writeSync(fd, data)
+  private trackWrite (fileDescriptor: number, data: string): void {
+    fs.writeSync(fileDescriptor, data)
     this.writeCounter++
 
     if (this.writeCounter % this.logFrequency === 0) {
@@ -104,14 +104,14 @@ export class Manager {
       fs.mkdirSync(dirPath, { recursive: true })
     }
 
-    let fd: number | null = null
+    let fileDescriptor: number | null = null
 
     try {
       // Create or truncate the file
-      fd = fs.openSync(targetPath, 'w')
+      fileDescriptor = fs.openSync(targetPath, 'w')
 
       // Start the JSON object
-      this.trackWrite(fd, '{')
+      this.trackWrite(fileDescriptor, '{')
 
       const keys = Object.keys(data)
       for (let i = 0; i < keys.length; i++) {
@@ -119,18 +119,18 @@ export class Manager {
 
         // Add comma if not the first key
         if (i > 0) {
-          this.trackWrite(fd, ',')
+          this.trackWrite(fileDescriptor, ',')
         }
 
         // Write the key
-        this.trackWrite(fd, `"${this.escapeJsonString(key)}":`)
+        this.trackWrite(fileDescriptor, `"${this.escapeJsonString(key)}":`)
 
         // Process the value with path tracking
-        this.writeValue(fd, data[key], key)
+        this.writeValue(fileDescriptor, data[key], key)
       }
 
       // Close the JSON object
-      this.trackWrite(fd, '}')
+      this.trackWrite(fileDescriptor, '}')
 
       console.info(`Serialization complete: ${this.writeCounter.toLocaleString()} total write operations`)
       console.log(`Successfully saved data to ${targetPath}`)
@@ -144,8 +144,8 @@ export class Manager {
       throw error // Re-throw to allow calling code to handle the error
     } finally {
       // Ensure file is closed even if an error occurs
-      if (fd !== null) {
-        fs.closeSync(fd)
+      if (fileDescriptor !== null) {
+        fs.closeSync(fileDescriptor)
       }
     }
   }
