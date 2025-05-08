@@ -10,16 +10,16 @@ import { GREEN } from '../shared/color'
 import { Server } from './server'
 import { Production } from './stage/production'
 import { PublicProduction } from './stage/publicProduction'
-import { LayoutData } from './layout'
+import { Promptbook } from './types'
 
 export class Producer extends Server {
   production: Production
 
   constructor (props: {
-    layoutData: LayoutData
+    promptbook: Promptbook
   }) {
     const production = new PublicProduction({
-      layoutData: props.layoutData
+      promptbook: props.promptbook
     })
     super({
       playhouse: production

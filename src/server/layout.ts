@@ -1,6 +1,7 @@
-import { Wall, WallDef } from './actor/wall'
-import { NavArea, NavAreaDef } from './navArea'
+import { Wall } from './actor/wall'
+import { NavArea } from './navArea'
 import { Stage } from './stage/stage'
+import { WallDef, WaypointData, NavAreaDef, Promptbook } from './types'
 import { Waypoint } from './waypoint'
 
 export class Layout {
@@ -27,7 +28,7 @@ export class Layout {
     console.log('radii', this.radii)
   }
 
-  getLayoutData (): LayoutData {
+  getLayoutData (): Promptbook {
     return {
       wallDefs: this.wallDefs,
       waypointDatas: this.waypointDatas,
@@ -104,26 +105,4 @@ export class Layout {
       }
     }
   }
-}
-
-interface WaypointData {
-  position: { x: number, y: number }
-  id: number
-  radius: number
-  category: string
-  radii: number[]
-  distances: number[]
-  neighbors: Record<number, Record<number, number>>
-  nextWaypoints: Record<number, Record<number, number>>
-  pathDistances: Record<number, Record<number, number>>
-}
-
-export interface LayoutData {
-  wallDefs: WallDef[]
-  waypointDatas: WaypointData[]
-  waypointMatrix: number[][]
-  navAreaDefs: NavAreaDef[]
-  halfHeight: number
-  halfWidth: number
-  radii: number[]
 }

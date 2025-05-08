@@ -1,10 +1,10 @@
 import { Flags } from '../flags'
 import { Production } from './production'
-import { LayoutData } from '../layout'
+import { Promptbook } from '../types'
 
 export class PrivateProduction extends Production {
   constructor (props: {
-    layoutData: LayoutData
+    promptbook: Promptbook
   }) {
     super({
       flags: new Flags({
@@ -12,7 +12,7 @@ export class PrivateProduction extends Production {
         // spawn: true
         // timings: false
       }),
-      layoutData: props.layoutData
+      promptbook: props.promptbook
     })
     // this.addTree({ position: Vec2(-10, -10) })
     // this.addStarTrees()

@@ -1,19 +1,20 @@
 import { Flags } from '../flags'
-import { LayoutData } from '../layout'
+import { Promptbook } from '../types'
 import { Production } from './production'
 
 export class PublicProduction extends Production {
   constructor (props: {
-    layoutData: LayoutData
+    promptbook: Promptbook
   }) {
+    const flags = new Flags({
+      // killingGame: false,
+      // timings: true,
+      // spawn: true,
+      performance: false
+    })
     super({
-      flags: new Flags({
-        // killingGame: false,
-        // timings: true,
-        // spawn: true,
-        performance: false
-      }),
-      layoutData: props.layoutData
+      flags,
+      promptbook: props.promptbook
     })
     this.addGridTrees()
     this.addFamilies()

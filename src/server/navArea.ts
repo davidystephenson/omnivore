@@ -1,13 +1,7 @@
 import { AABB, Vec2 } from 'planck'
 import { Waypoint } from './waypoint'
 import { Stage } from './stage/stage'
-
-export interface NavAreaDef {
-  aabb: {
-    upperBound: { x: number, y: number }
-    lowerBound: { x: number, y: number }
-  }
-}
+import { NavAreaDef } from './types'
 
 export class NavArea {
   stage: Stage
