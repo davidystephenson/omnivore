@@ -3,13 +3,7 @@ import { Stage } from '../stage/stage'
 import { Actor } from './actor'
 import { Structure } from '../feature/structure'
 import { Waypoint } from '../waypoint'
-
-export interface WallDef {
-  halfHeight: number
-  halfWidth: number
-  outer: boolean
-  position: { x: number, y: number }
-}
+import { WallDef } from '../types'
 
 export class Wall extends Actor {
   aabb: AABB

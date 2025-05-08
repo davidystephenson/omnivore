@@ -1,26 +1,26 @@
 import { Vec2, Body } from 'planck'
 import { Flags } from '../flags'
-import { LayoutData } from '../layout'
 import { Playhouse } from './playhouse'
 import { Waypoint } from '../waypoint'
 import { NavArea } from '../navArea'
 import { Feature } from '../feature/feature'
 import { Element } from '../../shared/element'
+import { Promptbook } from '../types'
 
 export class Production extends Playhouse {
   constructor (props: {
     flags: Flags
-    layoutData: LayoutData
+    promptbook: Promptbook
   }) {
     super({
       flags: props.flags,
-      halfHeight: props.layoutData.halfHeight,
-      halfWidth: props.layoutData.halfWidth
+      halfHeight: props.promptbook.halfHeight,
+      halfWidth: props.promptbook.halfWidth
     })
-    props.layoutData.wallDefs.forEach(wallDef => {
+    props.promptbook.wallDefs.forEach(wallDef => {
       this.addWall({ ...wallDef, position: new Vec2(wallDef.position.x, wallDef.position.y) })
     })
-    props.layoutData.waypointDatas.forEach(waypointData => {
+    props.promptbook.waypointDatas.forEach(waypointData => {
       const waypoint = new Waypoint({
         navigation: this.navigation,
         position: waypointData.position,
@@ -31,17 +31,18 @@ export class Production extends Playhouse {
       this.navigation.waypoints[waypoint.id] = waypoint
       for (const radiusString in waypointData.pathDistances) {
         const radius = Number(radiusString)
-        waypoint.pathDistances[radius] = waypointData.pathDistances[radius]
+        const radiusData = waypointData.pathDistances[radius]
+        waypoint.pathDistances[radius] = radiusData
       }
     })
     // props.layoutData.waypointDatas.forEach(waypointData => {
     //   console.log('waypointData', waypointData.id, waypointData == null)
     // })
-    props.layoutData.waypointDatas.forEach(waypointData => {
+    props.promptbook.waypointDatas.forEach(waypointData => {
       const waypoint = this.navigation.waypoints[waypointData.id]
       if (waypoint == null) throw new Error(`Missing waypoint ${waypointData.id}`)
       if (waypointData == null) return
-      props.layoutData.radii.forEach(radius => {
+      props.promptbook.radii.forEach(radius => {
         const waypoints: Record<number, Waypoint> = {}
         const ids = Object.keys(waypointData.nextWaypoints[radius]).map(s => Number(s))
         ids.forEach(id => {
@@ -52,12 +53,12 @@ export class Production extends Playhouse {
         waypoint.nextWaypoints[radius] = waypoints
       })
     })
-    const is = [...props.layoutData.waypointMatrix.keys()]
-    const js = [...props.layoutData.waypointMatrix[0].keys()]
+    const is = [...props.promptbook.waypointMatrix.keys()]
+    const js = [...props.promptbook.waypointMatrix[0].keys()]
     for (const i of is) {
       this.navigation.waypointMatrix[i] = []
       for (const j of js) {
-        const id = props.layoutData.waypointMatrix[i][j]
+        const id = props.promptbook.waypointMatrix[i][j]
         const waypoint = this.navigation.waypoints[id]
         if (waypoint == null) {
           throw new Error('missing waypoint')
@@ -65,7 +66,7 @@ export class Production extends Playhouse {
         this.navigation.waypointMatrix[i][j] = waypoint
       }
     }
-    this.navigation.navAreas = props.layoutData.navAreaDefs.map(navAreaDef => {
+    this.navigation.navAreas = props.promptbook.navAreaDefs.map(navAreaDef => {
       return new NavArea({ stage: this, ...navAreaDef })
     })
     this.spawner.setupSpawnPoints()
