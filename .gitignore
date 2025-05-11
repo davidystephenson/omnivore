@@ -4,4 +4,6 @@ dist
 config.json
 .parcel-cache
 input.json
-output*
+output.json
+*promptbook.json
+*Promptbook.json
