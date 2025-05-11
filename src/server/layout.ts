@@ -75,11 +75,11 @@ export class Layout {
       id: waypoint.id,
       radius: waypoint.radius,
       category: waypoint.category,
-      distances: waypoint.distances,
-      nextWaypoints,
-      radii,
-      neighbors,
-      pathDistances
+      // distances: waypoint.distances,
+      nextWaypoints
+      // radii,
+      // neighbors,
+      // pathDistances
     }
   }
 

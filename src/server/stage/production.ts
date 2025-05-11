@@ -29,11 +29,10 @@ export class Production extends Playhouse {
         id: waypointData.id
       })
       this.navigation.waypoints[waypoint.id] = waypoint
-      for (const radiusString in waypointData.pathDistances) {
-        const radius = Number(radiusString)
-        const radiusData = waypointData.pathDistances[radius]
-        waypoint.pathDistances[radius] = radiusData
-      }
+      // for (const radius of props.promptbook.radii) {
+      //   const radiusData = waypointData.pathDistances[radius]
+      //   waypoint.pathDistances[radius] = radiusData
+      // }
     })
     // props.layoutData.waypointDatas.forEach(waypointData => {
     //   console.log('waypointData', waypointData.id, waypointData == null)

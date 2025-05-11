@@ -375,6 +375,21 @@ export class Navigation {
           })
         })
       })
+      let maxPathDistance = 0
+      waypointArray.forEach(waypoint => {
+        const radii = Object.keys(waypoint.pathDistances).map(x => Number(x))
+        radii.forEach(key => {
+          const pathDistances = waypoint.pathDistances[radius]
+          if (pathDistances == null) throw new Error('Missing distances')
+        })
+        const pathDistances = Object.values(waypoint.pathDistances[radius])
+        maxPathDistance = Math.max(maxPathDistance, ...pathDistances)
+      })
+      console.log('maxPathDistance', maxPathDistance)
+      if (!(maxPathDistance < Infinity)) {
+        throw new Error('Infinite Path Distance')
+      }
+
       this.stage.debug({ v: `Calculate nextWaypoints r${radiusLabel}` })
       // NOTE: Check for incorrect next waypoints. Look for loops. Save the results.
       waypointArray.forEach(waypoint => {

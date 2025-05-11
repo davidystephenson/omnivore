@@ -774,11 +774,11 @@ export class Organism extends Actor {
       const circle = new CircleShape(end, 0.2)
       this.stage.debugCircle({ circle, color: RED })
     }
-    const pathDistance = this.stage.navigation.getPathDistance(this.membrane.position, end, this.membrane.radius)
-    const toLong = 10 * Math.max(this.stage.halfWidth, this.stage.halfHeight)
-    if (pathDistance > toLong) {
-      throw new Error('Path is too long')
-    }
+    // const pathDistance = this.stage.navigation.getPathDistance(this.membrane.position, end, this.membrane.radius)
+    // const toLong = 10 * Math.max(this.stage.halfWidth, this.stage.halfHeight)
+    // if (pathDistance > toLong) {
+    //   throw new Error('Path is too long')
+    // }
     const nextPoint = this.stage.navigation.navigate(this.membrane.position, end, this.membrane.radius)
     const nextPosition = nextPoint instanceof Waypoint ? nextPoint.position : nextPoint
     const directionToNext = directionFromTo(this.membrane.position, nextPosition)
