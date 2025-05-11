@@ -27,7 +27,7 @@ export const numberishSchema = z.preprocess(
 export type Numberish = z.infer<typeof numberishSchema>
 export const testSchema: ZodSchema<Numberish> = numberishSchema
 export const testValue: Numberish = 1
-export const numberullishSchema = numberishSchema.nullable()
+export const numberullishSchema = numberishSchema
 
 export const numberRecordSchema = z.record(numberishSchema, numberullishSchema)
   .or(numberullishSchema.array())
@@ -44,11 +44,11 @@ export const waypointDataSchema = z.object({
   id: z.number(),
   radius: z.number(),
   category: z.string(),
-  radii: z.number().array(),
-  distances: z.number().nullable().array(),
-  neighbors: nestedNumberRecordSchema,
-  nextWaypoints: nestedNumberRecordSchema,
-  pathDistances: nestedNumberRecordSchema
+  // radii: z.number().array(),
+  // distances: z.number().nullable().array(),
+  // neighbors: nestedNumberRecordSchema,
+  nextWaypoints: nestedNumberRecordSchema
+  // pathDistances: nestedNumberRecordSchema
 })
 export type WaypointData = z.infer<typeof waypointDataSchema>
 export const matrixSchema = z.array(z.array(z.number()))

@@ -404,8 +404,6 @@ export class Stage {
   saveLayout (): void {
     const layout = new Layout(this)
     const layoutData = layout.getLayoutData()
-    console.log('layoutData.waypointDatas[0].distances', layoutData.waypointDatas[0].distances)
-
     try {
       // Create a new Manager instance with a specific output path
       const manager = new Manager('output.json')

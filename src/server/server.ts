@@ -12,6 +12,7 @@ import { Playhouse } from './stage/playhouse'
 // import { Funhouse } from './funhouse'
 // import { GrandRehearsal } from './stage/grandRehearsal'
 import { Rehearsal } from './stage/rehearsal'
+import { Mission } from './stage/mission'
 // import { Mission } from './stage/mission'
 
 export class Server {
@@ -30,7 +31,7 @@ export class Server {
     this.setupApp()
     this.httpServer = this.getHttpServer()
     this.io = new SocketIo.Server(this.httpServer)
-    this.playhouse = props?.playhouse ?? new Rehearsal()
+    this.playhouse = props?.playhouse ?? new Mission()
     void this.start()
   }
 
@@ -45,7 +46,7 @@ export class Server {
       const player = this.playhouse.addPlayer({
         color: GREEN,
         id: socket.id,
-        gene: this.playhouse.trapperGene,
+        gene: this.playhouse.flyGene,
         position: Vec2(0, 0)
       })
       if (player.organism == null) {

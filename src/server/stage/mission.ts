@@ -74,6 +74,6 @@ export class Mission extends Walled {
     // this.addScavenger({ position: Vec2(0, 0) })
     // this.addHunter({ position: Vec2(0, 0) })
     // this.addTrisolaran({ position: Vec2(10, 10) })
-    this.saveLayout()
+    // this.saveLayout()
   }
 }
