@@ -1,4 +1,4 @@
-import { Producer } from './producer'
+import { Performer } from './performer'
 import { matrixSchema, navAreaDefSchema, Promptbook, tableOfContentsSchema, wallDefSchema, WaypointData, waypointDataSchema } from './types'
 import fs from 'fs'
 import json from 'big-json'
@@ -21,11 +21,13 @@ function parse <Value> (props: {
   throw new Error()
 }
 
-function parseMany <Value> (props: {
+function validateMany <Value> (props: {
   label: string
   schema: ZodSchema<Value>
   value: unknown[]
 }): Value[] {
+  const message = `Validating ${props.value.length} ${props.label}...`
+  console.info(message)
   return props.value.map((element, index) => {
     const label = `${props.label}[${index}]`
     const parsed: Value = parse({
@@ -34,7 +36,7 @@ function parseMany <Value> (props: {
       schema: props.schema
     })
     if (index !== 0 && index % 100 === 0) {
-      console.log(`Validated ${props.label} (${index}/${props.value.length})`)
+      console.log(`Validated ${index}/${props.value.length} ${props.label}`)
     }
     return parsed
   })
@@ -45,29 +47,28 @@ parseStream.on('data', function (pojo: unknown) {
   console.log('Validating promptbook...')
 
   const table = tableOfContentsSchema.parse(pojo)
+  console.log('Validated half height:', table.halfHeight)
+  console.log('Validated half width:', table.halfWidth)
+  console.log('Validated radii:', table.radii)
 
-  console.log('Validating navAreaDefs...')
-  const navAreaDefs = parseMany({
+  const navAreaDefs = validateMany({
     label: 'navAreaDefs',
     schema: navAreaDefSchema,
     value: table.navAreaDefs
   })
 
-  console.log('Validating wallDefs...')
-  const wallDefs = parseMany({
+  const wallDefs = validateMany({
     label: 'wallDefs',
     schema: wallDefSchema,
     value: table.wallDefs
   })
 
-  console.log('Validating waypointDatas...')
-  const waypointDatas: WaypointData[] = parseMany({
+  const waypointDatas: WaypointData[] = validateMany({
     label: 'waypointDatas',
     schema: waypointDataSchema,
     value: table.waypointDatas
   })
 
-  console.log('Validating waypointMatrix...')
   const waypointMatrix = matrixSchema.parse(table.waypointMatrix)
 
   const promptbook: Promptbook = {
@@ -77,9 +78,9 @@ parseStream.on('data', function (pojo: unknown) {
     waypointDatas,
     waypointMatrix
   }
-  console.log('Promptbook validated')
+  console.info('Promptbook validated ')
 
-  void new Producer({
+  void new Performer({
     promptbook
   })
 })

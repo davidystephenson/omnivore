@@ -12,7 +12,7 @@ import { Production } from './stage/production'
 import { PublicProduction } from './stage/publicProduction'
 import { Promptbook } from './types'
 
-export class Producer extends Server {
+export class Performer extends Server {
   production: Production
 
   constructor (props: {

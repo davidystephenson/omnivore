@@ -176,7 +176,7 @@ export class Runner {
     this.timing = this.stepCount % this.stepCountInterval === 0
     if (this.stage.flags.performance && this.timing) {
       const fpsString = this.fps.toFixed(2)
-      console.info('fps', fpsString)
+      console.info('fps', fpsString, `(${this.stepCount} steps)`)
       const msString = difference.toFixed(2)
       console.info('ms', msString)
     }

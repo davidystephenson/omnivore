@@ -10,7 +10,7 @@ export class PublicProduction extends Production {
       // killingGame: false,
       // timings: true,
       // spawn: true,
-      performance: false
+      performance: true
     })
     super({
       flags,
