@@ -8,9 +8,9 @@ export class PublicProduction extends Production {
   }) {
     const flags = new Flags({
       // killingGame: false,
-      // timings: true,
+      timings: true
       // spawn: true,
-      performance: true
+      // performance: false
     })
     super({
       flags,

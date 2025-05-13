@@ -46,6 +46,7 @@ export class Stage {
   walls: Wall[] = []
   world: World
   collider: Collider
+  checkCount = 0
 
   constructor (props: {
     flags: Flags
@@ -365,6 +366,7 @@ export class Stage {
     this.players.forEach(player => player.onStep({ stepSize: props.stepSize }))
     const bots = [...this.actors.values()].filter(actor => actor instanceof Organism && actor.player == null)
     this.time({ label: 'bots' })
+    this.checkCount = 0
     bots.forEach(actor => actor.onStep({ stepSize: props.stepSize }))
     this.timeEnd({ label: 'bots' })
     const nonBots = [...this.actors.values()].filter(actor => !(actor instanceof Organism) || actor.player != null)

@@ -1,5 +1,5 @@
 import { AABB, Vec2 } from 'planck'
-import { HALF_SIGHT } from '../../shared/sight'
+import { HALF_SIGHT_SIZE } from '../../shared/sight'
 import { Membrane } from '../feature/membrane'
 import { Stage } from '../stage/stage'
 import { Death } from './death'
@@ -14,8 +14,8 @@ export class Starvation extends Death {
     this.log({ v: 'Starvation.execute' })
     if (this.stage.flags.starveBricksGame) {
       const victimPosition = this.victim.body.getPosition()
-      const lookLowerBound = Vec2(victimPosition.x - HALF_SIGHT.x, victimPosition.y - HALF_SIGHT.y)
-      const lookUpperBound = Vec2(victimPosition.x + HALF_SIGHT.x, victimPosition.y + HALF_SIGHT.y)
+      const lookLowerBound = Vec2(victimPosition.x - HALF_SIGHT_SIZE.x, victimPosition.y - HALF_SIGHT_SIZE.y)
+      const lookUpperBound = Vec2(victimPosition.x + HALF_SIGHT_SIZE.x, victimPosition.y + HALF_SIGHT_SIZE.y)
       const lookBox = new AABB(lookLowerBound, lookUpperBound)
       const brickBox = this.trim({ base: victimPosition, lookBox })
       const length = this.victim.body.getLinearVelocity().length()

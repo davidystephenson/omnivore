@@ -4,7 +4,7 @@ import { Actor } from '../actor/actor'
 import { Rope } from '../../shared/rope'
 import { Element } from '../../shared/element'
 import { roundNumber, roundVector } from '../math'
-import { HALF_SIGHT } from '../../shared/sight'
+import { HALF_SIGHT_SIZE } from '../../shared/sight'
 
 let featureCount = 0
 
@@ -72,7 +72,7 @@ export class Feature {
 
   addSensor (): Fixture {
     this.sensor = this.body.createFixture({
-      shape: Box(HALF_SIGHT.x, HALF_SIGHT.y),
+      shape: Box(HALF_SIGHT_SIZE.x, HALF_SIGHT_SIZE.y),
       isSensor: true
     })
     this.sensor.setUserData(this)

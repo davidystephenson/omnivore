@@ -10,6 +10,7 @@ import { Player } from './actor/player'
 import { Tree } from './actor/tree'
 import { Timings } from './timings'
 import { Organism } from './actor/organism'
+import { sum } from './math'
 
 export class Runner {
   static FPS = 30
@@ -220,16 +221,21 @@ export class Runner {
 
     if (this.stage.flags.performance && this.timing) {
       if (this.stage.flags.timings) {
-        this.debugTiming({ key: 'navigate' })
-        this.debugTiming({ key: 'charge' })
-        this.debugTiming({ key: 'chase' })
-        this.debugTiming({ key: 'wander' })
-        this.debugTiming({ key: 'flee' })
-        this.debugTiming({ key: 'navigate' })
-        this.debugTiming({ key: 'afterIsOpen' })
-        this.debugTiming({ key: 'distances' })
-        this.debugTiming({ key: 'neighborToEnd' })
-        this.debugTiming({ key: 'afterDistances' })
+        // this.debugTiming({ key: 'vision' })
+        // this.debugTiming({ key: 'movement' })
+        // this.debugTiming({ key: 'explore' })
+        this.debugTiming({ key: '> exploreVisible' })
+        this.debugTiming({ key: '> > isVisible' })
+        // this.debugTiming({ key: 'maneuver' })
+        // this.debugTiming({ key: 'navigate' })
+        // this.debugTiming({ key: 'charge' })
+        // this.debugTiming({ key: 'chase' })
+        // this.debugTiming({ key: 'wander' })
+        // this.debugTiming({ key: 'flee' })
+        // this.debugTiming({ key: 'navigate' })
+        // this.debugTiming({ key: 'afterIsOpen' })
+        // this.debugTiming({ key: 'distances' })
+        // this.debugTiming({ key: 'neighborToEnd' })
       }
       const organisms: Organism[] = []
       this.stage.actors.forEach(actor => {
@@ -245,6 +251,11 @@ export class Runner {
         familyCounts[entry[0]] = entry[1].length
       })
       console.log('familyCounts', familyCounts)
+      const botCount = sum(Object.values(familyCounts))
+      console.log('botCount', botCount)
+      console.log('checkCount', this.stage.checkCount)
+      const checksPerBot = this.stage.checkCount / botCount
+      console.log('checksPerBot', checksPerBot)
       console.timeEnd('stageStep')
     }
     this.features = this.getFeatures()

@@ -1,5 +1,5 @@
 import { AABB, Vec2 } from 'planck'
-import { HALF_SIGHT } from '../../shared/sight'
+import { HALF_SIGHT_SIZE } from '../../shared/sight'
 import { Membrane } from '../feature/membrane'
 import { directionFromTo, getCompass, whichMax } from '../math'
 import { Stage } from '../stage/stage'
@@ -20,8 +20,8 @@ export class Killing extends Death {
       this.stage.flag({ f: 'death', v: 'Killing.execute' })
       const killerPosition = this.killer.body.getPosition()
       const brickDirection = getCompass(Vec2.sub(this.victim.deathPosition, killerPosition))
-      const brickLookDistance = (brickDirection.x !== 0 ? HALF_SIGHT.x : HALF_SIGHT.y) - this.killer.radius
-      const sideLookDistance = brickDirection.x !== 0 ? HALF_SIGHT.y : HALF_SIGHT.x
+      const brickLookDistance = (brickDirection.x !== 0 ? HALF_SIGHT_SIZE.x : HALF_SIGHT_SIZE.y) - this.killer.radius
+      const sideLookDistance = brickDirection.x !== 0 ? HALF_SIGHT_SIZE.y : HALF_SIGHT_SIZE.x
       const base = Vec2.combine(1, killerPosition, this.killer.radius, brickDirection)
       const sideDirections = [
         Vec2(-brickDirection.y, brickDirection.x),

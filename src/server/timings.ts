@@ -2,7 +2,9 @@ export interface Timings {
   vision?: number
   movement?: number
   explore?: number
-  isVisible?: number
+  '> exploreVisible'?: number
+  '> > isVisible'?: number
+  '> > extra'?: number
   isPointInRange?: number
   sort?: number
   target?: number

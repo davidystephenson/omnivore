@@ -1,8 +1,9 @@
 import { Vec2, Fixture, CircleShape } from 'planck'
 import { Spawner } from './spawner'
+import { HALF_SIGHT_WIDTH } from '../shared/sight'
 
 export class Spawnpoint {
-  static RADIUS = 5
+  static RADIUS = HALF_SIGHT_WIDTH
   spawner: Spawner
   position: Vec2
   fixture: Fixture

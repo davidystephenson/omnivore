@@ -3,11 +3,13 @@ import { Spawnpoint } from './spawnpoint'
 import { Stage } from './stage/stage'
 import { RED, GREEN, Rgb } from '../shared/color'
 import { Obituary, Organism } from './actor/organism'
+import { SIGHT_HEIGHT, SIGHT_WIDTH } from '../shared/sight'
+import { range } from './math'
 
 export class Spawner {
   queue: Obituary[] = []
   stage: Stage
-  spawnPoints: Spawnpoint[] = []
+  spawnpoints: Spawnpoint[] = []
   body: Body
 
   constructor (stage: Stage) {
@@ -34,10 +36,10 @@ export class Spawner {
 
   onStep (): void {
     if (this.stage.flags.spawn) {
-      this.spawnPoints.forEach(point => {
+      this.spawnpoints.forEach(point => {
         const collided = point.collideCount > 0
         const color = collided ? RED : GREEN
-        const transparent = { ...color, alpha: 0.1 }
+        const transparent = { ...color, alpha: 0.5 }
         this.stage.debugCircle({
           circle: new Circle(point.position, Spawnpoint.RADIUS),
           color: transparent
@@ -72,8 +74,8 @@ export class Spawner {
     const respawnable = living && this.queue.length > 0 && needed
     if (respawnable) {
       this.stage.flag({ f: 'spawn', vs: ['respawnQueue.length', this.queue.length] })
-      this.stage.flag({ f: 'spawn', vs: ['spawnPoints.length', this.spawnPoints.length] })
-      const clearSpawnPoints = this.stage.spawner.spawnPoints.filter(spawnPoint => spawnPoint.collideCount < 1)
+      this.stage.flag({ f: 'spawn', vs: ['spawnPoints.length', this.spawnpoints.length] })
+      const clearSpawnPoints = this.stage.spawner.spawnpoints.filter(spawnPoint => spawnPoint.collideCount < 1)
       this.stage.flag({ f: 'spawn', vs: ['clearSpawnPoints.length', clearSpawnPoints.length] })
       if (clearSpawnPoints.length > 0) {
         const first = this.stage.spawner.queue.shift()
@@ -91,21 +93,67 @@ export class Spawner {
   setupSpawnPoints (): void {
     if (this.stage.flags.waypointSpawnpointsGame) {
       const waypointArray = Object.values(this.stage.navigation.waypoints)
-      if (waypointArray == null) {
-        throw new Error('There are no waypoints')
-      }
-      const xMax = Math.round(Math.max(...waypointArray.map(w => Math.abs(w.position.x))))
-      const yMax = Math.round(Math.max(...waypointArray.map(w => Math.abs(w.position.y))))
-      const edgeWaypoints = waypointArray.filter(waypoint => {
-        const xEdge = Math.round(Math.abs(waypoint.position.x)) === xMax
-        const yEdge = Math.round(Math.abs(waypoint.position.y)) === yMax
-        return xEdge || yEdge
+      const xs = waypointArray.map(w => Math.round(w.position.x))
+      const ys = waypointArray.map(w => Math.round(w.position.y))
+      const minimumX = Math.min(...xs)
+      console.log('minimumX', minimumX)
+      const maximumX = Math.max(...xs)
+      console.log('maximumX', maximumX)
+      const minimumY = Math.min(...ys)
+      console.log('minimumY', minimumY)
+      const maximumY = Math.max(...ys)
+      console.log('maximumY', maximumY)
+      const width = maximumX - minimumX
+      console.log('width', width)
+      const height = maximumY - minimumY
+      console.log('height', height)
+      console.log('SIGHT_WIDTH', SIGHT_WIDTH)
+      console.log('SIGHT_HEIGHT', SIGHT_HEIGHT)
+      const xCount = Math.floor(width / SIGHT_WIDTH)
+      console.log('xCount', xCount)
+      const yCount = Math.floor(height / SIGHT_HEIGHT)
+      console.log('yCount', yCount)
+      const xMargin = width / xCount
+      console.log('xMargin', xMargin)
+      const yMargin = height / yCount
+      console.log('yMargin', yMargin)
+      const xRange = range(0, xCount - 1)
+      console.log('xRange', xRange)
+      const yRange = range(0, yCount - 1)
+      console.log('yRange', yRange)
+      const xBase = minimumX + (xMargin / 2)
+      const bottomSpawnpoints = xRange.map(x => {
+        const xPosition = xBase + (x * xMargin)
+        const position = new Vec2(xPosition, minimumY)
+        return new Spawnpoint(this, position)
       })
-      this.spawnPoints = edgeWaypoints.map(waypoint => {
-        return new Spawnpoint(this, waypoint.position)
+      const topSpawnpoints = xRange.map(x => {
+        const xPosition = xBase + (x * xMargin)
+        const position = new Vec2(xPosition, maximumY)
+        return new Spawnpoint(this, position)
       })
+      const yBase = minimumY + (yMargin / 2)
+      const leftSpawnpoints = yRange.map(y => {
+        const yPosition = yBase + (y * yMargin)
+        const position = new Vec2(minimumX, yPosition)
+        return new Spawnpoint(this, position)
+      })
+      const rightSpawnpoints = yRange.map(y => {
+        const yPosition = yBase + (y * yMargin)
+        const position = new Vec2(maximumX, yPosition)
+        return new Spawnpoint(this, position)
+      })
+      this.spawnpoints = [...bottomSpawnpoints, ...topSpawnpoints, ...leftSpawnpoints, ...rightSpawnpoints]
+      // const edgeWaypoints = waypointArray.filter(waypoint => {
+      //   const xEdge = Math.round(Math.abs(waypoint.position.x)) === maximumX || Math.round(Math.abs(waypoint.position.x)) === minimumX
+      //   const yEdge = Math.round(Math.abs(waypoint.position.y)) === maximumY || Math.round(Math.abs(waypoint.position.y)) === minimumY
+      //   return xEdge || yEdge
+      // })
+      // this.spawnpoints = edgeWaypoints.map(waypoint => {
+      //   return new Spawnpoint(this, waypoint.position)
+      // })
     } else {
-      this.spawnPoints = [
+      this.spawnpoints = [
         new Spawnpoint(this, Vec2(5, 5)),
         new Spawnpoint(this, Vec2(15, 15))
       ]

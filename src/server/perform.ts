@@ -42,46 +42,47 @@ function validateMany <Value> (props: {
   })
 }
 
-parseStream.on('data', function (pojo: unknown) {
+parseStream.on('data', function (pojo) {
   console.log('JSON parsed')
-  console.log('Validating promptbook...')
+  console.log('Waypoints.length:', pojo.waypointDatas.length)
+  // console.log('Validating promptbook...')
 
-  const table = tableOfContentsSchema.parse(pojo)
-  console.log('Validated half height:', table.halfHeight)
-  console.log('Validated half width:', table.halfWidth)
-  console.log('Validated radii:', table.radii)
+  // const table = tableOfContentsSchema.parse(pojo)
+  // console.log('Validated half height:', table.halfHeight)
+  // console.log('Validated half width:', table.halfWidth)
+  // console.log('Validated radii:', table.radii)
 
-  const navAreaDefs = validateMany({
-    label: 'navAreaDefs',
-    schema: navAreaDefSchema,
-    value: table.navAreaDefs
-  })
+  // const navAreaDefs = validateMany({
+  //   label: 'navAreaDefs',
+  //   schema: navAreaDefSchema,
+  //   value: table.navAreaDefs
+  // })
 
-  const wallDefs = validateMany({
-    label: 'wallDefs',
-    schema: wallDefSchema,
-    value: table.wallDefs
-  })
+  // const wallDefs = validateMany({
+  //   label: 'wallDefs',
+  //   schema: wallDefSchema,
+  //   value: table.wallDefs
+  // })
 
-  const waypointDatas: WaypointData[] = validateMany({
-    label: 'waypointDatas',
-    schema: waypointDataSchema,
-    value: table.waypointDatas
-  })
+  // const waypointDatas: WaypointData[] = validateMany({
+  //   label: 'waypointDatas',
+  //   schema: waypointDataSchema,
+  //   value: table.waypointDatas
+  // })
 
-  const waypointMatrix = matrixSchema.parse(table.waypointMatrix)
+  // const waypointMatrix = matrixSchema.parse(table.waypointMatrix)
 
-  const promptbook: Promptbook = {
-    ...table,
-    navAreaDefs,
-    wallDefs,
-    waypointDatas,
-    waypointMatrix
-  }
-  console.info('Promptbook validated ')
+  // const promptbook: Promptbook = {
+  //   ...table,
+  //   navAreaDefs,
+  //   wallDefs,
+  //   waypointDatas,
+  //   waypointMatrix
+  // }
+  // console.info('Promptbook validated ')
 
   void new Performer({
-    promptbook
+    promptbook: pojo
   })
 })
 

@@ -1,5 +1,5 @@
 
-import { HALF_SIGHT } from '../shared/sight'
+import { HALF_SIGHT_SIZE } from '../shared/sight'
 import { Feature } from './feature/feature'
 import { Vec2, CircleShape, PolygonShape, Fixture } from 'planck'
 import { Stage } from './stage/stage'
@@ -17,8 +17,8 @@ export class Vision {
   }
 
   isPointInRange (sourcePoint: Vec2, targetPoint: Vec2): boolean {
-    const upper = Vec2.add(sourcePoint, HALF_SIGHT)
-    const lower = Vec2.sub(sourcePoint, HALF_SIGHT)
+    const upper = Vec2.add(sourcePoint, HALF_SIGHT_SIZE)
+    const lower = Vec2.sub(sourcePoint, HALF_SIGHT_SIZE)
     const xInside = lower.x <= targetPoint.x && targetPoint.x <= upper.x
     const yInside = lower.y <= targetPoint.y && targetPoint.y <= upper.y
     return xInside && yInside
@@ -50,7 +50,7 @@ export class Vision {
     const isPointInRangeStart = performance.now()
     const inRange = this.isPointInRange(sourcePoint, targetPoint)
     this.stage.runner.endTiming({
-      key: 'isVisible',
+      key: 'isPointInRange',
       start: isPointInRangeStart
     })
     if (!inRange) {
@@ -184,7 +184,7 @@ export class Vision {
   }
 
   getFirstHit (rayStart: Vec2, direction: Vec2, excludeIds?: number[]): RayCastHit {
-    const rayEnd = Vec2.combine(1, rayStart, 2 * HALF_SIGHT.x, direction)
+    const rayEnd = Vec2.combine(1, rayStart, 2 * HALF_SIGHT_SIZE.x, direction)
     const hits = this.rayCast(rayStart, rayEnd, excludeIds)
     const legitHits = hits.filter(hit => {
       if (hit.feature == null) return false

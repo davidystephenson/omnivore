@@ -15,6 +15,7 @@ import { Player } from './player'
 import { Waypoint } from '../waypoint'
 import { Food } from './food'
 import { Tree } from './tree'
+import { SIGHT } from '../../shared/sight'
 
 export interface OrganismSpawn {
   color: Rgb
@@ -45,6 +46,7 @@ export class Organism extends Actor {
     cancel: false
   }
 
+  visibleWaypoints: Waypoint[] = []
   explorationIds: number[]
   explorationPoints: ExplorationPoint[] = []
   dead = false
@@ -86,12 +88,11 @@ export class Organism extends Actor {
       const isSmallRadius = waypoint.radius === validRadius
       if (isGrid || isSmallRadius) {
         const position = waypoint.position
-        const id = this.explorationPoints.length
-        const explorationPoint = new ExplorationPoint({ position, id })
-        this.explorationPoints.push(explorationPoint)
+        const explorationPoint = new ExplorationPoint({ position, id: waypoint.id })
+        this.explorationPoints[waypoint.id] = explorationPoint
       }
     })
-    this.explorationIds = range(0, this.explorationPoints.length - 1)
+    this.explorationIds = this.explorationPoints.map(p => p.id)
     this.sortExplorationPoints()
     this.giveUpTime = 30 / this.gene.speed
   }
@@ -300,16 +301,46 @@ export class Organism extends Actor {
   }
 
   explore (stepSize: number): void {
-    const isVisibleStart = performance.now()
+    const exploreVisibleStart = performance.now()
     this.giveUpTimer += stepSize
     const position = this.membrane.body.getPosition()
-    this.explorationPoints.forEach(point => {
-      const visible = this.stage.vision.isVisible(position, point.position)
-      point.visible = visible
-      if (visible) point.time = Date.now()
+    const i = position.x / this.stage.navigation.xStep
+    const j = position.y / this.stage.navigation.yStep
+    const iMin = Math.floor(i - SIGHT.halfWidth / this.stage.navigation.xStep)
+    const iMax = Math.ceil(i + SIGHT.halfWidth / this.stage.navigation.xStep)
+    const jMin = Math.floor(j - SIGHT.halfHeight / this.stage.navigation.yStep)
+    const jMax = Math.ceil(j + SIGHT.halfHeight / this.stage.navigation.yStep)
+    this.visibleWaypoints = []
+    range(iMin, iMax).forEach(i => {
+      const row = this.stage.navigation.waypointMatrix[i]
+      if (row == null) return
+      range(jMin, jMax).forEach(j => {
+        const waypoint = row[j]
+        if (waypoint == null) return
+        this.visibleWaypoints.push(waypoint)
+      })
     })
+    this.visibleWaypoints.forEach(waypoint => {
+      const explorationPoint = this.explorationPoints[waypoint.id]
+      this.stage.checkCount += 1
+      const isVisibleStart = performance.now()
+      this.stage.runner.endTiming({
+        key: '> > isVisible', start: isVisibleStart
+      })
+      explorationPoint.time = Date.now()
+    })
+    // this.explorationPoints.forEach(point => {
+    //   this.stage.checkCount += 1
+    //   const isVisibleStart = performance.now()
+    //   const visible = this.stage.vision.isVisible(position, point.position)
+    //   this.stage.runner.endTiming({
+    //     key: '> > isVisible', start: isVisibleStart
+    //   })
+    //   point.visible = visible
+    //   if (visible) point.time = Date.now()
+    // })
     const isVisibleEnd = this.stage.runner.endTiming({
-      key: 'isVisible', start: isVisibleStart
+      key: '> exploreVisible', start: exploreVisibleStart
     })
     const targetPoint = this.explorationPoints[this.explorationIds[0]]
     const targetVisible = this.stage.vision.isVisible(position, targetPoint.position)
@@ -358,7 +389,9 @@ export class Organism extends Actor {
     }
     const blocked = hitArrays[0].length > 0 || hitArrays[1].length > 0
     if (blocked) {
-      const visibleExplorationPoints = this.explorationPoints.filter(point => point.visible)
+      const visibleExplorationPoints = this.visibleWaypoints.map(waypoint => {
+        return this.explorationPoints[waypoint.id]
+      })
       const directions = visibleExplorationPoints.map(point => directionFromTo(myPosition, point.position))
       const dotProducts = directions.map(direction => Vec2.dot(direction, dirFromEnemy))
       if (directions.length === 0) return PINK
