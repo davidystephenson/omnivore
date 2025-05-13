@@ -37,7 +37,7 @@ export class Performer extends Server {
       const player = this.playhouse.addPlayer({
         color: GREEN,
         id: socket.id,
-        gene: this.playhouse.flyGene,
+        gene: this.playhouse.balancedGene,
         position: Vec2(0, 0)
       })
       if (player.organism == null) {

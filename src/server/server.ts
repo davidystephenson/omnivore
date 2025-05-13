@@ -46,7 +46,7 @@ export class Server {
       const player = this.playhouse.addPlayer({
         color: GREEN,
         id: socket.id,
-        gene: this.playhouse.flyGene,
+        gene: this.playhouse.hunterGene,
         position: Vec2(0, 0)
       })
       if (player.organism == null) {
