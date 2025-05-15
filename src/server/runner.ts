@@ -176,10 +176,11 @@ export class Runner {
     this.fps = 1000 / difference
     this.timing = this.stepCount % this.stepCountInterval === 0
     if (this.stage.flags.performance && this.timing) {
+      console.time('step')
       const fpsString = this.fps.toFixed(2)
       console.info('fps', fpsString, `(${this.stepCount} steps)`)
       const msString = difference.toFixed(2)
-      console.info('ms', msString)
+      console.info(msString, 'ms since the start of the last step')
     }
     this.worldTime += this.timeStep
     const bodies = this.getBodies()
@@ -189,6 +190,9 @@ export class Runner {
       body.applyForceToCenter(feature.force)
     })
     const stepSize = this.timeStep * this.timeScale
+    if (this.stage.flags.performance && this.timing) {
+      console.time('grow')
+    }
     this.stage.actors.forEach(actor => {
       if (actor instanceof Tree) {
         actor.grow(stepSize)
@@ -197,13 +201,14 @@ export class Runner {
         if (actor.membrane.collideFeatures.size === 0) actor.membrane.grow(stepSize)
       }
     })
-    const worldStepBefore = performance.now()
-    this.stage.world.step(stepSize)
-    const worldStepAfter = performance.now()
     if (this.stage.flags.performance && this.timing) {
-      const worldStepDifference = worldStepAfter - worldStepBefore
-      const worldStepDifferenceString = worldStepDifference.toFixed(2)
-      console.info('planck', worldStepDifferenceString)
+      console.timeEnd('grow')
+      console.time('planck')
+    }
+    this.stage.world.step(stepSize)
+    if (this.stage.flags.performance && this.timing) {
+      console.timeEnd('planck')
+      console.time('preStage')
       const bodyCount = this.stage.world.getBodyCount()
       console.info('bodyCount', bodyCount)
       const fixtureCount = this.getFixtures().length
@@ -213,17 +218,21 @@ export class Runner {
     }
     this.debugLines = []
     this.debugCircles = []
-    if (this.stage.flags.performance && this.timing) {
-      console.time('stageStep')
-    }
+
     this.timings = {}
+    if (this.stage.flags.performance && this.timing) {
+      console.timeEnd('preStage')
+      console.time('stage')
+    }
     this.stage.onStep({ stepSize })
 
     if (this.stage.flags.performance && this.timing) {
+      console.timeEnd('stage')
+      console.time('postStage')
       if (this.stage.flags.timings) {
         // this.debugTiming({ key: 'vision' })
         // this.debugTiming({ key: 'movement' })
-        // this.debugTiming({ key: 'explore' })
+        this.debugTiming({ key: 'explore' })
         this.debugTiming({ key: '> exploreVisible' })
         this.debugTiming({ key: '> > isVisible' })
         // this.debugTiming({ key: 'maneuver' })
@@ -245,19 +254,20 @@ export class Runner {
         organisms.push(actor)
       })
       this.stage.flag({ f: 'organismsCount', k: 'organismsCount', v: organisms.length })
-      const familyCounts: Record<string, number> = {}
       const entries = [...this.stage.families.entries()]
-      entries.forEach((entry) => {
-        familyCounts[entry[0]] = entry[1].length
-      })
-      console.log('familyCounts', familyCounts)
-      const botCount = sum(Object.values(familyCounts))
-      console.log('botCount', botCount)
-      console.log('checkCount', this.stage.checkCount)
+      const labels = entries.map(entry => `${entry[0]}:${entry[1].length}`)
+      const familiesLabel = labels.join(',')
+      console.info('families', familiesLabel)
+      const botCount = sum(entries.map(entry => entry[1].length))
+      console.info('botCount', botCount)
+      console.info('checkCount', this.stage.checkCount)
       const checksPerBot = this.stage.checkCount / botCount
-      console.log('checksPerBot', checksPerBot)
-      console.timeEnd('stageStep')
+      console.info('checksPerBot', checksPerBot)
     }
     this.features = this.getFeatures()
+    if (this.stage.flags.performance && this.timing) {
+      console.timeEnd('postStage')
+      console.timeEnd('step')
+    }
   }
 }

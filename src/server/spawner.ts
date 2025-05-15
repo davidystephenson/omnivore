@@ -96,31 +96,17 @@ export class Spawner {
       const xs = waypointArray.map(w => Math.round(w.position.x))
       const ys = waypointArray.map(w => Math.round(w.position.y))
       const minimumX = Math.min(...xs)
-      console.log('minimumX', minimumX)
       const maximumX = Math.max(...xs)
-      console.log('maximumX', maximumX)
       const minimumY = Math.min(...ys)
-      console.log('minimumY', minimumY)
       const maximumY = Math.max(...ys)
-      console.log('maximumY', maximumY)
       const width = maximumX - minimumX
-      console.log('width', width)
       const height = maximumY - minimumY
-      console.log('height', height)
-      console.log('SIGHT_WIDTH', SIGHT_WIDTH)
-      console.log('SIGHT_HEIGHT', SIGHT_HEIGHT)
       const xCount = Math.floor(width / SIGHT_WIDTH)
-      console.log('xCount', xCount)
       const yCount = Math.floor(height / SIGHT_HEIGHT)
-      console.log('yCount', yCount)
       const xMargin = width / xCount
-      console.log('xMargin', xMargin)
       const yMargin = height / yCount
-      console.log('yMargin', yMargin)
       const xRange = range(0, xCount - 1)
-      console.log('xRange', xRange)
       const yRange = range(0, yCount - 1)
-      console.log('yRange', yRange)
       const xBase = minimumX + (xMargin / 2)
       const bottomSpawnpoints = xRange.map(x => {
         const xPosition = xBase + (x * xMargin)

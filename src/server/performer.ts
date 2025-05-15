@@ -18,6 +18,7 @@ export class Performer extends Server {
   constructor (props: {
     promptbook: Promptbook
   }) {
+    console.info('Playhouse half size:', props.promptbook.halfWidth, 'x', props.promptbook.halfHeight)
     const production = new PublicProduction({
       promptbook: props.promptbook
     })

@@ -98,7 +98,7 @@ export class Renderer {
     this.context.fillStyle = 'white'
     this.context.font = '50px Arial'
     this.context.fillText(String(this.summary.age), 10, 60)
-    if (this.summary.respawn != null) {
+    if (this.summary.respawn != null && this.summary.respawn > -1) {
       this.context.fillText(`Respawning... ${String(this.summary.respawn)}`, 10, this.canvas.height * 0.95)
     }
   }

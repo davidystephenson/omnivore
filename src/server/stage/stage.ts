@@ -393,12 +393,11 @@ export class Stage {
     this.families = new Map()
     this.actors.forEach(actor => {
       if (!(actor instanceof Organism)) return
-      const label = `${actor.color.red},${actor.color.green},${actor.color.blue}`
-      const family = this.families.get(label)
+      const family = this.families.get(actor.color.label)
       if (family != null) {
         family.push(actor)
       } else {
-        this.families.set(label, [actor])
+        this.families.set(actor.color.label, [actor])
       }
     })
   }
