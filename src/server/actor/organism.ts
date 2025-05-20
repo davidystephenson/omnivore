@@ -358,6 +358,14 @@ export class Organism extends Actor {
   flee (enemy: Feature): Rgb {
     const fleeStart = performance.now()
     const fleeDir = this.getFleeDir(enemy)
+    if (this.stage.flags.botFlee) {
+      this.stage.debugLine({
+        a: this.membrane.position,
+        b: Vec2.combine(1, this.membrane.position, 2, fleeDir),
+        color: PINK,
+        width: 0.2
+      })
+    }
     this.setControls(fleeDir)
     this.stage.runner.endTiming({ key: 'flee', start: fleeStart })
     return PINK
@@ -475,8 +483,12 @@ export class Organism extends Actor {
         return dirFromEnemy
       }
       const openCardinalDots = openCardinals.map(c => Vec2.dot(c, dirFromEnemy))
-      const cornerFleeDir = openCardinals[whichMax(openCardinalDots)]
-      return cornerFleeDir
+      const bestCardinalDir = openCardinals[whichMax(openCardinalDots)]
+      const blockedHits = hits.filter(hit => this.isHitBlocked({ hit }))
+      const blockPoint = blockedHits.flat()[0].point
+      const unblockDir = directionFromTo(blockPoint, myPosition)
+      const trappedFleeDir = Vec2.combine(0.5, bestCardinalDir, 0.5, unblockDir)
+      return trappedFleeDir
     }
     return dirFromEnemy
   }

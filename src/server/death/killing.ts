@@ -1,11 +1,12 @@
-import { AABB, Vec2 } from 'planck'
+import { AABB, CircleShape, Fixture, Vec2 } from 'planck'
 import { HALF_SIGHT_SIZE } from '../../shared/sight'
 import { Membrane } from '../feature/membrane'
 import { directionFromTo, getCompass, whichMax } from '../math'
 import { Stage } from '../stage/stage'
 import { Death } from './death'
 import { River } from '../actor/river'
-import { GREEN, RED } from '../../shared/color'
+import { COLOR, GREEN, RED } from '../../shared/color'
+import { Feature } from '../feature/feature'
 // import { Feature } from '../feature/feature'
 
 export class Killing extends Death {
@@ -20,15 +21,53 @@ export class Killing extends Death {
     if (this.stage.flags.killingGame) {
       this.stage.flag({ f: 'death', v: 'Killing.execute' })
       const killerPosition = this.killer.body.getPosition()
-      console.log('killerPosition', killerPosition)
-      console.log('this.victim.deathPosition', this.victim.deathPosition)
-      const spawnDirection = Vec2.sub(killerPosition, this.victim.deathPosition)
-      console.log('spawnDirection', spawnDirection)
+      const spawnDirection = directionFromTo(killerPosition, this.victim.deathPosition)
       const brickDirection = getCompass(spawnDirection)
-      console.log('brickDirection', brickDirection)
       const brickLookDistance = (brickDirection.x !== 0 ? HALF_SIGHT_SIZE.x : HALF_SIGHT_SIZE.y) - this.killer.radius
       const sideLookDistance = brickDirection.x !== 0 ? HALF_SIGHT_SIZE.y : HALF_SIGHT_SIZE.x
-      const base = Vec2.combine(1, killerPosition, this.killer.radius, brickDirection)
+      const base = Vec2.combine(1, this.victim.deathPosition, this.victim.radius, brickDirection)
+      const checkPoint = Vec2.combine(1, this.victim.deathPosition, this.victim.radius + 0.2, brickDirection)
+      const checkBox = new AABB(Vec2.sub(checkPoint, new Vec2(0.01, 0.01)), Vec2.add(checkPoint, new Vec2(0.01, 0.01)))
+      let blocker = false as Feature | false
+      let blocked = false
+      this.stage.world.queryAABB(checkBox, (fixture: Fixture): boolean => {
+        const test = fixture.testPoint(checkPoint)
+        if (!test) return true
+        const feature = fixture.getUserData()
+        if (fixture.isSensor()) return true
+        if (!(feature instanceof Feature)) {
+          throw new Error('Fixture data is not a Feature')
+        }
+        if (this.stage.flags.death || this.stage.flags.killing) {
+          console.log('feature.label', feature.label)
+          console.log('feature.actor.label', feature.actor.label)
+          if (feature instanceof Membrane) {
+            console.log('feature.actor.player', feature.actor.player != null)
+            console.log('feature.actor.color', feature.actor.color)
+          }
+        }
+        blocker = feature
+        blocked = true
+        return false
+      })
+      if (blocked) {
+        if (this.killer.actor.player != null && (this.stage.flags.death || this.stage.flags.killing)) {
+          if (!(blocker instanceof Feature)) {
+            throw new Error('Blocker is not defined')
+          }
+          this.stage.debugBox({
+            box: checkBox,
+            color: COLOR.RED
+          })
+          const circle = new CircleShape(blocker.body.getPosition(), 0.2)
+          this.stage.debugCircle({
+            circle,
+            color: COLOR.RED
+          })
+          this.stage.runner.paused = true
+        }
+        return
+      }
       const sideDirections = [
         Vec2(-brickDirection.y, brickDirection.x),
         Vec2(brickDirection.y, -brickDirection.x)

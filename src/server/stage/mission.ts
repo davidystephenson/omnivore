@@ -29,8 +29,8 @@ export class Mission extends Walled {
         // waypointSpawnpointsY: false
         // waypoints: true
       }),
-      halfHeight: 7,
-      halfWidth: 30
+      halfHeight: 5,
+      halfWidth: 10
     })
     // this.addWall({
     //   position: Vec2(5, 0),
@@ -42,7 +42,6 @@ export class Mission extends Walled {
     this.spawner.setupSpawnPoints()
     const trisolaran = this.addTrisolaran({ position: Vec2(25, 0) })
     trisolaran.membrane.hungerDamage = 0.99
-    // this.addFruit({ position: Vec2(-5, 0) })
 
     // this.addBrick({ position: Vec2(20, -20), halfHeight: 5, halfWidth: 5 })
     // this.addBrick({ position: Vec2(25, -20), halfHeight: 1, halfWidth: 1 })

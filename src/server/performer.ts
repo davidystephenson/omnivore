@@ -48,7 +48,7 @@ export class Performer extends Server {
       if (player.organism == null) {
         throw new Error('player.organism is undefined')
       }
-      player.organism.membrane.hungerDamage = 0.5
+      // player.organism.membrane.hungerDamage = 0.5
       socket.on('controls', (controls: Controls) => {
         if (player.organism != null) {
           player.organism.controls = controls
