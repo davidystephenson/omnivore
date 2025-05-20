@@ -16,8 +16,8 @@ function parse <Value> (props: {
     return result.data
   }
   const label = `Invalid ${props.label}`
-  console.log(label)
-  console.log(result.error.issues[0])
+  console.info(label)
+  console.info(result.error.issues[0])
   throw new Error()
 }
 
@@ -36,21 +36,21 @@ function validateMany <Value> (props: {
       schema: props.schema
     })
     if (index !== 0 && index % 100 === 0) {
-      console.log(`Validated ${index}/${props.value.length} ${props.label}`)
+      console.info(`Validated ${index}/${props.value.length} ${props.label}`)
     }
     return parsed
   })
 }
 
 parseStream.on('data', function (pojo) {
-  console.log('JSON parsed')
-  console.log('Waypoints.length:', pojo.waypointDatas.length)
-  // console.log('Validating promptbook...')
+  console.info('JSON parsed')
+  console.info('Waypoints.length:', pojo.waypointDatas.length)
+  // console.info('Validating promptbook...')
 
   // const table = tableOfContentsSchema.parse(pojo)
-  // console.log('Validated half height:', table.halfHeight)
-  // console.log('Validated half width:', table.halfWidth)
-  // console.log('Validated radii:', table.radii)
+  // console.info('Validated half height:', table.halfHeight)
+  // console.info('Validated half width:', table.halfWidth)
+  // console.info('Validated radii:', table.radii)
 
   // const navAreaDefs = validateMany({
   //   label: 'navAreaDefs',
@@ -86,31 +86,31 @@ parseStream.on('data', function (pojo) {
   })
 })
 
-console.log('Reading promptbook...')
+console.info('Reading promptbook...')
 const readStream = fs.createReadStream('input.json')
 
 readStream.on('open', () => {
-  console.log('Promptbook opened')
+  console.info('Promptbook opened')
 })
 
 readStream.on('close', () => {
-  console.log('Promptbook closed')
+  console.info('Promptbook closed')
 })
 
 let index = 0
 readStream.on('data', (chunk) => {
   if (index === 0 || index % 100 === 0) {
-    console.log('Prompt', index, 'is', chunk.length, 'long')
+    console.info('Prompt', index, 'is', chunk.length, 'long')
   }
   index++
 })
 
 readStream.on('ready', () => {
-  console.log('Promptbook ready')
+  console.info('Promptbook ready')
 })
 
 readStream.on('end', () => {
-  console.log('Promptbook read')
+  console.info('Promptbook read')
 })
 
 readStream.on('error', (error) => {

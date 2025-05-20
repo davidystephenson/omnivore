@@ -9,7 +9,7 @@ import { HALF_SIGHT_SIZE } from '../../shared/sight'
 let featureCount = 0
 
 export class Feature {
-  static MINIMUM_DAMAGE = 0
+  static MINIMUM_DAMAGE = 0.0000001
   static DAMPING = 0.05
   actor: Actor
   body: Body
@@ -43,18 +43,22 @@ export class Feature {
   constructor (props: {
     bodyDef: BodyDef
     fixtureDef: FixtureDef
+    health?: number
     label?: string
     actor: Actor
     color: Rgb
     borderWidth?: number
   }) {
+    this.label = props.label ?? this.label
     this.actor = props.actor
     this.health = this.maximumHealth
     this.body = this.actor.stage.world.createBody(props.bodyDef)
     this.position = this.body.getPosition()
     this.body.setUserData(this)
-    this.label = props.label ?? this.label
     this.fixture = this.body.createFixture(props.fixtureDef)
+    this.combatDamage = props.health == null
+      ? 0
+      : this.maximumHealth - props.health
     this.fixture.setUserData(this)
     featureCount += 1
     this.id = featureCount
@@ -86,38 +90,29 @@ export class Feature {
   }): void {
     this.actor.stage.flag({ f: 'damage', k: 'attacker', v: this.label })
     this.actor.stage.flag({ f: 'damage', k: 'target', v: props.target.label })
-    const damageDealt = props.damage ?? this.getDamageDealt(props.target) * (props.multiplier ?? 1)
+    const damageDealt = props.damage ?? this.getDamageDealt({ multiplier: props.multiplier, target: props.target })
     this.actor.stage.flag({ f: 'damage', k: 'damageDealt', v: damageDealt })
     if (damageDealt < Feature.MINIMUM_DAMAGE) {
       const message = `combatDamage < Feature.MINIMUM_DAMAGE: ${damageDealt}`
       throw new Error(message)
     }
-    const oldHealth = props.target.getHealth()
-    if (oldHealth > 1) {
-      const message = `oldHealth > 1: ${oldHealth}`
-      throw new Error(message)
-    }
-    props.target.combatDamage += damageDealt
-    props.target.health = props.target.getHealth()
-    if (props.target.health > oldHealth - Feature.MINIMUM_DAMAGE + 0.001) {
-      const message = `Invalid target.health: ${props.target.health} > ${oldHealth} - ${Feature.MINIMUM_DAMAGE}`
-      throw new Error(message)
-    }
-    if (props.target.health <= 0) {
-      props.target.succumb({ killer: this })
-    }
+    props.target.takeDamage({ damage: damageDealt })
   }
 
   destroy (): void {
     this.actor.stage.destructionQueue.push(this.body)
   }
 
-  getDamageDealt (target: Feature): number {
+  getDamageDealt (props: { multiplier?: number, target: Feature }): number {
+    const multiplier = props.multiplier ?? 1
+    this.actor.stage.flag({ f: 'damage', k: 'multiplier', v: multiplier })
     const myMass = this.body.getMass()
-    this.actor.stage.flag({ f: 'damage', k: 'myMass', v: 'myMass' })
-    const targetMass = target.body.getMass()
+    this.actor.stage.flag({ f: 'damage', k: 'myMass', v: myMass })
+    const multipliedMass = myMass * multiplier
+    this.actor.stage.flag({ f: 'damage', k: 'multipliedMass', v: multipliedMass })
+    const targetMass = props.target.body.getMass()
     this.actor.stage.flag({ f: 'damage', k: 'targetMass', v: targetMass })
-    const ratio = myMass / targetMass
+    const ratio = multipliedMass / targetMass
     const factor = 5
     const combatDamage = 0.1 * Math.pow(ratio, factor)
     if (combatDamage < Feature.MINIMUM_DAMAGE) {
@@ -193,7 +188,7 @@ export class Feature {
 
   handleContact (props: {
     target: Feature
-  }): void {}
+  }): void { }
 
   handleContacts (): void {
     this.contacts.forEach(target => {
@@ -213,5 +208,24 @@ export class Feature {
     killer: Feature
   }): void {
     this.actor.destroy()
+  }
+
+  takeDamage (props: {
+    damage: number
+  }): void {
+    const oldHealth = this.getHealth()
+    if (oldHealth > 1) {
+      const message = `oldHealth > 1: ${oldHealth}`
+      throw new Error(message)
+    }
+    this.combatDamage += props.damage
+    this.health = this.getHealth()
+    if (this.health > oldHealth - Feature.MINIMUM_DAMAGE + 0.001) {
+      const message = `Invalid target.health: ${this.health} > ${oldHealth} - ${Feature.MINIMUM_DAMAGE}`
+      throw new Error(message)
+    }
+    if (this.health <= 0) {
+      this.succumb({ killer: this })
+    }
   }
 }

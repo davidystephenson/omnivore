@@ -12,6 +12,20 @@ export class Playhouse extends Stage {
     strength: 0.33
   })
 
+  bruteGene = new Gene({
+    speed: 0,
+    stage: this,
+    stamina: 0,
+    strength: 1
+  })
+
+  bruteVictimGene = new Gene({
+    speed: 0.0,
+    stamina: 0.01,
+    strength: 0.99,
+    stage: this
+  })
+
   bullyGene = new Gene({
     speed: 0.33,
     stage: this,
@@ -40,32 +54,27 @@ export class Playhouse extends Stage {
     strength: 0
   })
 
-  trisolaranGene = new Gene({
-    speed: 0,
-    stage: this,
-    stamina: 1,
-    strength: 0
-  })
-
-  bruteGene = new Gene({
-    speed: 0,
+  flyBullyGene = new Gene({
+    speed: 0.99,
     stage: this,
     stamina: 0,
-    strength: 1
+    strength: 0.01
   })
 
-  bruteVictimGene = new Gene({
-    speed: 0.0,
-    stamina: 0.01,
-    strength: 0.99,
-    stage: this
-  })
+  playerGene = this.balancedGene
 
   trapperGene = new Gene({
     speed: 0,
     stage: this,
     stamina: 0.5,
     strength: 0.5
+  })
+
+  trisolaranGene = new Gene({
+    speed: 0,
+    stage: this,
+    stamina: 1,
+    strength: 0
   })
 
   addBalanced (props: {

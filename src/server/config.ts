@@ -14,7 +14,7 @@ export class Config {
       if (typeof json.port === 'number') this.port = json.port
       if (typeof json.secure === 'boolean') this.secure = json.secure
     }
-    console.log('port:', this.port)
-    console.log('secure:', this.secure)
+    console.info('port:', this.port)
+    console.info('secure:', this.secure)
   }
 }

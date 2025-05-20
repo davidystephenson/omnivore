@@ -9,10 +9,10 @@ class Data {
 }
 
 const file = fs.readFileSync('./test.json', 'utf-8')
-console.log('file', file)
+console.info('file', file)
 
 const data: unknown = JSON.parse(file)
 if (!(data instanceof Data)) {
   throw new Error('not data')
 }
-console.log('data', data)
+console.info('data', data)

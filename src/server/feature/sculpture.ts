@@ -9,6 +9,7 @@ export class Sculpture extends Prop {
   constructor (props: {
     actor: Actor
     color?: Rgb
+    health?: number
     label?: string
     position: Vec2
     vertices: Vec2[]
@@ -17,6 +18,7 @@ export class Sculpture extends Prop {
     super({
       position: props.position,
       actor: props.actor,
+      health: props.health,
       shape: new PolygonShape(props.vertices),
       color: props.color,
       label

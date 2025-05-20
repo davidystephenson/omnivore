@@ -10,16 +10,20 @@ export class Crate extends Prop {
     angle?: number
     halfWidth: number
     halfHeight: number
+    health?: number
     position: Vec2
   }) {
     const color = props.color ?? CYAN
-    const shape = new BoxShape(props.halfWidth, props.halfHeight, Vec2(0, 0), props.angle)
+    const shape = new BoxShape(
+      props.halfWidth, props.halfHeight, Vec2(0, 0), props.angle
+    )
     super({
-      position: props.position,
       actor: props.actor,
-      shape,
       color,
-      label: 'crate'
+      health: props.health,
+      label: 'crate',
+      position: props.position,
+      shape
     })
   }
 }

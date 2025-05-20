@@ -356,58 +356,8 @@ export class Organism extends Actor {
 
   flee (enemy: Feature): Rgb {
     const fleeStart = performance.now()
-    const enemyPosition = enemy.body.getPosition()
-    const myPosition = this.membrane.body.getPosition()
-    const dirFromEnemy = directionFromTo(enemyPosition, myPosition)
-    const perps = [
-      rotate(dirFromEnemy, +0.5 * Math.PI),
-      rotate(dirFromEnemy, -0.5 * Math.PI)
-    ]
-    const sidePoints = perps.map(perp => {
-      return Vec2.combine(1, myPosition, this.membrane.radius, perp)
-    })
-    const lookDistance = 4
-    const lookPoints = sidePoints.map(sidePoint => {
-      return Vec2.combine(1, sidePoint, lookDistance, dirFromEnemy)
-    })
-    const rays = sidePoints.map((sidePoint, i) => {
-      return [sidePoint, lookPoints[i]]
-    })
-    const hitArrays = rays.map(ray => {
-      return this.stage.vision.rayCast(ray[0], ray[1])
-    })
-    if (this.stage.flags.botFlee) {
-      hitArrays.forEach((hitArray, i) => {
-        const color = hitArray.length === 0 ? WHITE : RED
-        this.stage.debugLine({
-          a: sidePoints[i],
-          b: lookPoints[i],
-          color,
-          width: 0.2
-        })
-      })
-    }
-    const blocked = hitArrays[0].length > 0 || hitArrays[1].length > 0
-    if (blocked) {
-      const visibleExplorationPoints = this.visibleWaypoints.map(waypoint => {
-        return this.explorationPoints[waypoint.id]
-      })
-      const directions = visibleExplorationPoints.map(point => directionFromTo(myPosition, point.position))
-      const dotProducts = directions.map(direction => Vec2.dot(direction, dirFromEnemy))
-      if (directions.length === 0) return PINK
-      const fleeDir = directions[whichMax(dotProducts)]
-      this.setControls(fleeDir)
-      if (this.stage.flags.botFlee) {
-        this.stage.debugLine({
-          a: myPosition,
-          b: Vec2.combine(1, myPosition, 2, fleeDir),
-          color: GREEN,
-          width: 0.4
-        })
-      }
-      return PINK
-    }
-    this.setControls(dirFromEnemy)
+    const fleeDir = this.getFleeDir(enemy)
+    this.setControls(fleeDir)
     this.stage.runner.endTiming({ key: 'flee', start: fleeStart })
     return PINK
   }
@@ -439,6 +389,92 @@ export class Organism extends Actor {
     const hx = 0.5 * (right - left)
     const hy = 0.5 * (top - bottom)
     return new Egg({ actor: this, position, hx, hy })
+  }
+
+  getFleeDir (enemy: Feature): Vec2 {
+    const enemyPosition = enemy.body.getPosition()
+    const myPosition = this.membrane.body.getPosition()
+    const dirFromEnemy = directionFromTo(enemyPosition, myPosition)
+    const perps = [
+      rotate(dirFromEnemy, +0.5 * Math.PI),
+      rotate(dirFromEnemy, -0.5 * Math.PI)
+    ]
+    const sidePoints = perps.map(perp => {
+      return Vec2.combine(1, myPosition, this.membrane.radius, perp)
+    })
+    const LOOK_DISTANCE = 4
+    const lookPoints = sidePoints.map(sidePoint => {
+      return Vec2.combine(1, sidePoint, LOOK_DISTANCE, dirFromEnemy)
+    })
+    const rays = sidePoints.map((sidePoint, i) => {
+      return [sidePoint, lookPoints[i]]
+    })
+    const hitArrays = rays.map(ray => {
+      return this.stage.vision.rayCast(ray[0], ray[1])
+    })
+    if (this.stage.flags.botFlee) {
+      hitArrays.forEach((hitArray, i) => {
+        const color = hitArray.length === 0 ? WHITE : RED
+        this.stage.debugLine({
+          a: sidePoints[i],
+          b: lookPoints[i],
+          color,
+          width: 0.2
+        })
+      })
+    }
+    const blocked = hitArrays[0].length > 0 || hitArrays[1].length > 0
+    if (blocked) {
+      const cardinals = [
+        new Vec2(0, 1),
+        new Vec2(0, -1),
+        new Vec2(1, 0),
+        new Vec2(-1, 0)
+      ]
+      const cardinalDots = cardinals.map(c => Vec2.dot(c, dirFromEnemy))
+      const wallDir = cardinals[whichMax(cardinalDots)]
+      const options = [
+        rotate(wallDir, 0.6 * Math.PI),
+        rotate(wallDir, -0.6 * Math.PI)
+      ]
+      const optionDots = options.map(o => Vec2.dot(o, dirFromEnemy))
+      const flatFleeDir = options[whichMax(optionDots)]
+      const lookPoint = Vec2.combine(1, myPosition, LOOK_DISTANCE, flatFleeDir)
+      const flatFleeHits = this.stage.vision.rayCast(myPosition, lookPoint)
+      if (this.stage.flags.botFlee) {
+        const color = flatFleeHits.length === 0 ? WHITE : RED
+        this.stage.debugLine({
+          a: myPosition,
+          b: lookPoint,
+          color,
+          width: 0.2
+        })
+      }
+      if (flatFleeHits.length === 0) {
+        return flatFleeDir
+      }
+      const openCardinals = cardinals.filter(cardinal => {
+        const cardinalPoint = Vec2.combine(1, myPosition, LOOK_DISTANCE, cardinal)
+        const cardinalHits = this.stage.vision.rayCast(myPosition, cardinalPoint)
+        if (this.stage.flags.botFlee) {
+          const color = cardinalHits.length === 0 ? WHITE : RED
+          this.stage.debugLine({
+            a: myPosition,
+            b: cardinalPoint,
+            color,
+            width: 0.2
+          })
+        }
+        return cardinalHits.length === 0
+      })
+      if (openCardinals.length === 0) {
+        return dirFromEnemy
+      }
+      const openCardinalDots = openCardinals.map(c => Vec2.dot(c, dirFromEnemy))
+      const cornerFleeDir = openCardinals[whichMax(openCardinalDots)]
+      return cornerFleeDir
+    }
+    return dirFromEnemy
   }
 
   getOffset (props: { parent: Membrane, gene: Gene }): Vec2 {

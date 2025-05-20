@@ -5,6 +5,8 @@ import { RED, GREEN, Rgb } from '../shared/color'
 import { Obituary, Organism } from './actor/organism'
 import { SIGHT_HEIGHT, SIGHT_WIDTH } from '../shared/sight'
 import { range } from './math'
+import { Prop } from './feature/prop'
+import { Debris } from './actor/debris'
 
 export class Spawner {
   queue: Obituary[] = []
@@ -39,7 +41,7 @@ export class Spawner {
       this.spawnpoints.forEach(point => {
         const collided = point.collideCount > 0
         const color = collided ? RED : GREEN
-        const transparent = { ...color, alpha: 0.5 }
+        const transparent = { ...color, alpha: 0.1 }
         this.stage.debugCircle({
           circle: new Circle(point.position, Spawnpoint.RADIUS),
           color: transparent
@@ -56,6 +58,9 @@ export class Spawner {
       organisms.push(actor)
       families.add(actor.color)
     })
+    if (this.queue.length === 0) {
+      return
+    }
     const area = this.stage.halfHeight * this.stage.halfWidth * 4
     this.stage.flag({ f: 'spawn', k: 'area', v: area })
     const organismCap = area / 100
@@ -65,7 +70,8 @@ export class Spawner {
     }
     const sigmaArea = sigmoid(area / 1000)
     this.stage.flag({ f: 'spawn', k: 'sigmaArea', v: sigmaArea })
-    const familyCap = 8 - (3 * 1 / sigmaArea)
+    // const familyCap = 8 - (3 * 1 / sigmaArea)
+    const familyCap = 6
     this.stage.flag({ f: 'spawn', k: 'familyCap', v: familyCap })
     const organismsNeeded = organisms.length < organismCap
     const familiesNeeded = families.size < familyCap
@@ -86,6 +92,12 @@ export class Spawner {
         const spawnpoint = this.getFarthest({ obituary: first, spawnpoints: clearSpawnPoints })
         const gene = first.gene.mutate()
         void new Organism({ ...first, gene, position: spawnpoint.position, stage: this.stage })
+      } else {
+        this.stage.runner.features.forEach(feature => {
+          if (feature instanceof Prop && feature.actor instanceof Debris && feature.blockCount > 0) {
+            feature.takeDamage({ damage: 0.01 })
+          }
+        })
       }
     }
   }

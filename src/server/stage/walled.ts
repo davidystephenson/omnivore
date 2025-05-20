@@ -24,12 +24,12 @@ export class Walled extends Playhouse {
     this.addOuterWall({
       halfWidth: Walled.HALF_SIZE,
       halfHeight: this.halfHeight + Walled.SIZE,
-      position: Vec2(this.halfHeight + Walled.HALF_SIZE, 0)
+      position: Vec2(this.halfWidth + Walled.HALF_SIZE, 0)
     })
     this.addOuterWall({
       halfWidth: Walled.HALF_SIZE,
       halfHeight: this.halfHeight + Walled.SIZE,
-      position: Vec2(-this.halfHeight - Walled.HALF_SIZE, 0)
+      position: Vec2(-this.halfWidth - Walled.HALF_SIZE, 0)
     })
   }
 }

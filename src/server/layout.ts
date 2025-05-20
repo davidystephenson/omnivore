@@ -25,7 +25,6 @@ export class Layout {
     this.waypointDatas = waypointArray.map(waypoint => this.getWaypointData(waypoint))
     this.navAreaDefs = stage.navigation.navAreas.map(navArea => this.getNavAreaDef(navArea))
     this.radii = stage.navigation.radii
-    console.log('radii', this.radii)
   }
 
   getLayoutData (): Promptbook {

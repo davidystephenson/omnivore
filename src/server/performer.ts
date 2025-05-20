@@ -11,6 +11,7 @@ import { Server } from './server'
 import { Production } from './stage/production'
 import { PublicProduction } from './stage/publicProduction'
 import { Promptbook } from './types'
+import { PrivateProduction } from './stage/privateProduction'
 
 export class Performer extends Server {
   production: Production
@@ -19,7 +20,7 @@ export class Performer extends Server {
     promptbook: Promptbook
   }) {
     console.info('Playhouse half size:', props.promptbook.halfWidth, 'x', props.promptbook.halfHeight)
-    const production = new PublicProduction({
+    const production = new PrivateProduction({
       promptbook: props.promptbook
     })
     super({
@@ -30,7 +31,7 @@ export class Performer extends Server {
 
   async start (): Promise<void> {
     this.httpServer.listen(this.config.port, () => {
-      console.log(`listening on port: ${this.config.port}`)
+      console.info(`listening on port: ${this.config.port}`)
     })
     this.io.on('connection', socket => {
       this.playhouse.debug({ vs: ['connection:', socket.id] })
@@ -38,13 +39,12 @@ export class Performer extends Server {
       const player = this.playhouse.addPlayer({
         color: GREEN,
         id: socket.id,
-        gene: this.playhouse.balancedGene,
+        gene: this.playhouse.playerGene,
         position: Vec2(0, 0)
       })
       if (player.organism == null) {
         throw new Error('player.organism is undefined')
       }
-      player.organism.membrane.hungerDamage = 0.5
       // player.organism.membrane.combatDamage = 0.9
       socket.on('controls', (controls: Controls) => {
         if (player.organism != null) {

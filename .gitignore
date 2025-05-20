@@ -5,5 +5,4 @@ config.json
 .parcel-cache
 input.json
 output.json
-*Promptbook*.json
-*promptbook*.json
+promptbooks/

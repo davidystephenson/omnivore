@@ -34,9 +34,6 @@ export class Production extends Playhouse {
       //   waypoint.pathDistances[radius] = radiusData
       // }
     })
-    // props.layoutData.waypointDatas.forEach(waypointData => {
-    //   console.log('waypointData', waypointData.id, waypointData == null)
-    // })
     props.promptbook.waypointDatas.forEach(waypointData => {
       const waypoint = this.navigation.waypoints[waypointData.id]
       if (waypoint == null) throw new Error(`Missing waypoint ${waypointData.id}`)

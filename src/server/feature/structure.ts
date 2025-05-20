@@ -2,7 +2,7 @@ import { Vec2, Box } from 'planck'
 import { COLOR } from '../../shared/color'
 import { Feature } from './feature'
 import { Wall } from '../actor/wall'
-import { Puppet } from '../actor/puppet'
+import { River } from '../actor/river'
 
 export class Structure extends Feature {
   wall: Wall
@@ -33,7 +33,7 @@ export class Structure extends Feature {
 
   handleContact (props: { target: Feature }): void {
     super.handleContact({ target: props.target })
-    if (this.wall.outer && props.target.actor instanceof Puppet) {
+    if (this.wall.outer && props.target.actor instanceof River) {
       this.dealDamage({ damage: 0.01, target: props.target })
     }
   }

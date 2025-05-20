@@ -4,13 +4,13 @@ import { Membrane } from '../feature/membrane'
 import { directionFromTo, getCompass, whichMax } from '../math'
 import { Stage } from '../stage/stage'
 import { Death } from './death'
-import { Puppet } from '../actor/puppet'
-import { Feature } from '../feature/feature'
+import { River } from '../actor/river'
+// import { Feature } from '../feature/feature'
 
 export class Killing extends Death {
-  killer: Feature
+  killer: Membrane
 
-  constructor (props: { killer: Feature, stage: Stage, victim: Membrane }) {
+  constructor (props: { killer: Membrane, stage: Stage, victim: Membrane }) {
     super({ stage: props.stage, victim: props.victim })
     this.killer = props.killer
   }
@@ -40,8 +40,10 @@ export class Killing extends Death {
       const lookUpperBound = Vec2(Math.max(...lookPointsX), Math.max(...lookPointsY))
       const lookBox = new AABB(lookLowerBound, lookUpperBound)
       const brickBox = this.trim({ base, lookBox })
-      const halfWidth = brickBox.getExtents().x
-      const halfHeight = brickBox.getExtents().y
+      const averageStrength = (this.killer.actor.gene.strength + this.victim.actor.gene.strength) / 2
+      const strengthFactor = Math.pow(averageStrength, 0.5)
+      const halfWidth = brickBox.getExtents().x * strengthFactor
+      const halfHeight = brickBox.getExtents().y * strengthFactor
       const brickPosition = brickBox.getCenter()
       const localBrickCorners = [
         Vec2(+halfWidth, +halfHeight),
@@ -66,7 +68,15 @@ export class Killing extends Death {
         const direction = directionFromTo(killerPosition, victimPosition)
         const force = Vec2.mul(power, direction)
         const speed = Math.min(killerSpeed, victimSpeed)
-        void new Puppet({ stage: this.stage, vertices: localPuppetCorners, position: brickPosition, force, speed })
+        const averageStamina = (this.killer.actor.gene.stamina + this.victim.actor.gene.stamina) / 2
+        void new River({
+          force,
+          health: averageStamina,
+          position: brickPosition,
+          speed,
+          stage: this.stage,
+          vertices: localPuppetCorners
+        })
       }
     }
     super.execute()

@@ -133,7 +133,7 @@ export class Manager {
       this.trackWrite(fileDescriptor, '}')
 
       console.info(`Serialization complete: ${this.writeCounter.toLocaleString()} total write operations`)
-      console.log(`Successfully saved data to ${targetPath}`)
+      console.info(`Successfully saved data to ${targetPath}`)
     } catch (error) {
       if (error instanceof SerializationError) {
         console.error(`Serialization failed: ${error.message}`)

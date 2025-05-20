@@ -2,44 +2,53 @@ import { Vec2 } from 'planck'
 import { Flags } from '../flags'
 import { Walled } from './walled'
 
-export class Mission extends Walled {
-  playerGene = this.flyGene
-
+export class Maze extends Walled {
   constructor () {
     super({
       flags: new Flags({
-        // botChase: true,
-        // botFlee: true,
-        // botPath: true,
-        // charge: true,
-        // controlLines: true,
-        // damage: true,
+        botChase: true,
+        botFlee: true,
+        botPath: true,
+        charge: true,
+        damage: true,
         death: true,
-        // hungerGame: false,
+        hungerGame: false,
         // meatY: false,
-        // navigation: true,
         performance: false,
-        // playerNavigation: false,
+        playerNavigation: false,
         reproduceGame: false,
         // respawn: true,
-        spawn: true
-        // timings: false,
-        // visionRangeGame: false,
-        // visionGame: false,
+        timings: false,
+        visionRangeGame: false,
+        visionGame: false,
+        navigation: true,
         // waypointSpawnpointsY: false
-        // waypoints: true
+        controlLines: true,
+        waypoints: true
       }),
-      halfHeight: 10,
+      halfHeight: 20,
       halfWidth: 20
+    })
+    this.addInnerWall({
+      halfWidth: 3,
+      halfHeight: 15,
+      position: Vec2(5, 5)
+    })
+    this.addInnerWall({
+      halfWidth: 3,
+      halfHeight: 10,
+      position: Vec2(-10, 3)
+    })
+    this.addInnerWall({
+      halfWidth: 8,
+      halfHeight: 3,
+      position: Vec2(-4, -6)
     })
 
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
-    // this.addTrisolaran({ position: Vec2(17, 17) })
+    this.addTrisolaran({ position: Vec2(17, 17) })
 
-    this.addBrick({ position: Vec2(-20, -20), halfHeight: 15, halfWidth: 15 })
-    this.addBrick({ position: Vec2(20, -20), halfHeight: 5, halfWidth: 5 })
-    this.addBrick({ position: Vec2(25, -20), halfHeight: 1, halfWidth: 1 })
     // this.addBrick({ position: Vec2(15, -5), halfHeight: 5, halfWidth: 5 })
     // this.addPuppet({
     //   position: Vec2(10, -10),
@@ -65,6 +74,6 @@ export class Mission extends Walled {
     // this.addScavenger({ position: Vec2(0, 0) })
     // this.addHunter({ position: Vec2(0, 0) })
     // this.addTrisolaran({ position: Vec2(10, 10) })
-    this.saveLayout()
+    // this.saveLayout()
   }
 }

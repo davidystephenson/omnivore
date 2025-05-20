@@ -88,7 +88,7 @@ export class Navigation {
   debugWaypoints (): void {
     const waypoints = Object.values(this.waypoints)
     waypoints.forEach(waypoint => {
-      console.log(waypoint.id, 'distances.length', waypoint.distances.length)
+      console.debug(waypoint.id, 'distances.length', waypoint.distances.length)
     })
   }
 
@@ -385,7 +385,6 @@ export class Navigation {
         const pathDistances = Object.values(waypoint.pathDistances[radius])
         maxPathDistance = Math.max(maxPathDistance, ...pathDistances)
       })
-      console.log('maxPathDistance', maxPathDistance)
       if (!(maxPathDistance < Infinity)) {
         throw new Error('Infinite Path Distance')
       }

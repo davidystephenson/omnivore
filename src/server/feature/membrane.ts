@@ -7,6 +7,8 @@ import { Tree } from '../actor/tree'
 import { Food } from '../actor/food'
 import { Runner } from '../runner'
 import { Prop } from './prop'
+import { Debris } from '../actor/debris'
+import { SIGHT } from '../../shared/sight'
 
 export class Membrane extends Feature {
   static BASE_DAMAGE = 0.1
@@ -70,9 +72,40 @@ export class Membrane extends Feature {
     super.destroy()
   }
 
-  getDamageDealt (target: Feature): number {
-    const damage = super.getDamageDealt(target)
-    if (target instanceof Membrane && damage < Membrane.MINIMUM_DAMAGE) {
+  getDamageDealt (props: { target: Feature }): number {
+    if (props.target.actor instanceof Debris) {
+      const fixture = props.target.body.getFixtureList()
+      if (fixture == null) {
+        throw new Error('fixture is null')
+      }
+      const area = props.target.actor.getArea()
+      this.actor.stage.flag({ f: 'damage', k: 'area', v: area })
+      this.actor.stage.flag({ f: 'damage', k: 'SIGHT.width', v: SIGHT.width })
+      const sightArea = SIGHT.width * SIGHT.height
+      this.actor.stage.flag({ f: 'damage', k: 'sightArea', v: sightArea })
+      const ratio = area / sightArea
+      this.actor.stage.flag({ f: 'damage', k: 'ratio', v: ratio })
+      const reversed = 1 - ratio
+      this.actor.stage.flag({ f: 'damage', k: 'reversed', v: reversed })
+      this.actor.stage.flag({ f: 'damage', k: 'strength', v: this.actor.gene.strength })
+      const baseDamage = Math.pow(this.actor.gene.strength, 2) * 0.01
+      this.actor.stage.flag({ f: 'damage', k: 'baseDamage', v: baseDamage })
+      const strengthDamage = baseDamage * Math.pow(reversed, 4)
+      this.actor.stage.flag({ f: 'damage', k: 'strengthDamage', v: strengthDamage })
+      const sizeFactor = Math.pow(reversed, 300)
+      this.actor.stage.flag({ f: 'damage', k: 'sizeFactor', v: sizeFactor })
+      const sizeDamage = 0.1 * sizeFactor
+      this.actor.stage.flag({ f: 'damage', k: 'sizeDamage', v: sizeDamage })
+      const damage = strengthDamage + sizeDamage
+      this.actor.stage.flag({ f: 'damage', k: 'damage', v: damage })
+
+      if (damage < Feature.MINIMUM_DAMAGE) {
+        return Feature.MINIMUM_DAMAGE
+      }
+      return damage
+    }
+    const damage = super.getDamageDealt({ target: props.target })
+    if (props.target instanceof Membrane && damage < Membrane.MINIMUM_DAMAGE) {
       return Membrane.MINIMUM_DAMAGE
     }
     return damage
@@ -91,7 +124,7 @@ export class Membrane extends Feature {
   getJaw (props: {
     target: Membrane
   }): number {
-    const damage = this.getDamageDealt(props.target)
+    const damage = this.getDamageDealt({ target: props.target })
     const jaw = props.target.health / damage
     return jaw
   }
@@ -127,7 +160,7 @@ export class Membrane extends Feature {
       this.dealDamage({ target: props.target })
       this.shove(props.target)
     } else if (props.target instanceof Prop) {
-      this.dealDamage({ target: props.target, multiplier: 2 })
+      this.dealDamage({ target: props.target })
     }
   }
 
@@ -196,7 +229,7 @@ export class Membrane extends Feature {
   }
 
   succumb (props: {
-    killer: Feature
+    killer: Membrane
   }): void {
     const killing = new Killing({
       victim: this,

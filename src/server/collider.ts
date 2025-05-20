@@ -5,6 +5,8 @@ import { Feature } from './feature/feature'
 import { Spawner } from './spawner'
 import { Spawnpoint } from './spawnpoint'
 import { Membrane } from './feature/membrane'
+import { Prop } from './feature/prop'
+import { Debris } from './actor/debris'
 
 export class Collider {
   stage: Stage
@@ -39,6 +41,9 @@ export class Collider {
           return false
         }
         spawnPoint.collideCount += 1
+        if (otherFeature instanceof Prop && otherFeature.actor instanceof Debris) {
+          otherFeature.blockCount += 1
+        }
       }
       if (!(feature instanceof Feature)) return
       const actor = feature.actor
@@ -78,6 +83,9 @@ export class Collider {
           return false
         }
         spawnPoint.collideCount -= 1
+        if (otherFeature instanceof Prop && otherFeature.actor instanceof Debris) {
+          otherFeature.blockCount -= 1
+        }
       }
       if (!(feature instanceof Feature)) return
       feature.contacts = feature.contacts.filter(contact => contact.id !== otherFeature.id)

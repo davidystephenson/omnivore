@@ -4,9 +4,11 @@ import { Feature } from './feature'
 import { Actor } from '../actor/actor'
 
 export class Prop extends Feature {
+  blockCount = 0
   constructor (props: {
     position: Vec2
     actor: Actor
+    health?: number
     shape: Shape
     label: string
     color?: Rgb
@@ -26,6 +28,7 @@ export class Prop extends Feature {
         restitution: 0,
         friction: 0
       },
+      health: props.health,
       label: props.label,
       actor: props.actor,
       color

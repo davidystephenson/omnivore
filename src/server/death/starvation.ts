@@ -3,7 +3,7 @@ import { HALF_SIGHT_SIZE } from '../../shared/sight'
 import { Membrane } from '../feature/membrane'
 import { Stage } from '../stage/stage'
 import { Death } from './death'
-import { Brick } from '../actor/brick'
+import { Rock } from '../actor/rock'
 
 export class Starvation extends Death {
   constructor (props: { stage: Stage, victim: Membrane }) {
@@ -11,7 +11,7 @@ export class Starvation extends Death {
   }
 
   execute (): void {
-    this.log({ v: 'Starvation.execute' })
+    this.deathLog({ v: 'Starvation.execute' })
     if (this.stage.flags.starveBricksGame) {
       const victimPosition = this.victim.body.getPosition()
       const lookLowerBound = Vec2(victimPosition.x - HALF_SIGHT_SIZE.x, victimPosition.y - HALF_SIGHT_SIZE.y)
@@ -19,18 +19,26 @@ export class Starvation extends Death {
       const lookBox = new AABB(lookLowerBound, lookUpperBound)
       const brickBox = this.trim({ base: victimPosition, lookBox })
       const length = this.victim.body.getLinearVelocity().length()
-      this.log({ k: 'length', v: length })
+      this.deathLog({ k: 'length', v: length })
       const scale = Math.min(1, length / 10)
-      this.log({ k: 'scale', v: scale })
-      const halfWidth = brickBox.getExtents().x * scale
-      const halfHeight = brickBox.getExtents().y * scale
+      this.deathLog({ k: 'scale', v: scale })
+      const halfWidth = brickBox.getExtents().x * Math.pow(scale, 0.5)
+      const halfHeight = brickBox.getExtents().y * Math.pow(scale, 0.5)
       const brickPosition = brickBox.getCenter()
+      this.deathLog({ k: 'brickPosition', v: brickPosition })
       const minimum = Math.min(halfWidth, halfHeight)
-      this.log({ k: 'minimum', v: minimum })
-      const sized = minimum > Death.MINIMUM
-      this.log({ k: 'sized', v: sized })
-      if (sized) {
-        void new Brick({ halfWidth, halfHeight, position: brickPosition, stage: this.stage })
+      this.deathLog({ k: 'minimum', v: minimum })
+      const sizable = minimum > Death.MINIMUM
+      if (sizable) {
+        const health = Math.max(0.01, this.victim.actor.gene.stamina)
+        this.deathLog({ k: 'health', v: health })
+        void new Rock({
+          halfWidth,
+          halfHeight,
+          health,
+          position: brickPosition,
+          stage: this.stage
+        })
       }
     }
     super.execute()

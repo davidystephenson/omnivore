@@ -6,7 +6,7 @@ import { Spawnpoint } from '../spawnpoint'
 import { LogProps } from '../debugger'
 
 export class Death {
-  static MINIMUM = 0.6
+  static MINIMUM = 0.00000001
   stage: Stage
   victim: Membrane
 
@@ -58,7 +58,7 @@ export class Death {
     return extents.x * extents.y
   }
 
-  log <Value> (props: LogProps<Value>): void {
+  deathLog <Value> (props: LogProps<Value>): void {
     this.stage.flag({ f: 'death', ...props })
   }
 

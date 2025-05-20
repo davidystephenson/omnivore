@@ -3,13 +3,13 @@ import { Runner } from '../runner'
 import { Organism } from '../actor/organism'
 import { Wall } from '../actor/wall'
 import { Actor } from '../actor/actor'
-import { Brick } from '../actor/brick'
+import { Rock } from '../actor/rock'
 import { Feature } from '../feature/feature'
 import { Killing } from '../death/killing'
 import { Rgb, RED, Rgba } from '../../shared/color'
 import { DebugLine } from '../../shared/debugLine'
 import { Vision } from '../vision'
-import { Puppet } from '../actor/puppet'
+import { River } from '../actor/river'
 import { range } from '../math'
 import { DebugCircle } from '../../shared/debugCircle'
 import { Starvation } from '../death/starvation'
@@ -70,8 +70,8 @@ export class Stage {
     halfHeight: number
     halfWidth: number
     position: Vec2
-  }): Brick {
-    const brick = new Brick({ stage: this, ...props })
+  }): Rock {
+    const brick = new Rock({ stage: this, ...props })
     return brick
   }
 
@@ -156,8 +156,8 @@ export class Stage {
     position: Vec2
     force: Vec2
     speed: number
-  }): Puppet {
-    const puppet = new Puppet({ stage: this, ...props })
+  }): River {
+    const puppet = new River({ stage: this, ...props })
     return puppet
   }
 
