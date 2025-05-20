@@ -22,9 +22,9 @@ export class Killing extends Death {
       const killerPosition = this.killer.body.getPosition()
       console.log('killerPosition', killerPosition)
       console.log('this.victim.deathPosition', this.victim.deathPosition)
-      const killerToVictim = Vec2.sub(this.victim.deathPosition, killerPosition)
-      console.log('killerToVictim', killerToVictim)
-      const brickDirection = getCompass(killerToVictim)
+      const spawnDirection = Vec2.sub(killerPosition, this.victim.deathPosition)
+      console.log('spawnDirection', spawnDirection)
+      const brickDirection = getCompass(spawnDirection)
       console.log('brickDirection', brickDirection)
       const brickLookDistance = (brickDirection.x !== 0 ? HALF_SIGHT_SIZE.x : HALF_SIGHT_SIZE.y) - this.killer.radius
       const sideLookDistance = brickDirection.x !== 0 ? HALF_SIGHT_SIZE.y : HALF_SIGHT_SIZE.x
