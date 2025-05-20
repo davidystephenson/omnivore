@@ -1,11 +1,11 @@
-import { AABB, Circle, Fixture, Vec2 } from 'planck'
+import { AABB, Circle, CircleShape, Fixture, Vec2 } from 'planck'
 import { Stage } from './stage/stage'
 import { Waypoint } from './waypoint'
 import { clamp, directionFromTo, range, rotate, whichMin } from './math'
 import { Feature } from './feature/feature'
 import { Structure } from './feature/structure'
 import { Organism } from './actor/organism'
-import { CYAN, LIME, RED, WHITE } from '../shared/color'
+import { COLOR, CYAN, LIME, RED, WHITE } from '../shared/color'
 import { NavArea } from './navArea'
 
 export class Navigation {
@@ -260,7 +260,7 @@ export class Navigation {
     return pathDistances[endWaypoint.id]
   }
 
-  navigate (start: Vec2, end: Vec2, radius: number, otherRadius?: number): Waypoint | Vec2 {
+  navigate (start: Vec2, end: Vec2, radius: number, otherRadius?: number, debug?: boolean): Waypoint | Vec2 {
     const open = this.isOpen({
       fromPosition: start,
       toPosition: end,
@@ -275,6 +275,22 @@ export class Navigation {
     const endWaypoint = this.getNearWaypoint(end)
     const nextWaypoints = startWaypoint.nextWaypoints[bigRadius]
     const nextWaypoint = nextWaypoints[endWaypoint.id]
+    if (debug === true) {
+      this.stage.debugCircle({
+        circle: new CircleShape(startWaypoint.position, 0.3),
+        color: COLOR.MAGENTA
+      })
+      this.stage.debugCircle({
+        circle: new CircleShape(endWaypoint.position, 0.3),
+        color: COLOR.LIME
+      })
+      this.stage.debugLine({
+        a: startWaypoint.position,
+        b: nextWaypoint.position,
+        color: COLOR.RED,
+        width: 0.15
+      })
+    }
     this.stage.runner.endTiming({ key: 'navigate', start: navigateStart })
     return nextWaypoint
   }

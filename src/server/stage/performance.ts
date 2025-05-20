@@ -7,7 +7,7 @@ import { Feature } from '../feature/feature'
 import { Element } from '../../shared/element'
 import { Promptbook } from '../types'
 
-export class Production extends Playhouse {
+export class Performance extends Playhouse {
   constructor (props: {
     flags: Flags
     promptbook: Promptbook
@@ -39,14 +39,15 @@ export class Production extends Playhouse {
       if (waypoint == null) throw new Error(`Missing waypoint ${waypointData.id}`)
       if (waypointData == null) return
       props.promptbook.radii.forEach(radius => {
-        const waypoints: Record<number, Waypoint> = {}
-        const ids = Object.keys(waypointData.nextWaypoints[radius]).map(s => Number(s))
-        ids.forEach(id => {
-          const waypoint = this.navigation.waypoints[id]
-          if (waypoint == null) throw new Error(`Missing waypoint ${radius} ${id}`)
-          waypoints[id] = waypoint
+        const nextWaypoints: Record<number, Waypoint> = {}
+        const targetIds = Object.keys(waypointData.nextWaypoints[radius]).map(s => Number(s))
+        targetIds.forEach(targetId => {
+          const nextId = waypointData.nextWaypoints[radius][targetId]
+          const nextWaypoint = this.navigation.waypoints[nextId]
+          if (nextWaypoint == null) throw new Error(`Missing waypoint ${radius} ${targetId}`)
+          nextWaypoints[targetId] = nextWaypoint
         })
-        waypoint.nextWaypoints[radius] = waypoints
+        waypoint.nextWaypoints[radius] = nextWaypoints
       })
     })
     const is = [...props.promptbook.waypointMatrix.keys()]

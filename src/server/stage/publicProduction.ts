@@ -1,12 +1,13 @@
 import { Flags } from '../flags'
 import { Promptbook } from '../types'
-import { Production } from './production'
+import { Performance } from './performance'
 
-export class PublicProduction extends Production {
+export class PublicProduction extends Performance {
   constructor (props: {
     promptbook: Promptbook
   }) {
     const flags = new Flags({
+      charge: true,
       // killingGame: false,
       timings: true
       // spawn: true,

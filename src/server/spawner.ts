@@ -37,7 +37,7 @@ export class Spawner {
   }
 
   onStep (): void {
-    if (this.stage.flags.spawn) {
+    if (this.stage.flags.spawnpoints) {
       this.spawnpoints.forEach(point => {
         const collided = point.collideCount > 0
         const color = collided ? RED : GREEN

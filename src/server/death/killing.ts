@@ -5,6 +5,7 @@ import { directionFromTo, getCompass, whichMax } from '../math'
 import { Stage } from '../stage/stage'
 import { Death } from './death'
 import { River } from '../actor/river'
+import { GREEN, RED } from '../../shared/color'
 // import { Feature } from '../feature/feature'
 
 export class Killing extends Death {
@@ -38,12 +39,29 @@ export class Killing extends Death {
       const lookPointsY = lookPoints.map(point => point.y)
       const lookLowerBound = Vec2(Math.min(...lookPointsX), Math.min(...lookPointsY))
       const lookUpperBound = Vec2(Math.max(...lookPointsX), Math.max(...lookPointsY))
+      if (this.stage.flags.death) {
+        const color = { ...RED, a: 0.1 }
+        this.stage.debugBox({
+          box: new AABB(lookLowerBound, lookUpperBound),
+          color
+        })
+        this.stage.runner.paused = true
+      }
       const lookBox = new AABB(lookLowerBound, lookUpperBound)
       const brickBox = this.trim({ base, lookBox })
+      if (this.stage.flags.death) {
+        const color = { ...GREEN, a: 0.1 }
+        this.stage.debugBox({
+          box: brickBox,
+          color
+        })
+        this.stage.runner.paused = true
+      }
       const averageStrength = (this.killer.actor.gene.strength + this.victim.actor.gene.strength) / 2
       const strengthFactor = Math.pow(averageStrength, 0.5)
-      const halfWidth = brickBox.getExtents().x * strengthFactor
-      const halfHeight = brickBox.getExtents().y * strengthFactor
+      void strengthFactor
+      const halfWidth = brickBox.getExtents().x
+      const halfHeight = brickBox.getExtents().y
       const brickPosition = brickBox.getCenter()
       const localBrickCorners = [
         Vec2(+halfWidth, +halfHeight),

@@ -1,8 +1,21 @@
 import { Performer } from './performer'
-import { matrixSchema, navAreaDefSchema, Promptbook, tableOfContentsSchema, wallDefSchema, WaypointData, waypointDataSchema } from './types'
+import { matrixSchema, navAreaDefSchema, performanceNameSchema, Promptbook, tableOfContentsSchema, wallDefSchema, WaypointData, waypointDataSchema } from './types'
 import fs from 'fs'
 import json from 'big-json'
 import { ZodSchema } from 'zod'
+import { PublicProduction } from './stage/publicProduction'
+import { PrivateProduction } from './stage/privateProduction'
+
+const performances = {
+  public: PublicProduction,
+  private: PrivateProduction
+}
+
+const performanceName = performanceNameSchema.parse(process.argv[2])
+
+console.log(`Performing ${performanceName}...`)
+
+const performance = performances[performanceName]
 
 const parseStream = json.createParseStream()
 
@@ -82,12 +95,15 @@ parseStream.on('data', function (pojo) {
   // console.info('Promptbook validated ')
 
   void new Performer({
-    promptbook: pojo
+    promptbook: pojo,
+    Performance: performance
   })
 })
 
-console.info('Reading promptbook...')
-const readStream = fs.createReadStream('input.json')
+const filename = process.argv[3] ?? 'output'
+const path = `promptbooks/${filename}.json`
+console.info(`Reading ${path}...`)
+const readStream = fs.createReadStream(path)
 
 readStream.on('open', () => {
   console.info('Promptbook opened')
@@ -99,7 +115,7 @@ readStream.on('close', () => {
 
 let index = 0
 readStream.on('data', (chunk) => {
-  if (index === 0 || index % 100 === 0) {
+  if (index === 0 || index % 500 === 0) {
     console.info('Prompt', index, 'is', chunk.length, 'long')
   }
   index++

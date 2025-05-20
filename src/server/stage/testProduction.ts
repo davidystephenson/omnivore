@@ -1,10 +1,10 @@
 
 import { Vec2 } from 'planck'
 import { Flags } from '../flags'
-import { Production } from './production'
+import { Performance } from './performance'
 import { Promptbook } from '../types'
 
-export class TestProduction extends Production {
+export class TestProduction extends Performance {
   constructor (props: {
     promptbook: Promptbook
   }) {

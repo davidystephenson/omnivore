@@ -23,6 +23,7 @@ export class Flags {
   procedural: boolean
   reproduceGame: boolean
   spawn: boolean
+  spawnpoints: boolean
   starveBricksGame: boolean
   summary: boolean
   timings: boolean
@@ -57,6 +58,7 @@ export class Flags {
     procedural?: boolean
     reproduceGame?: boolean
     spawn?: boolean
+    spawnpoints?: boolean
     starveBricksGame?: boolean
     summary?: boolean
     timings?: boolean
@@ -90,6 +92,7 @@ export class Flags {
     this.procedural = props.procedural ?? false
     this.reproduceGame = props.reproduceGame ?? true
     this.spawn = props.spawn ?? false
+    this.spawnpoints = props.spawnpoints ?? false
     this.starveBricksGame = props.starveBricksGame ?? true
     this.summary = props.summary ?? false
     this.timings = props.timings ?? false

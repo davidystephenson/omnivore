@@ -8,25 +8,28 @@ import { Vec2 } from 'planck'
 import { Controls } from '../shared/input'
 import { GREEN } from '../shared/color'
 import { Server } from './server'
-import { Production } from './stage/production'
-import { PublicProduction } from './stage/publicProduction'
+import { Performance } from './stage/performance'
 import { Promptbook } from './types'
-import { PrivateProduction } from './stage/privateProduction'
+import { Flags } from './flags'
 
 export class Performer extends Server {
-  production: Production
+  performance: Performance
 
   constructor (props: {
     promptbook: Promptbook
+    Performance: new (props: { flags: Flags, promptbook: Promptbook }) => Performance
   }) {
     console.info('Playhouse half size:', props.promptbook.halfWidth, 'x', props.promptbook.halfHeight)
-    const production = new PrivateProduction({
+    const performance = new props.Performance({
+      flags: new Flags({
+        performance: false
+      }),
       promptbook: props.promptbook
     })
     super({
-      playhouse: production
+      playhouse: performance
     })
-    this.production = production
+    this.performance = performance
   }
 
   async start (): Promise<void> {
@@ -45,7 +48,7 @@ export class Performer extends Server {
       if (player.organism == null) {
         throw new Error('player.organism is undefined')
       }
-      // player.organism.membrane.combatDamage = 0.9
+      player.organism.membrane.hungerDamage = 0.5
       socket.on('controls', (controls: Controls) => {
         if (player.organism != null) {
           player.organism.controls = controls

@@ -163,7 +163,7 @@ export class Organism extends Actor {
   charge (enemy: Feature): Rgb {
     const chargeStart = performance.now()
     const enemyPosition = enemy.body.getPosition()
-    const navPoint = this.stage.navigation.navigate(this.membrane.position, enemyPosition, this.membrane.radius, enemy.radius)
+    const navPoint = this.stage.navigation.navigate(this.membrane.position, enemyPosition, this.membrane.radius, enemy.radius, this.stage.flags.charge)
     const navPosition = navPoint instanceof Vec2 ? navPoint : navPoint.position
     if (this.stage.flags.charge) {
       this.debugPath({ target: enemyPosition })
@@ -427,10 +427,6 @@ export class Organism extends Actor {
     }
     const blocked = hits.some(hit => this.isHitBlocked({ hit }))
     if (blocked) {
-      const contains0 = hits[0].some(hit => hit.feature === this.membrane)
-      console.log('contains0', contains0)
-      const contains1 = hits[1].some(hit => hit.feature === this.membrane)
-      console.log('contains1', contains1)
       const cardinals = [
         new Vec2(0, 1),
         new Vec2(0, -1),

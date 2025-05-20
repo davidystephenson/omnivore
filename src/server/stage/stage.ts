@@ -179,7 +179,6 @@ export class Stage {
   }
 
   addTree (props: {
-    // vertices: [Vec2, Vec2, Vec2]
     position: Vec2
   }): Tree {
     const puppet = new Tree({
@@ -407,7 +406,7 @@ export class Stage {
     const layoutData = layout.getLayoutData()
     try {
       // Create a new Manager instance with a specific output path
-      const manager = new Manager('output.json')
+      const manager = new Manager('promptbooks/output.json')
 
       // Validate the data before saving
       console.info('Starting layout data validation...')

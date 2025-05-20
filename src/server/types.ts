@@ -74,3 +74,5 @@ export const tableOfContentsSchema = z.object({
   halfWidth: z.number(),
   radii: z.number().array()
 })
+export const performanceNameSchema = z.literal('public').or(z.literal('private'))
+export type PerformanceName = z.infer<typeof performanceNameSchema>

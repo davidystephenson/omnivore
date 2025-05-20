@@ -58,6 +58,13 @@ export class Membrane extends Feature {
     this.sensor = this.addSensor()
   }
 
+  damageLog (props: {
+    k: string
+    v: string | number
+  }): void {
+    this.actor.stage.flag({ f: 'damage', k: props.k, seconds: 1, v: props.v })
+  }
+
   destroy (): void {
     this.destroyed = true
     if (this.actor.stage.flags.meatGame && this.combatDamage > 0) {
@@ -79,25 +86,25 @@ export class Membrane extends Feature {
         throw new Error('fixture is null')
       }
       const area = props.target.actor.getArea()
-      this.actor.stage.flag({ f: 'damage', k: 'area', v: area })
-      this.actor.stage.flag({ f: 'damage', k: 'SIGHT.width', v: SIGHT.width })
+      this.damageLog({ k: 'area', v: area })
+      this.damageLog({ k: 'SIGHT.width', v: SIGHT.width })
       const sightArea = SIGHT.width * SIGHT.height
-      this.actor.stage.flag({ f: 'damage', k: 'sightArea', v: sightArea })
+      this.damageLog({ k: 'sightArea', v: sightArea })
       const ratio = area / sightArea
-      this.actor.stage.flag({ f: 'damage', k: 'ratio', v: ratio })
+      this.damageLog({ k: 'ratio', v: ratio })
       const reversed = 1 - ratio
-      this.actor.stage.flag({ f: 'damage', k: 'reversed', v: reversed })
-      this.actor.stage.flag({ f: 'damage', k: 'strength', v: this.actor.gene.strength })
+      this.damageLog({ k: 'reversed', v: reversed })
+      this.damageLog({ k: 'strength', v: this.actor.gene.strength })
       const baseDamage = Math.pow(this.actor.gene.strength, 2) * 0.01
-      this.actor.stage.flag({ f: 'damage', k: 'baseDamage', v: baseDamage })
-      const strengthDamage = baseDamage * Math.pow(reversed, 4)
-      this.actor.stage.flag({ f: 'damage', k: 'strengthDamage', v: strengthDamage })
-      const sizeFactor = Math.pow(reversed, 300)
-      this.actor.stage.flag({ f: 'damage', k: 'sizeFactor', v: sizeFactor })
+      this.damageLog({ k: 'baseDamage', v: baseDamage })
+      const strengthDamage = baseDamage * Math.pow(reversed, 6)
+      this.damageLog({ k: 'strengthDamage', v: strengthDamage })
+      const sizeFactor = Math.pow(reversed, 200)
+      this.damageLog({ k: 'sizeFactor', v: sizeFactor })
       const sizeDamage = 0.1 * sizeFactor
-      this.actor.stage.flag({ f: 'damage', k: 'sizeDamage', v: sizeDamage })
+      this.damageLog({ k: 'sizeDamage', v: sizeDamage })
       const damage = strengthDamage + sizeDamage
-      this.actor.stage.flag({ f: 'damage', k: 'damage', v: damage })
+      this.damageLog({ k: 'damage', v: damage })
 
       if (damage < Feature.MINIMUM_DAMAGE) {
         return Feature.MINIMUM_DAMAGE
