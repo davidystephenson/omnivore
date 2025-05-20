@@ -29,8 +29,8 @@ export class Mission extends Walled {
         // waypointSpawnpointsY: false
         // waypoints: true
       }),
-      halfHeight: 10,
-      halfWidth: 20
+      halfHeight: 35,
+      halfWidth: 35
     })
 
     this.navigation.setupWaypoints()

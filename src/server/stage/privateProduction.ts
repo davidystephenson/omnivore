@@ -20,7 +20,7 @@ export class PrivateProduction extends Production {
       }),
       promptbook: props.promptbook
     })
-    this.addFly({ position: Vec2(10, 10) })
+    this.addTrisolaran({ position: Vec2(10, 10) })
     // this.addBrick({ position: Vec2(-20, -20), halfHeight: 15, halfWidth: 15 })
     // this.addBrick({ position: Vec2(20, -20), halfHeight: 5, halfWidth: 5 })
     // this.addBrick({ position: Vec2(20, -15), halfHeight: 2, halfWidth: 2 })

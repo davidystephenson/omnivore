@@ -16,6 +16,7 @@ import { Waypoint } from '../waypoint'
 import { Food } from './food'
 import { Tree } from './tree'
 import { SIGHT } from '../../shared/sight'
+import { RayCastHit } from '../../shared/rayCastHit'
 
 export interface OrganismSpawn {
   color: Rgb
@@ -409,12 +410,13 @@ export class Organism extends Actor {
     const rays = sidePoints.map((sidePoint, i) => {
       return [sidePoint, lookPoints[i]]
     })
-    const hitArrays = rays.map(ray => {
+    const hits = rays.map(ray => {
       return this.stage.vision.rayCast(ray[0], ray[1])
     })
     if (this.stage.flags.botFlee) {
-      hitArrays.forEach((hitArray, i) => {
-        const color = hitArray.length === 0 ? WHITE : RED
+      hits.forEach((hitArray, i) => {
+        const blocked = this.isHitBlocked({ hit: hitArray })
+        const color = blocked ? RED : WHITE
         this.stage.debugLine({
           a: sidePoints[i],
           b: lookPoints[i],
@@ -423,8 +425,12 @@ export class Organism extends Actor {
         })
       })
     }
-    const blocked = hitArrays[0].length > 0 || hitArrays[1].length > 0
+    const blocked = hits.some(hit => this.isHitBlocked({ hit }))
     if (blocked) {
+      const contains0 = hits[0].some(hit => hit.feature === this.membrane)
+      console.log('contains0', contains0)
+      const contains1 = hits[1].some(hit => hit.feature === this.membrane)
+      console.log('contains1', contains1)
       const cardinals = [
         new Vec2(0, 1),
         new Vec2(0, -1),
@@ -441,8 +447,9 @@ export class Organism extends Actor {
       const flatFleeDir = options[whichMax(optionDots)]
       const lookPoint = Vec2.combine(1, myPosition, LOOK_DISTANCE, flatFleeDir)
       const flatFleeHits = this.stage.vision.rayCast(myPosition, lookPoint)
+      const flatFleeBlocked = this.isHitBlocked({ hit: flatFleeHits })
       if (this.stage.flags.botFlee) {
-        const color = flatFleeHits.length === 0 ? WHITE : RED
+        const color = flatFleeBlocked ? RED : WHITE
         this.stage.debugLine({
           a: myPosition,
           b: lookPoint,
@@ -450,14 +457,15 @@ export class Organism extends Actor {
           width: 0.2
         })
       }
-      if (flatFleeHits.length === 0) {
+      if (!flatFleeBlocked) {
         return flatFleeDir
       }
       const openCardinals = cardinals.filter(cardinal => {
         const cardinalPoint = Vec2.combine(1, myPosition, LOOK_DISTANCE, cardinal)
         const cardinalHits = this.stage.vision.rayCast(myPosition, cardinalPoint)
+        const blocked = this.isHitBlocked({ hit: cardinalHits })
         if (this.stage.flags.botFlee) {
-          const color = cardinalHits.length === 0 ? WHITE : RED
+          const color = blocked ? RED : WHITE
           this.stage.debugLine({
             a: myPosition,
             b: cardinalPoint,
@@ -465,7 +473,7 @@ export class Organism extends Actor {
             width: 0.2
           })
         }
-        return cardinalHits.length === 0
+        return !blocked
       })
       if (openCardinals.length === 0) {
         return dirFromEnemy
@@ -527,6 +535,14 @@ export class Organism extends Actor {
   }): boolean {
     const position = props.feature.body.getPosition()
     return this.isPointReachable(position, props.otherRadius)
+  }
+
+  isHitBlocked (props: {
+    hit: RayCastHit[]
+  }): boolean {
+    if (props.hit.length === 0) return false
+    const other = props.hit.some(hit => hit.feature !== this.membrane)
+    return other
   }
 
   isPointReachable (end: Vec2, otherRadius?: number): boolean {
