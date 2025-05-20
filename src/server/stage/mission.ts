@@ -3,7 +3,7 @@ import { Flags } from '../flags'
 import { Walled } from './walled'
 
 export class Mission extends Walled {
-  playerGene = this.flyGene
+  playerGene = this.flyBullyGene
 
   constructor () {
     super({
@@ -11,37 +11,38 @@ export class Mission extends Walled {
         // botChase: true,
         // botFlee: true,
         // botPath: true,
-        charge: true,
+        // charge: true,
         // controlLines: true,
         // damage: true,
-        // death: true,
-        // hungerGame: false,
+        death: true,
+        hungerGame: false,
         // meatY: false,
         // navigation: true,
         performance: false,
         // playerNavigation: false,
-        reproduceGame: false,
+        reproduceGame: false
         // respawn: true,
         // spawn: true
         // timings: false,
         // visionRangeGame: false,
         // visionGame: false,
         // waypointSpawnpointsY: false
-        waypoints: true
+        // waypoints: true
       }),
       halfHeight: 7,
       halfWidth: 30
     })
-    this.addWall({
-      position: Vec2(5, 0),
-      halfHeight: 3,
-      halfWidth: 1,
-      outer: false
-    })
+    // this.addWall({
+    //   position: Vec2(5, 0),
+    //   halfHeight: 3,
+    //   halfWidth: 1,
+    //   outer: false
+    // })
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
-    this.addBrute({ position: Vec2(25, 0) })
-    this.addFruit({ position: Vec2(-5, 0) })
+    const trisolaran = this.addTrisolaran({ position: Vec2(25, 0) })
+    trisolaran.membrane.hungerDamage = 0.99
+    // this.addFruit({ position: Vec2(-5, 0) })
 
     // this.addBrick({ position: Vec2(20, -20), halfHeight: 5, halfWidth: 5 })
     // this.addBrick({ position: Vec2(25, -20), halfHeight: 1, halfWidth: 1 })

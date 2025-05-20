@@ -7,7 +7,7 @@ export class PublicProduction extends Performance {
     promptbook: Promptbook
   }) {
     const flags = new Flags({
-      charge: true,
+      // charge: true,
       // killingGame: false,
       timings: true
       // spawn: true,

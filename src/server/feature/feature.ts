@@ -97,6 +97,9 @@ export class Feature {
       throw new Error(message)
     }
     props.target.takeDamage({ damage: damageDealt })
+    if (props.target.health <= 0) {
+      props.target.succumb({ killer: this })
+    }
   }
 
   destroy (): void {
@@ -223,9 +226,6 @@ export class Feature {
     if (this.health > oldHealth - Feature.MINIMUM_DAMAGE + 0.001) {
       const message = `Invalid target.health: ${this.health} > ${oldHealth} - ${Feature.MINIMUM_DAMAGE}`
       throw new Error(message)
-    }
-    if (this.health <= 0) {
-      this.succumb({ killer: this })
     }
   }
 }

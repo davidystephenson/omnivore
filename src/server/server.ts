@@ -52,7 +52,7 @@ export class Server {
       if (player.organism == null) {
         throw new Error('player.organism is undefined')
       }
-      player.organism.membrane.hungerDamage = 0.5
+      // player.organism.membrane.hungerDamage = 0.5
       // player.organism.membrane.combatDamage = 0.9
       socket.on('controls', (controls: Controls) => {
         if (player.organism != null) {

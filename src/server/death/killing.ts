@@ -20,7 +20,12 @@ export class Killing extends Death {
     if (this.stage.flags.killingGame) {
       this.stage.flag({ f: 'death', v: 'Killing.execute' })
       const killerPosition = this.killer.body.getPosition()
-      const brickDirection = getCompass(Vec2.sub(this.victim.deathPosition, killerPosition))
+      console.log('killerPosition', killerPosition)
+      console.log('this.victim.deathPosition', this.victim.deathPosition)
+      const killerToVictim = Vec2.sub(this.victim.deathPosition, killerPosition)
+      console.log('killerToVictim', killerToVictim)
+      const brickDirection = getCompass(killerToVictim)
+      console.log('brickDirection', brickDirection)
       const brickLookDistance = (brickDirection.x !== 0 ? HALF_SIGHT_SIZE.x : HALF_SIGHT_SIZE.y) - this.killer.radius
       const sideLookDistance = brickDirection.x !== 0 ? HALF_SIGHT_SIZE.y : HALF_SIGHT_SIZE.x
       const base = Vec2.combine(1, killerPosition, this.killer.radius, brickDirection)
