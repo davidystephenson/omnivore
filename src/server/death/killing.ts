@@ -42,11 +42,11 @@ export class Killing extends Death {
           throw new Error('Fixture data is not a Feature')
         }
         if (this.stage.flags.death || this.stage.flags.killing) {
-          console.log('feature.label', feature.label)
-          console.log('feature.actor.label', feature.actor.label)
+          console.debug('feature.label', feature.label)
+          console.debug('feature.actor.label', feature.actor.label)
           if (feature instanceof Membrane) {
-            console.log('feature.actor.player', feature.actor.player != null)
-            console.log('feature.actor.color', feature.actor.color)
+            console.debug('feature.actor.player', feature.actor.player != null)
+            console.debug('feature.actor.color', feature.actor.color)
           }
         }
         blocker = feature

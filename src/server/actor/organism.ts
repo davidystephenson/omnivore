@@ -687,7 +687,6 @@ export class Organism extends Actor {
     this.membranes.forEach(membrane => {
       const myMass = membrane.body.getMass()
       const forceScale = (Organism.MINIMUM_FORCE + this.gene.speed * Organism.GENETIC_FORCE_SCALE) * myMass
-      console.log('radius, forceScale =', membrane.radius, this.gene.speed, forceScale)
       membrane.force = Vec2.mul(direction, forceScale)
     })
   }

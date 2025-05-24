@@ -13,7 +13,7 @@ const performances = {
 
 const performanceName = performanceNameSchema.parse(process.argv[2])
 
-console.log(`Performing ${performanceName}...`)
+console.info(`Performing ${performanceName}...`)
 
 const performance = performances[performanceName]
 

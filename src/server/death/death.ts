@@ -13,7 +13,7 @@ export class Death {
 
   constructor (props: { stage: Stage, victim: Membrane }) {
     if (props.victim.actor.player != null && props.stage.flags.playerDeath) {
-      console.log('Death constructor', new Date().toLocaleTimeString())
+      console.debug('Death constructor', new Date().toLocaleTimeString())
     }
     this.stage = props.stage
     this.victim = props.victim
@@ -24,7 +24,7 @@ export class Death {
 
   execute (): void {
     if (this.stage.flags.playerDeath && this.victim.actor.player != null) {
-      console.log('playerDeath execute', new Date().toLocaleTimeString())
+      console.debug('playerDeath execute', new Date().toLocaleTimeString())
     }
     const actors = [...this.stage.actors.values()]
     const organisms = actors.filter((actor) => actor instanceof Organism) as Organism[]

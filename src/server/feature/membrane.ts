@@ -246,11 +246,11 @@ export class Membrane extends Feature {
       killer: props.killer
     })
     if (this.actor.stage.flags.playerDeath && this.actor.player != null) {
-      console.log('killingQueue before', this.actor.stage.killingQueue.length, new Date().toLocaleTimeString())
+      console.debug('killingQueue before', this.actor.stage.killingQueue.length, new Date().toLocaleTimeString())
     }
     this.actor.stage.killingQueue.push(killing)
     if (this.actor.stage.flags.playerDeath && this.actor.player != null) {
-      console.log('killingQueue after', this.actor.stage.killingQueue.length, new Date().toLocaleTimeString())
+      console.debug('killingQueue after', this.actor.stage.killingQueue.length, new Date().toLocaleTimeString())
     }
   }
 }
