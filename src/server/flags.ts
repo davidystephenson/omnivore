@@ -7,6 +7,7 @@ export class Flags {
   controlLines: boolean
   damage: boolean
   death: boolean
+  growGame: boolean
   hungerGame: boolean
   isOpen: boolean
   killing: boolean
@@ -44,6 +45,7 @@ export class Flags {
     botPath?: boolean
     controlLines?: boolean
     death?: boolean
+    growGame?: boolean
     hungerGame?: boolean
     isOpen?: boolean
     killing?: boolean
@@ -80,6 +82,7 @@ export class Flags {
     this.controlLines = props.controlLines ?? false
     this.damage = props.damage ?? false
     this.death = props.death ?? false
+    this.growGame = props.growGame ?? true
     this.hungerGame = props.hungerGame ?? true
     this.killing = props.killing ?? false
     this.killingGame = props.killingGame ?? true

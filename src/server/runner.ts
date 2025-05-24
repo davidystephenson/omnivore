@@ -16,7 +16,7 @@ export class Runner {
   static FPS = 30
   // intervalId: NodeJS.Timeout
 
-  paused = false
+  paused = true
   debugLines: DebugLine[] = []
   debugCircles: DebugCircle[] = []
   features: Feature[] = []
@@ -28,7 +28,7 @@ export class Runner {
   stepCount = 0
   stepCountInterval = 30
   timeStep = 1 / Runner.FPS
-  timeScale = 1 // 1
+  timeScale = 0.1
   timing = false
   timings: Timings = {}
 

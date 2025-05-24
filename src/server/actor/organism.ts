@@ -550,7 +550,15 @@ export class Organism extends Actor {
     hit: RayCastHit[]
   }): boolean {
     if (props.hit.length === 0) return false
-    const other = props.hit.some(hit => hit.feature !== this.membrane)
+    const other = props.hit.some(hit => {
+      if (hit.feature == null) {
+        throw new Error('Hit feature is undefined')
+      }
+      if (hit.feature.actor instanceof Food) {
+        return false
+      }
+      return hit.feature !== this.membrane
+    })
     return other
   }
 
@@ -677,7 +685,9 @@ export class Organism extends Actor {
       throw new Error('This organism has no membranes')
     }
     this.membranes.forEach(membrane => {
-      const forceScale = Organism.MINIMUM_FORCE + this.gene.speed * membrane.body.getMass() * Organism.GENETIC_FORCE_SCALE
+      const myMass = membrane.body.getMass()
+      const forceScale = (Organism.MINIMUM_FORCE + this.gene.speed * Organism.GENETIC_FORCE_SCALE) * myMass
+      console.log('radius, forceScale =', membrane.radius, this.gene.speed, forceScale)
       membrane.force = Vec2.mul(direction, forceScale)
     })
   }

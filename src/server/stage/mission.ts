@@ -29,8 +29,8 @@ export class Mission extends Walled {
         // waypointSpawnpointsY: false
         // waypoints: true
       }),
-      halfHeight: 5,
-      halfWidth: 10
+      halfHeight: 20,
+      halfWidth: 20
     })
     // this.addWall({
     //   position: Vec2(5, 0),
@@ -40,13 +40,18 @@ export class Mission extends Walled {
     // })
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
+
+    // this.addFruit({ position: Vec2(-7, 5) })
+    // this.addTrisolaran({ position: Vec2(0, 7) })
+    this.addHunter({ position: Vec2(5, 7) })
+
     // const trisolaran = this.addTrisolaran({ position: Vec2(25, 0) })
     // trisolaran.membrane.hungerDamage = 0.99
 
     // this.addBrick({ position: Vec2(20, -20), halfHeight: 5, halfWidth: 5 })
-    this.addBrick({ position: Vec2(25, -20), halfHeight: 1, halfWidth: 1 })
-    this.addBrick({ position: Vec2(15, -5), halfHeight: 5, halfWidth: 5 })
-    this.addBrick({ position: Vec2(15, -5), halfHeight: 5, halfWidth: 10 })
+    // this.addBrick({ position: Vec2(25, -20), halfHeight: 1, halfWidth: 1 })
+    // this.addBrick({ position: Vec2(15, -5), halfHeight: 5, halfWidth: 5 })
+    // this.addBrick({ position: Vec2(15, -5), halfHeight: 5, halfWidth: 10 })
     // this.addPuppet({
     //   position: Vec2(10, -10),
     //   vertices: [

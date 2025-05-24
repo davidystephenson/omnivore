@@ -33,6 +33,7 @@ export class Membrane extends Feature {
     radius?: number
   }) {
     const radius = props.radius ?? 1
+    const startRadius = props.actor.stage.flags.growGame ? Membrane.INITIAL_RADIUS : radius
     super({
       bodyDef: {
         type: 'dynamic',
@@ -42,7 +43,7 @@ export class Membrane extends Feature {
         linearDamping: Feature.DAMPING
       },
       fixtureDef: {
-        shape: new Circle(Vec2(0, 0), Membrane.INITIAL_RADIUS),
+        shape: new Circle(Vec2(0, 0), startRadius),
         density: 1,
         restitution: 0,
         friction: 0
@@ -53,7 +54,7 @@ export class Membrane extends Feature {
     })
     this.actor = props.actor
     this.mass = this.body.getMass()
-    this.radius = Membrane.INITIAL_RADIUS
+    this.radius = startRadius
     this.targetRadius = radius
     this.sensor = this.addSensor()
   }
