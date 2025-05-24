@@ -29,7 +29,7 @@ export class Sculpture extends Prop {
     target: Feature
   }): void {
     if (props.target instanceof Crate) {
-      this.dealDamage({ target: props.target, multiplier: 5 })
+      this.dealDamage({ target: props.target, multiplier: 2 })
     }
   }
 }

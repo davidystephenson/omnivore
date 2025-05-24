@@ -324,6 +324,16 @@ export class Stage {
     this.debug(props)
   }
 
+  flagLog<Value>(props: {
+    f: keyof Flags
+  } & LogProps<Value>): void {
+    const raised = this.flags[props.f]
+    if (!raised) {
+      return
+    }
+    this.debug(props)
+  }
+
   getFeaturesInShape (shape: Shape): Feature[] {
     const featuresInShape: Feature[] = []
     const origin = new Transform()

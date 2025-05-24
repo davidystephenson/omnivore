@@ -28,9 +28,9 @@ export class Starvation extends Death {
       this.deathLog({ k: 'brickPosition', v: brickPosition })
       const minimum = Math.min(halfWidth, halfHeight)
       this.deathLog({ k: 'minimum', v: minimum })
-      const sizable = minimum > Death.MINIMUM
+      const sizable = minimum > Death.MINIMUM_SIZE
       if (sizable) {
-        const health = Math.max(0.01, this.victim.actor.gene.stamina)
+        const health = Math.max(Death.MINIMUM_HEALTH, this.victim.actor.gene.stamina)
         this.deathLog({ k: 'health', v: health })
         void new Rock({
           halfWidth,

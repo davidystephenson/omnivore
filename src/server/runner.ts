@@ -159,6 +159,13 @@ export class Runner {
       if (obituary.player !== props.player) return
       summary.respawn = index
     })
+    if (this.stage.flags.playerDeath && props.player.organism == null) {
+      console.debug('playerDeath no organism, respawn?', summary.respawn, new Date().toLocaleTimeString())
+      const respawn = Number(summary.respawn)
+      if (respawn < 0) {
+        throw new Error(`Player.organism is null without respawning!!! ${respawn} ${new Date().toLocaleTimeString()}`)
+      }
+    }
     if (this.stage.flags.summary) {
       this.stage.debug({ vs: ['getSummary elements.length', elements.length], seconds: 10 })
       const json = JSON.stringify(summary)

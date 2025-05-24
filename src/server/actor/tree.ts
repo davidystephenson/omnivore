@@ -129,7 +129,7 @@ export class Tree extends Actor {
     this.step += 1
     this.radius = this.radius + stepSize * this.growthRate
     this.sideLength = this.radius * Math.sin(2 / 3 * Math.PI)
-    this.innerRadius = Math.sqrt(this.radius ** 2 - 0.25 * this.sideLength ** 2)
+    this.innerRadius = Math.sqrt(this.radius ** 2 - 0.1 * this.sideLength ** 2)
     if (this.step % 2 === 0) {
       this.sculpture.body.destroyFixture(this.sculpture.fixture)
       this.setupVertices()

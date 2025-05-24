@@ -14,5 +14,5 @@ export interface Summary {
   fps: number
   id?: number
   ropes?: Rope[]
-  respawn?: number
+  respawn: number
 }

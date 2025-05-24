@@ -167,6 +167,17 @@ export class Playhouse extends Stage {
     })
   }
 
+  addCornerTrees (): void {
+    const minimum = Math.min(this.halfWidth, this.halfHeight)
+    const half = minimum / 2
+    const negative = -half
+
+    this.addTree({ position: Vec2(half, half) })
+    this.addTree({ position: Vec2(negative, half) })
+    this.addTree({ position: Vec2(half, negative) })
+    this.addTree({ position: Vec2(negative, negative) })
+  }
+
   addGridTrees (): void {
     const minimum = Math.min(this.halfWidth, this.halfHeight)
     const half = minimum / 2

@@ -15,8 +15,8 @@ export class Membrane extends Feature {
   static DAMAGE_FACTOR = 3
   static INITIAL_RADIUS = 0.6 / Math.sqrt(2)
   static MINIMUM_DAMAGE = 0.1
-  static MINIMUM_LIFE_SECONDS = 30
-  static GENETIC_LIFE_SECONDS = 90
+  static MINIMUM_LIFE_SECONDS = 55
+  static GENETIC_LIFE_SECONDS = 95
   actor: Organism
   destroyed = false
   hungerDamage = 0
@@ -99,7 +99,7 @@ export class Membrane extends Feature {
       this.damageLog({ k: 'baseDamage', v: baseDamage })
       const strengthDamage = baseDamage * Math.pow(reversed, 6)
       this.damageLog({ k: 'strengthDamage', v: strengthDamage })
-      const sizeFactor = Math.pow(reversed, 200)
+      const sizeFactor = Math.pow(reversed, 500)
       this.damageLog({ k: 'sizeFactor', v: sizeFactor })
       const sizeDamage = 0.1 * sizeFactor
       this.damageLog({ k: 'sizeDamage', v: sizeDamage })
@@ -140,7 +140,8 @@ export class Membrane extends Feature {
     if (this.radius === this.targetRadius) return
     this.step += 1
     if (this.step % 2 === 0) {
-      this.radius = Math.min(this.radius + 0.5 * stepSize, this.targetRadius)
+      const increase = 0.2 * stepSize * this.radius
+      this.radius = Math.min(this.radius + increase, this.targetRadius)
       this.body.destroyFixture(this.fixture)
       this.fixture = this.body.createFixture({
         shape: new Circle(Vec2(0, 0), this.radius),
@@ -243,6 +244,12 @@ export class Membrane extends Feature {
       stage: this.actor.stage,
       killer: props.killer
     })
+    if (this.actor.stage.flags.playerDeath && this.actor.player != null) {
+      console.log('killingQueue before', this.actor.stage.killingQueue.length, new Date().toLocaleTimeString())
+    }
     this.actor.stage.killingQueue.push(killing)
+    if (this.actor.stage.flags.playerDeath && this.actor.player != null) {
+      console.log('killingQueue after', this.actor.stage.killingQueue.length, new Date().toLocaleTimeString())
+    }
   }
 }

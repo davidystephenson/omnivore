@@ -6,11 +6,15 @@ import { Spawnpoint } from '../spawnpoint'
 import { LogProps } from '../debugger'
 
 export class Death {
-  static MINIMUM = 0.00000001
+  static MINIMUM_SIZE = 0.01
+  static MINIMUM_HEALTH = 0.1
   stage: Stage
   victim: Membrane
 
   constructor (props: { stage: Stage, victim: Membrane }) {
+    if (props.victim.actor.player != null && props.stage.flags.playerDeath) {
+      console.log('Death constructor', new Date().toLocaleTimeString())
+    }
     this.stage = props.stage
     this.victim = props.victim
     this.victim.actor.dead = true
@@ -19,6 +23,9 @@ export class Death {
   }
 
   execute (): void {
+    if (this.stage.flags.playerDeath && this.victim.actor.player != null) {
+      console.log('playerDeath execute', new Date().toLocaleTimeString())
+    }
     const actors = [...this.stage.actors.values()]
     const organisms = actors.filter((actor) => actor instanceof Organism) as Organism[]
     const relatives = organisms.filter((actor) => {
@@ -36,9 +43,15 @@ export class Death {
       if (oldest == null) {
         throw new Error('There is no oldest relative')
       }
+      if (this.stage.flags.playerDeath && this.victim.actor.player != null) {
+        console.debug('playerDeath move', relatives.length, new Date().toLocaleTimeString())
+      }
       this.victim.actor.player.organism = oldest
       oldest.player = this.victim.actor.player
       return
+    }
+    if (this.stage.flags.playerDeath && this.victim.actor.player != null) {
+      console.debug('playerDeath respawn', relatives.length, new Date().toLocaleTimeString())
     }
     this.victim.actor.respawning = true
     const spawn: Obituary = {
@@ -58,7 +71,7 @@ export class Death {
     return extents.x * extents.y
   }
 
-  deathLog <Value> (props: LogProps<Value>): void {
+  deathLog<Value>(props: LogProps<Value>): void {
     this.stage.flag({ f: 'death', ...props })
   }
 

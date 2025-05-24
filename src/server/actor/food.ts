@@ -5,7 +5,7 @@ import { Actor } from './actor'
 import { Serving } from '../feature/serving'
 
 export class Food extends Actor {
-  static NUTRITION = 0.2
+  static NUTRITION = 0.15
   nutrition: number
   serving: Sculpture
 

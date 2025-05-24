@@ -40,9 +40,8 @@ export class Server {
       console.info(`listening on port: ${this.config.port}`)
     })
     this.io.on('connection', socket => {
-      this.playhouse.debug({ vs: ['connection??:', socket.id] })
+      this.playhouse.debug({ vs: ['connection:', socket.id] })
       socket.emit('connected')
-      this.playhouse.debug({ k: 'trapperGene', v: this.playhouse.trapperGene })
       const player = this.playhouse.addPlayer({
         color: GREEN,
         id: socket.id,

@@ -29,8 +29,10 @@ export interface Obituary extends OrganismSpawn {
 }
 
 export class Organism extends Actor {
-  static GENETIC_FORCE_SCALE = 0.6
-  static MINIMUM_FORCE = 2.5
+  static BLOCKED_DISTANCE = 4
+  static TRAPPED_DISTANCE = 0.5 * Organism.BLOCKED_DISTANCE
+  static GENETIC_FORCE_SCALE = 0.45
+  static MINIMUM_FORCE = 1.9
   controlColor = LIME
   chasePoint: Vec2 | undefined
   chaseRadius = 0.2
@@ -411,9 +413,8 @@ export class Organism extends Actor {
     const sidePoints = perps.map(perp => {
       return Vec2.combine(1, myPosition, this.membrane.radius, perp)
     })
-    const LOOK_DISTANCE = 4
     const lookPoints = sidePoints.map(sidePoint => {
-      return Vec2.combine(1, sidePoint, LOOK_DISTANCE, dirFromEnemy)
+      return Vec2.combine(1, sidePoint, Organism.BLOCKED_DISTANCE, dirFromEnemy)
     })
     const rays = sidePoints.map((sidePoint, i) => {
       return [sidePoint, lookPoints[i]]
@@ -449,7 +450,7 @@ export class Organism extends Actor {
       ]
       const optionDots = options.map(o => Vec2.dot(o, dirFromEnemy))
       const flatFleeDir = options[whichMax(optionDots)]
-      const lookPoint = Vec2.combine(1, myPosition, LOOK_DISTANCE, flatFleeDir)
+      const lookPoint = Vec2.combine(1, myPosition, Organism.BLOCKED_DISTANCE, flatFleeDir)
       const flatFleeHits = this.stage.vision.rayCast(myPosition, lookPoint)
       const flatFleeBlocked = this.isHitBlocked({ hit: flatFleeHits })
       if (this.stage.flags.botFlee) {
@@ -465,7 +466,7 @@ export class Organism extends Actor {
         return flatFleeDir
       }
       const openCardinals = cardinals.filter(cardinal => {
-        const cardinalPoint = Vec2.combine(1, myPosition, LOOK_DISTANCE, cardinal)
+        const cardinalPoint = Vec2.combine(1, myPosition, Organism.TRAPPED_DISTANCE, cardinal)
         const cardinalHits = this.stage.vision.rayCast(myPosition, cardinalPoint)
         const blocked = this.isHitBlocked({ hit: cardinalHits })
         if (this.stage.flags.botFlee) {
