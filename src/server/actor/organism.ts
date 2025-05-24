@@ -232,9 +232,6 @@ export class Organism extends Actor {
   }
 
   debugControls (): void {
-    if (!this.stage.flags.controlLines && (this.player == null || !this.stage.flags.playerControl)) {
-      return
-    }
     const circle = new CircleShape(this.membrane.position, 0.2)
     this.stage.debugCircle({ circle, color: this.controlColor })
     const length = 1
@@ -802,6 +799,9 @@ export class Organism extends Actor {
     this.controls.down = roundDir.y < 0
     this.controls.left = roundDir.x < 0
     this.controls.right = roundDir.x > 0
+    if (!this.stage.flags.controlLines) {
+      return
+    }
     this.debugControls()
   }
 

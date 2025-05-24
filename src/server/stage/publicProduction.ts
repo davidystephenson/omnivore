@@ -10,10 +10,11 @@ export class PublicProduction extends Performance {
   }) {
     const flags = new Flags({
       // killing: true,
-      timings: true
+      timings: true,
       // spawn: true,
       // performance: false,
       // death: true,
+      playerControl: true
       // playerDeath: true
     })
     super({

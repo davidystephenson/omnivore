@@ -11,14 +11,15 @@ export class PrivateProduction extends Performance {
   }) {
     super({
       flags: new Flags({
-        botFlee: true,
-        charge: true,
-        controlLines: true,
+        // botFlee: true,
+        // charge: true,
+        // controlLines: true,
         // damage: true,
         // death: true,
-        growGame: false,
-        hungerGame: false,
-        performance: false
+        // growGame: false,
+        // hungerGame: false,
+        // performance: false,
+        playerControl: true
         // spawnpoints: true
         // waypoints: true
       }),

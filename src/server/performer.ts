@@ -52,6 +52,9 @@ export class Performer extends Server {
       socket.on('controls', (controls: Controls) => {
         if (player.organism != null) {
           player.organism.controls = controls
+          if (this.playhouse.flags.playerControl) {
+            player.organism.debugControls()
+          }
           if (controls.select) {
             this.playhouse.runner.paused = true
           }
