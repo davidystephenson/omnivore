@@ -54,7 +54,6 @@ export class Server {
       // player.organism.membrane.hungerDamage = 0.5
       // player.organism.membrane.combatDamage = 0.9
       socket.on('controls', (controls: Controls) => {
-        console.log('player controls', socket.id)
         if (player.organism != null) {
           player.organism.controls = controls
           if (this.playhouse.flags.playerControl) {
