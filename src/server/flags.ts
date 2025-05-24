@@ -20,8 +20,9 @@ export class Flags {
   organisms: boolean
   organismsCount: boolean
   performance: boolean
-  playerNavigation: boolean
+  playerControl: boolean
   playerDeath: boolean
+  playerNavigation: boolean
   players: boolean
   procedural: boolean
   reproduceGame: boolean
@@ -60,6 +61,7 @@ export class Flags {
     performance?: boolean
     playerDeath?: boolean
     playerNavigation?: boolean
+    playerControl?: boolean
     players?: boolean
     procedural?: boolean
     reproduceGame?: boolean
@@ -98,6 +100,7 @@ export class Flags {
     this.playerNavigation = props.playerNavigation ?? true
     this.playerDeath = props.playerDeath ?? false
     this.players = props.players ?? false
+    this.playerControl = props.playerControl ?? false
     this.procedural = props.procedural ?? false
     this.reproduceGame = props.reproduceGame ?? true
     this.spawn = props.spawn ?? false
