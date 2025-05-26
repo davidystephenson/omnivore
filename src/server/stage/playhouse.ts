@@ -117,6 +117,17 @@ export class Playhouse extends Stage {
     })
   }
 
+  addFamilies (): void {
+    this.addBalanced({ position: Vec2(45, 45) })
+    this.addBully({ position: Vec2(-35, 35) })
+    this.addHunter({ position: Vec2(-25, -25) })
+    this.addScavenger({ position: Vec2(-15, 15) })
+    this.addFly({ position: Vec2(0, -5) })
+    this.addTrisolaran({ position: Vec2(15, -15) })
+    this.addBrute({ position: Vec2(25, 10) })
+    this.addTrapper({ position: Vec2(35, 10) })
+  }
+
   addFly (props: {
     position: Vec2
   }): Organism {
@@ -206,14 +217,11 @@ export class Playhouse extends Stage {
     this.addTree({ position: Vec2(0, 0) })
   }
 
-  addFamilies (): void {
-    this.addBalanced({ position: Vec2(45, 45) })
-    this.addBully({ position: Vec2(-35, 35) })
-    this.addHunter({ position: Vec2(-25, -25) })
-    this.addScavenger({ position: Vec2(-15, 15) })
-    this.addFly({ position: Vec2(0, -5) })
-    this.addTrisolaran({ position: Vec2(15, -15) })
-    this.addBrute({ position: Vec2(25, 10) })
-    this.addTrapper({ position: Vec2(35, 10) })
+  addVerticalTrees (): void {
+    const minimum = Math.min(this.halfWidth, this.halfHeight)
+    const half = minimum / 2
+
+    this.addTree({ position: Vec2(0, half) })
+    this.addTree({ position: Vec2(0, -half) })
   }
 }

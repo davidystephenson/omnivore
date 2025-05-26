@@ -31,8 +31,8 @@ export interface Obituary extends OrganismSpawn {
 export class Organism extends Actor {
   static BLOCKED_DISTANCE = 4
   static TRAPPED_DISTANCE = 0.5 * Organism.BLOCKED_DISTANCE
-  static GENETIC_FORCE_SCALE = 0.75
-  static MINIMUM_FORCE = 0.5
+  static GENETIC_FORCE_SCALE = 1.5
+  static MINIMUM_FORCE = 0.45
   controlColor = LIME
   chasePoint: Vec2 | undefined
   chaseRadius = 0.2
@@ -683,8 +683,11 @@ export class Organism extends Actor {
     }
     this.membranes.forEach(membrane => {
       const myMass = membrane.body.getMass()
-      const forceScale = (Organism.MINIMUM_FORCE + this.gene.speed * Organism.GENETIC_FORCE_SCALE) * myMass
-      membrane.force = Vec2.mul(direction, forceScale)
+      const speedFactor = Math.pow(this.gene.speed, 1)
+      const geneticForce = Organism.GENETIC_FORCE_SCALE * speedFactor
+      const combinedForce = Organism.MINIMUM_FORCE + geneticForce
+      const scaledForce = combinedForce * myMass
+      membrane.force = Vec2.mul(direction, scaledForce)
     })
   }
 

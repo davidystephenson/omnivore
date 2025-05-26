@@ -34,7 +34,7 @@ export class Structure extends Feature {
   handleContact (props: { target: Feature }): void {
     super.handleContact({ target: props.target })
     if (this.wall.outer && props.target.actor instanceof River) {
-      this.dealDamage({ damage: 0.01, target: props.target })
+      this.dealDamage({ damage: 0.0001, target: props.target })
     }
   }
 }

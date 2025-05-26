@@ -5,10 +5,12 @@ import json from 'big-json'
 import { ZodSchema } from 'zod'
 import { PublicProduction } from './stage/publicProduction'
 import { PrivateProduction } from './stage/privateProduction'
+import { TestProduction } from './stage/testProduction'
 
 const performances = {
   public: PublicProduction,
-  private: PrivateProduction
+  private: PrivateProduction,
+  test: TestProduction
 }
 
 const performanceName = performanceNameSchema.parse(process.argv[2])

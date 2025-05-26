@@ -15,8 +15,9 @@ export class Membrane extends Feature {
   static DAMAGE_FACTOR = 3
   static INITIAL_RADIUS = 0.6 / Math.sqrt(2)
   static MINIMUM_DAMAGE = 0.1
-  static MINIMUM_LIFE_SECONDS = 55
-  static GENETIC_LIFE_SECONDS = 95
+  static MINIMUM_LIFE_SECONDS = 35
+  static GENETIC_LIFE_SECONDS = 150
+  static GROWTH = 0.15
   actor: Organism
   destroyed = false
   hungerDamage = 0
@@ -98,7 +99,7 @@ export class Membrane extends Feature {
       this.damageLog({ k: 'strength', v: this.actor.gene.strength })
       const baseDamage = Math.pow(this.actor.gene.strength, 2) * 0.01
       this.damageLog({ k: 'baseDamage', v: baseDamage })
-      const strengthDamage = baseDamage * Math.pow(reversed, 6)
+      const strengthDamage = baseDamage * Math.pow(reversed, 10)
       this.damageLog({ k: 'strengthDamage', v: strengthDamage })
       const sizeFactor = Math.pow(reversed, 500)
       this.damageLog({ k: 'sizeFactor', v: sizeFactor })
@@ -141,7 +142,7 @@ export class Membrane extends Feature {
     if (this.radius === this.targetRadius) return
     this.step += 1
     if (this.step % 2 === 0) {
-      const increase = 0.2 * stepSize * this.radius
+      const increase = Membrane.GROWTH * stepSize * this.radius
       this.radius = Math.min(this.radius + increase, this.targetRadius)
       this.body.destroyFixture(this.fixture)
       this.fixture = this.body.createFixture({

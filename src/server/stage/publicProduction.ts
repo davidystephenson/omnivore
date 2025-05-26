@@ -10,11 +10,11 @@ export class PublicProduction extends Performance {
   }) {
     const flags = new Flags({
       // killing: true,
-      timings: true,
+      timings: true
       // spawn: true,
       // performance: false,
       // death: true,
-      playerControl: true
+      // playerControl: true
       // playerDeath: true
     })
     super({
@@ -24,6 +24,7 @@ export class PublicProduction extends Performance {
     this.addGridTrees()
     // this.addGridTrees()
     this.addFamilies()
-    this.addCornerTrees()
+    // this.addCornerTrees()
+    this.addVerticalTrees()
   }
 }
