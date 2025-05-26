@@ -21,10 +21,9 @@ export class PublicProduction extends Performance {
       flags,
       promptbook: props.promptbook
     })
-    this.addGridTrees()
-    // this.addGridTrees()
+    this.addCornerTrees()
+    this.addCornerTrees()
+    this.addCornerTrees()
     this.addFamilies()
-    // this.addCornerTrees()
-    this.addVerticalTrees()
   }
 }

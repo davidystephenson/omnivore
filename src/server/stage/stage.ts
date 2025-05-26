@@ -24,6 +24,7 @@ import { Flags } from '../flags'
 import { Layout } from '../layout'
 import { Collider } from '../collider'
 import { Manager, SerializationError } from '../../manager'
+import { StageDef } from '../types'
 
 export class Stage {
   actors = new Map<number, Actor>()
@@ -48,11 +49,7 @@ export class Stage {
   collider: Collider
   checkCount = 0
 
-  constructor (props: {
-    flags: Flags
-    halfHeight: number
-    halfWidth: number
-  }) {
+  constructor (props: StageDef) {
     this.flags = props.flags
     this.debugger = new Debugger()
     this.world = new World({ gravity: Vec2(0, 0) })
@@ -73,6 +70,32 @@ export class Stage {
   }): Rock {
     const brick = new Rock({ stage: this, ...props })
     return brick
+  }
+
+  addBricks (props: {
+    angle?: number
+    count: number
+    gap: number
+    halfHeight: number
+    halfWidth: number
+    position: Vec2
+  }): void {
+    const brickRange = range(1, props.count)
+    const indexOffset = (props.count) / 2
+    const height = props.halfHeight * 2
+    const offsetHeight = height + props.gap
+    brickRange.forEach(index => {
+      const offsetIndex = index - indexOffset
+      const offset = offsetHeight * offsetIndex
+      const position = props.position.clone()
+      position.y += offset
+      this.addBrick({
+        angle: props.angle,
+        halfHeight: props.halfHeight,
+        halfWidth: props.halfWidth,
+        position
+      })
+    })
   }
 
   addFood (props: {
@@ -141,16 +164,6 @@ export class Stage {
     return this.addWall({ ...props, outer: true })
   }
 
-  addPlayer (props: {
-    color: Rgb
-    id: string
-    position: Vec2
-    gene: Gene
-  }): Player {
-    const player = new Player({ stage: this, ...props })
-    return player
-  }
-
   addPuppet (props: {
     vertices: [Vec2, Vec2, Vec2]
     position: Vec2
@@ -178,16 +191,6 @@ export class Stage {
     })
   }
 
-  addTree (props: {
-    position: Vec2
-  }): Tree {
-    const puppet = new Tree({
-      stage: this,
-      ...props
-    })
-    return puppet
-  }
-
   addWall (props: {
     halfWidth: number
     halfHeight: number
@@ -197,32 +200,6 @@ export class Stage {
     const wall = new Wall({ stage: this, ...props })
     this.walls.push(wall)
     return wall
-  }
-
-  addBricks (props: {
-    angle?: number
-    count: number
-    gap: number
-    halfHeight: number
-    halfWidth: number
-    position: Vec2
-  }): void {
-    const brickRange = range(1, props.count)
-    const indexOffset = (props.count) / 2
-    const height = props.halfHeight * 2
-    const offsetHeight = height + props.gap
-    brickRange.forEach(index => {
-      const offsetIndex = index - indexOffset
-      const offset = offsetHeight * offsetIndex
-      const position = props.position.clone()
-      position.y += offset
-      this.addBrick({
-        angle: props.angle,
-        halfHeight: props.halfHeight,
-        halfWidth: props.halfWidth,
-        position
-      })
-    })
   }
 
   addWalls (props: {

@@ -1,4 +1,5 @@
 import { z, ZodSchema } from 'zod'
+import { Flags } from './flags'
 
 export const vec2Schema = z.object({
   x: z.number(),
@@ -76,3 +77,9 @@ export const tableOfContentsSchema = z.object({
 })
 export const performanceNameSchema = z.literal('public').or(z.literal('private'))
 export type PerformanceName = z.infer<typeof performanceNameSchema>
+
+export interface StageDef {
+  flags: Flags
+  halfHeight: number
+  halfWidth: number
+}

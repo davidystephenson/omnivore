@@ -1,10 +1,36 @@
 import { Vec2 } from 'planck'
-import { YELLOW, RED, PURPLE, ORANGE, BROWN, MAGENTA, PINK, GRAY, CYAN } from '../../shared/color'
+import { YELLOW, RED, PURPLE, ORANGE, BROWN, MAGENTA, PINK, GRAY, CYAN, Rgb } from '../../shared/color'
 import { Gene } from '../gene'
 import { Organism } from '../actor/organism'
 import { Stage } from './stage'
+import { Player } from '../actor/player'
+import { Tree } from '../actor/tree'
+import { StageDef } from '../types'
 
 export class Playhouse extends Stage {
+  bottomCenter: Vec2
+  bottomLeft: Vec2
+  bottomRight: Vec2
+  center: Vec2
+  centerLeft: Vec2
+  centerRight: Vec2
+  topCenter: Vec2
+  topLeft: Vec2
+  topRight: Vec2
+
+  constructor (props: StageDef) {
+    super(props)
+    this.bottomCenter = Vec2(0, this.halfHeight)
+    this.bottomLeft = Vec2(-this.halfWidth, this.halfHeight)
+    this.bottomRight = Vec2(this.halfWidth, this.halfHeight)
+    this.center = Vec2(0, 0)
+    this.centerLeft = Vec2(-this.halfWidth, 0)
+    this.centerRight = Vec2(this.halfWidth, 0)
+    this.topCenter = Vec2(0, -this.halfHeight)
+    this.topLeft = Vec2(-this.halfWidth, -this.halfHeight)
+    this.topRight = Vec2(this.halfWidth, -this.halfHeight)
+  }
+
   balancedGene = new Gene({
     speed: 0.34,
     stage: this,
@@ -117,6 +143,29 @@ export class Playhouse extends Stage {
     })
   }
 
+  addCenterTree (): void {
+    this.addTree({ position: this.center })
+  }
+
+  addCornerTrees (): void {
+    this.addTree({ position: this.bottomLeft })
+    this.addTree({ position: this.bottomRight })
+    this.addTree({ position: this.topLeft })
+    this.addTree({ position: this.topRight })
+  }
+
+  addGridTrees (): void {
+    this.addTree({ position: this.bottomCenter })
+    this.addTree({ position: this.bottomLeft })
+    this.addTree({ position: this.bottomRight })
+    this.addTree({ position: this.centerLeft })
+    this.addTree({ position: this.center })
+    this.addTree({ position: this.centerRight })
+    this.addTree({ position: this.topCenter })
+    this.addTree({ position: this.topLeft })
+    this.addTree({ position: this.topRight })
+  }
+
   addFamilies (): void {
     this.addBalanced({ position: Vec2(45, 45) })
     this.addBully({ position: Vec2(-35, 35) })
@@ -148,6 +197,16 @@ export class Playhouse extends Stage {
     })
   }
 
+  addPlayer (props: {
+    color: Rgb
+    id: string
+    position: Vec2
+    gene: Gene
+  }): Player {
+    const player = new Player({ stage: this, ...props })
+    return player
+  }
+
   addScavenger (props: {
     position: Vec2
   }): Organism {
@@ -158,14 +217,12 @@ export class Playhouse extends Stage {
     })
   }
 
-  addTrisolaran (props: {
-    position: Vec2
-  }): Organism {
-    return this.addOrganism({
-      color: PURPLE,
-      gene: this.trisolaranGene,
-      position: props.position
-    })
+  addStarTrees (): void {
+    this.addTree({ position: this.bottomLeft })
+    this.addTree({ position: this.bottomRight })
+    this.addTree({ position: this.center })
+    this.addTree({ position: this.topLeft })
+    this.addTree({ position: this.topRight })
   }
 
   addTrapper (props: {
@@ -178,50 +235,28 @@ export class Playhouse extends Stage {
     })
   }
 
-  addCornerTrees (): void {
-    const minimum = Math.min(this.halfWidth, this.halfHeight)
-    const half = minimum / 2
-    const negative = -half
-
-    this.addTree({ position: Vec2(half, half) })
-    this.addTree({ position: Vec2(negative, half) })
-    this.addTree({ position: Vec2(half, negative) })
-    this.addTree({ position: Vec2(negative, negative) })
+  addTree (props: {
+    position: Vec2
+  }): Tree {
+    const puppet = new Tree({
+      stage: this,
+      ...props
+    })
+    return puppet
   }
 
-  addGridTrees (): void {
-    const minimum = Math.min(this.halfWidth, this.halfHeight)
-    const half = minimum / 2
-    const negative = -half
-
-    this.addTree({ position: Vec2(half, half) })
-    this.addTree({ position: Vec2(0, negative) })
-    this.addTree({ position: Vec2(0, half) })
-    this.addTree({ position: Vec2(half, 0) })
-    this.addTree({ position: Vec2(negative, 0) })
-    this.addTree({ position: Vec2(negative, half) })
-    this.addTree({ position: Vec2(half, negative) })
-    this.addTree({ position: Vec2(negative, negative) })
-    this.addTree({ position: Vec2(0, 0) })
-  }
-
-  addStarTrees (): void {
-    const minimum = Math.min(this.halfWidth, this.halfHeight)
-    const half = minimum / 2
-    const negative = -half
-
-    this.addTree({ position: Vec2(half, half) })
-    this.addTree({ position: Vec2(negative, half) })
-    this.addTree({ position: Vec2(half, negative) })
-    this.addTree({ position: Vec2(negative, negative) })
-    this.addTree({ position: Vec2(0, 0) })
+  addTrisolaran (props: {
+    position: Vec2
+  }): Organism {
+    return this.addOrganism({
+      color: PURPLE,
+      gene: this.trisolaranGene,
+      position: props.position
+    })
   }
 
   addVerticalTrees (): void {
-    const minimum = Math.min(this.halfWidth, this.halfHeight)
-    const half = minimum / 2
-
-    this.addTree({ position: Vec2(0, half) })
-    this.addTree({ position: Vec2(0, -half) })
+    this.addTree({ position: this.bottomCenter })
+    this.addTree({ position: this.topCenter })
   }
 }
