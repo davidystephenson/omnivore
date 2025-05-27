@@ -10,9 +10,9 @@ export class PublicProduction extends Performance {
   }) {
     const flags = new Flags({
       // killing: true,
-      timings: true
+      // timings: true
       // spawn: true,
-      // performance: false,
+      performance: false
       // death: true,
       // playerControl: true
       // playerDeath: true
@@ -24,7 +24,7 @@ export class PublicProduction extends Performance {
     this.addCornerTrees()
     this.addCornerTrees()
     this.addCenterTree()
-    this.addCenterTree()
+    // this.addCenterTree()
     this.addCenterTree()
     this.addFamilies()
   }
