@@ -21,9 +21,11 @@ export class PrivateProduction extends Performance {
       flags,
       promptbook: props.promptbook
     })
-    this.addGridTrees()
-    // this.addGridTrees()
     this.addFamilies()
     this.addCornerTrees()
+    this.addCornerTrees()
+    this.addCenterTree()
+    this.addCenterTree()
+    this.addCenterTree()
   }
 }

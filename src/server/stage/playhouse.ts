@@ -178,6 +178,10 @@ export class Playhouse extends Stage {
     })
   }
 
+  addCenterTree (): void {
+    this.addTree({ position: Vec2(0, 0) })
+  }
+
   addCornerTrees (): void {
     const minimum = Math.min(this.halfWidth, this.halfHeight)
     const half = minimum / 2
