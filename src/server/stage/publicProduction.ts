@@ -23,7 +23,9 @@ export class PublicProduction extends Performance {
     })
     this.addCornerTrees()
     this.addCornerTrees()
-    this.addCornerTrees()
+    this.addCenterTree()
+    this.addCenterTree()
+    this.addCenterTree()
     this.addFamilies()
   }
 }
