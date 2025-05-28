@@ -15,9 +15,9 @@ export class Membrane extends Feature {
   static DAMAGE_FACTOR = 3
   static INITIAL_RADIUS = 0.6 / Math.sqrt(2)
   static MINIMUM_DAMAGE = 0.1
-  static MINIMUM_LIFE_SECONDS = 35
-  static GENETIC_LIFE_SECONDS = 150
-  static GROWTH = 0.15
+  static MINIMUM_LIFE_SECONDS = 40
+  static GENETIC_LIFE_SECONDS = 120
+  static GROWTH = 0.13
   actor: Organism
   destroyed = false
   hungerDamage = 0
@@ -73,7 +73,7 @@ export class Membrane extends Feature {
       const size = this.radius * Math.SQRT2
       const halfSize = size / 2
       this.actor.stage.addFoodSquare({
-        nutrition: this.combatDamage,
+        nutrition: this.combatDamage * 0.5,
         position: this.position,
         halfSize
       })
