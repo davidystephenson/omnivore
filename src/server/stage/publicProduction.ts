@@ -12,7 +12,7 @@ export class PublicProduction extends Performance {
       // killing: true,
       // timings: true
       // spawn: true,
-      // performance: false,
+      performance: false,
       // death: true,
       // playerControl: true
       playerDeath: true

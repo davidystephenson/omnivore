@@ -9,7 +9,7 @@ import { Controls } from '../shared/input'
 import { GREEN } from '../shared/color'
 import { Server } from './server'
 import { Performance } from './stage/performance'
-import { Promptbook } from './types'
+import { PerformanceConstructor, Promptbook } from './types'
 import { Flags } from './flags'
 
 export class Performer extends Server {
@@ -17,7 +17,7 @@ export class Performer extends Server {
 
   constructor (props: {
     promptbook: Promptbook
-    Performance: new (props: { flags: Flags, promptbook: Promptbook }) => Performance
+    Performance: PerformanceConstructor
   }) {
     console.info('Playhouse half size:', props.promptbook.halfWidth, 'x', props.promptbook.halfHeight)
     const performance = new props.Performance({

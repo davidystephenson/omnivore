@@ -14,7 +14,7 @@ export class PrivateProduction extends Performance {
       // spawn: true,
       // performance: false,
       // death: true,
-      playerControl: true
+      // playerControl: true
       // playerDeath: true
     })
     super({

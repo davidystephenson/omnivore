@@ -1,10 +1,9 @@
 import { Flags } from '../flags'
 import { Performance } from './performance'
 import { Promptbook } from '../types'
-import { Vec2 } from 'planck'
 
 export class TestProduction extends Performance {
-  playerGene = this.bruteGene
+  playerGene = this.trisolaranGene
 
   constructor (props: {
     promptbook: Promptbook
@@ -18,8 +17,9 @@ export class TestProduction extends Performance {
         // death: true,
         // growGame: false,
         // hungerGame: false,
-        // performance: false,
-        playerControl: true
+        performance: false,
+        // playerControl: true
+        playerDeath: true
         // spawnpoints: true
         // waypoints: true
       }),
@@ -27,9 +27,9 @@ export class TestProduction extends Performance {
     })
     // const trisolaran = this.addTrisolaran({ position: Vec2(3, 3) })
     // trisolaran.membrane.hungerDamage = 0.99
-    this.addFruit({ position: Vec2(-7, 7) })
-    this.addTrisolaran({ position: Vec2(0, 7) })
-    this.addHunter({ position: Vec2(2, 7) })
+    // this.addFruit({ position: Vec2(-7, 7) })
+    // this.addTrisolaran({ position: Vec2(0, 7) })
+    // this.addHunter({ position: Vec2(2, 7) })
     // this.addBrick({ position: Vec2(-20, -20), halfHeight: 15, halfWidth: 15 })
     // this.addBrick({ position: Vec2(20, -20), halfHeight: 5, halfWidth: 5 })
     // this.addBrick({ position: Vec2(20, -15), halfHeight: 2, halfWidth: 2 })

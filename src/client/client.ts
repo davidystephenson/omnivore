@@ -4,7 +4,7 @@ import { Summary } from '../shared/summary'
 import { Renderer } from './renderer'
 
 const input = new Input()
-const renderer = new Renderer()
+const renderer = new Renderer({ input })
 
 window.onkeydown = function (event: KeyboardEvent) {
   input.take({

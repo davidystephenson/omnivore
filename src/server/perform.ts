@@ -1,5 +1,5 @@
 import { Performer } from './performer'
-import { matrixSchema, navAreaDefSchema, performanceNameSchema, Promptbook, tableOfContentsSchema, wallDefSchema, WaypointData, waypointDataSchema } from './types'
+import { matrixSchema, navAreaDefSchema, PerformanceConstructor, PerformanceName, performanceNameSchema, Promptbook, tableOfContentsSchema, wallDefSchema, WaypointData, waypointDataSchema } from './types'
 import fs from 'fs'
 import json from 'big-json'
 import { ZodSchema } from 'zod'
@@ -7,9 +7,9 @@ import { PublicProduction } from './stage/publicProduction'
 import { PrivateProduction } from './stage/privateProduction'
 import { TestProduction } from './stage/testProduction'
 
-const performances = {
-  public: PublicProduction,
+const performances: Record<PerformanceName, PerformanceConstructor> = {
   private: PrivateProduction,
+  public: PublicProduction,
   test: TestProduction
 }
 
