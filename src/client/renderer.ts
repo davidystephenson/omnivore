@@ -105,6 +105,10 @@ export class Renderer {
     if (this.summary.respawn != null && this.summary.respawn > -1) {
       this.context.fillText(`Respawning... ${String(this.summary.respawn)}`, 10, this.canvas.height * 0.95)
     }
+    const floored = Math.floor(this.summary.fps)
+    const capped = Math.min(floored, 30)
+    this.context.fillStyle = capped < 25 ? 'red' : 'green'
+    this.context.fillText(`${capped} FPS`, this.canvas.width * 0.85, 60)
   }
 
   followCamera (): void {
