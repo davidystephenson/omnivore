@@ -2,6 +2,7 @@ import { io } from 'socket.io-client'
 import { Input } from '../shared/input'
 import { Summary } from '../shared/summary'
 import { Renderer } from './renderer'
+import { HALF_SIGHT_HEIGHT } from '../shared/sight'
 
 const input = new Input()
 const renderer = new Renderer({ input })
@@ -20,7 +21,9 @@ window.onkeyup = function (event: KeyboardEvent) {
 }
 window.onwheel = function (event: WheelEvent) {
   renderer.camera.zoom -= 0.005 * event.deltaY
+  const cameraScale = 20 / HALF_SIGHT_HEIGHT * Math.exp(0.03 * renderer.camera.zoom)
   console.info('renderer.camera.zoom', renderer.camera.zoom)
+  console.info('cameraScale', cameraScale)
 }
 let lastSummary: Summary
 window.onmousedown = (event: MouseEvent) => {

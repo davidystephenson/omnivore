@@ -3,12 +3,14 @@ import { Spawnpoint } from './spawnpoint'
 import { Stage } from './stage/stage'
 import { RED, GREEN, Rgb } from '../shared/color'
 import { Obituary, Organism } from './actor/organism'
-import { SIGHT_HEIGHT, SIGHT_WIDTH } from '../shared/sight'
+import { HALF_SIGHT_HEIGHT, HALF_SIGHT_WIDTH, SIGHT_HEIGHT, SIGHT_WIDTH } from '../shared/sight'
 import { range } from './math'
 import { Prop } from './feature/prop'
 import { Debris } from './actor/debris'
 
 export class Spawner {
+  static HEIGHT = HALF_SIGHT_HEIGHT / 2
+  static WIDTH = HALF_SIGHT_WIDTH / 2
   queue: Obituary[] = []
   stage: Stage
   spawnpoints: Spawnpoint[] = []
@@ -43,7 +45,7 @@ export class Spawner {
         const color = collided ? RED : GREEN
         const transparent = { ...color, alpha: 0.1 }
         this.stage.debugCircle({
-          circle: new Circle(point.position, Spawnpoint.RADIUS),
+          circle: new Circle(point.position, Spawner.WIDTH),
           color: transparent
         })
       })
@@ -113,8 +115,8 @@ export class Spawner {
       const maximumY = Math.max(...ys)
       const width = maximumX - minimumX
       const height = maximumY - minimumY
-      const xCount = Math.floor(width / SIGHT_WIDTH)
-      const yCount = Math.floor(height / SIGHT_HEIGHT)
+      const xCount = Math.floor(width / Spawner.WIDTH)
+      const yCount = Math.floor(height / Spawner.HEIGHT)
       const xMargin = width / xCount
       const yMargin = height / yCount
       const xRange = range(0, xCount - 1)

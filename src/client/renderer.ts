@@ -2,7 +2,7 @@ import { Vec2 } from 'planck'
 import { ClientElement } from '../shared/element'
 import { Summary } from '../shared/summary'
 import { Rope } from '../shared/rope'
-import { HALF_SIGHT_SIZE } from '../shared/sight'
+import { HALF_SIGHT_HEIGHT, HALF_SIGHT_SIZE } from '../shared/sight'
 import { DebugLine } from '../shared/debugLine'
 import { DebugCircle } from '../shared/debugCircle'
 import { LIGHT_GREEN } from '../shared/color'
@@ -111,15 +111,15 @@ export class Renderer {
     const floored = Math.floor(average)
     const capped = Math.min(floored, 30)
     this.context.fillStyle = capped < 25 ? 'red' : 'green'
-    this.context.fillText(`${capped} FPS`, this.canvas.width * 0.85, 100)
+    this.context.fillText(`${capped} fps`, this.canvas.width * 0.909, 60)
   }
 
   followCamera (): void {
     this.context.resetTransform()
     this.context.translate(0.5 * this.canvas.width, 0.5 * this.canvas.height)
     const vmin = Math.min(this.canvas.width, this.canvas.height)
-    this.context.scale(0.03 * vmin, -0.03 * vmin)
-    const cameraScale = Math.exp(0.1 * this.camera.zoom)
+    this.context.scale(0.02 * vmin, -0.02 * vmin)
+    const cameraScale = 20 / HALF_SIGHT_HEIGHT * Math.exp(0.03 * this.camera.zoom)
     this.context.scale(cameraScale, cameraScale)
     this.context.translate(-this.camera.position.x, -this.camera.position.y)
   }
@@ -190,13 +190,11 @@ export class Renderer {
       const HALF_LENGTH = TOTAL_LENGTH / 2
       const bonusLength = HALF_LENGTH * speed
       const lengthPercent = HALF_LENGTH + bonusLength
-      console.log('lengthPercent', lengthPercent)
       const length = lengthPercent * element.u
       const TOTAL_WIDTH = 0.15
       const HALF_WIDTH = TOTAL_WIDTH / 2
       const bonusWidth = HALF_WIDTH * speed
       const widthPercent = HALF_WIDTH + bonusWidth
-      console.log('widthPercent', widthPercent)
       const width = widthPercent * element.u
       this.context.lineWidth = width
       this.context.strokeStyle = 'white'
