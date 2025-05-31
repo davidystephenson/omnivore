@@ -3,7 +3,6 @@ import { Spawner } from './spawner'
 import { HALF_SIGHT_WIDTH } from '../shared/sight'
 
 export class Spawnpoint {
-  static RADIUS = HALF_SIGHT_WIDTH
   spawner: Spawner
   position: Vec2
   fixture: Fixture
@@ -12,7 +11,7 @@ export class Spawnpoint {
   constructor (spawner: Spawner, position: Vec2) {
     this.spawner = spawner
     this.position = position
-    const circleShape = new CircleShape(position, Spawnpoint.RADIUS)
+    const circleShape = new CircleShape(position, Spawner.WIDTH)
     this.fixture = this.spawner.body.createFixture({
       shape: circleShape,
       isSensor: true
