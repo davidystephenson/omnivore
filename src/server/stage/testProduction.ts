@@ -19,8 +19,8 @@ export class TestProduction extends Performance {
         // hungerGame: false,
         performance: false,
         // playerControl: true
-        playerDeath: true
-        // spawnpoints: true
+        // playerDeath: true
+        spawnpoints: true
         // waypoints: true
       }),
       promptbook: props.promptbook
