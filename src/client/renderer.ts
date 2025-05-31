@@ -25,6 +25,7 @@ export class Renderer {
   id: number = 0
   summary?: Summary
   input: Input
+  fpsList: number[] = []
 
   constructor (props: {
     input: Input
@@ -105,10 +106,12 @@ export class Renderer {
     if (this.summary.respawn != null && this.summary.respawn > -1) {
       this.context.fillText(`Respawning... ${String(this.summary.respawn)}`, 10, this.canvas.height * 0.95)
     }
-    const floored = Math.floor(this.summary.fps)
+    const total = this.fpsList.reduce((a, b) => a + b, 0)
+    const average = total / this.fpsList.length
+    const floored = Math.floor(average)
     const capped = Math.min(floored, 30)
     this.context.fillStyle = capped < 25 ? 'red' : 'green'
-    this.context.fillText(`${capped} FPS`, this.canvas.width * 0.85, 60)
+    this.context.fillText(`${capped} FPS`, this.canvas.width * 0.85, 100)
   }
 
   followCamera (): void {
@@ -214,6 +217,10 @@ export class Renderer {
 
   update (summary: Summary): void {
     this.summary = summary
+    this.fpsList.push(summary.fps)
+    if (this.fpsList.length > 100) {
+      this.fpsList.shift()
+    }
     this.elements.forEach(element => {
       element.visible = false
     })
