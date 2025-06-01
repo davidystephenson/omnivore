@@ -26,6 +26,7 @@ export class Flags {
   players: boolean
   procedural: boolean
   reproduceGame: boolean
+  respawn: boolean
   spawn: boolean
   spawnpoints: boolean
   starveBricksGame: boolean
@@ -65,6 +66,7 @@ export class Flags {
     players?: boolean
     procedural?: boolean
     reproduceGame?: boolean
+    respawn?: boolean
     spawn?: boolean
     spawnpoints?: boolean
     starveBricksGame?: boolean
@@ -96,13 +98,14 @@ export class Flags {
     this.navigation = props.navigation ?? false
     this.organisms = props.organisms ?? false
     this.organismsCount = props.organismsCount ?? false
-    this.performance = props.performance ?? true
+    this.performance = props.performance ?? false
     this.playerNavigation = props.playerNavigation ?? true
     this.playerDeath = props.playerDeath ?? false
     this.players = props.players ?? false
     this.playerControl = props.playerControl ?? false
     this.procedural = props.procedural ?? false
     this.reproduceGame = props.reproduceGame ?? true
+    this.respawn = props.respawn ?? false
     this.spawn = props.spawn ?? false
     this.spawnpoints = props.spawnpoints ?? false
     this.starveBricksGame = props.starveBricksGame ?? true

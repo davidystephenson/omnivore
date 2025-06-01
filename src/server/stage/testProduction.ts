@@ -17,7 +17,6 @@ export class TestProduction extends Performance {
         // death: true,
         // growGame: false,
         // hungerGame: false,
-        performance: false,
         // playerControl: true
         // playerDeath: true
         spawnpoints: true

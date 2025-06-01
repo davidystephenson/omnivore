@@ -1,16 +1,16 @@
 import { Vec2, Body, Circle } from 'planck'
 import { Spawnpoint } from './spawnpoint'
 import { Stage } from './stage/stage'
-import { RED, GREEN, Rgb } from '../shared/color'
+import { RED, GREEN, Rgb, YELLOW } from '../shared/color'
 import { Obituary, Organism } from './actor/organism'
-import { HALF_SIGHT_HEIGHT, HALF_SIGHT_WIDTH, SIGHT_HEIGHT, SIGHT_WIDTH } from '../shared/sight'
+import { HALF_SIGHT_HEIGHT } from '../shared/sight'
 import { range } from './math'
 import { Prop } from './feature/prop'
 import { Debris } from './actor/debris'
 
 export class Spawner {
-  static HEIGHT = HALF_SIGHT_HEIGHT / 2
-  static WIDTH = HALF_SIGHT_WIDTH / 2
+  static RATIO = 1
+  static RADIUS = HALF_SIGHT_HEIGHT * Spawner.RATIO
   queue: Obituary[] = []
   stage: Stage
   spawnpoints: Spawnpoint[] = []
@@ -23,6 +23,18 @@ export class Spawner {
       position: Vec2(0, 0)
     })
     this.body.setUserData(this)
+  }
+
+  debugSpawnpoints (props: {
+    color: Rgb
+  }): void {
+    this.spawnpoints.forEach(point => {
+      const transparent = { ...props.color, alpha: 0.1 }
+      this.stage.debugCircle({
+        circle: new Circle(point.position, Spawner.RADIUS),
+        color: transparent
+      })
+    })
   }
 
   getFarthest (props: {
@@ -43,11 +55,7 @@ export class Spawner {
       this.spawnpoints.forEach(point => {
         const collided = point.collideCount > 0
         const color = collided ? RED : GREEN
-        const transparent = { ...color, alpha: 0.1 }
-        this.stage.debugCircle({
-          circle: new Circle(point.position, Spawner.WIDTH),
-          color: transparent
-        })
+        point.debug({ color })
       })
     }
 
@@ -85,14 +93,15 @@ export class Spawner {
       this.stage.flag({ f: 'spawn', vs: ['spawnPoints.length', this.spawnpoints.length] })
       const clearSpawnPoints = this.stage.spawner.spawnpoints.filter(spawnPoint => spawnPoint.collideCount < 1)
       this.stage.flag({ f: 'spawn', vs: ['clearSpawnPoints.length', clearSpawnPoints.length] })
+      const first = this.stage.spawner.queue.shift()
+      if (first == null) {
+        throw new Error('There is no first')
+      }
       if (clearSpawnPoints.length > 0) {
-        const first = this.stage.spawner.queue.shift()
-        if (first == null) {
-          throw new Error('There is no first')
-        }
         // TODO longest path away
         const spawnpoint = this.getFarthest({ obituary: first, spawnpoints: clearSpawnPoints })
         const gene = first.gene.mutate()
+        this.stage.flag({ f: 'respawn', k: 'Respawned', v: first.color.label })
         void new Organism({ ...first, gene, position: spawnpoint.position, stage: this.stage })
       } else {
         this.stage.runner.features.forEach(feature => {
@@ -100,6 +109,12 @@ export class Spawner {
             feature.takeDamage({ damage: 0.01 })
           }
         })
+        if (this.stage.flags.spawnpoints) {
+          this.spawnpoints.forEach(point => {
+            point.debug({ color: YELLOW })
+          })
+        }
+        this.stage.flag({ f: 'respawn', k: 'No spawnpoints for', v: first.color.label })
       }
     }
   }
@@ -115,8 +130,9 @@ export class Spawner {
       const maximumY = Math.max(...ys)
       const width = maximumX - minimumX
       const height = maximumY - minimumY
-      const xCount = Math.floor(width / Spawner.WIDTH)
-      const yCount = Math.floor(height / Spawner.HEIGHT)
+      const size = Spawner.RADIUS * 2
+      const xCount = Math.floor(width / size)
+      const yCount = Math.floor(height / size)
       const xMargin = width / xCount
       const yMargin = height / yCount
       const xRange = range(0, xCount - 1)

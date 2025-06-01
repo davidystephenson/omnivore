@@ -10,12 +10,14 @@ export class PrivateProduction extends Performance {
   }) {
     const flags = new Flags({
       // killing: true,
-      timings: true,
+      // timings: true,
       // spawn: true,
-      // performance: false,
+      // performance: true,
       // death: true,
       // playerControl: true
       // playerDeath: true
+      // spawnpoints: true,
+      respawn: true
     })
     super({
       flags,
