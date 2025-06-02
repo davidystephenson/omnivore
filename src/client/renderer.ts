@@ -199,7 +199,7 @@ export class Renderer {
 
       const length = borderLength + bonusLength
       console.log('length', length)
-      const TOTAL_WIDTH = 0.2
+      const TOTAL_WIDTH = 0.8
       const HALF_WIDTH = TOTAL_WIDTH / 2
       const bonusWidth = HALF_WIDTH * this.summary.stamina
       const widthPercent = HALF_WIDTH + bonusWidth
