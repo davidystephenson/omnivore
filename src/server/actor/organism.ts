@@ -163,7 +163,6 @@ export class Organism extends Actor {
   }
 
   charge (enemy: Feature): Rgb {
-    const chargeStart = performance.now()
     const enemyPosition = enemy.body.getPosition()
     const navPoint = this.stage.navigation.navigate(this.membrane.position, enemyPosition, this.membrane.radius, enemy.radius, this.stage.flags.charge)
     const navPosition = navPoint instanceof Vec2 ? navPoint : navPoint.position
@@ -182,7 +181,6 @@ export class Organism extends Actor {
     this.setControls(moveDir)
     this.chasePoint = enemyPosition.clone()
     this.chaseRadius = enemy.radius
-    this.stage.runner.endTiming({ key: 'charge', start: chargeStart })
     return MAGENTA
   }
 
@@ -355,7 +353,6 @@ export class Organism extends Actor {
   }
 
   flee (enemy: Feature): Rgb {
-    const fleeStart = performance.now()
     const fleeDir = this.getFleeDir(enemy)
     if (this.stage.flags.botFlee) {
       this.stage.debugLine({
@@ -366,7 +363,6 @@ export class Organism extends Actor {
       })
     }
     this.setControls(fleeDir)
-    this.stage.runner.endTiming({ key: 'flee', start: fleeStart })
     return PINK
   }
 
@@ -598,41 +594,49 @@ export class Organism extends Actor {
   maneuver (props: {
     sortedVisibleFeatures: Feature[]
   }): Rgb {
-    const maneuverLoopStart = performance.now()
+    const start = performance.now()
     for (const feature of props.sortedVisibleFeatures) {
       const maneuverStepStart = performance.now()
       const judgement = this.judge({ feature })
+      this.stage.runner.endTiming({
+        key: '> > judge', start: maneuverStepStart
+      })
       if (judgement == null) {
         this.debugManeuverLine({ color: GRAY, feature })
-        this.stage.runner.endTiming({
-          key: 'reachable', start: maneuverStepStart
-        })
         this.stage.runner.endTiming({
           key: 'maneuverStep', start: maneuverStepStart
         })
         continue
       }
       if (judgement) {
+        const chargeStart = performance.now()
         const color = this.charge(feature)
+        this.stage.runner.endTiming({
+          key: '> > charge', start: chargeStart
+        })
         this.stage.runner.endTiming({
           key: 'maneuverStep', start: maneuverStepStart
         })
         this.stage.runner.endTiming({
-          key: '> maneuverLoop', start: maneuverLoopStart
+          key: '> maneuver targets', start
         })
         return color
       }
+      const fleeStart = performance.now()
       const color = this.flee(feature)
+      this.stage.runner.endTiming({
+        key: '> > flee', start: fleeStart
+      })
       this.stage.runner.endTiming({
         key: 'maneuverStep', start: maneuverStepStart
       })
       this.stage.runner.endTiming({
-        key: '> maneuverLoop', start: maneuverLoopStart
+        key: '> maneuver targets', start
       })
       return color
     }
-    const maneuverLoopEnd = this.stage.runner.endTiming({
-      key: '> maneuverLoop', start: maneuverLoopStart
+    const maneuverTargetsEnd = this.stage.runner.endTiming({
+      key: '> maneuver targets', start
     })
     if (this.chasePoint != null) {
       const reached = this.isTouching({ point: this.chasePoint })
@@ -649,7 +653,7 @@ export class Organism extends Actor {
     }
     const color = this.wander()
     this.stage.runner.endTiming({
-      key: '> afterManeuverLoop', start: maneuverLoopEnd
+      key: '> maneuver memory', start: maneuverTargetsEnd
     })
     return color
   }

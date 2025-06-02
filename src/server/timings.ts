@@ -1,5 +1,5 @@
 export interface Timings {
-  vision?: number
+  afterDistances?: number
   movement?: number
   explore?: number
   '> exploreVisible'?: number
@@ -9,20 +9,21 @@ export interface Timings {
   sort?: number
   target?: number
   maneuver?: number
+  '> maneuver memory'?: number
+  '> maneuver targets'?: number
   sortNearest?: number
-  flee?: number
-  '> maneuverLoop'?: number
   maneuverStep?: number
-  '> afterManeuverLoop'?: number
-  reachable?: number
+  '> > charge'?: number
+  '> > flee'?: number
+  '> > judge'?: number
   postReachable?: number
   navigate?: number
-  charge?: number
   chase?: number
   wander?: number
   afterIsOpen?: number
   distances?: number
+  summary?: number
   startToNeighbor?: number
   neighborToEnd?: number
-  afterDistances?: number
+  vision?: number
 }

@@ -152,6 +152,7 @@ export class Runner {
   getSummary (props: {
     player: Player
   }): Summary {
+    const start = performance.now()
     const elements = this.getElements(props.player)
     const age = Math.floor(props.player.age)
     const summary: Summary = {
@@ -185,6 +186,7 @@ export class Runner {
       const json = JSON.stringify(summary)
       this.stage.debug({ vs: ['getSummary json.length', json.length], seconds: 10 })
     }
+    this.endTiming({ key: 'summary', start })
     return summary
   }
 
@@ -257,17 +259,20 @@ export class Runner {
         this.debugTiming({ key: '> exploreVisible' })
         this.debugTiming({ key: '> > isVisible' })
         this.debugTiming({ key: 'maneuver' })
-        this.debugTiming({ key: '> maneuverLoop' })
-        this.debugTiming({ key: '> afterManeuverLoop' })
+        this.debugTiming({ key: '> maneuver targets' })
+        this.debugTiming({ key: '> > judge' })
+        this.debugTiming({ key: '> > charge' })
+        this.debugTiming({ key: '> > flee' })
+        this.debugTiming({ key: '> maneuver memory' })
         // this.debugTiming({ key: 'navigate' })
         // this.debugTiming({ key: 'charge' })
         // this.debugTiming({ key: 'chase' })
         // this.debugTiming({ key: 'wander' })
-        // this.debugTiming({ key: 'flee' })
         this.debugTiming({ key: 'navigate' })
         // this.debugTiming({ key: 'afterIsOpen' })
         // this.debugTiming({ key: 'distances' })
         // this.debugTiming({ key: 'neighborToEnd' })
+        this.debugTiming({ key: 'summary' })
       }
       const organisms: Organism[] = []
       this.stage.actors.forEach(actor => {
