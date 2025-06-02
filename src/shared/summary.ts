@@ -16,4 +16,5 @@ export interface Summary {
   ropes?: Rope[]
   respawn: number
   speed?: number
+  stamina?: number
 }

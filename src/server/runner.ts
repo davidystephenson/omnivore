@@ -169,6 +169,7 @@ export class Runner {
       summary.id = props.player.organism.membrane.id
       summary.controls = props.player.organism.controls
       summary.speed = props.player.organism.gene.speed
+      summary.stamina = props.player.organism.gene.stamina
     }
     this.stage.spawner.queue.forEach((obituary, index) => {
       if (obituary.player !== props.player) return

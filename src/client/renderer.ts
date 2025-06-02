@@ -185,30 +185,52 @@ export class Renderer {
     context.restore()
     if (self) {
       // Horizontal and vertical lines
+      if (this.summary.stamina == null) {
+        throw new Error('Missing stamina')
+      }
+      const borderLength = 0.25
+      console.log('borderLength', borderLength)
       const speed = this.summary.speed ?? 1
-      const TOTAL_LENGTH = 1
-      const HALF_LENGTH = TOTAL_LENGTH / 2
-      const bonusLength = HALF_LENGTH * speed
-      const lengthPercent = HALF_LENGTH + bonusLength
-      const length = lengthPercent * element.u
-      const TOTAL_WIDTH = 0.15
+      console.log('element', element)
+      const totalBonus = element.u - borderLength
+      console.log('totalBonus', totalBonus)
+      const bonusLength = totalBonus * speed
+      console.log('bonusLength', bonusLength)
+
+      const length = borderLength + bonusLength
+      console.log('length', length)
+      const TOTAL_WIDTH = 0.2
       const HALF_WIDTH = TOTAL_WIDTH / 2
-      const bonusWidth = HALF_WIDTH * speed
+      const bonusWidth = HALF_WIDTH * this.summary.stamina
       const widthPercent = HALF_WIDTH + bonusWidth
       const width = widthPercent * element.u
       this.context.lineWidth = width
-      this.context.strokeStyle = 'white'
-      const left = this.input.controls.left ? element.z - length : element.z
-      const right = this.input.controls.right ? element.z + length : element.z
-      const up = this.input.controls.up ? element.w + length : element.w
-      const down = this.input.controls.down ? element.w - length : element.w
+      this.context.strokeStyle = 'lime'
+      const left = element.z - element.u
+      console.log('left', left)
+      const innerLeft = this.input.controls.left ? left + length : left
+      console.log('innerLeft', innerLeft)
+      const right = element.z + element.u
+      const innerRight = this.input.controls.right ? right - length : right
+      const up = element.w + element.u
+      const innerUp = this.input.controls.up ? up - length : up
+      const down = element.w - element.u
+      const innerDown = this.input.controls.down ? down + length : down
       this.context.beginPath()
       this.context.moveTo(left, element.w)
-      this.context.lineTo(right, element.w)
+      this.context.lineTo(innerLeft, element.w)
+      this.context.stroke()
+      this.context.beginPath()
+      this.context.moveTo(right, element.w)
+      this.context.lineTo(innerRight, element.w)
       this.context.stroke()
       this.context.beginPath()
       this.context.moveTo(element.z, up)
-      this.context.lineTo(element.z, down)
+      this.context.lineTo(element.z, innerUp)
+      this.context.stroke()
+      this.context.beginPath()
+      this.context.moveTo(element.z, down)
+      this.context.lineTo(element.z, innerDown)
       this.context.stroke()
     }
   }

@@ -192,7 +192,7 @@ export class Renderer {
       console.log('widthPercent', widthPercent)
       const width = widthPercent * element.u
       this.context.lineWidth = width
-      this.context.strokeStyle = 'white'
+      this.context.strokeStyle = 'lime'
       const left = this.input.controls.left ? element.z - length : element.z
       const right = this.input.controls.right ? element.z + length : element.z
       const up = this.input.controls.up ? element.w + length : element.w

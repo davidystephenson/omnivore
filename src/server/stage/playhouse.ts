@@ -12,14 +12,14 @@ export class Playhouse extends Stage {
     strength: 0.33
   })
 
-  bruteGene = new Gene({
+  whaleGene = new Gene({
     speed: 0,
     stage: this,
     stamina: 0,
     strength: 1
   })
 
-  bruteVictimGene = new Gene({
+  whaleVictimGene = new Gene({
     speed: 0.0,
     stamina: 0.01,
     strength: 0.99,
@@ -70,7 +70,7 @@ export class Playhouse extends Stage {
     strength: 0.5
   })
 
-  trisolaranGene = new Gene({
+  tardigradeGene = new Gene({
     speed: 0,
     stage: this,
     stamina: 1,
@@ -92,7 +92,7 @@ export class Playhouse extends Stage {
   }): Organism {
     return this.addOrganism({
       color: MAGENTA,
-      gene: this.bruteGene,
+      gene: this.whaleGene,
       position: props.position
     })
   }
@@ -102,7 +102,7 @@ export class Playhouse extends Stage {
   }): Organism {
     return this.addOrganism({
       color: CYAN,
-      gene: this.bruteVictimGene,
+      gene: this.whaleVictimGene,
       position: props.position
     })
   }
@@ -163,7 +163,7 @@ export class Playhouse extends Stage {
   }): Organism {
     return this.addOrganism({
       color: PURPLE,
-      gene: this.trisolaranGene,
+      gene: this.tardigradeGene,
       position: props.position
     })
   }

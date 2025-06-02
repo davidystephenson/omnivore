@@ -1,10 +1,9 @@
 import { Flags } from '../flags'
 import { Performance } from './performance'
 import { Promptbook } from '../types'
-import { Vec2 } from 'planck'
 
 export class TestProduction extends Performance {
-  playerGene = this.trisolaranGene
+  playerGene = this.hunterGene
 
   constructor (props: {
     promptbook: Promptbook

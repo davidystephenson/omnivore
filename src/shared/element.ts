@@ -9,6 +9,7 @@ export interface Element {
   y: number // y
   z?: number // center x
   w?: number // center y
+  // TODO Remove borderWidth
   o?: number // borderWidth
   u?: number // radius
   v?: Vec2[] // polygon
