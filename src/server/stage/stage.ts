@@ -382,6 +382,13 @@ export class Stage {
     nonBots.forEach(actor => actor.onStep({ stepSize: props.stepSize }))
     this.destructionQueue.forEach(body => {
       this.world.destroyBody(body)
+      const data = body.getUserData()
+      if (!(data instanceof Feature)) return
+      this.players.forEach(player => {
+        player.seenIds = player.seenIds.filter(id => {
+          return id !== data.id
+        })
+      })
     })
     this.killingQueue.forEach(killing => {
       killing.execute()

@@ -6,10 +6,12 @@ import { ZodSchema } from 'zod'
 import { PublicProduction } from './stage/publicProduction'
 import { PrivateProduction } from './stage/privateProduction'
 import { TestProduction } from './stage/testProduction'
+import { SmallProduction } from './stage/smallProduction'
 
 const performances: Record<PerformanceName, PerformanceConstructor> = {
   private: PrivateProduction,
   public: PublicProduction,
+  small: SmallProduction,
   test: TestProduction
 }
 

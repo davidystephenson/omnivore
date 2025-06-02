@@ -76,6 +76,6 @@ export const tableOfContentsSchema = z.object({
   halfWidth: z.number(),
   radii: z.number().array()
 })
-export const performanceNameSchema = z.literal('public').or(z.literal('private')).or(z.literal('test'))
+export const performanceNameSchema = z.literal('public').or(z.literal('private')).or(z.literal('test')).or(z.literal('small'))
 export type PerformanceName = z.infer<typeof performanceNameSchema>
 export type PerformanceConstructor = new (props: { flags: Flags, promptbook: Promptbook }) => Performance

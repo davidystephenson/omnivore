@@ -9,13 +9,11 @@ export class PublicProduction extends Performance {
     promptbook: Promptbook
   }) {
     const flags = new Flags({
-      // killing: true,
-      // timings: true
-      // spawn: true,
-      performance: false
-      // death: true,
-      // playerControl: true
+      // performance: true,
       // playerDeath: true
+      // respawn: true,
+      // spawn: true,
+      // timings: true
     })
     super({
       flags,

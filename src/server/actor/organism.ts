@@ -595,20 +595,7 @@ export class Organism extends Actor {
     return undefined
   }
 
-  maneuver (): Rgb {
-    const sortNearestStart = performance.now()
-    const sorted = this.sortNearest({ features: this.featuresInVision })
-    const sortNearestEnd = this.stage.runner.endTiming({
-      key: 'sortNearest', start: sortNearestStart
-    })
-    const color = this.maneuverElse({ sortedVisibleFeatures: sorted })
-    this.stage.runner.endTiming({
-      key: 'maneuverElse', start: sortNearestEnd
-    })
-    return color
-  }
-
-  maneuverElse (props: {
+  maneuver (props: {
     sortedVisibleFeatures: Feature[]
   }): Rgb {
     const maneuverLoopStart = performance.now()
@@ -631,7 +618,7 @@ export class Organism extends Actor {
           key: 'maneuverStep', start: maneuverStepStart
         })
         this.stage.runner.endTiming({
-          key: 'maneuverLoop', start: maneuverLoopStart
+          key: '> maneuverLoop', start: maneuverLoopStart
         })
         return color
       }
@@ -640,12 +627,12 @@ export class Organism extends Actor {
         key: 'maneuverStep', start: maneuverStepStart
       })
       this.stage.runner.endTiming({
-        key: 'maneuverLoop', start: maneuverLoopStart
+        key: '> maneuverLoop', start: maneuverLoopStart
       })
       return color
     }
     const maneuverLoopEnd = this.stage.runner.endTiming({
-      key: 'maneuverLoop', start: maneuverLoopStart
+      key: '> maneuverLoop', start: maneuverLoopStart
     })
     if (this.chasePoint != null) {
       const reached = this.isTouching({ point: this.chasePoint })
@@ -662,7 +649,7 @@ export class Organism extends Actor {
     }
     const color = this.wander()
     this.stage.runner.endTiming({
-      key: 'afterManeuverLoop', start: maneuverLoopEnd
+      key: '> afterManeuverLoop', start: maneuverLoopEnd
     })
     return color
   }
@@ -761,8 +748,14 @@ export class Organism extends Actor {
     const exploreEnd = this.stage.runner.endTiming({
       key: 'explore', start: movementEnd
     })
-    this.controlColor = this.maneuver()
-    this.stage.runner.endTiming({ key: 'maneuver', start: exploreEnd })
+    const sorted = this.sortNearest({ features: this.featuresInVision })
+    const sortNearestEnd = this.stage.runner.endTiming({
+      key: 'sortNearest', start: exploreEnd
+    })
+    this.controlColor = this.maneuver({ sortedVisibleFeatures: sorted })
+    this.stage.runner.endTiming({
+      key: 'maneuver', start: sortNearestEnd
+    })
   }
 
   reproduce (props: {

@@ -2,7 +2,7 @@ import fs from 'fs-extra'
 import path from 'path'
 
 export class Config {
-  port = 3001
+  port = 3000
   secure = false
 
   constructor () {

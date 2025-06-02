@@ -12,7 +12,6 @@ import { Playhouse } from './stage/playhouse'
 // import { Funhouse } from './funhouse'
 // import { GrandRehearsal } from './stage/grandRehearsal'
 import { Rehearsal } from './stage/rehearsal'
-import { Mission } from './stage/mission'
 // import { Mission } from './stage/mission'
 
 export class Server {
@@ -31,7 +30,7 @@ export class Server {
     this.setupApp()
     this.httpServer = this.getHttpServer()
     this.io = new SocketIo.Server(this.httpServer)
-    this.playhouse = props?.playhouse ?? new Mission()
+    this.playhouse = props?.playhouse ?? new Rehearsal()
     void this.start()
   }
 

@@ -2,7 +2,7 @@ import { Flags } from '../flags'
 import { Promptbook } from '../types'
 import { Performance } from './performance'
 
-export class PrivateProduction extends Performance {
+export class SmallProduction extends Performance {
   playerGene = this.balancedGene
 
   constructor (props: {
@@ -16,9 +16,9 @@ export class PrivateProduction extends Performance {
       // death: true,
       // playerControl: true
       // playerDeath: true,
-      // spawnpoints: true,
-      respawn: true,
-      summary: true
+      spawnpoints: true,
+      respawn: true
+      // summary: true
       // timings: true
     })
     super({
@@ -28,8 +28,5 @@ export class PrivateProduction extends Performance {
     this.addFamilies()
     this.addCornerTrees()
     this.addCornerTrees()
-    this.addCenterTree()
-    this.addCenterTree()
-    this.addCenterTree()
   }
 }

@@ -2,6 +2,7 @@ import { Vec2 } from 'planck'
 import { GREEN } from '../../shared/color'
 import { Actor } from '../actor/actor'
 import { Sculpture } from './sculpture'
+import { Feature } from './feature'
 
 export class Serving extends Sculpture {
   constructor (props: {
@@ -17,4 +18,8 @@ export class Serving extends Sculpture {
       actor: props.actor
     })
   }
+
+  handleContact (props: {
+    target: Feature
+  }): void {}
 }

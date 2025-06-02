@@ -93,15 +93,16 @@ export class Spawner {
       this.stage.flag({ f: 'spawn', vs: ['spawnPoints.length', this.spawnpoints.length] })
       const clearSpawnPoints = this.stage.spawner.spawnpoints.filter(spawnPoint => spawnPoint.collideCount < 1)
       this.stage.flag({ f: 'spawn', vs: ['clearSpawnPoints.length', clearSpawnPoints.length] })
-      const first = this.stage.spawner.queue.shift()
-      if (first == null) {
-        throw new Error('There is no first')
-      }
+
       if (clearSpawnPoints.length > 0) {
+        const first = this.stage.spawner.queue.shift()
+        if (first == null) {
+          throw new Error('There is no first')
+        }
         // TODO longest path away
         const spawnpoint = this.getFarthest({ obituary: first, spawnpoints: clearSpawnPoints })
         const gene = first.gene.mutate()
-        this.stage.flag({ f: 'respawn', k: 'Respawned', v: first.color.label })
+        this.stage.flag({ f: 'respawn', k: 'Respawned', v: first.color.label, seconds: 0 })
         void new Organism({ ...first, gene, position: spawnpoint.position, stage: this.stage })
       } else {
         this.stage.runner.features.forEach(feature => {
@@ -114,6 +115,7 @@ export class Spawner {
             point.debug({ color: YELLOW })
           })
         }
+        const first = this.queue[0]
         this.stage.flag({ f: 'respawn', k: 'No spawnpoints for', v: first.color.label })
       }
     }
@@ -130,9 +132,13 @@ export class Spawner {
       const maximumY = Math.max(...ys)
       const width = maximumX - minimumX
       const height = maximumY - minimumY
-      const size = Spawner.RADIUS * 2
-      const xCount = Math.floor(width / size)
-      const yCount = Math.floor(height / size)
+      const distance = Spawner.RADIUS * 4
+      const xQuotient = Math.floor(width / distance)
+      const yQuotient = Math.floor(height / distance)
+      const xCapped = Math.min(xQuotient, 5)
+      const yCapped = Math.min(yQuotient, 5)
+      const xCount = Math.max(xCapped, 2)
+      const yCount = Math.max(yCapped, 2)
       const xMargin = width / xCount
       const yMargin = height / yCount
       const xRange = range(0, xCount - 1)
@@ -168,6 +174,7 @@ export class Spawner {
       // this.spawnpoints = edgeWaypoints.map(waypoint => {
       //   return new Spawnpoint(this, waypoint.position)
       // })
+      this.stage.debug({ v: ['Setup', this.spawnpoints.length, 'spawnpoints'] })
     } else {
       this.spawnpoints = [
         new Spawnpoint(this, Vec2(5, 5)),

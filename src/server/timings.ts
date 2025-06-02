@@ -10,11 +10,10 @@ export interface Timings {
   target?: number
   maneuver?: number
   sortNearest?: number
-  maneuverElse?: number
   flee?: number
-  maneuverLoop?: number
+  '> maneuverLoop'?: number
   maneuverStep?: number
-  afterManeuverLoop?: number
+  '> afterManeuverLoop'?: number
   reachable?: number
   postReachable?: number
   navigate?: number

@@ -26,7 +26,7 @@ export class Runner {
 
   stepDate = performance.now()
   stepCount = 0
-  stepCountInterval = 30
+  stepCountInterval = 100
   timeStep = 1 / Runner.FPS
   timeScale = 1
   timing = false
@@ -93,9 +93,22 @@ export class Runner {
   }
 
   getElements (player: Player): Element[] {
+    this.stage.flag({
+      f: 'summary',
+      k: 'featuresInVision.length',
+      v: player.organism?.featuresInVision.length,
+      seconds: 10
+    })
     const idsInVision = player.organism?.featuresInVision.map(feature => feature.id)
+    this.stage.flag({ f: 'summary', k: 'features.length', v: this.features.length, seconds: 10 })
     const filteredFeatures = this.features.filter(feature => {
       return idsInVision?.includes(feature.id)
+    })
+    this.stage.flag({
+      f: 'summary',
+      k: 'seenIds.length',
+      v: player.seenIds.length,
+      seconds: 10
     })
     const elements: Element[] = filteredFeatures.map(feature => {
       const tree = feature.actor instanceof Tree
@@ -186,7 +199,7 @@ export class Runner {
     if (this.stage.flags.performance && this.timing) {
       console.time('step')
       const fpsString = this.fps.toFixed(2)
-      console.info('fps', fpsString, `(${this.stepCount} steps)`)
+      console.info('=== fps', fpsString, `(${this.stepCount} steps)`)
       const msString = difference.toFixed(2)
       console.info(msString, 'ms since the start of the last step')
     }
@@ -244,6 +257,8 @@ export class Runner {
         this.debugTiming({ key: '> exploreVisible' })
         this.debugTiming({ key: '> > isVisible' })
         this.debugTiming({ key: 'maneuver' })
+        this.debugTiming({ key: '> maneuverLoop' })
+        this.debugTiming({ key: '> afterManeuverLoop' })
         // this.debugTiming({ key: 'navigate' })
         // this.debugTiming({ key: 'charge' })
         // this.debugTiming({ key: 'chase' })

@@ -4,7 +4,7 @@ import { Actor } from './actor'
 import { LIME } from '../../shared/color'
 import { directionFromTo, mean, range, rotate } from '../math'
 import { getNearestOtherPoint } from '../geometry'
-import { Stand } from '../feature/stand'
+import { Sculpture } from '../feature/sculpture'
 
 export class Tree extends Actor {
   seedRadius: number
@@ -14,7 +14,7 @@ export class Tree extends Actor {
   sideLength: number
   innerRadius: number
   oldSideLength: number
-  stand: Stand
+  sculpture: Sculpture
   growthRate = 0.5
   foodPolygons: Vec2[][] = []
   step = 0
@@ -34,24 +34,24 @@ export class Tree extends Actor {
     this.foodSize = this.stage.navigation.margin
     this.seedSideLength = 1 * this.foodSize
     this.seedRadius = this.seedSideLength / Math.sin(2 / 3 * Math.PI)
-    this.stand = new Stand({
+    this.sculpture = new Sculpture({
       actor: this,
       color: LIME,
       position: props.position,
       vertices: this.getVertices(this.seedRadius)
     })
-    this.stand.seed = {
+    this.sculpture.seed = {
       vertices: this.getVertices(this.seedRadius)
     }
     this.setupVertices()
-    this.stand.combatDamage = 0.999999999999
-    this.features.push(this.stand)
+    this.sculpture.combatDamage = 0.999999999999
+    this.features.push(this.sculpture)
     this.seedInnerRadius = Math.sqrt(this.seedRadius ** 2 - 0.25 * this.seedSideLength ** 2)
     this.radius = this.seedRadius
     this.sideLength = this.seedSideLength
     this.innerRadius = this.seedInnerRadius
     this.oldSideLength = this.sideLength
-    this.sensor = this.stand.addSensor()
+    this.sensor = this.sculpture.addSensor()
   }
 
   getVertices (radius: number): Vec2[] {
@@ -63,10 +63,10 @@ export class Tree extends Actor {
   }
 
   setupVertices (): void {
-    this.stand.polygon = {
+    this.sculpture.polygon = {
       vertices: this.getVertices(this.radius)
     }
-    this.stand.seed = {
+    this.sculpture.seed = {
       vertices: this.getVertices(this.radius)
     }
   }
@@ -95,16 +95,16 @@ export class Tree extends Actor {
     this.foodPolygons.push(...foodRow1, ...foodRow2, ...foodRow3)
     this.foodLayer += 1
     this.oldSideLength = this.sideLength
-    this.stand.combatDamage = 0
+    this.sculpture.combatDamage = 0
   }
 
   fall (): void {
     this.radius = this.seedRadius
-    this.stand.combatDamage = 0.999999999999
-    if (this.stand.polygon == null) {
+    this.sculpture.combatDamage = 0.999999999999
+    if (this.sculpture.polygon == null) {
       throw new Error('There is no polygon')
     }
-    this.stand.polygon = {
+    this.sculpture.polygon = {
       vertices: this.getVertices(this.radius)
     }
     this.foodLayer = 0
@@ -114,7 +114,7 @@ export class Tree extends Actor {
     this.oldSideLength = this.sideLength
     this.foodPolygons.forEach(polygon => {
       const worldVertices = polygon.map(localPoint => {
-        return this.stand.body.getWorldPoint(localPoint)
+        return this.sculpture.body.getWorldPoint(localPoint)
       })
       const xValues = worldVertices.map(point => point.x)
       const yValues = worldVertices.map(point => point.y)
@@ -131,19 +131,19 @@ export class Tree extends Actor {
     this.sideLength = this.radius * Math.sin(2 / 3 * Math.PI)
     this.innerRadius = Math.sqrt(this.radius ** 2 - 0.1 * this.sideLength ** 2)
     if (this.step % 2 === 0) {
-      this.stand.body.destroyFixture(this.stand.fixture)
+      this.sculpture.body.destroyFixture(this.sculpture.fixture)
       this.setupVertices()
-      if (this.stand.polygon == null) {
+      if (this.sculpture.polygon == null) {
         throw new Error('There is no polygon')
       }
-      this.stand.fixture = this.stand.body.createFixture({
-        shape: new PolygonShape(this.stand.polygon.vertices),
+      this.sculpture.fixture = this.sculpture.body.createFixture({
+        shape: new PolygonShape(this.sculpture.polygon.vertices),
         density: 1,
         restitution: 0,
         friction: 0
       })
-      this.stand.body.setUserData(this.stand)
-      this.stand.fixture.setUserData(this.stand)
+      this.sculpture.body.setUserData(this.sculpture)
+      this.sculpture.fixture.setUserData(this.sculpture)
     }
     const gapSize = this.innerRadius - this.seedInnerRadius - this.foodLayer * this.foodSize
     if (gapSize > this.foodSize) {
@@ -155,13 +155,13 @@ export class Tree extends Actor {
     stepSize: number
   }): void {
     super.onStep({ stepSize: props.stepSize })
-    const features = this.stand.getFeaturesInRange()
-    const otherFeatures = features.filter(feature => feature !== this.stand)
-    const nearestOtherPoint = getNearestOtherPoint(this.stage, this.stand, otherFeatures)
+    const features = this.sculpture.getFeaturesInRange()
+    const otherFeatures = features.filter(feature => feature !== this.sculpture)
+    const nearestOtherPoint = getNearestOtherPoint(this.stage, this.sculpture, otherFeatures)
     // this.stage.debugLine({ a: this.sculpture.body.getPosition(), b: nearestOtherPoint, color: RED })
-    const position = this.stand.body.getPosition()
+    const position = this.sculpture.body.getPosition()
     const direction = directionFromTo(nearestOtherPoint, position)
     const force = Vec2.mul(5, direction)
-    this.stand.body.applyForceToCenter(force)
+    this.sculpture.body.applyForceToCenter(force)
   }
 }

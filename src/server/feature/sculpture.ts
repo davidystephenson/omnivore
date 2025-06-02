@@ -4,6 +4,7 @@ import { Actor } from '../actor/actor'
 import { Prop } from './prop'
 import { Feature } from './feature'
 import { Crate } from './crate'
+import { Debris } from '../actor/debris'
 
 export class Sculpture extends Prop {
   constructor (props: {
@@ -28,7 +29,7 @@ export class Sculpture extends Prop {
   handleContact (props: {
     target: Feature
   }): void {
-    if (props.target instanceof Crate) {
+    if (props.target.actor instanceof Debris) {
       this.dealDamage({ target: props.target })
     }
   }
