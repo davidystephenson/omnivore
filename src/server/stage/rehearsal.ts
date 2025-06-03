@@ -13,8 +13,8 @@ export class Rehearsal extends Procedural {
         // vision: false,
         performance: false
       }),
-      halfHeight: 35,
-      halfWidth: 35
+      halfHeight: 70,
+      halfWidth: 70
     })
 
     this.navigation.setupWaypoints()
