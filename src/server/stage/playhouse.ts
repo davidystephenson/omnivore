@@ -5,7 +5,7 @@ import { Organism } from '../actor/organism'
 import { Stage } from './stage'
 
 export class Playhouse extends Stage {
-  balancedGene = new Gene({
+  apeGene = new Gene({
     speed: 0.34,
     stage: this,
     stamina: 0.33,
@@ -61,7 +61,7 @@ export class Playhouse extends Stage {
     strength: 0.01
   })
 
-  playerGene = this.balancedGene
+  playerGene = this.apeGene
 
   trapperGene = new Gene({
     speed: 0,
@@ -82,7 +82,7 @@ export class Playhouse extends Stage {
   }): Organism {
     return this.addOrganism({
       color: ORANGE,
-      gene: this.balancedGene,
+      gene: this.apeGene,
       position: props.position
     })
   }
