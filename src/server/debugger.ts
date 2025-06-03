@@ -124,9 +124,12 @@ export class Debugger {
     line: string
   }): string {
     const spaceParts = props.line.split(' ')
+    if (spaceParts.length < 6) {
+      return '<anonymous>'
+    }
     const name = spaceParts[5]
-    const periodPars = name.split('.')
-    const lastPart = periodPars[periodPars.length - 1]
+    const periodPairs = name.split('.')
+    const lastPart = periodPairs[periodPairs.length - 1]
     return lastPart
   }
 
