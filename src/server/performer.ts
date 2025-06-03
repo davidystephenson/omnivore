@@ -43,7 +43,7 @@ export class Performer extends Server {
         color: GREEN,
         id: socket.id,
         gene: this.playhouse.playerGene,
-        position: Vec2(0, 0)
+        position: Vec2(20, -10)
       })
       if (player.organism == null) {
         throw new Error('player.organism is undefined')
