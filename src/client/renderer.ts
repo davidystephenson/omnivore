@@ -182,7 +182,6 @@ export class Renderer {
     context.beginPath()
     context.arc(element.z, element.w, element.u, 0, 2 * Math.PI)
     context.stroke()
-    context.restore()
     if (self) {
       if (this.summary.stamina == null) {
         throw new Error('Missing stamina')
@@ -193,7 +192,6 @@ export class Renderer {
       const minimum = 0.1
       const maximumBonus = element.u - minimum
       const bonusLength = maximumBonus * this.summary.speed
-
       const length = minimum + bonusLength
       const bonusWidth = maximumBonus * this.summary.stamina
       const width = minimum + bonusWidth
@@ -224,6 +222,7 @@ export class Renderer {
       this.context.lineTo(element.z, innerDown)
       this.context.stroke()
     }
+    context.restore()
   }
 
   update (summary: Summary): void {
