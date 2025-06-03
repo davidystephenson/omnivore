@@ -23,6 +23,6 @@ export class PrivateProduction extends Performance {
     })
     this.addFamilies()
     this.addStarTrees()
-    this.addStarTrees()
+    // this.addStarTrees()
   }
 }

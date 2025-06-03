@@ -191,24 +191,16 @@ export class Renderer {
         throw new Error('Missing speed')
       }
       const minimum = 0.1
-      console.log('minimum', minimum)
       const maximumBonus = element.u - minimum
-      console.log('maximumBonus', maximumBonus)
       const bonusLength = maximumBonus * this.summary.speed
-      console.log('bonusLength', bonusLength)
 
       const length = minimum + bonusLength
-      console.log('length', length)
       const bonusWidth = maximumBonus * this.summary.stamina
-      console.log('bonusWidth', bonusWidth)
       const width = minimum + bonusWidth
-      console.log('width', width)
       this.context.lineWidth = width
       this.context.strokeStyle = 'lime'
       const left = element.z - element.u
-      console.log('left', left)
       const innerLeft = this.input.controls.left ? left + length : left
-      console.log('innerLeft', innerLeft)
       const right = element.z + element.u
       const innerRight = this.input.controls.right ? right - length : right
       const up = element.w + element.u

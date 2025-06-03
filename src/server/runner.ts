@@ -297,12 +297,12 @@ export class Runner {
     if (this.stage.flags.performance && this.timing) {
       console.timeEnd('postStage')
       console.timeEnd('step')
-      const usage = process.memoryUsage();
-      console.log({
-        heapUsed: Math.round(usage.heapUsed / 1024 / 1024) + 'MB',
-        heapTotal: Math.round(usage.heapTotal / 1024 / 1024) + 'MB',
-        utilization: Math.round((usage.heapUsed / usage.heapTotal) * 100) + '%'
-      });
+      const usage = process.memoryUsage()
+      console.info({
+        heapUsed: `${Math.round(usage.heapUsed / 1024 / 1024)}MB`,
+        heapTotal: `${Math.round(usage.heapTotal / 1024 / 1024)}MB`,
+        utilization: `${Math.round((usage.heapUsed / usage.heapTotal) * 100)} %`
+      })
     }
   }
 }
