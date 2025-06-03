@@ -31,8 +31,8 @@ export interface Obituary extends OrganismSpawn {
 export class Organism extends Actor {
   static BLOCKED_DISTANCE = 4
   static TRAPPED_DISTANCE = 0.5 * Organism.BLOCKED_DISTANCE
-  static GENETIC_FORCE_SCALE = 1.5
-  static MINIMUM_FORCE = 0.75
+  static GENETIC_FORCE_SCALE = 1.85
+  static MINIMUM_FORCE = 0.9
   controlColor = LIME
   chasePoint: Vec2 | undefined
   chaseRadius = 0.2
