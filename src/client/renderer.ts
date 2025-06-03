@@ -184,26 +184,25 @@ export class Renderer {
     context.stroke()
     context.restore()
     if (self) {
-      // Horizontal and vertical lines
       if (this.summary.stamina == null) {
         throw new Error('Missing stamina')
       }
-      const borderLength = 0.25
-      console.log('borderLength', borderLength)
-      const speed = this.summary.speed ?? 1
-      console.log('element', element)
-      const totalBonus = element.u - borderLength
-      console.log('totalBonus', totalBonus)
-      const bonusLength = totalBonus * speed
+      if (this.summary.speed == null) {
+        throw new Error('Missing speed')
+      }
+      const minimum = 0.1
+      console.log('minimum', minimum)
+      const maximumBonus = element.u - minimum
+      console.log('maximumBonus', maximumBonus)
+      const bonusLength = maximumBonus * this.summary.speed
       console.log('bonusLength', bonusLength)
 
-      const length = borderLength + bonusLength
+      const length = minimum + bonusLength
       console.log('length', length)
-      const TOTAL_WIDTH = 0.8
-      const HALF_WIDTH = TOTAL_WIDTH / 2
-      const bonusWidth = HALF_WIDTH * this.summary.stamina
-      const widthPercent = HALF_WIDTH + bonusWidth
-      const width = widthPercent * element.u
+      const bonusWidth = maximumBonus * this.summary.stamina
+      console.log('bonusWidth', bonusWidth)
+      const width = minimum + bonusWidth
+      console.log('width', width)
       this.context.lineWidth = width
       this.context.strokeStyle = 'lime'
       const left = element.z - element.u

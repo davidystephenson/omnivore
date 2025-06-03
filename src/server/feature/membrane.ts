@@ -16,7 +16,7 @@ export class Membrane extends Feature {
   static INITIAL_RADIUS = 0.6 / Math.sqrt(2)
   static MINIMUM_DAMAGE = 0.1
   static MINIMUM_LIFE_SECONDS = 40
-  static GENETIC_LIFE_SECONDS = 120
+  static GENETIC_LIFE_SECONDS = 90
   static GROWTH = 0.13
   actor: Organism
   destroyed = false
@@ -101,7 +101,7 @@ export class Membrane extends Feature {
       this.damageLog({ k: 'baseDamage', v: baseDamage })
       const strengthDamage = baseDamage * Math.pow(reversed, 10)
       this.damageLog({ k: 'strengthDamage', v: strengthDamage })
-      const sizeFactor = Math.pow(reversed, 500)
+      const sizeFactor = Math.pow(reversed, 550)
       this.damageLog({ k: 'sizeFactor', v: sizeFactor })
       const sizeDamage = 0.1 * sizeFactor
       this.damageLog({ k: 'sizeDamage', v: sizeDamage })

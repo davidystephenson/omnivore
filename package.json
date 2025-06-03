@@ -8,7 +8,7 @@
     "build": "npm run build:server && npm run build:client",
     "rehearse": "npm run build && npm run start:rehearse",
     "perform": "npm run build && npm run start",
-    "start": "node --enable-source-maps build/server/perform.js",
+    "start": "node --enable-source-maps --max-old-space-size=4096 build/server/perform.js",
     "start:rehearse": "node --enable-source-maps build/server/rehearse.js",
     "start:server": "npm run build:server && npm run start",
     "watch:server": "npx onchange -i -k \"src/shared/**\" \"src/server/**\" -- npm run start:server",

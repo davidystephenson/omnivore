@@ -9,27 +9,20 @@ export class PrivateProduction extends Performance {
     promptbook: Promptbook
   }) {
     const flags = new Flags({
-      // killing: true,
-      // timings: true,
-      // spawn: true,
-      // performance: true,
-      // death: true,
+      performance: true,
       // playerControl: true
       // playerDeath: true,
       // spawnpoints: true,
-      respawn: true,
-      summary: true
-      // timings: true
+      // respawn: true,
+      // summary: true
+      timings: true
     })
     super({
       flags,
       promptbook: props.promptbook
     })
     this.addFamilies()
-    this.addCornerTrees()
-    this.addCornerTrees()
-    this.addCenterTree()
-    this.addCenterTree()
-    this.addCenterTree()
+    this.addStarTrees()
+    this.addStarTrees()
   }
 }

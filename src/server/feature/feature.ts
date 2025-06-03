@@ -9,7 +9,7 @@ import { HALF_SIGHT_SIZE } from '../../shared/sight'
 let featureCount = 0
 
 export class Feature {
-  static MINIMUM_DAMAGE = 0.0000001
+  static MINIMUM_DAMAGE = 0.00000001
   static DAMPING = 0.14
   actor: Actor
   body: Body
