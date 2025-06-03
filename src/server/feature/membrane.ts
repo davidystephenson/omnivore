@@ -16,7 +16,7 @@ export class Membrane extends Feature {
   static INITIAL_RADIUS = 0.6 / Math.sqrt(2)
   static MINIMUM_DAMAGE = 0.1
   static MINIMUM_LIFE_SECONDS = 40
-  static GENETIC_LIFE_SECONDS = 90
+  static GENETIC_LIFE_SECONDS = 80
   static GROWTH = 0.13
   actor: Organism
   destroyed = false
