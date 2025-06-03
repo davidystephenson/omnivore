@@ -1,6 +1,6 @@
 import { Performer } from './performer'
 import { PerformanceConstructor, PerformanceName, performanceNameSchema } from './types'
-import fs from 'fs'
+import fs, { promises } from 'fs'
 import json from 'big-json'
 import { PublicProduction } from './stage/publicProduction'
 import { PrivateProduction } from './stage/privateProduction'
@@ -22,6 +22,7 @@ console.info(`Directing ${performanceName}...`)
 const performance = performances[performanceName]
 
 async function main (): Promise<void> {
+  await promises.mkdir('./promptbooks', { recursive: true })
   await downloadPromptbook()
   const parseStream = json.createParseStream()
 
