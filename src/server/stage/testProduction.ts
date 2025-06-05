@@ -4,7 +4,7 @@ import { Promptbook } from '../types'
 import { Vec2 } from 'planck'
 
 export class TestProduction extends Performance {
-  playerGene = this.tardigradeGene
+  playerGene = this.apeGene
 
   constructor (props: {
     promptbook: Promptbook

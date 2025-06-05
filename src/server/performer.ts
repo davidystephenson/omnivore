@@ -69,7 +69,7 @@ export class Performer extends Server {
       })
       socket.on('disconnect', () => {
         this.playhouse.debug({ vs: ['disconnect:', socket.id] })
-        player.organism?.destroy()
+        player.destroy()
       })
     })
   }

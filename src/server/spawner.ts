@@ -102,7 +102,7 @@ export class Spawner {
         // TODO longest path away
         const spawnpoint = this.getFarthest({ obituary: first, spawnpoints: clearSpawnPoints })
         const gene = first.gene.mutate()
-        this.stage.flag({ f: 'respawn', k: 'Respawned', v: first.color.label, seconds: 0 })
+        this.stage.flag({ f: 'respawn', k: 'Respawned', v: [first.color.label, new Date().toISOString()], seconds: 0 })
         void new Organism({ ...first, gene, position: spawnpoint.position, stage: this.stage })
       } else {
         this.stage.runner.features.forEach(feature => {

@@ -30,9 +30,17 @@ export class Player {
     })
   }
 
+  destroy (): void {
+    this.stage.spawner.queue = this.stage.spawner.queue.filter(spawn => spawn.player !== this)
+    this.organism?.destroy()
+  }
+
   onStep (props: {
     stepSize: number
   }): void {
+    if (this.organism == null) {
+      return
+    }
     this.age += props.stepSize
   }
 }

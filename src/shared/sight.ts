@@ -9,10 +9,10 @@ export const SIGHT_WIDTH = HALF_SIGHT_WIDTH * 2
 export const SIGHT_SIZE = Vec2(SIGHT_WIDTH, SIGHT_HEIGHT)
 export const SIGHT = {
   halfHeight: HALF_SIGHT_HEIGHT,
-  halfWidth: HALF_SIGHT_WIDTH,
-  ratio: SIGHT_RATIO,
   halfSize: HALF_SIGHT_SIZE,
+  halfWidth: HALF_SIGHT_WIDTH,
   height: SIGHT_HEIGHT,
-  width: SIGHT_WIDTH,
-  size: SIGHT_SIZE
+  ratio: SIGHT_RATIO,
+  size: SIGHT_SIZE,
+  width: SIGHT_WIDTH
 }
