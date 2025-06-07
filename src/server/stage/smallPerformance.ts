@@ -16,8 +16,8 @@ export class SmallPerformance extends Performance {
       // death: true,
       // playerControl: true
       // playerDeath: true,
-      spawnpoints: true,
-      respawn: true
+      // spawnpoints: true,
+      // respawn: true
       // summary: true
       // timings: true
     })
