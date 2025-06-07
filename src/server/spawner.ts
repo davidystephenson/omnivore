@@ -107,7 +107,16 @@ export class Spawner {
       } else {
         this.stage.runner.features.forEach(feature => {
           if (feature instanceof Prop && feature.actor instanceof Debris && feature.blockCount > 0) {
-            feature.takeDamage({ damage: 0.01 })
+            feature.takeDamage({
+              damage: 0.01,
+              debug: this.stage.flags.spawnpoints
+            })
+            if (this.stage.flags.spawnpoints) {
+              this.stage.debugCircle({
+                circle: new Circle(feature.position, 0.5),
+                color: RED
+              })
+            }
           }
         })
         if (this.stage.flags.spawnpoints) {

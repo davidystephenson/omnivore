@@ -9,12 +9,9 @@ import { LIGHT_GREEN } from '../shared/color'
 import { Input } from '../shared/input'
 
 export class Renderer {
-  lerp = 0.5
-  elements = new Map<number, ClientElement>()
-  foodCount = 0
-  ropes: Rope[] = []
-  debugLines: DebugLine[] = []
-  debugCircles: DebugCircle[] = []
+  static BACKGROUND = 'rgba(50,50,50,1)'
+  static DURATION = 500
+  active = false
   camera = {
     position: new Vec2(0, 0),
     zoom: 0
@@ -22,10 +19,17 @@ export class Renderer {
 
   canvas: HTMLCanvasElement
   context: CanvasRenderingContext2D
-  id: number = 0
-  summary?: Summary
-  input: Input
+  debugLines: DebugLine[] = []
+  debugCircles: DebugCircle[] = []
+  elements = new Map<number, ClientElement>()
+  foodCount = 0
   fpsList: number[] = []
+  id: number = 0
+  input: Input
+  interval?: number
+  lerp = 0.5
+  ropes: Rope[] = []
+  summary?: Summary
 
   constructor (props: {
     input: Input
@@ -49,7 +53,7 @@ export class Renderer {
       return
     }
     this.context.translate(eye.x, eye.y)
-    this.context.fillStyle = 'rgba(50,50,50,1)'
+    this.context.fillStyle = Renderer.BACKGROUND
     this.context.lineWidth = 0.4
     this.context.beginPath()
     this.context.moveTo(-HALF_SIGHT_SIZE.x, HALF_SIGHT_SIZE.y)
@@ -104,6 +108,9 @@ export class Renderer {
     this.context.font = '50px Arial'
     this.context.fillText(String(this.summary.age), 10, 60)
     if (this.summary.respawn != null && this.summary.respawn > -1) {
+      const next = this.summary.respawn === 0
+      const color = next ? 'lime' : 'white'
+      this.context.fillStyle = color
       this.context.fillText(`Respawning... ${String(this.summary.respawn)}`, 10, this.canvas.height * 0.95)
     }
     const total = this.fpsList.reduce((a, b) => a + b, 0)
@@ -189,6 +196,18 @@ export class Renderer {
       if (this.summary.speed == null) {
         throw new Error('Missing speed')
       }
+      const warning = element.a < 0.1
+      if (warning && this.interval == null) {
+        this.active = true
+        this.interval = window.setInterval(() => {
+          this.active = !this.active
+        }, Renderer.DURATION)
+      }
+      if (!warning && this.interval != null) {
+        window.clearInterval(this.interval)
+        this.interval = undefined
+        this.active = false
+      }
       const minimum = 0.1
       const maximumBonus = element.u - minimum
       const bonusLength = maximumBonus * this.summary.speed
@@ -197,32 +216,89 @@ export class Renderer {
       const width = minimum + bonusWidth
       this.context.lineWidth = width
       this.context.strokeStyle = 'lime'
-      const left = element.z - element.u
-      const innerLeft = this.input.controls.left ? left + length : left
-      const right = element.z + element.u
-      const innerRight = this.input.controls.right ? right - length : right
-      const up = element.w + element.u
-      const innerUp = this.input.controls.up ? up - length : up
-      const down = element.w - element.u
-      const innerDown = this.input.controls.down ? down + length : down
-      this.context.beginPath()
-      this.context.moveTo(left, element.w)
-      this.context.lineTo(innerLeft, element.w)
-      this.context.stroke()
-      this.context.beginPath()
-      this.context.moveTo(right, element.w)
-      this.context.lineTo(innerRight, element.w)
-      this.context.stroke()
-      this.context.beginPath()
-      this.context.moveTo(element.z, up)
-      this.context.lineTo(element.z, innerUp)
-      this.context.stroke()
-      this.context.beginPath()
-      this.context.moveTo(element.z, down)
-      this.context.lineTo(element.z, innerDown)
-      this.context.stroke()
+      this.indicate({
+        control: this.input.controls.left,
+        element,
+        length
+      })
+      this.indicate({
+        control: this.input.controls.right,
+        element,
+        length,
+        positive: true
+      })
+      this.indicate({
+        control: this.input.controls.up,
+        element,
+        length,
+        positive: true,
+        vertical: true
+      })
+      this.indicate({
+        control: this.input.controls.down,
+        element,
+        length,
+        vertical: true
+      })
     }
     context.restore()
+  }
+
+  drawIndicator (props: {
+    color: string
+    element: ClientElement
+    length: number
+    positive?: boolean
+    vertical?: boolean
+  }): void {
+    if (props.element.z == null) {
+      throw new Error('Missing circle center x')
+    }
+    if (props.element.w == null) {
+      throw new Error('Missing circle center y')
+    }
+    if (props.element.u == null) {
+      throw new Error('Missing circle radius')
+    }
+    const vertical = props.vertical ?? false
+    const positive = props.positive ?? false
+    const directionCoordinate = vertical ? props.element.w : props.element.z
+    const outer = positive
+      ? directionCoordinate + props.element.u
+      : directionCoordinate - props.element.u
+    const inner = positive
+      ? outer - props.length
+      : outer + props.length
+    this.context.strokeStyle = props.color
+    this.context.beginPath()
+    if (vertical) {
+      this.context.moveTo(props.element.z, outer)
+      this.context.lineTo(props.element.z, inner)
+    } else {
+      this.context.moveTo(outer, props.element.w)
+      this.context.lineTo(inner, props.element.w)
+    }
+    this.context.stroke()
+  }
+
+  indicate (props: {
+    control: boolean
+    element: ClientElement
+    length: number
+    positive?: boolean
+    vertical?: boolean
+  }): void {
+    if (!props.control && props.element.a > 0.1) {
+      return
+    }
+    const color = props.control ? 'lime' : Renderer.BACKGROUND
+    this.drawIndicator({
+      color,
+      element: props.element,
+      length: props.length,
+      positive: props.positive,
+      vertical: props.vertical
+    })
   }
 
   update (summary: Summary): void {

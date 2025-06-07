@@ -2,7 +2,7 @@ import { Flags } from '../flags'
 import { Promptbook } from '../types'
 import { Performance } from './performance'
 
-export class SmallProduction extends Performance {
+export class SmallPerformance extends Performance {
   playerGene = this.apeGene
 
   constructor (props: {

@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import json from 'big-json'
 
 /**
  * Represents a value that can be serialized to JSON.
@@ -62,6 +63,27 @@ export class Manager {
   }
 
   /**
+   * Escapes special characters in a string for JSON
+   *
+   * @param str The string to escape
+   * @returns The escaped string
+   */
+  private escapeJsonString (str: string): string {
+    return str
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"')
+      .replace(/\n/g, '\\n')
+      .replace(/\r/g, '\\r')
+      .replace(/\t/g, '\\t')
+      .replace(/\f/g, '\\f')
+      // eslint-disable-next-line no-control-regex
+      .replace(/[\0-\x1F]/g, (char) => {
+        const code = char.charCodeAt(0)
+        return `\\u${code.toString(16).padStart(4, '0')}`
+      })
+  }
+
+  /**
    * Track write operations and log progress at specified intervals
    * @param fd File descriptor
    * @param data The string data to write
@@ -73,6 +95,51 @@ export class Manager {
     if (this.writeCounter % this.logFrequency === 0) {
       console.info(`${this.writeCounter.toLocaleString()} writes`)
     }
+  }
+
+  read (props: {
+    onData: (props: { data: unknown }) => void
+  }): void {
+    const parseStream = json.createParseStream()
+
+    parseStream.on('data', function (data) {
+      props.onData({ data })
+    })
+
+    const filename = process.argv[3] ?? 'output'
+    const path = `promptbooks/${filename}.json`
+    console.info(`Reading ${path}...`)
+    const readStream = fs.createReadStream(path)
+
+    readStream.on('open', () => {
+      console.info('Promptbook opened')
+    })
+
+    readStream.on('close', () => {
+      console.info('Promptbook closed')
+    })
+
+    let index = 0
+    readStream.on('data', (chunk) => {
+      if (index === 0 || index % 500 === 0) {
+        console.info('Prompt', index, 'is', chunk.length, 'long')
+      }
+      index++
+    })
+
+    readStream.on('ready', () => {
+      console.info('Promptbook ready')
+    })
+
+    readStream.on('end', () => {
+      console.info('Promptbook read')
+    })
+
+    readStream.on('error', (error) => {
+      console.error('Error reading promptbook', error)
+    })
+
+    readStream.pipe(parseStream)
   }
 
   /**
@@ -151,40 +218,6 @@ export class Manager {
   }
 
   /**
-   * Writes a value to the file descriptor based on its type
-   *
-   * @param fd File descriptor
-   * @param value The value to write
-   * @param path Current path in the object structure for error reporting
-   */
-  private writeValue (fd: number, value: SerializableValue, path: string): void {
-    if (value === undefined) {
-      // Convert undefined to null
-      this.trackWrite(fd, 'null')
-    } else if (value === null) {
-      this.trackWrite(fd, 'null')
-    } else if (typeof value === 'string') {
-      this.trackWrite(fd, `"${this.escapeJsonString(value)}"`)
-    } else if (typeof value === 'number') {
-      // Handle NaN and Infinity by converting to null
-      if (isNaN(value) || !isFinite(value)) {
-        this.trackWrite(fd, 'null')
-      } else {
-        this.trackWrite(fd, value.toString())
-      }
-    } else if (typeof value === 'boolean') {
-      this.trackWrite(fd, value.toString())
-    } else if (Array.isArray(value)) {
-      this.writeArray(fd, value, path)
-    } else if (typeof value === 'object') {
-      this.writeObject(fd, value, path)
-    } else {
-      // Handle unexpected types - this should not happen with proper validation
-      throw new SerializationError(`Cannot serialize value of type ${typeof value}`, path)
-    }
-  }
-
-  /**
    * Writes an array to the file descriptor
    *
    * @param fd File descriptor
@@ -234,27 +267,6 @@ export class Manager {
     }
 
     this.trackWrite(fd, '}')
-  }
-
-  /**
-   * Escapes special characters in a string for JSON
-   *
-   * @param str The string to escape
-   * @returns The escaped string
-   */
-  private escapeJsonString (str: string): string {
-    return str
-      .replace(/\\/g, '\\\\')
-      .replace(/"/g, '\\"')
-      .replace(/\n/g, '\\n')
-      .replace(/\r/g, '\\r')
-      .replace(/\t/g, '\\t')
-      .replace(/\f/g, '\\f')
-      // eslint-disable-next-line no-control-regex
-      .replace(/[\0-\x1F]/g, (char) => {
-        const code = char.charCodeAt(0)
-        return `\\u${code.toString(16).padStart(4, '0')}`
-      })
   }
 
   /**
@@ -343,6 +355,40 @@ export class Manager {
     }
 
     return report
+  }
+
+  /**
+   * Writes a value to the file descriptor based on its type
+   *
+   * @param fd File descriptor
+   * @param value The value to write
+   * @param path Current path in the object structure for error reporting
+   */
+  private writeValue (fd: number, value: SerializableValue, path: string): void {
+    if (value === undefined) {
+      // Convert undefined to null
+      this.trackWrite(fd, 'null')
+    } else if (value === null) {
+      this.trackWrite(fd, 'null')
+    } else if (typeof value === 'string') {
+      this.trackWrite(fd, `"${this.escapeJsonString(value)}"`)
+    } else if (typeof value === 'number') {
+      // Handle NaN and Infinity by converting to null
+      if (isNaN(value) || !isFinite(value)) {
+        this.trackWrite(fd, 'null')
+      } else {
+        this.trackWrite(fd, value.toString())
+      }
+    } else if (typeof value === 'boolean') {
+      this.trackWrite(fd, value.toString())
+    } else if (Array.isArray(value)) {
+      this.writeArray(fd, value, path)
+    } else if (typeof value === 'object') {
+      this.writeObject(fd, value, path)
+    } else {
+      // Handle unexpected types - this should not happen with proper validation
+      throw new SerializationError(`Cannot serialize value of type ${typeof value}`, path)
+    }
   }
 }
 

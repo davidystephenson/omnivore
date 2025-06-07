@@ -76,6 +76,7 @@ export class Stage {
   }
 
   addFood (props: {
+    color?: Rgb
     nutrition?: number
     position: Vec2
     vertices: Vec2[]
@@ -85,6 +86,7 @@ export class Stage {
   }
 
   addFoodSquare (props: {
+    color?: Rgb
     halfSize: number
     nutrition?: number
     position: Vec2
@@ -100,6 +102,7 @@ export class Stage {
       Vec2(x0, y1)
     ]
     return this.addFood({
+      color: props.color,
       position: props.position,
       nutrition: props.nutrition,
       vertices

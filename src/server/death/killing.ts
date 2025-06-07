@@ -19,8 +19,12 @@ export class Killing extends Death {
 
   execute (): void {
     if (this.stage.flags.killingGame) {
-      if (this.stage.flags.playerDeath && this.victim.actor.player != null) {
-        console.debug('player killing execute', new Date().toLocaleTimeString())
+      if (
+        this.stage.flags.playerDeath &&
+        this.victim.actor.player != null
+      ) {
+        const timestamp = new Date().toLocaleTimeString()
+        console.debug('player killing execute', timestamp)
       }
       this.stage.flag({ f: 'death', v: 'Killing.execute' })
       const killerPosition = this.killer.body.getPosition()

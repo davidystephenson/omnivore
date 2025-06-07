@@ -1,5 +1,5 @@
 import { Body, BodyDef, Box, Circle, Fixture, FixtureDef, Polygon, Vec2 } from 'planck'
-import { Rgb } from '../../shared/color'
+import { Rgb, YELLOW } from '../../shared/color'
 import { Actor } from '../actor/actor'
 import { Rope } from '../../shared/rope'
 import { Element } from '../../shared/element'
@@ -16,7 +16,7 @@ export class Feature {
   borderWidth: number
   center: Vec2
   color: Rgb
-  combatDamage = 0
+  combatDamage: number
   contacts: Feature[] = []
   deathPosition = Vec2(0, 0)
   health: number
@@ -89,17 +89,18 @@ export class Feature {
     multiplier?: number
   }): void {
     this.actor.stage.flag({ f: 'damage', k: 'attacker', v: this.label })
-    this.actor.stage.flag({ f: 'damage', k: 'target', v: props.target.label })
+    this.actor.stage.flag({
+      f: 'damage', k: 'target', v: props.target.label
+    })
     const damageDealt = props.damage ?? this.getDamageDealt({ multiplier: props.multiplier, target: props.target })
-    this.actor.stage.flag({ f: 'damage', k: 'damageDealt', v: damageDealt })
+    this.actor.stage.flag({
+      f: 'damage', k: 'damageDealt', v: damageDealt
+    })
     if (damageDealt < Feature.MINIMUM_DAMAGE) {
       const message = `combatDamage < Feature.MINIMUM_DAMAGE: ${damageDealt}`
       throw new Error(message)
     }
-    props.target.takeDamage({ damage: damageDealt })
-    if (props.target.health <= 0) {
-      props.target.succumb({ killer: this })
-    }
+    props.target.takeDamage({ damage: damageDealt, dealer: this })
   }
 
   destroy (): void {
@@ -208,14 +209,17 @@ export class Feature {
   }
 
   succumb (props: {
-    killer: Feature
+    killer?: Feature
   }): void {
     this.actor.destroy()
   }
 
   takeDamage (props: {
+    debug?: boolean
     damage: number
+    dealer?: Feature
   }): void {
+    const debug = props.debug ?? false
     const oldHealth = this.getHealth()
     if (oldHealth > 1) {
       const message = `oldHealth > 1: ${oldHealth}`
@@ -226,6 +230,15 @@ export class Feature {
     if (this.health > oldHealth - Feature.MINIMUM_DAMAGE + 0.001) {
       const message = `Invalid target.health: ${this.health} > ${oldHealth} - ${Feature.MINIMUM_DAMAGE}`
       throw new Error(message)
+    }
+    if (debug) {
+      this.actor.stage.debugCircle({
+        circle: new Circle(this.position, 0.6),
+        color: YELLOW
+      })
+    }
+    if (this.health <= 0) {
+      this.succumb({ killer: props.dealer })
     }
   }
 }

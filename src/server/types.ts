@@ -1,6 +1,4 @@
 import { z, ZodSchema } from 'zod'
-import { Flags } from './flags'
-import { Performance } from './stage/performance'
 
 export const vec2Schema = z.object({
   x: z.number(),
@@ -78,4 +76,3 @@ export const tableOfContentsSchema = z.object({
 })
 export const performanceNameSchema = z.literal('public').or(z.literal('private')).or(z.literal('test')).or(z.literal('small'))
 export type PerformanceName = z.infer<typeof performanceNameSchema>
-export type PerformanceConstructor = new (props: { flags: Flags, promptbook: Promptbook }) => Performance

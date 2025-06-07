@@ -3,7 +3,7 @@ import { Performance } from './performance'
 import { Promptbook } from '../types'
 import { Vec2 } from 'planck'
 
-export class TestProduction extends Performance {
+export class TestPerformance extends Performance {
   playerGene = this.apeGene
 
   constructor (props: {

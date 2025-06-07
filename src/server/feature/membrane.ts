@@ -9,15 +9,16 @@ import { Runner } from '../runner'
 import { Prop } from './prop'
 import { Debris } from '../actor/debris'
 import { SIGHT } from '../../shared/sight'
+import { LIME } from '../../shared/color'
 
 export class Membrane extends Feature {
   static BASE_DAMAGE = 0.1
   static DAMAGE_FACTOR = 3
   static INITIAL_RADIUS = 0.6 / Math.sqrt(2)
   static MINIMUM_DAMAGE = 0.1
-  static MINIMUM_LIFE_SECONDS = 40
+  static MINIMUM_LIFE_SECONDS = 50
   static GENETIC_LIFE_SECONDS = 90
-  static GROWTH = 0.13
+  static GROWTH = 0.1
   actor: Organism
   destroyed = false
   hungerDamage = 0
@@ -73,6 +74,7 @@ export class Membrane extends Feature {
       const size = this.radius * Math.SQRT2
       const halfSize = size / 2
       this.actor.stage.addFoodSquare({
+        color: LIME,
         nutrition: this.combatDamage * 0.5,
         position: this.position,
         halfSize
@@ -239,8 +241,12 @@ export class Membrane extends Feature {
   }
 
   succumb (props: {
-    killer: Membrane
+    killer?: Membrane
   }): void {
+    if (props.killer == null) {
+      const message = 'killer is null'
+      throw new Error(message)
+    }
     const killing = new Killing({
       victim: this,
       stage: this.actor.stage,

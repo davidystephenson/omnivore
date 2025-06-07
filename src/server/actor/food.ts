@@ -3,6 +3,7 @@ import { Sculpture } from '../feature/sculpture'
 import { Stage } from '../stage/stage'
 import { Actor } from './actor'
 import { Serving } from '../feature/serving'
+import { Rgb } from '../../shared/color'
 
 export class Food extends Actor {
   static NUTRITION = 0.18
@@ -10,18 +11,20 @@ export class Food extends Actor {
   serving: Sculpture
 
   constructor (props: {
-    stage: Stage
-    vertices: Vec2[]
+    color?: Rgb
     nutrition?: number
     position: Vec2
+    stage: Stage
+    vertices: Vec2[]
   }) {
     super({ stage: props.stage, label: 'food' })
     const nutrition = props.nutrition ?? Food.NUTRITION
     this.nutrition = Math.min(nutrition, 1)
     this.serving = new Serving({
+      actor: this,
+      color: props.color,
       position: props.position,
-      vertices: props.vertices,
-      actor: this
+      vertices: props.vertices
     })
     this.serving.combatDamage = 1 - this.nutrition
     this.features.push(this.serving)

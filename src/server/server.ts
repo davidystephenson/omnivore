@@ -9,10 +9,7 @@ import path from 'path'
 import * as SocketIo from 'socket.io'
 import { Config } from './config'
 import { Playhouse } from './stage/playhouse'
-// import { Funhouse } from './funhouse'
-// import { GrandRehearsal } from './stage/grandRehearsal'
 import { Rehearsal } from './stage/rehearsal'
-// import { Mission } from './stage/mission'
 
 export class Server {
   seed = Math.random().toString()
@@ -20,7 +17,7 @@ export class Server {
   dirname = path.dirname(__filename)
   app = express()
   httpServer: https.Server | http.Server
-  io: SocketIoServer
+  io: SocketIo.Server
   playhouse: Playhouse
   step = 0
 
@@ -45,13 +42,11 @@ export class Server {
         color: GREEN,
         id: socket.id,
         gene: this.playhouse.playerGene,
-        position: Vec2(0, 0)
+        position: Vec2(20, -10)
       })
       if (player.organism == null) {
         throw new Error('player.organism is undefined')
       }
-      // player.organism.membrane.hungerDamage = 0.5
-      // player.organism.membrane.combatDamage = 0.9
       socket.on('controls', (controls: Controls) => {
         if (player.organism != null) {
           player.organism.controls = controls
@@ -63,8 +58,6 @@ export class Server {
           }
           if (controls.cancel) {
             this.playhouse.runner.paused = false
-            // player.organism.membrane.combatDamage = 0
-            // player.organism.membrane.hungerDamage = 0
           }
         }
         const summary = this.playhouse.runner.getSummary({ player })
@@ -72,7 +65,7 @@ export class Server {
       })
       socket.on('disconnect', () => {
         this.playhouse.debug({ vs: ['disconnect:', socket.id] })
-        player.organism?.destroy()
+        player.destroy()
       })
     })
   }
@@ -96,5 +89,3 @@ export class Server {
     }
   }
 }
-
-type SocketIoServer = SocketIo.Server
