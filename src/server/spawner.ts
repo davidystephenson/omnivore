@@ -71,7 +71,6 @@ export class Spawner {
         curtain.debug({ color: WHITE })
       })
     }
-
     const organisms: Organism[] = []
     const families = new Set<Rgb>()
     this.stage.actors.forEach(actor => {

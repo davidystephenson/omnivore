@@ -2,7 +2,7 @@ import { Vec2, Fixture, Box, BoxShape } from 'planck'
 import { Spawner } from './spawner'
 import { Rgb } from '../shared/color'
 import { roundNumber, roundVector } from './math'
-import { Element } from '../shared/element'
+import { ClientElement } from '../shared/element'
 
 export class Curtain {
   box: BoxShape
@@ -35,14 +35,14 @@ export class Curtain {
     })
   }
 
-  getElement (): Element {
+  getElement (): ClientElement {
     const angle = this.spawner.body.getAngle()
     const i = Math.random()
     const n = roundNumber({ number: angle, decimals: 3 })
     const v = this.box.m_vertices.map(vertex => {
       return roundVector({ vector: vertex })
     })
-    const element: Element = {
+    const element: ClientElement = {
       i,
       x: 0,
       y: 0,
@@ -53,7 +53,8 @@ export class Curtain {
       g: 25,
       b: 25,
       o: 0,
-      v
+      v,
+      visible: true
     }
     return element
   }

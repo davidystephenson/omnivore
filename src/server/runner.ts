@@ -110,17 +110,12 @@ export class Runner {
       v: player.seenIds.length,
       seconds: 10
     })
-    const featureElements = filteredFeatures.map(feature => {
+    const elements = filteredFeatures.map(feature => {
       const tree = feature.actor instanceof Tree
       const seen = player.seenIds.includes(feature.id)
       if (!seen) player.seenIds.push(feature.id)
       return feature.getElement(seen && !tree)
     })
-    const curtainElements = this.stage.spawner.curtains.map(
-      curtain => curtain.getElement()
-    )
-    // const elements = [...featureElements, ...curtainElements]
-    const elements = [...curtainElements, ...featureElements]
     return elements
   }
 
@@ -159,10 +154,14 @@ export class Runner {
   }): Summary {
     const start = performance.now()
     const elements = this.getElements(props.player)
+    const curtains = this.stage.spawner.curtains.map(
+      curtain => curtain.getElement()
+    )
     const age = Math.floor(props.player.age)
     const summary: Summary = {
       age,
-      elements,
+      curtains,
+      features: elements,
       fps: this.fps,
       foodCount: this.stage.food.length,
       ropes: this.getRopes(props.player),

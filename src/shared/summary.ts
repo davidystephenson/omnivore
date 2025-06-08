@@ -1,4 +1,4 @@
-import { Element } from './element'
+import { ClientElement, Element } from './element'
 import { Rope } from './rope'
 import { DebugLine } from './debugLine'
 import { DebugCircle } from './debugCircle'
@@ -7,9 +7,10 @@ import { Controls } from './input'
 export interface Summary {
   age?: number
   controls?: Controls
+  curtains?: ClientElement[]
   debugLines?: DebugLine[]
   debugCircles?: DebugCircle[]
-  elements?: Element[]
+  features?: Element[]
   foodCount?: number
   fps: number
   id?: number

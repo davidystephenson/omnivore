@@ -48,10 +48,8 @@ export class Renderer {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
     if (this.summary == null) return
     this.followCamera()
-    const elements = Array.from(this.elements.values())
-    const curtains = elements.filter(element => element.i < 1)
-    curtains.forEach(element => {
-      this.drawElement({ element })
+    this.summary.curtains?.forEach(curtain => {
+      this.drawElement({ element: curtain })
     })
     const eye = this.elements.get(this.id)
     if (eye == null) {
@@ -77,8 +75,7 @@ export class Renderer {
       this.context.lineTo(rope.b.x, rope.b.y)
       this.context.stroke()
     })
-    const features = elements.filter(element => element.i >= 1)
-    features.forEach(element => {
+    this.elements.forEach(element => {
       this.drawElement({ element })
     })
 
@@ -348,7 +345,7 @@ export class Renderer {
     this.elements.forEach(element => {
       element.visible = false
     })
-    summary.elements?.forEach(element => {
+    summary.features?.forEach(element => {
       const oldElement = this.elements.get(element.i)
       if (oldElement != null) {
         const oldPosition = new Vec2(oldElement.x, oldElement.y)
