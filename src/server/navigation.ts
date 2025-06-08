@@ -304,7 +304,7 @@ export class Navigation {
     const debugRadius = 1.2
     if (this.stage.flags.navAreas) {
       this.navAreas.forEach(navArea => {
-        this.stage.debugBox({
+        this.stage.debugAABB({
           box: navArea.aabb,
           color: LIME
         })

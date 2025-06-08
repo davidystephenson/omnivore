@@ -240,6 +240,27 @@ export class Renderer {
         length,
         vertical: true
       })
+    } else {
+      this.indicate({
+        element,
+        length
+      })
+      this.indicate({
+        element,
+        length,
+        positive: true
+      })
+      this.indicate({
+        element,
+        length,
+        positive: true,
+        vertical: true
+      })
+      this.indicate({
+        element,
+        length,
+        vertical: true
+      })
     }
     context.restore()
   }
@@ -282,16 +303,16 @@ export class Renderer {
   }
 
   indicate (props: {
-    control: boolean
+    control?: boolean
     element: ClientElement
     length: number
     positive?: boolean
     vertical?: boolean
   }): void {
-    if (!props.control && props.element.a > 0.1) {
+    if (props.control !== true && props.element.a > 0.1) {
       return
     }
-    const color = props.control ? 'lime' : Renderer.BACKGROUND
+    const color = props.control === true ? 'lime' : Renderer.BACKGROUND
     this.drawIndicator({
       color,
       element: props.element,

@@ -3,7 +3,7 @@ import { Spawnpoint } from './spawnpoint'
 import { Stage } from './stage/stage'
 import { RED, GREEN, Rgb, YELLOW } from '../shared/color'
 import { Obituary, Organism } from './actor/organism'
-import { HALF_SIGHT_HEIGHT } from '../shared/sight'
+import { HALF_SIGHT_HEIGHT, SIGHT, SIGHT_WIDTH } from '../shared/sight'
 import { range } from './math'
 import { Prop } from './feature/prop'
 import { Debris } from './actor/debris'
@@ -136,25 +136,39 @@ export class Spawner {
       const xs = waypointArray.map(w => Math.round(w.position.x))
       const ys = waypointArray.map(w => Math.round(w.position.y))
       const minimumX = Math.min(...xs)
+      console.log('minimumX', minimumX)
       const maximumX = Math.max(...xs)
       const minimumY = Math.min(...ys)
+      console.log('minimumY', minimumY)
       const maximumY = Math.max(...ys)
       const width = maximumX - minimumX
+      console.log('width', width)
       const height = maximumY - minimumY
-      const distance = Spawner.RADIUS * 4
-      const xQuotient = Math.floor(width / distance)
-      const yQuotient = Math.floor(height / distance)
-      const xCapped = Math.min(xQuotient, 5)
-      const yCapped = Math.min(yQuotient, 5)
-      const xCount = Math.max(xCapped, 2)
-      const yCount = Math.max(yCapped, 2)
+      console.log('height', height)
+      console.log('SIGHT.width', SIGHT.width)
+      console.log('SIGHT.height', SIGHT.height)
+      const xQuotient = Math.floor(width / SIGHT.width)
+      console.log('xQuotient', xQuotient)
+      const yQuotient = Math.floor(height / SIGHT.height)
+      console.log('yQuotient', yQuotient)
+      const xCount = Math.max(xQuotient, 1)
+      console.log('xCount', xCount)
+      const yCount = Math.max(yQuotient, 1)
+      console.log('yCount', yCount)
       const xMargin = width / xCount
+      console.log('xMargin', xMargin)
       const yMargin = height / yCount
+      console.log('yMargin', yMargin)
       const xRange = range(0, xCount - 1)
+      console.log('xRange', xRange)
       const yRange = range(0, yCount - 1)
-      const xBase = minimumX + (xMargin / 2)
-      const bottomSpawnpoints = xRange.map(x => {
-        const xPosition = xBase + (x * xMargin)
+      console.log('yRange', yRange)
+      const halfXMargin = xMargin / 2
+      console.log('halfXMargin', halfXMargin)
+      const xBase = minimumX + halfXMargin
+      console.log('xBase', xBase)
+      const bottomSpawnpoints = xRange.map(index => {
+        const xPosition = xBase + (index * xMargin)
         const position = new Vec2(xPosition, minimumY)
         return new Spawnpoint(this, position)
       })

@@ -62,7 +62,7 @@ export class Killing extends Death {
           if (!(blocker instanceof Feature)) {
             throw new Error('Blocker is not defined')
           }
-          this.stage.debugBox({
+          this.stage.debugAABB({
             box: checkBox,
             color: COLOR.RED
           })
@@ -91,7 +91,7 @@ export class Killing extends Death {
         const lookUpperBound = Vec2(Math.max(...lookPointsX), Math.max(...lookPointsY))
         if (this.stage.flags.death) {
           const color = { ...RED, a: 0.1 }
-          this.stage.debugBox({
+          this.stage.debugAABB({
             box: new AABB(lookLowerBound, lookUpperBound),
             color
           })
@@ -101,7 +101,7 @@ export class Killing extends Death {
         const brickBox = this.trim({ base, lookBox })
         if (this.stage.flags.death) {
           const color = { ...GREEN, a: 0.1 }
-          this.stage.debugBox({
+          this.stage.debugAABB({
             box: brickBox,
             color
           })

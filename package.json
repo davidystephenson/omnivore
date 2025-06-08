@@ -6,7 +6,6 @@
     "build:server": "npx tsc",
     "build:client": "npx parcel build src/client/index.html",
     "build": "npm run build:server && npm run build:client",
-    "perform": "npm run build && npm run serve",
     "off": "npm run build && node --enable-source-maps --max-old-space-size=4096 build/server/offBook.js",
     "on": "npm run build && node --enable-source-maps --max-old-space-size=4096 build/server/onBook.js",
     "rehearse": "npm run build && npm run serve",

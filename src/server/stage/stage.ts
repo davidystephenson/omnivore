@@ -252,24 +252,20 @@ export class Stage {
     this.debugger.debug(props)
   }
 
-  debugLine (props: {
-    a: Vec2
-    b: Vec2
+  debugAABB (props: {
+    box: AABB
     color: Rgb
-    width?: number
-  }): DebugLine {
-    const width = props.width ?? 0.05
-    const a = { x: props.a.x, y: props.a.y }
-    const b = { x: props.b.x, y: props.b.y }
-    const color: Rgba = { alpha: 1, ...props.color }
-    const debugLine: DebugLine = {
-      a,
-      b,
-      color,
-      width
-    }
-    this.runner.debugLines.push(debugLine)
-    return debugLine
+  }): void {
+    const upper = props.box.upperBound.clone()
+    const lower = props.box.lowerBound.clone()
+    const point1 = upper
+    const point2 = Vec2(lower.x, upper.y)
+    const point3 = lower
+    const point4 = Vec2(upper.x, lower.y)
+    this.debugLine({ a: point1, b: point2, color: props.color })
+    this.debugLine({ a: point2, b: point3, color: props.color })
+    this.debugLine({ a: point3, b: point4, color: props.color })
+    this.debugLine({ a: point4, b: point1, color: props.color })
   }
 
   debugCircle (props: {
@@ -289,20 +285,24 @@ export class Stage {
     return debugCircle
   }
 
-  debugBox (props: {
-    box: AABB
+  debugLine (props: {
+    a: Vec2
+    b: Vec2
     color: Rgb
-  }): void {
-    const upper = props.box.upperBound.clone()
-    const lower = props.box.lowerBound.clone()
-    const point1 = upper
-    const point2 = Vec2(lower.x, upper.y)
-    const point3 = lower
-    const point4 = Vec2(upper.x, lower.y)
-    this.debugLine({ a: point1, b: point2, color: props.color })
-    this.debugLine({ a: point2, b: point3, color: props.color })
-    this.debugLine({ a: point3, b: point4, color: props.color })
-    this.debugLine({ a: point4, b: point1, color: props.color })
+    width?: number
+  }): DebugLine {
+    const width = props.width ?? 0.05
+    const a = { x: props.a.x, y: props.a.y }
+    const b = { x: props.b.x, y: props.b.y }
+    const color: Rgba = { alpha: 1, ...props.color }
+    const debugLine: DebugLine = {
+      a,
+      b,
+      color,
+      width
+    }
+    this.runner.debugLines.push(debugLine)
+    return debugLine
   }
 
   debugPolygon (props: {
@@ -407,7 +407,7 @@ export class Stage {
     this.starvationQueue = []
     this.destructionQueue = []
     this.virtualBoxes.forEach(box => {
-      this.debugBox({ box, color: RED })
+      this.debugAABB({ box, color: RED })
     })
     this.families = new Map()
     this.actors.forEach(actor => {

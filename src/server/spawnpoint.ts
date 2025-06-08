@@ -1,30 +1,32 @@
-import { Vec2, Fixture, CircleShape, Circle } from 'planck'
+import { Vec2, Fixture, Box, BoxShape } from 'planck'
 import { Spawner } from './spawner'
 import { Rgb } from '../shared/color'
+import { HALF_SIGHT_SIZE } from '../shared/sight'
 
 export class Spawnpoint {
+  box: BoxShape
   spawner: Spawner
   position: Vec2
-  fixture: Fixture
+  sensor: Fixture
   collideCount = 0
 
   constructor (spawner: Spawner, position: Vec2) {
     this.spawner = spawner
     this.position = position
-    const circleShape = new CircleShape(position, Spawner.RADIUS)
-    this.fixture = this.spawner.body.createFixture({
-      shape: circleShape,
+    this.box = new Box(HALF_SIGHT_SIZE.x, HALF_SIGHT_SIZE.y, this.position)
+    this.sensor = this.spawner.body.createFixture({
+      shape: this.box,
       isSensor: true
     })
-    this.fixture.setUserData(this)
+    this.sensor.setUserData(this)
   }
 
   debug (props: {
     color: Rgb
   }): void {
     const transparent = { ...props.color, alpha: 0.1 }
-    this.spawner.stage.debugCircle({
-      circle: new Circle(this.position, Spawner.RADIUS),
+    this.spawner.stage.debugPolygon({
+      polygon: this.box,
       color: transparent
     })
   }
