@@ -9,7 +9,7 @@ import path from 'path'
 import * as SocketIo from 'socket.io'
 import { Config } from './config'
 import { Playhouse } from './stage/playhouse'
-import { Rehearsal } from './stage/rehearsal'
+import { Mission } from './stage/mission'
 
 export class Server {
   seed = Math.random().toString()
@@ -27,7 +27,7 @@ export class Server {
     this.setupApp()
     this.httpServer = this.getHttpServer()
     this.io = new SocketIo.Server(this.httpServer)
-    this.playhouse = props?.playhouse ?? new Rehearsal()
+    this.playhouse = props?.playhouse ?? new Mission()
     void this.start()
   }
 

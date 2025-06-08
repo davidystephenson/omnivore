@@ -110,12 +110,17 @@ export class Runner {
       v: player.seenIds.length,
       seconds: 10
     })
-    const elements: Element[] = filteredFeatures.map(feature => {
+    const featureElements = filteredFeatures.map(feature => {
       const tree = feature.actor instanceof Tree
       const seen = player.seenIds.includes(feature.id)
       if (!seen) player.seenIds.push(feature.id)
       return feature.getElement(seen && !tree)
     })
+    const curtainElements = this.stage.spawner.curtains.map(
+      curtain => curtain.getElement()
+    )
+    // const elements = [...featureElements, ...curtainElements]
+    const elements = [...curtainElements, ...featureElements]
     return elements
   }
 

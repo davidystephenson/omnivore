@@ -14,11 +14,11 @@ import { LIME } from '../../shared/color'
 export class Membrane extends Feature {
   static BASE_DAMAGE = 0.1
   static DAMAGE_FACTOR = 3
+  static GENETIC_LIFE_SECONDS = 100
+  static GROWTH = 0.01
   static INITIAL_RADIUS = 0.6 / Math.sqrt(2)
   static MINIMUM_DAMAGE = 0.1
-  static MINIMUM_LIFE_SECONDS = 35
-  static GENETIC_LIFE_SECONDS = 120
-  static GROWTH = 0.016
+  static MINIMUM_LIFE_SECONDS = 40
   actor: Organism
   destroyed = false
   hungerDamage = 0

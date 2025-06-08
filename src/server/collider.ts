@@ -7,6 +7,7 @@ import { Spawnpoint } from './spawnpoint'
 import { Membrane } from './feature/membrane'
 import { Prop } from './feature/prop'
 import { Debris } from './actor/debris'
+import { Curtain } from './curtain'
 
 export class Collider {
   stage: Stage
@@ -33,16 +34,19 @@ export class Collider {
       const otherFeature = otherFixture.getBody().getUserData()
       if (!(otherFeature instanceof Feature)) return
       if (feature instanceof Spawner && !otherFixture.isSensor()) {
-        const spawnPoint = fixture.getUserData()
-        if (!(spawnPoint instanceof Spawnpoint)) {
-          throw new Error('spawnPoint is not a SpawnPoint')
-        }
         if (otherFeature.actor.label === 'food') {
           return false
         }
-        spawnPoint.collideCount += 1
-        if (otherFeature instanceof Prop && otherFeature.actor instanceof Debris) {
-          otherFeature.blockCount += 1
+        const data = fixture.getUserData()
+        if (data instanceof Spawnpoint) {
+          data.collideCount += 1
+        } else if (data instanceof Curtain) {
+          data.collideCount += 1
+          if (otherFeature instanceof Prop && otherFeature.actor instanceof Debris) {
+            otherFeature.blockCount += 1
+          }
+        } else {
+          throw new Error('data is not a Spawnpoint or Curtain')
         }
       }
       if (!(feature instanceof Feature)) return
@@ -75,16 +79,19 @@ export class Collider {
       const otherFeature = otherFixture.getBody().getUserData()
       if (!(otherFeature instanceof Feature)) return
       if (feature instanceof Spawner && !otherFixture.isSensor()) {
-        const spawnPoint = fixture.getUserData()
-        if (!(spawnPoint instanceof Spawnpoint)) {
-          throw new Error('spawnPoint is not a SpawnPoint')
-        }
         if (otherFeature.actor.label === 'food') {
           return false
         }
-        spawnPoint.collideCount -= 1
-        if (otherFeature instanceof Prop && otherFeature.actor instanceof Debris) {
-          otherFeature.blockCount -= 1
+        const data = fixture.getUserData()
+        if (data instanceof Spawnpoint) {
+          data.collideCount -= 1
+        } else if (data instanceof Curtain) {
+          data.collideCount -= 1
+          if (otherFeature instanceof Prop && otherFeature.actor instanceof Debris) {
+            otherFeature.blockCount -= 1
+          }
+        } else {
+          throw new Error('data is not a Spawnpoint or Curtain')
         }
       }
       if (!(feature instanceof Feature)) return

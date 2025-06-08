@@ -9,7 +9,7 @@ import { LIGHT_GREEN } from '../shared/color'
 import { Input } from '../shared/input'
 
 export class Renderer {
-  static BACKGROUND = 'rgba(50,50,50,1)'
+  static BACKGROUND = 'rgba(50,50,50,0.9)'
   static DURATION = 500
   active = false
   camera = {
@@ -48,11 +48,17 @@ export class Renderer {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
     if (this.summary == null) return
     this.followCamera()
+    const elements = Array.from(this.elements.values())
+    const curtains = elements.filter(element => element.i < 1)
+    curtains.forEach(element => {
+      this.drawElement({ element })
+    })
     const eye = this.elements.get(this.id)
     if (eye == null) {
       return
     }
     this.context.translate(eye.x, eye.y)
+
     this.context.fillStyle = Renderer.BACKGROUND
     this.context.lineWidth = 0.4
     this.context.beginPath()
@@ -71,22 +77,13 @@ export class Renderer {
       this.context.lineTo(rope.b.x, rope.b.y)
       this.context.stroke()
     })
-    this.elements.forEach(element => {
-      if (!element.visible) return
-      this.followCamera()
-      this.context.translate(element.x, element.y)
-      this.context.rotate(element.n)
-      if (element.z != null) {
-        this.drawCircle(element)
-      }
-      if (element.v != null) {
-        this.drawPolygon(element, element.v)
-        if (element.d != null) {
-          this.drawPolygon(element, element.d)
-        }
-      }
+    const features = elements.filter(element => element.i >= 1)
+    features.forEach(element => {
+      this.drawElement({ element })
     })
+
     this.debugLines.forEach(debugLine => {
+      console.log('debugLine', JSON.stringify(debugLine))
       this.followCamera()
       this.context.lineWidth = debugLine.width
       this.context.strokeStyle = `rgba(${debugLine.color.red}, ${debugLine.color.green}, ${debugLine.color.blue}, 1)`
@@ -131,6 +128,24 @@ export class Renderer {
     this.context.translate(-this.camera.position.x, -this.camera.position.y)
   }
 
+  drawElement (props: {
+    element: ClientElement
+  }): void {
+    if (!props.element.visible) return
+    this.followCamera()
+    this.context.translate(props.element.x, props.element.y)
+    this.context.rotate(props.element.n)
+    if (props.element.z != null) {
+      this.drawCircle(props.element)
+    }
+    if (props.element.v != null) {
+      this.drawPolygon(props.element, props.element.v)
+      if (props.element.d != null) {
+        this.drawPolygon(props.element, props.element.d)
+      }
+    }
+  }
+
   drawPolygon (element: ClientElement, vertices: Vec2[]): void {
     const context = this.context
     context.save()
@@ -145,17 +160,19 @@ export class Renderer {
     context.closePath()
     context.clip()
     context.fill()
-    this.context.strokeStyle = `rgba(${element.r},${element.g},${element.b},1)`
-    this.context.lineWidth = 2 * element.o
-    context.beginPath()
-    vertices.forEach((vertex, i) => {
-      const x = vertex.x
-      const y = vertex.y
-      if (i === 0) context.moveTo(x, y)
-      else context.lineTo(x, y)
-    })
-    context.closePath()
-    context.stroke()
+    if (element.o > 0) {
+      this.context.strokeStyle = `rgba(${element.r},${element.g},${element.b},1)`
+      this.context.lineWidth = 2 * element.o
+      context.beginPath()
+      vertices.forEach((vertex, i) => {
+        const x = vertex.x
+        const y = vertex.y
+        if (i === 0) context.moveTo(x, y)
+        else context.lineTo(x, y)
+      })
+      context.closePath()
+      context.stroke()
+    }
     context.restore()
   }
 
