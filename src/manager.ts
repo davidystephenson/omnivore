@@ -227,7 +227,7 @@ export class Manager {
     path: string
   }): void {
     console.info(`Saving ${props.data.length} files to ${props.path}...`)
-    let factor = 10
+    let factor = 100
     props.data.forEach((data, index) => {
       if (index > 0 && index % factor === 0) {
         console.info(`Saving file ${index} of ${props.data.length}...`)
