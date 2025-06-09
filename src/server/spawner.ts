@@ -133,53 +133,60 @@ export class Spawner {
       const bottomSpawnpoints = xRange.map(index => {
         const xPosition = xBase + (index * xMargin)
         const position = new Vec2(xPosition, minimumY)
-        return new Spawnpoint({ spawner: this, position })
+        return new Spawnpoint({ stage: this.stage, position, vertical: false })
       })
       const topSpawnpoints = xRange.map(x => {
         const xPosition = xBase + (x * xMargin)
         const position = new Vec2(xPosition, maximumY)
-        return new Spawnpoint({ spawner: this, position })
+        return new Spawnpoint({ stage: this.stage, position, vertical: false })
       })
       const yBase = minimumY + (yMargin / 2)
       const leftSpawnpoints = yRange.map(y => {
         const yPosition = yBase + (y * yMargin)
         const position = new Vec2(minimumX, yPosition)
-        return new Spawnpoint({ spawner: this, position })
+        return new Spawnpoint({ stage: this.stage, position, vertical: true })
       })
       const rightSpawnpoints = yRange.map(y => {
         const yPosition = yBase + (y * yMargin)
         const position = new Vec2(maximumX, yPosition)
-        return new Spawnpoint({ spawner: this, position })
+        return new Spawnpoint({ stage: this.stage, position, vertical: true })
       })
       this.spawnpoints = [...bottomSpawnpoints, ...topSpawnpoints, ...leftSpawnpoints, ...rightSpawnpoints]
       this.stage.debug({ v: `Setup ${this.spawnpoints.length} spawnpoints` })
-      const curtainHalfHeight = this.stage.halfHeight - SIGHT.halfHeight
       this.curtains = [
         new Curtain({
           spawner: this,
           position: Vec2(0, minimumY),
-          size: Vec2(this.stage.halfWidth, SIGHT.halfHeight)
+          size: Vec2(this.stage.halfWidth, this.stage.navigation.margin)
         }),
         new Curtain({
           spawner: this,
           position: Vec2(0, maximumY),
-          size: Vec2(this.stage.halfWidth, SIGHT.halfHeight)
+          size: Vec2(this.stage.halfWidth, this.stage.navigation.margin)
         }),
         new Curtain({
           spawner: this,
           position: Vec2(minimumX, 0),
-          size: Vec2(SIGHT.halfWidth, curtainHalfHeight)
+          size: Vec2(this.stage.navigation.margin, this.stage.halfHeight)
         }),
         new Curtain({
           spawner: this,
           position: Vec2(maximumX, 0),
-          size: Vec2(SIGHT.halfWidth, curtainHalfHeight)
+          size: Vec2(this.stage.navigation.margin, this.stage.halfHeight)
         })
       ]
     } else {
       this.spawnpoints = [
-        new Spawnpoint({ spawner: this, position: Vec2(5, 5) }),
-        new Spawnpoint({ spawner: this, position: Vec2(15, 15) })
+        new Spawnpoint({
+          stage: this.stage,
+          position: Vec2(5, 5),
+          vertical: false
+        }),
+        new Spawnpoint({
+          stage: this.stage,
+          position: Vec2(15, 15),
+          vertical: false
+        })
       ]
     }
   }

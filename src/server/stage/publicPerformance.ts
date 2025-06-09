@@ -20,11 +20,7 @@ export class PublicPerformance extends Performance {
       promptbook: props.promptbook
     })
     this.addFamilies()
-    this.addCenterTree()
-    this.addCenterTree()
-    this.addCenterTree()
-    this.addCenterTree()
-    this.addCenterTree()
-    this.addCenterTree()
+    this.addCornerTrees()
+    this.addCornerTrees()
   }
 }

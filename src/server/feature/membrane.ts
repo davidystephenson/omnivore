@@ -99,11 +99,11 @@ export class Membrane extends Feature {
       const reversed = 1 - ratio
       this.damageLog({ k: 'reversed', v: reversed })
       this.damageLog({ k: 'strength', v: this.actor.gene.strength })
-      const baseDamage = Math.pow(this.actor.gene.strength, 5) * 0.05
+      const baseDamage = Math.pow(this.actor.gene.strength, 10) * 0.01
       this.damageLog({ k: 'baseDamage', v: baseDamage })
-      const strengthDamage = baseDamage * Math.pow(reversed, 70)
+      const strengthDamage = baseDamage * Math.pow(reversed, 100)
       this.damageLog({ k: 'strengthDamage', v: strengthDamage })
-      const sizeFactor = Math.pow(reversed, 550)
+      const sizeFactor = Math.pow(reversed, 1000)
       this.damageLog({ k: 'sizeFactor', v: sizeFactor })
       const sizeDamage = 0.1 * sizeFactor
       this.damageLog({ k: 'sizeDamage', v: sizeDamage })

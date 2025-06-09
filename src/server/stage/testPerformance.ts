@@ -4,7 +4,7 @@ import { Promptbook } from '../types'
 import { Vec2 } from 'planck'
 
 export class TestPerformance extends Performance {
-  playerGene = this.apeGene
+  playerGene = this.flyGene
 
   constructor (props: {
     promptbook: Promptbook
@@ -17,12 +17,12 @@ export class TestPerformance extends Performance {
         // curtains: true,
         // damage: true,
         // death: true,
-        // growGame: false,
+        growGame: false,
         hungerGame: false,
         // playerControl: true
         // playerDeath: true
-        reproduceGame: false
-        // spawnpoints: true
+        reproduceGame: false,
+        spawnpoints: true
         // waypoints: true
       }),
       promptbook: props.promptbook
@@ -33,12 +33,12 @@ export class TestPerformance extends Performance {
     // this.addTrisolaran({ position: Vec2(0, 7) })
     // this.addHunter({ position: Vec2(2, 7) })
     // this.addBrick({ position: Vec2(-20, -20), halfHeight: 15, halfWidth: 15 })
-    this.addBrick({
-      halfHeight: 10,
-      halfWidth: 5,
-      position: Vec2(0, 0)
-    })
-    // this.addBrick({ position: Vec2(20, -15), halfHeight: 2, halfWidth: 2 })
+    // this.addBrick({
+    //   halfHeight: 10,
+    //   halfWidth: 5,
+    //   position: Vec2(0, 0)
+    // })
+    this.addBrick({ position: Vec2(20, -15), halfHeight: 2, halfWidth: 2 })
     // this.addBrick({ position: Vec2(15, -15), halfHeight: 1, halfWidth: 1 })
     // this.addTree({ position: Vec2(-5, -5) })
     // this.addBrick({ position: Vec2(-7, -7), halfHeight: 1, halfWidth: 10 })
