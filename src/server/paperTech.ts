@@ -1,6 +1,5 @@
 import { ZodSchema } from 'zod'
 import {
-  matrixSchema,
   navAreaDefSchema,
   Promptbook,
   tableOfContentsSchema,
@@ -73,14 +72,11 @@ export default function paperTech (props: {
     value: table.waypointDatas
   })
 
-  const waypointMatrix = matrixSchema.parse(table.waypointMatrix)
-
   const promptbook: Promptbook = {
     ...table,
     navAreaDefs,
     wallDefs,
-    waypointDatas,
-    waypointMatrix
+    waypointDatas
   }
   console.info('Promptbook validated ')
   return promptbook

@@ -20,6 +20,15 @@ export class NavArea {
     })
   }
 
+  getDef (): NavAreaDef {
+    return {
+      aabb: {
+        upperBound: { x: this.aabb.upperBound.x, y: this.aabb.upperBound.y },
+        lowerBound: { x: this.aabb.lowerBound.x, y: this.aabb.lowerBound.y }
+      }
+    }
+  }
+
   testPoint (point: Vec2): boolean {
     if (point.y >= this.aabb.upperBound.y) return false
     if (point.y <= this.aabb.lowerBound.y) return false

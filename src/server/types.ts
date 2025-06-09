@@ -44,31 +44,28 @@ export const waypointDataSchema = z.object({
   id: z.number(),
   radius: z.number(),
   category: z.string(),
-  // radii: z.number().array(),
-  // distances: z.number().nullable().array(),
-  // neighbors: nestedNumberRecordSchema,
   nextWaypoints: nestedNumberRecordSchema
-  // pathDistances: nestedNumberRecordSchema
 })
 export type WaypointData = z.infer<typeof waypointDataSchema>
-export const matrixSchema = z.array(z.array(z.number()))
-export type Matrix = z.infer<typeof matrixSchema>
+export const numberMatrixSchema = z.number().array().array()
+export type NumberMatrix = z.infer<typeof numberMatrixSchema>
 export const promptbookSchema = z.object({
   wallDefs: wallDefSchema.array(),
   waypointDatas: waypointDataSchema.array(),
-  waypointMatrix: matrixSchema,
+  waypointIdMatrix: numberMatrixSchema,
   navAreaDefs: navAreaDefSchema.array(),
   halfHeight: z.number(),
   halfWidth: z.number(),
   radii: z.number().array()
 })
 export type Promptbook = z.infer<typeof promptbookSchema>
-// export const testSchema: z.ZodType<Promptbook> = promptbookSchema
+const promptbookTestSchema: z.ZodType<Promptbook> = promptbookSchema
+void promptbookTestSchema
 
 export const tableOfContentsSchema = z.object({
   wallDefs: z.unknown().array(),
   waypointDatas: z.unknown().array(),
-  waypointMatrix: z.unknown(),
+  waypointIdMatrix: numberMatrixSchema,
   navAreaDefs: z.unknown().array(),
   halfHeight: z.number(),
   halfWidth: z.number(),

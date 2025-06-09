@@ -43,4 +43,14 @@ export class Wall extends Actor {
     this.left = this.position.x - this.halfWidth
     this.aabb = new AABB(Vec2(this.left, this.bottom), Vec2(this.right, this.top))
   }
+
+  getDef (): WallDef {
+    const position = { x: this.position.x, y: this.position.y }
+    return {
+      halfHeight: this.halfHeight,
+      halfWidth: this.halfWidth,
+      outer: this.outer,
+      position
+    }
+  }
 }

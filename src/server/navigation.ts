@@ -7,6 +7,7 @@ import { Structure } from './feature/structure'
 import { Organism } from './actor/organism'
 import { COLOR, CYAN, LIME, RED, WHITE } from '../shared/color'
 import { NavArea } from './navArea'
+import { NumberMatrix, WaypointData } from './types'
 
 export class Navigation {
   static spacing = 2
@@ -180,6 +181,26 @@ export class Navigation {
       path.push(nextPosition)
     })
     return path
+  }
+
+  getWaypointData (): WaypointData[] {
+    const waypointArray = Object.values(this.waypoints)
+    const waypointData = waypointArray.map(waypoint => waypoint.getData())
+    return waypointData
+  }
+
+  getWaypointIdMatrix (): NumberMatrix {
+    const is = [...this.stage.navigation.waypointMatrix.keys()]
+    const js = [...this.stage.navigation.waypointMatrix[0].keys()]
+    const matrix: NumberMatrix = []
+    for (const i of is) {
+      matrix[i] = []
+      for (const j of js) {
+        const waypoint = this.stage.navigation.waypointMatrix[i][j]
+        matrix[i][j] = waypoint.id
+      }
+    }
+    return matrix
   }
 
   isPointReachable (start: Vec2, end: Vec2, radius: number, otherRadius?: number): boolean {

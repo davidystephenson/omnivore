@@ -50,12 +50,12 @@ export class Performance extends Playhouse {
         waypoint.nextWaypoints[radius] = nextWaypoints
       })
     })
-    const is = [...props.promptbook.waypointMatrix.keys()]
-    const js = [...props.promptbook.waypointMatrix[0].keys()]
+    const is = [...props.promptbook.waypointIdMatrix.keys()]
+    const js = [...props.promptbook.waypointIdMatrix[0].keys()]
     for (const i of is) {
       this.navigation.waypointMatrix[i] = []
       for (const j of js) {
-        const id = props.promptbook.waypointMatrix[i][j]
+        const id = props.promptbook.waypointIdMatrix[i][j]
         const waypoint = this.navigation.waypoints[id]
         if (waypoint == null) {
           throw new Error('missing waypoint')

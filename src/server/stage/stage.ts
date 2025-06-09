@@ -21,9 +21,9 @@ import { Tree } from '../actor/tree'
 import { Food } from '../actor/food'
 import { Spawner } from '../spawner'
 import { Flags } from '../flags'
-import { Layout } from '../layout'
 import { Collider } from '../collider'
 import { Manager, SerializationError } from '../../manager'
+import { Promptbook } from '../types'
 
 export class Stage {
   actors = new Map<number, Actor>()
@@ -422,21 +422,31 @@ export class Stage {
   }
 
   saveLayout (): void {
-    const layout = new Layout(this)
-    const layoutData = layout.getLayoutData()
+    const navAreaDefs = this.navigation.navAreas.map(navArea => navArea.getDef())
+    const wallDefs = this.walls.map(wall => wall.getDef())
+    const waypointDatas = this.navigation.getWaypointData()
+    const waypointIdMatrix = this.navigation.getWaypointIdMatrix()
+    const promptbook: Promptbook = {
+      halfHeight: this.halfHeight,
+      halfWidth: this.halfWidth,
+      navAreaDefs,
+      radii: this.navigation.radii,
+      wallDefs,
+      waypointDatas,
+      waypointIdMatrix
+    }
     try {
       // Create a new Manager instance with a specific output path
       const manager = new Manager('promptbooks/output.json')
 
       // Validate the data before saving
       console.info('Starting layout data validation...')
-      manager.validateObject(layoutData)
-
+      manager.validateObject(promptbook)
       // Log validation summary
       console.info('Validation complete. Starting serialization process...')
 
       // Save the layout data (will convert empty/infinite values to null)
-      manager.saveToFile(layoutData)
+      manager.saveToFile(promptbook)
       console.info('Layout data saved successfully to output.json')
     } catch (error: unknown) {
       if (error instanceof SerializationError) {
