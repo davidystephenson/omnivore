@@ -29,10 +29,6 @@ export class Performance extends Playhouse {
         id: waypointData.id
       })
       this.navigation.waypoints[waypoint.id] = waypoint
-      // for (const radius of props.promptbook.radii) {
-      //   const radiusData = waypointData.pathDistances[radius]
-      //   waypoint.pathDistances[radius] = radiusData
-      // }
     })
     props.promptbook.waypointDatas.forEach(waypointData => {
       const waypoint = this.navigation.waypoints[waypointData.id]

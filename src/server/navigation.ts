@@ -367,7 +367,7 @@ export class Navigation {
       // Compute the minimal path distance from each waypoint to each other waypoint
       let pathDivisor = 1
       let pathNextDivisor = 100
-      const maxPathSize = 6
+      const maxPathSize = 10
       const pathLengths = range(1, maxPathSize)
       pathLengths.forEach(pathLength => {
         const remainder = pathLength % pathDivisor

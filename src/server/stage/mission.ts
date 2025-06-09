@@ -1,4 +1,3 @@
-import { Vec2 } from 'planck'
 import { Flags } from '../flags'
 import { Walled } from './walled'
 

@@ -23,7 +23,8 @@ import { Spawner } from '../spawner'
 import { Flags } from '../flags'
 import { Collider } from '../collider'
 import { Manager, SerializationError } from '../../manager'
-import { Promptbook } from '../types'
+import { Index, Promptbook } from '../types'
+import fs from 'fs'
 
 export class Stage {
   actors = new Map<number, Actor>()
@@ -36,6 +37,7 @@ export class Stage {
   halfHeight: number
   halfWidth: number
   killingQueue: Killing[] = []
+  manager: Manager
   navigation: Navigation
   players = new Map<string, Player>()
   runner: Runner
@@ -55,6 +57,7 @@ export class Stage {
   }) {
     this.flags = props.flags
     this.debugger = new Debugger()
+    this.manager = new Manager()
     this.world = new World({ gravity: Vec2(0, 0) })
     this.halfHeight = props.halfHeight
     this.halfWidth = props.halfWidth
@@ -422,10 +425,30 @@ export class Stage {
   }
 
   saveLayout (): void {
-    const navAreaDefs = this.navigation.navAreas.map(navArea => navArea.getDef())
-    const wallDefs = this.walls.map(wall => wall.getDef())
-    const waypointDatas = this.navigation.getWaypointData()
+    fs.rmSync('./promptbooks/output', { recursive: true, force: true })
     const waypointIdMatrix = this.navigation.getWaypointIdMatrix()
+    const index: Index = {
+      halfHeight: this.halfHeight,
+      halfWidth: this.halfWidth,
+      radii: this.navigation.radii,
+      waypointIdMatrix
+    }
+    this.manager.saveToFile({ data: index, path: 'promptbooks/output/index.json' })
+    const navAreaDefs = this.navigation.navAreas.map(navArea => navArea.getDef())
+    this.manager.saveMany({
+      data: navAreaDefs,
+      path: 'promptbooks/output/navAreaDefs'
+    })
+    const wallDefs = this.walls.map(wall => wall.getDef())
+    this.manager.saveMany({
+      data: wallDefs,
+      path: 'promptbooks/output/wallDefs'
+    })
+    const waypointDatas = this.navigation.getWaypointData()
+    this.manager.saveMany({
+      data: waypointDatas,
+      path: 'promptbooks/output/waypointDatas'
+    })
     const promptbook: Promptbook = {
       halfHeight: this.halfHeight,
       halfWidth: this.halfWidth,
@@ -436,17 +459,13 @@ export class Stage {
       waypointIdMatrix
     }
     try {
-      // Create a new Manager instance with a specific output path
-      const manager = new Manager('promptbooks/output.json')
-
-      // Validate the data before saving
       console.info('Starting layout data validation...')
-      manager.validateObject(promptbook)
+      this.manager.validateObject(promptbook)
       // Log validation summary
       console.info('Validation complete. Starting serialization process...')
 
       // Save the layout data (will convert empty/infinite values to null)
-      manager.saveToFile(promptbook)
+      this.manager.saveToFile({ data: promptbook, path: 'promptbooks/output.json' })
       console.info('Layout data saved successfully to output.json')
     } catch (error: unknown) {
       if (error instanceof SerializationError) {

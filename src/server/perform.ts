@@ -1,4 +1,4 @@
-import { performanceNameSchema, Promptbook } from './types'
+import { Promptbook } from './types'
 import { PublicPerformance } from './stage/publicPerformance'
 import { PrivatePerformance } from './stage/privatePerformance'
 import { TestPerformance } from './stage/testPerformance'
@@ -12,15 +12,17 @@ export default function perform (props: {
   performance?: string
 }): void {
   const name = props.performance ?? process.argv[2] ?? 'public'
-  const performanceName = performanceNameSchema.parse(name)
-  console.info(`Performing ${performanceName}...`)
-  const PERFORMANCES = {
+  console.info(`Performing ${name}...`)
+  const PERFORMANCES: Record<string, typeof PrivatePerformance> = {
     private: PrivatePerformance,
     public: PublicPerformance,
     small: SmallPerformance,
     test: TestPerformance
   }
-  const Performance = PERFORMANCES[performanceName]
+  const Performance = PERFORMANCES[name]
+  if (Performance == null) {
+    throw new Error(`Unknown performance: ${name}`)
+  }
   function onData (onDataProps: { data: unknown }): void {
     const promptbook = props.onData({ data: onDataProps.data })
     console.info('Waypoints.length:', promptbook.waypointDatas.length)

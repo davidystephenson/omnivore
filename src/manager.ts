@@ -48,19 +48,9 @@ export function isSerializableArray (value: unknown): value is SerializableArray
  * Manager class for handling large data serialization and file operations
  */
 export class Manager {
-  private readonly outputPath: string
+  static LOG_FREQUENCY = 1000000
   private writeCounter: number = 0
-  private readonly logFrequency: number
-
-  /**
-   * Creates a new Manager instance
-   * @param outputPath Optional path to the output file. Defaults to 'output.json'
-   * @param logFrequency How often to log progress (number of writes). Defaults to 10000.
-   */
-  constructor (outputPath = 'output.json', logFrequency = 100000) {
-    this.outputPath = outputPath
-    this.logFrequency = logFrequency
-  }
+  private verbose: boolean = true
 
   /**
    * Escapes special characters in a string for JSON
@@ -92,8 +82,16 @@ export class Manager {
     fs.writeSync(fileDescriptor, data)
     this.writeCounter++
 
-    if (this.writeCounter % this.logFrequency === 0) {
+    if (this.writeCounter % Manager.LOG_FREQUENCY === 0) {
       console.info(`${this.writeCounter.toLocaleString()} writes`)
+    }
+  }
+
+  debug (props: {
+    message: string
+  }): void {
+    if (this.verbose) {
+      console.debug(props.message)
     }
   }
 
@@ -150,21 +148,28 @@ export class Manager {
    * @param data The object to save, could be any type but will be checked for serializability
    * @param filePath Optional path to the output file. Defaults to the constructor's outputPath
    */
-  saveToFile (data: unknown, filePath?: string): void {
+  saveToFile (props: {
+    data: unknown
+    path: string
+    verbose?: boolean
+  }): void {
+    if (props.verbose != null) {
+      this.verbose = props.verbose
+    }
+    this.debug({ message: `Saving to ${props.path}...` })
     // Reset write counter for this operation
     this.writeCounter = 0
 
     // First validate that data is a serializable object
-    if (!isSerializableObject(data)) {
+    if (!isSerializableObject(props.data)) {
       throw new SerializationError('Data must be a serializable object', 'root')
     }
 
     // Validate the object structure before saving
     // Only validate critical errors, not conversion warnings
-    this.validateObject(data)
+    this.validateObject(props.data)
 
-    const targetPath = filePath ?? this.outputPath
-    const dirPath = path.dirname(targetPath)
+    const dirPath = path.dirname(props.path)
 
     // Ensure the directory exists
     if (!fs.existsSync(dirPath)) {
@@ -175,12 +180,12 @@ export class Manager {
 
     try {
       // Create or truncate the file
-      fileDescriptor = fs.openSync(targetPath, 'w')
+      fileDescriptor = fs.openSync(props.path, 'w')
 
       // Start the JSON object
       this.trackWrite(fileDescriptor, '{')
 
-      const keys = Object.keys(data)
+      const keys = Object.keys(props.data)
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i]
 
@@ -193,14 +198,14 @@ export class Manager {
         this.trackWrite(fileDescriptor, `"${this.escapeJsonString(key)}":`)
 
         // Process the value with path tracking
-        this.writeValue(fileDescriptor, data[key], key)
+        this.writeValue(fileDescriptor, props.data[key], key)
       }
 
       // Close the JSON object
       this.trackWrite(fileDescriptor, '}')
 
-      console.info(`Serialization complete: ${this.writeCounter.toLocaleString()} total write operations`)
-      console.info(`Successfully saved data to ${targetPath}`)
+      this.debug({ message: `Serialization complete: ${this.writeCounter.toLocaleString()} total write operations` })
+      this.debug({ message: `Successfully saved data to ${props.path}` })
     } catch (error) {
       if (error instanceof SerializationError) {
         console.error(`Serialization failed: ${error.message}`)
@@ -215,6 +220,28 @@ export class Manager {
         fs.closeSync(fileDescriptor)
       }
     }
+  }
+
+  saveMany (props: {
+    data: unknown[]
+    path: string
+  }): void {
+    console.info(`Saving ${props.data.length} files to ${props.path}...`)
+    let factor = 10
+    props.data.forEach((data, index) => {
+      if (index > 0 && index % factor === 0) {
+        console.info(`Saving file ${index} of ${props.data.length}...`)
+      }
+      if (index >= factor * 10) {
+        factor *= 10
+      }
+      const path = `${props.path}/${index}.json`
+      this.saveToFile({
+        data,
+        path,
+        verbose: false
+      })
+    })
   }
 
   /**

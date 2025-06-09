@@ -9,7 +9,6 @@ import path from 'path'
 import * as SocketIo from 'socket.io'
 import { Config } from './config'
 import { Playhouse } from './stage/playhouse'
-import { Mission } from './stage/mission'
 
 export class Server {
   seed = Math.random().toString()
@@ -21,13 +20,13 @@ export class Server {
   playhouse: Playhouse
   step = 0
 
-  constructor (props?: {
-    playhouse?: Playhouse
+  constructor (props: {
+    playhouse: Playhouse
   }) {
     this.setupApp()
     this.httpServer = this.getHttpServer()
     this.io = new SocketIo.Server(this.httpServer)
-    this.playhouse = props?.playhouse ?? new Mission()
+    this.playhouse = props.playhouse
     void this.start()
   }
 

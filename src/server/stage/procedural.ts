@@ -11,7 +11,7 @@ export interface Rectangle {
 }
 
 export default class Procedural extends Walled {
-  static FILL = 0.25
+  static FILL = 0.1
   static FAILS = 100000
   static DEBUG = 10000
 
@@ -25,7 +25,7 @@ export default class Procedural extends Walled {
     halfWidth: number
   }) {
     super(props)
-    console.info('Initiating procedure')
+    console.info('Initiating procedure for', props.halfWidth, 'x', props.halfHeight)
 
     while (!this.isDone()) {
       const remainder = this.fails % Procedural.DEBUG
