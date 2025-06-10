@@ -80,7 +80,6 @@ export class Renderer {
     })
 
     this.debugLines.forEach(debugLine => {
-      console.log('debugLine', JSON.stringify(debugLine))
       this.followCamera()
       this.context.lineWidth = debugLine.width
       this.context.strokeStyle = `rgba(${debugLine.color.red}, ${debugLine.color.green}, ${debugLine.color.blue}, 1)`

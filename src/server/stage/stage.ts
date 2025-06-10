@@ -311,12 +311,13 @@ export class Stage {
   debugPolygon (props: {
     polygon: PolygonShape
     color: Rgb
+    width?: number
   }): void {
     range(0, props.polygon.m_vertices.length - 1).forEach(i => {
       const j = (i + 1) % props.polygon.m_vertices.length
       const point1 = props.polygon.m_vertices[i]
       const point2 = props.polygon.m_vertices[j]
-      this.debugLine({ a: point1, b: point2, color: props.color })
+      this.debugLine({ a: point1, b: point2, color: props.color, width: props.width })
     })
   }
 

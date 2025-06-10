@@ -26,5 +26,7 @@ export class PublicPerformance extends Performance {
     this.addCenterTree()
     this.addCenterTree()
     this.addCenterTree()
+    this.addCenterTree()
+    this.addCenterTree()
   }
 }

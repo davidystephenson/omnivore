@@ -37,11 +37,14 @@ export class Collider {
         if (otherFeature.actor.label === 'food') {
           return false
         }
-        const data = fixture.getUserData()
-        if (data instanceof Spawnpoint) {
-          data.collideCount += 1
-        } else if (data instanceof Curtain) {
-          data.collideCount += 1
+        const sensorData = fixture.getUserData()
+        if (sensorData instanceof Spawnpoint) {
+          const otherData = otherFixture.getUserData()
+          if (sensorData.featureSensor === fixture || otherData instanceof Membrane) {
+            sensorData.collideCount += 1
+          }
+        } else if (sensorData instanceof Curtain) {
+          sensorData.collideCount += 1
           if (otherFeature instanceof Prop && otherFeature.actor instanceof Debris) {
             otherFeature.blockCount += 1
           }
@@ -82,11 +85,15 @@ export class Collider {
         if (otherFeature.actor.label === 'food') {
           return false
         }
-        const data = fixture.getUserData()
-        if (data instanceof Spawnpoint) {
-          data.collideCount -= 1
-        } else if (data instanceof Curtain) {
-          data.collideCount -= 1
+        const sensorData = fixture.getUserData()
+        if (sensorData instanceof Spawnpoint) {
+          const otherData = otherFixture.getUserData()
+          const sensingFeatures = sensorData.featureSensor === fixture
+          if (sensingFeatures || otherData instanceof Membrane) {
+            sensorData.collideCount -= 1
+          }
+        } else if (sensorData instanceof Curtain) {
+          sensorData.collideCount -= 1
           if (otherFeature instanceof Prop && otherFeature.actor instanceof Debris) {
             otherFeature.blockCount -= 1
           }

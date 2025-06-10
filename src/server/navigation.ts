@@ -36,6 +36,7 @@ export class Navigation {
     this.smallRadius = Math.min(...this.radii)
     const bigDiameter = 2 * this.bigRadius
     this.margin = bigDiameter + 0.1
+    this.stage.debug({ k: 'Navigation margin:', v: this.margin })
     this.xCount = Math.ceil(2 * this.stage.halfWidth / Navigation.spacing)
     this.yCount = Math.ceil(2 * this.stage.halfHeight / Navigation.spacing)
     this.xStep = 2 * this.stage.halfWidth / this.xCount
