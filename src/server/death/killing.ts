@@ -63,7 +63,7 @@ export class Killing extends Death {
             throw new Error('Blocker is not defined')
           }
           this.stage.debugAABB({
-            box: checkBox,
+            aabb: checkBox,
             color: COLOR.RED
           })
           const circle = new CircleShape(blocker.body.getPosition(), 0.2)
@@ -92,7 +92,7 @@ export class Killing extends Death {
         if (this.stage.flags.death) {
           const color = { ...RED, a: 0.1 }
           this.stage.debugAABB({
-            box: new AABB(lookLowerBound, lookUpperBound),
+            aabb: new AABB(lookLowerBound, lookUpperBound),
             color
           })
           this.stage.runner.paused = true
@@ -102,7 +102,7 @@ export class Killing extends Death {
         if (this.stage.flags.death) {
           const color = { ...GREEN, a: 0.1 }
           this.stage.debugAABB({
-            box: brickBox,
+            aabb: brickBox,
             color
           })
           this.stage.runner.paused = true

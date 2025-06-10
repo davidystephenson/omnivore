@@ -306,7 +306,7 @@ export class Navigation {
     if (this.stage.flags.navAreas) {
       this.navAreas.forEach(navArea => {
         this.stage.debugAABB({
-          box: navArea.aabb,
+          aabb: navArea.aabb,
           color: LIME
         })
       })

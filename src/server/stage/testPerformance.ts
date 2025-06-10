@@ -1,7 +1,6 @@
 import { Flags } from '../flags'
 import { Performance } from './performance'
 import { Promptbook } from '../types'
-import { Vec2 } from 'planck'
 
 export class TestPerformance extends Performance {
   playerGene = this.flyGene
@@ -16,14 +15,16 @@ export class TestPerformance extends Performance {
         // controlLines: true,
         // curtains: true,
         // damage: true,
-        // death: true,
+        death: true,
         growGame: false,
-        hungerGame: false,
+        // hungerGame: false,
         // playerControl: true
         // playerDeath: true
-        playerNearest: true,
+        // playerNearest: true,
         reproduceGame: false,
-        spawnpoints: true
+        respawn: true,
+        spawn: true
+        // spawnpoints: true
         // waypoints: true
       }),
       promptbook: props.promptbook
@@ -39,7 +40,7 @@ export class TestPerformance extends Performance {
     //   halfWidth: 5,
     //   position: Vec2(0, 0)
     // })
-    this.addBrick({ position: Vec2(20, -15), halfHeight: 2, halfWidth: 2 })
+    // this.addBrick({ position: Vec2(20, -15), halfHeight: 2, halfWidth: 2 })
     // this.addBrick({ position: Vec2(15, -15), halfHeight: 1, halfWidth: 1 })
     // this.addTree({ position: Vec2(-5, -5) })
     // this.addBrick({ position: Vec2(-7, -7), halfHeight: 1, halfWidth: 10 })
