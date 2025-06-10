@@ -20,7 +20,7 @@ export class SmallPerformance extends Performance {
       // respawn: true
       // summary: true
       // timings: true
-      tree: true
+      // tree: true
     })
     super({
       flags,

@@ -10,6 +10,7 @@ import * as SocketIo from 'socket.io'
 import { Config } from './config'
 import { Playhouse } from './stage/playhouse'
 import { Mission } from './stage/mission'
+import { Maze } from './stage/maze'
 
 export class Server {
   seed = Math.random().toString()
@@ -27,7 +28,7 @@ export class Server {
     this.setupApp()
     this.httpServer = this.getHttpServer()
     this.io = new SocketIo.Server(this.httpServer)
-    this.playhouse = props?.playhouse ?? new Mission()
+    this.playhouse = props?.playhouse ?? new Maze()
     void this.start()
   }
 

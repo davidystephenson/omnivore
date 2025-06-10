@@ -347,9 +347,11 @@ export class Navigation {
       // Compute the minimal path distance from each waypoint to each other waypoint
       let pathDivisor = 1
       let pathNextDivisor = 100
-      const maxPathSize = 6
+      const maxPathSize = 20
+      let emptySteps = 0
       const pathLengths = range(1, maxPathSize)
-      pathLengths.forEach(pathLength => {
+      for (const pathLength of pathLengths) {
+        let improvements = 0
         const remainder = pathLength % pathDivisor
         const divisible = remainder === 0
         const pathLabel = `${pathLength}/${maxPathSize} r${radiusLabel}`
@@ -387,11 +389,20 @@ export class Navigation {
                 throw new Error(`Missing neighbor distance at ${otherWaypoint.id}}`)
               }
               const distanceThroughNeighbor = waypoint.distances[neighbor.id] + neighborDistance
+              if(distanceThroughNeighbor < pathDistances[otherWaypoint.id]) improvements += 1
               pathDistances[otherWaypoint.id] = Math.min(pathDistances[otherWaypoint.id], distanceThroughNeighbor)
             })
           })
         })
-      })
+        let maxPathDistance = 0
+        waypointArray.forEach(waypoint => {
+          const pathDistances = Object.values(waypoint.pathDistances[radius])
+          maxPathDistance = Math.max(maxPathDistance, ...pathDistances)
+        })
+        if (improvements === 0) emptySteps += 1
+        else emptySteps = 0
+        if (isFinite(maxPathDistance) && emptySteps > 1) break
+      }
       let maxPathDistance = 0
       waypointArray.forEach(waypoint => {
         const radii = Object.keys(waypoint.pathDistances).map(x => Number(x))
