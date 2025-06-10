@@ -21,6 +21,7 @@ export class TestPerformance extends Performance {
         hungerGame: false,
         // playerControl: true
         // playerDeath: true
+        playerNearest: true,
         reproduceGame: false,
         spawnpoints: true
         // waypoints: true

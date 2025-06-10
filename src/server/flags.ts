@@ -24,6 +24,7 @@ export class Flags {
   playerControl: boolean
   playerDeath: boolean
   playerNavigation: boolean
+  playerNearest: boolean
   players: boolean
   procedural: boolean
   reproduceGame: boolean
@@ -32,6 +33,7 @@ export class Flags {
   spawnpoints: boolean
   starveBricksGame: boolean
   summary: boolean
+  tree: boolean
   timings: boolean
   vision: boolean
   visionRangeGame: boolean
@@ -62,9 +64,10 @@ export class Flags {
     organisms?: boolean
     organismsCount?: boolean
     performance?: boolean
+    playerControl?: boolean
     playerDeath?: boolean
     playerNavigation?: boolean
-    playerControl?: boolean
+    playerNearest?: boolean
     players?: boolean
     procedural?: boolean
     reproduceGame?: boolean
@@ -74,6 +77,7 @@ export class Flags {
     starveBricksGame?: boolean
     summary?: boolean
     timings?: boolean
+    tree?: boolean
     vision?: boolean
     visionRangeGame?: boolean
     visionGame?: boolean
@@ -102,10 +106,11 @@ export class Flags {
     this.organisms = props.organisms ?? false
     this.organismsCount = props.organismsCount ?? false
     this.performance = props.performance ?? false
+    this.playerControl = props.playerControl ?? false
     this.playerNavigation = props.playerNavigation ?? true
+    this.playerNearest = props.playerNearest ?? false
     this.playerDeath = props.playerDeath ?? false
     this.players = props.players ?? false
-    this.playerControl = props.playerControl ?? false
     this.procedural = props.procedural ?? false
     this.reproduceGame = props.reproduceGame ?? true
     this.respawn = props.respawn ?? false
@@ -114,6 +119,7 @@ export class Flags {
     this.starveBricksGame = props.starveBricksGame ?? true
     this.summary = props.summary ?? false
     this.timings = props.timings ?? false
+    this.tree = props.tree ?? false
     this.vision = props.vision ?? false
     this.visionRangeGame = props.visionRangeGame ?? true
     this.visionGame = props.visionGame ?? false

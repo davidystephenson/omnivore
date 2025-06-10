@@ -2,7 +2,7 @@ import { Vec2 } from 'planck'
 import { Stage } from '../stage/stage'
 import { Organism } from './organism'
 import { Gene } from '../gene'
-import { Rgb } from '../../shared/color'
+import { PINK, Rgb } from '../../shared/color'
 
 export class Player {
   age = 0
@@ -42,5 +42,14 @@ export class Player {
       return
     }
     this.age += props.stepSize
+    if (this.stage.flags.playerNearest) {
+      const features = this.organism.membrane.getFeaturesInRange()
+      const sorted = this.organism.sortNearest({ features })
+      this.stage.debugLine({
+        a: this.organism.membrane.body.getPosition(),
+        b: sorted[0].body.getPosition(),
+        color: PINK
+      })
+    }
   }
 }
