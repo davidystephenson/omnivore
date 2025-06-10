@@ -32,11 +32,13 @@ export class Membrane extends Feature {
   constructor (props: {
     position: Vec2
     actor: Organism
+    health?: number
     radius?: number
   }) {
     const radius = props.radius ?? 1
     const startRadius = props.actor.stage.flags.growGame ? Membrane.INITIAL_RADIUS : radius
     super({
+      actor: props.actor,
       bodyDef: {
         type: 'dynamic',
         position: props.position,
@@ -44,15 +46,15 @@ export class Membrane extends Feature {
         fixedRotation: true,
         linearDamping: Feature.DAMPING
       },
+      color: props.actor.color,
       fixtureDef: {
         shape: new Circle(Vec2(0, 0), startRadius),
         density: 1,
         restitution: 0,
         friction: 0
       },
-      label: 'membrane',
-      actor: props.actor,
-      color: props.actor.color
+      health: props.health,
+      label: 'membrane'
     })
     this.actor = props.actor
     this.mass = this.body.getMass()

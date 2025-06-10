@@ -41,13 +41,13 @@ export class Feature {
   spawnPosition = Vec2(0, 0)
 
   constructor (props: {
+    actor: Actor
     bodyDef: BodyDef
+    borderWidth?: number
+    color: Rgb
     fixtureDef: FixtureDef
     health?: number
     label?: string
-    actor: Actor
-    color: Rgb
-    borderWidth?: number
   }) {
     this.label = props.label ?? this.label
     this.actor = props.actor

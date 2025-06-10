@@ -5,6 +5,7 @@ import { Gene } from '../gene'
 import { PINK, Rgb } from '../../shared/color'
 
 export class Player {
+  static INITIAL = 1
   age = 0
   id: string
   organism?: Organism
@@ -14,6 +15,7 @@ export class Player {
   constructor (props: {
     color: Rgb
     gene: Gene
+    health?: number
     id: string
     position: Vec2
     stage: Stage
@@ -24,6 +26,7 @@ export class Player {
     this.organism = new Organism({
       color: props.color,
       gene: props.gene,
+      health: props.health ?? Player.INITIAL,
       player: this,
       position: props.position,
       stage: this.stage

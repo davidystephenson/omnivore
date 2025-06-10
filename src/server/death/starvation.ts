@@ -4,7 +4,7 @@ import { Membrane } from '../feature/membrane'
 import { Stage } from '../stage/stage'
 import { Death } from './death'
 import { Rock } from '../actor/rock'
-import { BLUE, CYAN, GREEN, RED, WHITE } from '../../shared/color'
+import { GREEN, RED, WHITE } from '../../shared/color'
 
 export class Starvation extends Death {
   constructor (props: { stage: Stage, victim: Membrane }) {
@@ -51,43 +51,13 @@ export class Starvation extends Death {
         this.stage.debugAABB({ aabb: scaledBox, color, width: 0.15 })
       }
       if (sizable) {
-        const victimScaledLeft = victimPosition.x - halfWidth
-        const victimScaledRight = victimPosition.x + halfWidth
-        const victimScaledTop = victimPosition.y - halfHeight
-        const victimScaledBottom = victimPosition.y + halfHeight
-        const victimScaledLower = Vec2(victimScaledLeft, victimScaledBottom)
-        const victimScaledUpper = Vec2(victimScaledRight, victimScaledTop)
-        const victimScaledBox = new AABB(victimScaledLower, victimScaledUpper)
-        if (this.stage.flags.death) {
-          this.stage.debugAABB({ aabb: victimScaledBox, color: CYAN, width: 0.15 })
-        }
-        const leftOverflow = maximumBox.lowerBound.x - victimScaledLeft
-        this.deathLog({ k: 'leftOverflow', v: leftOverflow })
-        const rightOverflow = victimScaledRight - maximumBox.upperBound.x
-        this.deathLog({ k: 'rightOverflow', v: rightOverflow })
-        const topOverflow = maximumBox.lowerBound.y - victimScaledTop
-        this.deathLog({ k: 'topOverflow', v: topOverflow })
-        const bottomOverflow = victimScaledBottom - maximumBox.upperBound.y
-        this.deathLog({ k: 'bottomOverflow', v: bottomOverflow })
-        const brickX = leftOverflow > 0
-          ? victimPosition.x + leftOverflow
-          : rightOverflow > 0
-            ? victimPosition.x - rightOverflow
-            : victimPosition.x
-        const brickY = topOverflow > 0
-          ? victimPosition.y + topOverflow
-          : bottomOverflow > 0
-            ? victimPosition.y - bottomOverflow
-            : victimPosition.y
-        const brickPosition = Vec2(brickX, brickY)
-        if (this.stage.flags.death) {
-          const brickCircle = new CircleShape(brickPosition, 0.1)
-          this.stage.debugCircle({ circle: brickCircle, color: BLUE })
-          const brickLower = Vec2(brickX - halfWidth, brickY - halfHeight)
-          const brickUpper = Vec2(brickX + halfWidth, brickY + halfHeight)
-          const brickBox = new AABB(brickLower, brickUpper)
-          this.stage.debugAABB({ aabb: brickBox, color: BLUE, width: 0.15 })
-        }
+        const center = this.getCenter({
+          base: victimPosition,
+          debug: this.stage.flags.death,
+          halfHeight,
+          halfWidth,
+          maximum: maximumBox
+        })
         const health = Math.max(
           Death.MINIMUM_HEALTH,
           this.victim.actor.gene.stamina
@@ -97,7 +67,7 @@ export class Starvation extends Death {
           halfWidth,
           halfHeight,
           health,
-          position: brickPosition,
+          position: center,
           stage: this.stage
         })
       }

@@ -1,9 +1,10 @@
-import { AABB, Fixture, Vec2 } from 'planck'
+import { AABB, CircleShape, Fixture, Vec2 } from 'planck'
 import { Membrane } from '../feature/membrane'
 import { Stage } from '../stage/stage'
 import { Obituary, Organism } from '../actor/organism'
 import { Spawnpoint } from '../spawnpoint'
 import { LogProps } from '../debugger'
+import { BLUE, CYAN } from '../../shared/color'
 
 export class Death {
   static MINIMUM_SIZE = 0.01
@@ -69,6 +70,53 @@ export class Death {
   getArea (box: AABB): number {
     const extents = box.getExtents()
     return extents.x * extents.y
+  }
+
+  getCenter (props: {
+    base: Vec2
+    debug: boolean
+    halfHeight: number
+    halfWidth: number
+    maximum: AABB
+  }): Vec2 {
+    const baseLeft = props.base.x - props.halfWidth
+    const baseRight = props.base.x + props.halfWidth
+    const baseTop = props.base.y - props.halfHeight
+    const baseBottom = props.base.y + props.halfHeight
+    const baseLower = Vec2(baseLeft, baseBottom)
+    const baseUpper = Vec2(baseRight, baseTop)
+    const baseBox = new AABB(baseLower, baseUpper)
+    if (props.debug) {
+      this.stage.debugAABB({ aabb: baseBox, color: CYAN, width: 0.15 })
+    }
+    const leftOverflow = props.maximum.lowerBound.x - baseLeft
+    this.deathLog({ k: 'leftOverflow', v: leftOverflow })
+    const rightOverflow = baseRight - props.maximum.upperBound.x
+    this.deathLog({ k: 'rightOverflow', v: rightOverflow })
+    const topOverflow = props.maximum.lowerBound.y - baseTop
+    this.deathLog({ k: 'topOverflow', v: topOverflow })
+    const bottomOverflow = baseBottom - props.maximum.upperBound.y
+    this.deathLog({ k: 'bottomOverflow', v: bottomOverflow })
+    const brickX = leftOverflow > 0
+      ? props.base.x + leftOverflow
+      : rightOverflow > 0
+        ? props.base.x - rightOverflow
+        : props.base.x
+    const brickY = topOverflow > 0
+      ? props.base.y + topOverflow
+      : bottomOverflow > 0
+        ? props.base.y - bottomOverflow
+        : props.base.y
+    const center = Vec2(brickX, brickY)
+    if (props.debug) {
+      const circle = new CircleShape(center, 0.1)
+      this.stage.debugCircle({ circle, color: BLUE })
+      const lower = Vec2(brickX - props.halfWidth, brickY - props.halfHeight)
+      const upper = Vec2(brickX + props.halfWidth, brickY + props.halfHeight)
+      const box = new AABB(lower, upper)
+      this.stage.debugAABB({ aabb: box, color: BLUE, width: 0.15 })
+    }
+    return center
   }
 
   deathLog<Value>(props: LogProps<Value>): void {

@@ -1,6 +1,7 @@
 import { Flags } from '../flags'
 import { Performance } from './performance'
 import { Promptbook } from '../types'
+// import { Vec2 } from 'planck'
 
 export class TestPerformance extends Performance {
   playerGene = this.tardigradeGene
@@ -29,11 +30,8 @@ export class TestPerformance extends Performance {
       }),
       promptbook: props.promptbook
     })
-    // const trisolaran = this.addTrisolaran({ position: Vec2(3, 3) })
-    // trisolaran.membrane.hungerDamage = 0.99
+    // this.addTardigrade({ position: Vec2(3, 3) })
     // this.addFruit({ position: Vec2(-7, 7) })
-    // this.addTrisolaran({ position: Vec2(0, 7) })
-    // this.addHunter({ position: Vec2(2, 7) })
     // this.addBrick({ position: Vec2(-20, -20), halfHeight: 15, halfWidth: 15 })
     // this.addBrick({
     //   halfHeight: 10,
