@@ -1,4 +1,4 @@
-import { Vec2, Body } from 'planck'
+import { Body } from 'planck'
 import { Flags } from '../flags'
 import { Playhouse } from './playhouse'
 import { Waypoint } from '../waypoint'
@@ -16,9 +16,7 @@ export class Performance extends Playhouse {
       halfHeight: props.promptbook.halfHeight,
       halfWidth: props.promptbook.halfWidth
     })
-    props.promptbook.wallDefs.forEach(wallDef => {
-      this.addWall({ ...wallDef, position: new Vec2(wallDef.position.x, wallDef.position.y) })
-    })
+    this.buildWalls({ wallDefs: props.promptbook.wallDefs })
     props.promptbook.waypointDatas.forEach(waypointData => {
       const waypoint = new Waypoint({
         navigation: this.navigation,

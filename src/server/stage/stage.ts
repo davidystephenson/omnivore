@@ -1,3 +1,4 @@
+import fs from 'fs'
 import { World, Vec2, Body, AABB, PolygonShape, CircleShape, Shape, Transform, testOverlap } from 'planck'
 import { Runner } from '../runner'
 import { Organism } from '../actor/organism'
@@ -23,6 +24,10 @@ import { Spawner } from '../spawner'
 import { Flags } from '../flags'
 import { Collider } from '../collider'
 import { Manager } from '../../manager'
+import { WallDef } from '../types'
+import readWalls from '../readWalls'
+import readMainIndex from '../readMainIndex'
+import readWaypointIndex from '../readWaypointIndex'
 
 export class Stage {
   actors = new Map<number, Actor>()
@@ -249,6 +254,14 @@ export class Stage {
     })
   }
 
+  buildWalls (props: {
+    wallDefs: WallDef[]
+  }): void {
+    props.wallDefs.forEach(wallDef => {
+      this.addWall({ ...wallDef, position: new Vec2(wallDef.position.x, wallDef.position.y) })
+    })
+  }
+
   debug<Value>(props: LogProps<Value>): void {
     this.debugger.debug(props)
   }
@@ -360,6 +373,31 @@ export class Stage {
       return true
     })
     return featuresInShape
+  }
+
+  loadIndex (props: {
+    promptbookName: string
+    onBook: boolean
+  }): void {
+    const wallDefs = readWalls(props)
+    const index = readMainIndex(props)
+    const waypointFolders = fs.readdirSync(`promptbooks/${props.promptbookName}/waypointDatas`)
+    console.info(`Reading ${waypointFolders.length} waypoint folders...`)
+    let factor = 100
+    const waypointIndexes = waypointFolders.map((folder, index) => {
+      if (index % factor === 0) {
+        console.info(`Reading waypoint folder ${index} of ${waypointFolders.length}...`)
+      }
+      if (index >= factor * 10) {
+        factor *= 10
+      }
+      const waypointIndex = readWaypointIndex({
+        onBook: props.onBook,
+        promptbookName: props.promptbookName,
+        folder
+      })
+      return waypointIndex
+    })
   }
 
   log<Value>(props: LogProps<Value>): void {

@@ -6,8 +6,7 @@ import { Feature } from './feature/feature'
 import { Structure } from './feature/structure'
 import { Organism } from './actor/organism'
 import { COLOR, CYAN, RED, WHITE } from '../shared/color'
-import { Index, NumberMatrix, WaypointDataIndex } from './types'
-import fs from 'fs'
+import { MainIndex, NumberMatrix, WaypointDataIndex } from './types'
 
 export class Navigation {
   static spacing = 2
@@ -416,7 +415,7 @@ export class Navigation {
     })
     this.createWaypoints()
     const waypointIdMatrix = this.getWaypointIdMatrix()
-    const index: Index = {
+    const index: MainIndex = {
       halfHeight: this.stage.halfHeight,
       halfWidth: this.stage.halfWidth,
       radii: this.radii,
@@ -443,6 +442,7 @@ export class Navigation {
         verbose: false
       })
     })
+    // STOP HERE
     this.stage.debug({ v: 'Setting up neighbors...' })
     this.setupNeighbors()
     this.stage.debug({ v: 'Calculating distances...' })

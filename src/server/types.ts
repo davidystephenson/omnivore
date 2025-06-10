@@ -45,11 +45,17 @@ export const waypointDataSchema = waypointDataIndexSchema.and(waypointDataExtend
 export type WaypointData = z.infer<typeof waypointDataSchema>
 export const numberMatrixSchema = z.number().array().array()
 export type NumberMatrix = z.infer<typeof numberMatrixSchema>
-export const indexSchema = z.object({
+export const mainIndexSchema = z.object({
   halfHeight: z.number(),
   halfWidth: z.number(),
   radii: z.number().array(),
   waypointIdMatrix: numberMatrixSchema
+})
+export type MainIndex = z.infer<typeof mainIndexSchema>
+export const indexSchema = z.object({
+  mainIndex: mainIndexSchema,
+  wallDefs: wallDefSchema.array(),
+  waypointIndexes: waypointDataIndexSchema.array()
 })
 export type Index = z.infer<typeof indexSchema>
 export const tableOfContentsExtendSchema = z.object({
@@ -57,13 +63,13 @@ export const tableOfContentsExtendSchema = z.object({
   wallDefs: z.unknown().array(),
   waypointDatas: z.unknown().array()
 })
-export const tableOfContentsSchema = indexSchema.and(tableOfContentsExtendSchema)
+export const tableOfContentsSchema = mainIndexSchema.and(tableOfContentsExtendSchema)
 export type TableOfContents = z.infer<typeof tableOfContentsSchema>
 export const promptbookExtendSchema = z.object({
   wallDefs: wallDefSchema.array(),
   waypointDatas: waypointDataSchema.array()
 })
-export const promptbookSchema = indexSchema.and(promptbookExtendSchema)
+export const promptbookSchema = mainIndexSchema.and(promptbookExtendSchema)
 export type Promptbook = z.infer<typeof promptbookSchema>
 const promptbookTestSchema: z.ZodType<Promptbook> = promptbookSchema
 void promptbookTestSchema
