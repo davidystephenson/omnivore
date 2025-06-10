@@ -38,7 +38,7 @@ export default class Procedural extends Walled {
     }
 
     const fill = this.getFillString()
-    console.info('Proceeded:', this.fails, fill)
+    console.info(`Proceeded with ${fill}% and`, this.walls.length, 'walls after', this.fails, 'fails')
   }
 
   getCoordinate (props: {

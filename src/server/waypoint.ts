@@ -1,6 +1,6 @@
 import { Vec2 } from 'planck'
 import { Navigation } from './navigation'
-import { WaypointData } from './types'
+import { NestedNumberRecord } from './types'
 
 export interface WaypointDef {
   position: { x: number, y: number }
@@ -30,7 +30,7 @@ export class Waypoint {
     this.id = props.id
   }
 
-  getData (): WaypointData {
+  getNextWaypoints (): NestedNumberRecord {
     const radii = Object.keys(this.neighbors).map(r => Number(r))
     const neighbors: Record<number, number[]> = {}
     radii.forEach(radius => {
@@ -51,12 +51,6 @@ export class Waypoint {
       targetIds.forEach(targetId => { radiusNextWaypointIds[targetId] = radiusNextWaypoints[targetId].id })
       nextWaypoints[radius] = radiusNextWaypointIds
     })
-    return {
-      position: { x: this.position.x, y: this.position.y },
-      id: this.id,
-      radius: this.radius,
-      category: this.category,
-      nextWaypoints
-    }
+    return nextWaypoints
   }
 }

@@ -7,7 +7,7 @@ import { Structure } from './feature/structure'
 import { Organism } from './actor/organism'
 import { COLOR, CYAN, LIME, RED, WHITE } from '../shared/color'
 import { NavArea } from './navArea'
-import { NumberMatrix, WaypointData } from './types'
+import { NumberMatrix } from './types'
 
 export class Navigation {
   static spacing = 2
@@ -181,12 +181,6 @@ export class Navigation {
       path.push(nextPosition)
     })
     return path
-  }
-
-  getWaypointData (): WaypointData[] {
-    const waypointArray = Object.values(this.waypoints)
-    const waypointData = waypointArray.map(waypoint => waypoint.getData())
-    return waypointData
   }
 
   getWaypointIdMatrix (): NumberMatrix {

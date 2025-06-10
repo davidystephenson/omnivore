@@ -22,8 +22,8 @@ import { Food } from '../actor/food'
 import { Spawner } from '../spawner'
 import { Flags } from '../flags'
 import { Collider } from '../collider'
-import { Manager, SerializationError } from '../../manager'
-import { Index, Promptbook } from '../types'
+import { Manager } from '../../manager'
+import { Index, WaypointDataIndex } from '../types'
 import fs from 'fs'
 
 export class Stage {
@@ -354,20 +354,6 @@ export class Stage {
     return featuresInShape
   }
 
-  getInnerWalls (): Wall[] {
-    return this.walls.filter(wall => {
-      const top = wall.position.y + wall.halfHeight
-      const bottom = wall.position.y - wall.halfHeight
-      const right = wall.position.x + wall.halfWidth
-      const left = wall.position.x - wall.halfWidth
-      if (top > this.halfHeight) return false
-      if (bottom < -this.halfHeight) return false
-      if (right > this.halfWidth) return false
-      if (left < -this.halfWidth) return false
-      return true
-    })
-  }
-
   log<Value>(props: LogProps<Value>): void {
     this.debug(props)
   }
@@ -444,37 +430,37 @@ export class Stage {
       data: wallDefs,
       path: 'promptbooks/output/wallDefs'
     })
-    const waypointDatas = this.navigation.getWaypointData()
-    this.manager.saveMany({
-      data: waypointDatas,
-      path: 'promptbooks/output/waypointDatas'
-    })
-    const promptbook: Promptbook = {
-      halfHeight: this.halfHeight,
-      halfWidth: this.halfWidth,
-      navAreaDefs,
-      radii: this.navigation.radii,
-      wallDefs,
-      waypointDatas,
-      waypointIdMatrix
-    }
-    try {
-      console.info('Starting layout data validation...')
-      this.manager.validateObject(promptbook)
-      // Log validation summary
-      console.info('Validation complete. Starting serialization process...')
-
-      // Save the layout data (will convert empty/infinite values to null)
-      this.manager.saveToFile({ data: promptbook, path: 'promptbooks/output.json' })
-      console.info('Layout data saved successfully to output.json')
-    } catch (error: unknown) {
-      if (error instanceof SerializationError) {
-        console.error(`Layout validation failed: ${error.message}`)
-      } else {
-        const errorMessage = error instanceof Error ? error.message : String(error)
-        console.error(`Failed to save layout: ${errorMessage}`)
+    const waypointArray = Object.values(this.navigation.waypoints)
+    console.info(`Saving ${waypointArray.length} waypoints...`)
+    let factor = 100
+    waypointArray.forEach((waypoint, index) => {
+      if (index % factor === 0) {
+        console.info(`Saving waypoint ${index} of ${waypointArray.length}...`)
       }
-    }
+      if (index >= factor * 10) {
+        factor *= 10
+      }
+      const waypointIndex: WaypointDataIndex = {
+        position: { x: waypoint.position.x, y: waypoint.position.y },
+        id: waypoint.id,
+        radius: waypoint.radius,
+        category: waypoint.category
+      }
+      this.manager.saveToFile({
+        data: waypointIndex,
+        path: `promptbooks/output/waypointDatas/${waypoint.id}/index.json`,
+        verbose: false
+      })
+      const nextWaypoints = waypoint.getNextWaypoints()
+      for (const radius in nextWaypoints) {
+        const record = nextWaypoints[radius]
+        this.manager.saveToFile({
+          data: record,
+          path: `promptbooks/output/waypointDatas/${waypoint.id}/${radius}.json`,
+          verbose: false
+        })
+      }
+    })
   }
 
   time (props: {

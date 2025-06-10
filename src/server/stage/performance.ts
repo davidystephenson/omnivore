@@ -36,7 +36,11 @@ export class Performance extends Playhouse {
       if (waypointData == null) return
       props.promptbook.radii.forEach(radius => {
         const nextWaypoints: Record<number, Waypoint> = {}
-        const targetIds = Object.keys(waypointData.nextWaypoints[radius]).map(s => Number(s))
+        const record = waypointData.nextWaypoints[radius]
+        if (record == null) {
+          throw new Error(`Missing waypoint ${waypointData.id} ${radius}`)
+        }
+        const targetIds = Object.keys(record).map(s => Number(s))
         targetIds.forEach(targetId => {
           const nextId = waypointData.nextWaypoints[radius][targetId]
           const nextWaypoint = this.navigation.waypoints[nextId]
