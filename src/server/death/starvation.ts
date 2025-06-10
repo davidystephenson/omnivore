@@ -71,7 +71,9 @@ export class Starvation extends Death {
           stage: this.stage
         })
       }
-      this.stage.runner.paused = true
+      if (this.stage.flags.death) {
+        this.stage.runner.paused = true
+      }
     }
     super.execute()
   }
