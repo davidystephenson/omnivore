@@ -23,8 +23,6 @@ import { Spawner } from '../spawner'
 import { Flags } from '../flags'
 import { Collider } from '../collider'
 import { Manager } from '../../manager'
-import { Index, WaypointDataIndex } from '../types'
-import fs from 'fs'
 
 export class Stage {
   actors = new Map<number, Actor>()
@@ -416,52 +414,6 @@ export class Stage {
         family.push(actor)
       } else {
         this.families.set(actor.color.label, [actor])
-      }
-    })
-  }
-
-  saveLayout (): void {
-    fs.rmSync('./promptbooks/output', { recursive: true, force: true })
-    const waypointIdMatrix = this.navigation.getWaypointIdMatrix()
-    const index: Index = {
-      halfHeight: this.halfHeight,
-      halfWidth: this.halfWidth,
-      radii: this.navigation.radii,
-      waypointIdMatrix
-    }
-    this.manager.saveToFile({ data: index, path: 'promptbooks/output/index.json' })
-    const wallDefs = this.walls.map(wall => wall.getDef())
-    this.manager.saveMany({
-      data: wallDefs,
-      path: 'promptbooks/output/wallDefs'
-    })
-    const waypointArray = Object.values(this.navigation.waypoints)
-    console.info(`Saving ${waypointArray.length} waypoints...`)
-    let factor = 100
-    waypointArray.forEach((waypoint, index) => {
-      if (index % factor === 0) {
-        console.info(`Saving waypoint ${index} of ${waypointArray.length}...`)
-      }
-      if (index >= factor * 10) {
-        factor *= 10
-      }
-      const waypointIndex: WaypointDataIndex = {
-        position: { x: waypoint.position.x, y: waypoint.position.y },
-        id: waypoint.id
-      }
-      this.manager.saveToFile({
-        data: waypointIndex,
-        path: `promptbooks/output/waypointDatas/${waypoint.id}/index.json`,
-        verbose: false
-      })
-      const nextWaypoints = waypoint.getNextWaypoints()
-      for (const radius in nextWaypoints) {
-        const record = nextWaypoints[radius]
-        this.manager.saveToFile({
-          data: record,
-          path: `promptbooks/output/waypointDatas/${waypoint.id}/${radius}.json`,
-          verbose: false
-        })
       }
     })
   }

@@ -29,7 +29,5 @@ export class Rehearsal extends Procedural {
     // this.addTree({ position: Vec2(20, -20) })
     // this.addTree({ position: Vec2(-20, -20) })
     // this.addTree({ position: Vec2(-20, 20) })
-
-    this.saveLayout()
   }
 }

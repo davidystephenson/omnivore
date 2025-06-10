@@ -52,7 +52,5 @@ export class Lab extends Walled {
     this.addTree({ position: Vec2(20, -20) })
     this.addTree({ position: Vec2(-20, -20) })
     this.addTree({ position: Vec2(-20, 20) })
-
-    this.saveLayout()
   }
 }

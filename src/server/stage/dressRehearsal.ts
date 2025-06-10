@@ -50,7 +50,5 @@ export class DressRehearsal extends Procedural {
     // this.addTree({ position: Vec2(half, negative) })
     // this.addTree({ position: Vec2(negative, negative) })
     this.addTree({ position: Vec2(0, 0) })
-
-    this.saveLayout()
   }
 }

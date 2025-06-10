@@ -6,7 +6,8 @@ import { Feature } from './feature/feature'
 import { Structure } from './feature/structure'
 import { Organism } from './actor/organism'
 import { COLOR, CYAN, RED, WHITE } from '../shared/color'
-import { NumberMatrix } from './types'
+import { Index, NumberMatrix, WaypointDataIndex } from './types'
+import fs from 'fs'
 
 export class Navigation {
   static spacing = 2
@@ -354,11 +355,6 @@ export class Navigation {
       }
       let maxPathDistance = 0
       waypointArray.forEach(waypoint => {
-        const radii = Object.keys(waypoint.pathDistances).map(x => Number(x))
-        radii.forEach(key => {
-          const pathDistances = waypoint.pathDistances[radius]
-          if (pathDistances == null) throw new Error('Missing distances')
-        })
         const pathDistances = Object.values(waypoint.pathDistances[radius])
         maxPathDistance = Math.max(maxPathDistance, ...pathDistances)
       })
@@ -391,12 +387,62 @@ export class Navigation {
           nextWaypoints[otherWaypoint.id] = neighbors[whichMin(distances)]
         })
       })
+
+      console.info(`Saving ${waypointArray.length} waypoints for radius ${radius}...`)
+      let factor = 100
+      waypointArray.forEach((waypoint, index) => {
+        if (index % factor === 0) {
+          console.info(`Saving waypoint ${index} of ${waypointArray.length}...`)
+        }
+        if (index >= factor * 10) {
+          factor *= 10
+        }
+        const nextWaypoints = waypoint.getNextWaypointIds({ radius })
+        this.stage.manager.saveToFile({
+          data: nextWaypoints,
+          path: `promptbooks/output/waypointDatas/${waypoint.id}/${radius}.json`,
+          verbose: false
+        })
+      })
     })
   }
 
   setupWaypoints (): void {
     this.stage.debug({ v: 'Setting up waypoints...' })
+    const wallDefs = this.stage.walls.map(wall => wall.getDef())
+    this.stage.manager.saveMany({
+      data: wallDefs,
+      path: 'promptbooks/output/wallDefs'
+    })
     this.createWaypoints()
+    const waypointIdMatrix = this.getWaypointIdMatrix()
+    const index: Index = {
+      halfHeight: this.stage.halfHeight,
+      halfWidth: this.stage.halfWidth,
+      radii: this.radii,
+      waypointIdMatrix
+    }
+    this.stage.manager.saveToFile({ data: index, path: 'promptbooks/output/index.json' })
+    const waypointArray = Object.values(this.waypoints)
+    console.info(`Saving ${waypointArray.length} waypoint indexes...`)
+    let factor = 100
+    waypointArray.forEach((waypoint, index) => {
+      if (index % factor === 0) {
+        console.info(`Saving waypoint ${index} of ${waypointArray.length}...`)
+      }
+      if (index >= factor * 10) {
+        factor *= 10
+      }
+      const waypointIndex: WaypointDataIndex = {
+        position: { x: waypoint.position.x, y: waypoint.position.y },
+        id: waypoint.id
+      }
+      this.stage.manager.saveToFile({
+        data: waypointIndex,
+        path: `promptbooks/output/waypointDatas/${waypoint.id}/index.json`,
+        verbose: false
+      })
+    })
     this.stage.debug({ v: 'Setting up neighbors...' })
     this.setupNeighbors()
     this.stage.debug({ v: 'Calculating distances...' })
