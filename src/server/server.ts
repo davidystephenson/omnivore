@@ -47,14 +47,13 @@ export class Server {
       if (player.organism == null) {
         throw new Error('player.organism is undefined')
       }
-      player.organism.membrane.hungerDamage = 0.95
+      player.organism.membrane.hungerDamage = 0.9
       console.log('player.organism.membrane.hungerDamage', player.organism.membrane.hungerDamage)
       socket.on('controls', (controls: Controls) => {
         if (controls.select) {
           this.playhouse.runner.paused = true
         }
         if (controls.cancel) {
-          console.log('controls.cancel')
           this.playhouse.runner.paused = false
         }
         if (player.organism != null) {

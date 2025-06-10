@@ -3,7 +3,7 @@ import { Performance } from './performance'
 import { Promptbook } from '../types'
 
 export class TestPerformance extends Performance {
-  playerGene = this.flyGene
+  playerGene = this.tardigradeGene
 
   constructor (props: {
     promptbook: Promptbook
