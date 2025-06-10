@@ -125,19 +125,31 @@ export class Vision {
     return vertices
   }
 
-  getNearestSide (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): Vec2[] {
-    const targetCorners = targetPolygon.m_vertices.map(v => targetFeature.body.getWorldPoint(v))
-    const nearestCornerIndex = getNearestIndex(sourcePoint, targetCorners)
+  getNearestSide (props: {
+    debug?: boolean
+    sourcePoint: Vec2
+    targetFeature: Feature
+    targetPolygon: PolygonShape
+  }): Vec2[] {
+    const targetCorners = props.targetPolygon.m_vertices.map(v => props.targetFeature.body.getWorldPoint(v))
+    const nearestCornerIndex = getNearestIndex(props.sourcePoint, targetCorners)
     const nearestCorner = targetCorners[nearestCornerIndex]
     const cornerA = targetCorners[(nearestCornerIndex + 1) % targetCorners.length]
-    const cornerB = targetCorners[nearestCornerIndex > 0 ? nearestCornerIndex - 1 : 2]
+    const cornerB = targetCorners[nearestCornerIndex > 0 ? nearestCornerIndex - 1 : targetCorners.length - 1]
     const directionA = normalize(Vec2.sub(cornerA, nearestCorner))
     const directionB = normalize(Vec2.sub(cornerB, nearestCorner))
     const pointA = Vec2.add(nearestCorner, directionA)
     const pointB = Vec2.add(nearestCorner, directionB)
-    const distanceA = Vec2.distance(pointA, sourcePoint)
-    const distanceB = Vec2.distance(pointB, sourcePoint)
+    const distanceA = Vec2.distance(pointA, props.sourcePoint)
+    const distanceB = Vec2.distance(pointB, props.sourcePoint)
     const otherCorner = distanceA < distanceB ? cornerA : cornerB
+    if (props.debug === true) {
+      this.stage.debugLine({
+        a: nearestCorner,
+        b: otherCorner,
+        color: YELLOW
+      })
+    }
     return [nearestCorner, otherCorner]
   }
 
@@ -150,13 +162,18 @@ export class Vision {
     return intersection
   }
 
-  getNearestPoint (sourcePoint: Vec2, targetFeature: Feature, targetPolygon: PolygonShape): Vec2 {
-    const nearestSide = this.getNearestSide(sourcePoint, targetFeature, targetPolygon)
+  getNearestPoint (props: {
+    debug?: boolean
+    sourcePoint: Vec2
+    targetFeature: Feature
+    targetPolygon: PolygonShape
+  }): Vec2 {
+    const nearestSide = this.getNearestSide(props)
     const nearestCorner = nearestSide[0]
     const otherCorner = nearestSide[1]
     const sideDirection = Vec2.sub(nearestSide[1], nearestSide[0])
     const perpDirection = rotate(sideDirection, Math.PI / 2)
-    const numerator = Vec2.crossVec2Vec2(Vec2.sub(sourcePoint, nearestCorner), perpDirection)
+    const numerator = Vec2.crossVec2Vec2(Vec2.sub(props.sourcePoint, nearestCorner), perpDirection)
     const denominator = Vec2.crossVec2Vec2(sideDirection, perpDirection)
     const sideLength = Vec2.distance(nearestCorner, otherCorner)
     const nearestWeight = Math.max(0, Math.min(sideLength, numerator / denominator))
@@ -329,7 +346,7 @@ export class Vision {
     targetPolygon: PolygonShape
   ): boolean {
     const debug = false
-    const nearestPoint = this.getNearestPoint(sourcePoint, targetFeature, targetPolygon)
+    const nearestPoint = this.getNearestPoint({ sourcePoint, targetFeature, targetPolygon })
     if (debug) {
       this.stage.debugLine({ a: sourcePoint, b: nearestPoint, color: YELLOW })
     }

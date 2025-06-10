@@ -838,7 +838,9 @@ export class Organism extends Actor {
       const sourcePoint = feature.body.getPosition()
       const shape = feature.fixture.getShape()
       if (shape instanceof PolygonShape) {
-        const nearestPoint = this.stage.vision.getNearestPoint(sourcePoint, feature, shape)
+        const nearestPoint = this.stage.vision.getNearestPoint({
+          sourcePoint, targetFeature: feature, targetPolygon: shape
+        })
         const distance = Vec2.distance(nearestPoint, myPosition)
         return {
           distance,
