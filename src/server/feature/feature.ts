@@ -41,13 +41,13 @@ export class Feature {
   spawnPosition = Vec2(0, 0)
 
   constructor (props: {
+    actor: Actor
     bodyDef: BodyDef
+    borderWidth?: number
+    color: Rgb
     fixtureDef: FixtureDef
     health?: number
     label?: string
-    actor: Actor
-    color: Rgb
-    borderWidth?: number
   }) {
     this.label = props.label ?? this.label
     this.actor = props.actor
@@ -117,7 +117,7 @@ export class Feature {
     const targetMass = props.target.body.getMass()
     this.actor.stage.flag({ f: 'damage', k: 'targetMass', v: targetMass })
     const ratio = multipliedMass / targetMass
-    const factor = 5
+    const factor = 4
     const combatDamage = 0.1 * Math.pow(ratio, factor)
     if (combatDamage < Feature.MINIMUM_DAMAGE) {
       return Feature.MINIMUM_DAMAGE

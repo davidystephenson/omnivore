@@ -24,14 +24,14 @@ export class DressRehearsal extends Procedural {
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
 
-    this.addBalanced({ position: Vec2(5, 5) })
-    this.addBully({ position: Vec2(-5, 5) })
-    this.addHunter({ position: Vec2(5, -5) })
-    this.addScavenger({ position: Vec2(5, -5) })
-    this.addTrisolaran({ position: Vec2(-5, -5) })
-    this.addBrute({ position: Vec2(0, 5) })
+    this.addApe({ position: Vec2(5, 5) })
+    this.addApeBully({ position: Vec2(-5, 5) })
+    this.addTiger({ position: Vec2(5, -5) })
+    this.addCrow({ position: Vec2(5, -5) })
+    this.addTardigrade({ position: Vec2(-5, -5) })
+    this.addWhale({ position: Vec2(0, 5) })
     this.addFly({ position: Vec2(5, 0) })
-    this.addTrapper({ position: Vec2(0, -5) })
+    this.addBoa({ position: Vec2(0, -5) })
 
     const minimum = Math.min(this.halfWidth, this.halfHeight)
     const half = minimum / 2

@@ -5,8 +5,7 @@ import { clamp, directionFromTo, range, rotate, whichMin } from './math'
 import { Feature } from './feature/feature'
 import { Structure } from './feature/structure'
 import { Organism } from './actor/organism'
-import { COLOR, CYAN, LIME, RED, WHITE } from '../shared/color'
-import { NavArea } from './navArea'
+import { COLOR, CYAN, RED, WHITE } from '../shared/color'
 import { NumberMatrix } from './types'
 
 export class Navigation {
@@ -21,7 +20,6 @@ export class Navigation {
   wallOffset = 0.4
   wallWaypoints: Waypoint[] = []
   cornerWaypoints: Waypoint[] = []
-  navAreas: NavArea[] = []
   blockedPairs: Waypoint[][] = []
   xCount: number
   yCount: number
@@ -54,8 +52,6 @@ export class Navigation {
         const waypoint = new Waypoint({
           position: new Vec2(x, y),
           navigation: this,
-          radius: 1.2,
-          category: 'grid',
           id
         })
         const aabb = new AABB(waypoint.position, waypoint.position)
@@ -92,57 +88,6 @@ export class Navigation {
     waypoints.forEach(waypoint => {
       console.debug(waypoint.id, 'distances.length', waypoint.distances.length)
     })
-  }
-
-  getBigWaypoints (): Waypoint[] {
-    const maximumRadius = Math.max(...this.radii)
-    const waypointArray = Object.values(this.waypoints)
-    return waypointArray.filter(waypoint => waypoint.radius === maximumRadius)
-  }
-
-  getNavAreas (): NavArea[] {
-    const areaBoxes: AABB[] = []
-    const wallTops = this.stage.walls.map(wall => wall.top + 0.001)
-    const wallBottoms = this.stage.walls.map(wall => wall.bottom - 0.001)
-    const wallRights = this.stage.walls.map(wall => wall.right + 0.001)
-    const wallLefts = this.stage.walls.map(wall => wall.left - 0.001)
-    wallTops.sort((a, b) => a - b)
-    wallBottoms.sort((a, b) => a - b)
-    wallRights.sort((a, b) => a - b)
-    wallLefts.sort((a, b) => a - b)
-    wallTops.forEach(areaBottom => {
-      wallBottoms.forEach(areaTop => {
-        wallLefts.forEach(areaRight => {
-          wallRights.forEach(areaLeft => {
-            if (areaRight - areaLeft < this.margin) return
-            if (areaTop - areaBottom < this.margin) return
-            const aabb = new AABB(Vec2(areaLeft, areaBottom), Vec2(areaRight, areaTop))
-            for (const wall of this.stage.walls) {
-              const overlap = AABB.testOverlap(wall.aabb, aabb)
-              if (overlap) return
-            }
-            areaBoxes.push(aabb)
-          })
-        })
-      })
-    })
-    const navAreas: NavArea[] = []
-    areaBoxes.forEach(areaBox => {
-      for (const otherAreaBox of areaBoxes) {
-        const otherContainsSelf = otherAreaBox.contains(areaBox)
-        const selfContainsOther = areaBox.contains(otherAreaBox)
-        if (otherContainsSelf && !selfContainsOther) return
-      }
-      navAreas.push(new NavArea({ stage: this.stage, aabb: areaBox }))
-    })
-    return navAreas
-  }
-
-  getNeighbors (position: Vec2, radius: number): Waypoint[] {
-    const navAreas = this.navAreas.filter(navArea => {
-      return navArea.testPoint(position)
-    })
-    return navAreas.flatMap(navArea => navArea.waypoints)
   }
 
   getNeighborsRaycast (position: Vec2, radius: number): Waypoint[] {
@@ -317,24 +262,13 @@ export class Navigation {
       return actor.player
     })
     if (!playing) return
-    const debugRadius = 1.2
-    if (this.stage.flags.navAreas) {
-      this.navAreas.forEach(navArea => {
-        this.stage.debugAABB({
-          box: navArea.aabb,
-          color: LIME
-        })
-      })
-    }
     if (this.stage.flags.waypoints) {
       const waypointArray = Object.values(this.waypoints)
       waypointArray.forEach(waypoint => {
-        if (waypoint.radius === debugRadius) {
-          this.stage.debugCircle({
-            circle: new Circle(waypoint.position, 0.2),
-            color: WHITE
-          })
-        }
+        this.stage.debugCircle({
+          circle: new Circle(waypoint.position, 0.2),
+          color: WHITE
+        })
       })
     }
   }
@@ -362,9 +296,11 @@ export class Navigation {
       // Compute the minimal path distance from each waypoint to each other waypoint
       let pathDivisor = 1
       let pathNextDivisor = 100
-      const maxPathSize = 10
+      const maxPathSize = 20
+      let emptySteps = 0
       const pathLengths = range(1, maxPathSize)
-      pathLengths.forEach(pathLength => {
+      for (const pathLength of pathLengths) {
+        let improvements = 0
         const remainder = pathLength % pathDivisor
         const divisible = remainder === 0
         const pathLabel = `${pathLength}/${maxPathSize} r${radiusLabel}`
@@ -402,11 +338,20 @@ export class Navigation {
                 throw new Error(`Missing neighbor distance at ${otherWaypoint.id}}`)
               }
               const distanceThroughNeighbor = waypoint.distances[neighbor.id] + neighborDistance
+              if (distanceThroughNeighbor < pathDistances[otherWaypoint.id]) improvements += 1
               pathDistances[otherWaypoint.id] = Math.min(pathDistances[otherWaypoint.id], distanceThroughNeighbor)
             })
           })
         })
-      })
+        let maxPathDistance = 0
+        waypointArray.forEach(waypoint => {
+          const pathDistances = Object.values(waypoint.pathDistances[radius])
+          maxPathDistance = Math.max(maxPathDistance, ...pathDistances)
+        })
+        if (improvements === 0) emptySteps += 1
+        else emptySteps = 0
+        if (isFinite(maxPathDistance) && emptySteps > 1) break
+      }
       let maxPathDistance = 0
       waypointArray.forEach(waypoint => {
         const radii = Object.keys(waypoint.pathDistances).map(x => Number(x))
@@ -452,9 +397,6 @@ export class Navigation {
   setupWaypoints (): void {
     this.stage.debug({ v: 'Setting up waypoints...' })
     this.createWaypoints()
-    this.stage.debug({ v: 'Setting up navAreas...' })
-    this.navAreas = this.getNavAreas()
-    this.stage.debug({ v: `Set up ${this.navAreas.length} navAreas.` })
     this.stage.debug({ v: 'Setting up neighbors...' })
     this.setupNeighbors()
     this.stage.debug({ v: 'Calculating distances...' })

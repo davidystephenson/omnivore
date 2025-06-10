@@ -1,4 +1,4 @@
-import { Circle, CircleShape, Fixture, PolygonShape, Vec2 } from 'planck'
+import { CircleShape, Fixture, PolygonShape, Vec2 } from 'planck'
 import { Stage } from '../stage/stage'
 import { Actor } from './actor'
 import { LIME, RED, WHITE } from '../../shared/color'
@@ -157,20 +157,29 @@ export class Tree extends Actor {
   }): void {
     super.onStep({ stepSize: props.stepSize })
     const features = this.sculpture.getFeaturesInRange()
+    const treePosition = this.sculpture.body.getPosition()
     const otherFeatures = features.filter(feature => feature !== this.sculpture)
-    // const outerFeatures = otherFeatures.filter(feature => {
-    //   return feature instanceof Structure && feature.wall.outer
-    // })
-    // if (outerFeatures.length > 0) {
-    //   this.stage.debugCircle({ circle: new CircleShape(this.sculpture.body.getPosition(), 0.1), color: WHITE })
-    //   outerFeatures.forEach(feature => {
-    //     const nearestOtherPoint = getNearestOtherPoint(this.stage, this.sculpture, [feature])
-    //     this.stage.debugLine({ a: this.sculpture.body.getPosition(), b: nearestOtherPoint, color: WHITE, width: 0.15 })
-    //     this.stage.debugCircle({ circle: new CircleShape(nearestOtherPoint, 0.5), color: WHITE })
-    //   })
-    // }
-    const nearestOtherPoint = getNearestOtherPoint(this.stage, this.sculpture, otherFeatures)
-    // this.stage.debugLine({ a: this.sculpture.body.getPosition(), b: nearestOtherPoint, color: RED })
+    if (this.stage.flags.tree) {
+      const outerFeatures = otherFeatures.filter(feature => {
+        return feature instanceof Structure && feature.wall.outer
+      })
+      if (outerFeatures.length > 0) {
+        this.stage.debugCircle({ circle: new CircleShape(treePosition, 0.25), color: WHITE })
+        outerFeatures.forEach(feature => {
+          const nearestOtherPoint = getNearestOtherPoint({
+            debug: true, stage: this.stage, sourceFeature: this.sculpture, otherFeatures: [feature]
+          })
+          this.stage.debugLine({ a: treePosition, b: nearestOtherPoint, color: WHITE, width: 0.15 })
+          this.stage.debugCircle({ circle: new CircleShape(nearestOtherPoint, 0.5), color: WHITE })
+        })
+      }
+    }
+    const nearestOtherPoint = getNearestOtherPoint({
+      stage: this.stage, sourceFeature: this.sculpture, otherFeatures
+    })
+    if (this.stage.flags.tree) {
+      this.stage.debugLine({ a: treePosition, b: nearestOtherPoint, color: RED })
+    }
     const position = this.sculpture.body.getPosition()
     const direction = directionFromTo(nearestOtherPoint, position)
     const force = Vec2.mul(5, direction)

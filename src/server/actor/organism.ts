@@ -32,7 +32,7 @@ export class Organism extends Actor {
   static BLOCKED_DISTANCE = 4
   static TRAPPED_DISTANCE = 0.5 * Organism.BLOCKED_DISTANCE
   static GENETIC_FORCE_SCALE = 1.5
-  static MINIMUM_FORCE = 1
+  static MINIMUM_FORCE = 0.7
   controlColor = LIME
   chasePoint: Vec2 | undefined
   chaseRadius = 0.2
@@ -67,6 +67,7 @@ export class Organism extends Actor {
   spawnPosition: Vec2
 
   constructor (props: {
+    health?: number
     position: Vec2
     stage: Stage
   } & OrganismSpawn) {
@@ -76,7 +77,7 @@ export class Organism extends Actor {
     this.gene = props.gene
     this.player = props.player
     this.spawnPosition = props.position
-    this.membrane = this.grow({ gene: this.gene })
+    this.membrane = this.grow({ gene: this.gene, health: props.health })
     if (this.player != null) {
       this.player.organism = this
     }
@@ -128,9 +129,15 @@ export class Organism extends Actor {
   addMembrane (props: {
     position: Vec2
     cell?: Membrane
+    health?: number
     radius?: number
   }): Membrane {
-    const membrane = new Membrane({ position: props.position, actor: this, radius: props.radius })
+    const membrane = new Membrane({
+      radius: props.radius,
+      health: props.health,
+      position: props.position,
+      actor: this
+    })
     if (props.cell != null) {
       const cellPosition = props.cell.body.getPosition()
       const maxLength = Vec2.distance(props.position, cellPosition)
@@ -505,6 +512,7 @@ export class Organism extends Actor {
 
   grow (props: {
     gene: Gene
+    health?: number
     parent?: Membrane
   }): Membrane {
     const position = props.parent == null
@@ -514,6 +522,7 @@ export class Organism extends Actor {
     const membrane = this.addMembrane({
       position,
       cell: props.parent,
+      health: props.health,
       radius
     })
     for (const childBranch of props.gene.branches) {
@@ -829,7 +838,9 @@ export class Organism extends Actor {
       const sourcePoint = feature.body.getPosition()
       const shape = feature.fixture.getShape()
       if (shape instanceof PolygonShape) {
-        const nearestPoint = this.stage.vision.getNearestPoint(sourcePoint, feature, shape)
+        const nearestPoint = this.stage.vision.getNearestPoint({
+          sourcePoint, targetFeature: feature, targetPolygon: shape
+        })
         const distance = Vec2.distance(nearestPoint, myPosition)
         return {
           distance,

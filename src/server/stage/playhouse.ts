@@ -6,9 +6,9 @@ import { Stage } from './stage'
 
 export class Playhouse extends Stage {
   apeGene = new Gene({
-    speed: 0.34,
+    speed: 0.33,
     stage: this,
-    stamina: 0.33,
+    stamina: 0.34,
     strength: 0.33
   })
 
@@ -26,21 +26,21 @@ export class Playhouse extends Stage {
     stage: this
   })
 
-  bullyGene = new Gene({
+  apeBullyGene = new Gene({
     speed: 0.33,
     stage: this,
     stamina: 0.33,
     strength: 0.34
   })
 
-  hunterGene = new Gene({
+  tigerGene = new Gene({
     speed: 0.5,
     stage: this,
     stamina: 0,
     strength: 0.5
   })
 
-  scavengerGene = new Gene({
+  crowGene = new Gene({
     speed: 0.5,
     stage: this,
     stamina: 0.5,
@@ -63,7 +63,7 @@ export class Playhouse extends Stage {
 
   playerGene = this.apeGene
 
-  trapperGene = new Gene({
+  boaGene = new Gene({
     speed: 0,
     stage: this,
     stamina: 0.5,
@@ -77,7 +77,7 @@ export class Playhouse extends Stage {
     strength: 0
   })
 
-  addBalanced (props: {
+  addApe (props: {
     position: Vec2
   }): Organism {
     return this.addOrganism({
@@ -87,7 +87,7 @@ export class Playhouse extends Stage {
     })
   }
 
-  addBrute (props: {
+  addWhale (props: {
     position: Vec2
   }): Organism {
     return this.addOrganism({
@@ -97,7 +97,7 @@ export class Playhouse extends Stage {
     })
   }
 
-  addBruteVictim (props: {
+  addWhaleVictim (props: {
     position: Vec2
   }): Organism {
     return this.addOrganism({
@@ -107,25 +107,25 @@ export class Playhouse extends Stage {
     })
   }
 
-  addBully (props: {
+  addApeBully (props: {
     position: Vec2
   }): Organism {
     return this.addOrganism({
       color: GRAY,
-      gene: this.bullyGene,
+      gene: this.apeBullyGene,
       position: props.position
     })
   }
 
   addFamilies (): void {
-    this.addBalanced({ position: Vec2(45, 45) })
-    this.addBully({ position: Vec2(-35, 35) })
-    this.addHunter({ position: Vec2(-25, -25) })
-    this.addScavenger({ position: Vec2(-15, 15) })
+    this.addApe({ position: Vec2(45, 45) })
+    this.addApeBully({ position: Vec2(-35, 35) })
+    this.addTiger({ position: Vec2(-25, -25) })
+    this.addCrow({ position: Vec2(-15, 15) })
     this.addFly({ position: Vec2(0, -5) })
-    this.addTrisolaran({ position: Vec2(15, -15) })
-    this.addBrute({ position: Vec2(25, 10) })
-    this.addTrapper({ position: Vec2(35, 10) })
+    this.addTardigrade({ position: Vec2(15, -15) })
+    this.addWhale({ position: Vec2(25, 10) })
+    this.addBoa({ position: Vec2(35, 10) })
   }
 
   addFly (props: {
@@ -138,27 +138,27 @@ export class Playhouse extends Stage {
     })
   }
 
-  addHunter (props: {
+  addTiger (props: {
     position: Vec2
   }): Organism {
     return this.addOrganism({
       color: RED,
-      gene: this.hunterGene,
+      gene: this.tigerGene,
       position: props.position
     })
   }
 
-  addScavenger (props: {
+  addCrow (props: {
     position: Vec2
   }): Organism {
     return this.addOrganism({
       color: BROWN,
-      gene: this.scavengerGene,
+      gene: this.crowGene,
       position: props.position
     })
   }
 
-  addTrisolaran (props: {
+  addTardigrade (props: {
     position: Vec2
   }): Organism {
     return this.addOrganism({
@@ -168,12 +168,12 @@ export class Playhouse extends Stage {
     })
   }
 
-  addTrapper (props: {
+  addBoa (props: {
     position: Vec2
   }): Organism {
     return this.addOrganism({
       color: PINK,
-      gene: this.trapperGene,
+      gene: this.boaGene,
       position: props.position
     })
   }

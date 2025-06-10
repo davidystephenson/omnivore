@@ -6,25 +6,25 @@ export class Maze extends Walled {
   constructor () {
     super({
       flags: new Flags({
-        botChase: true,
-        botFlee: true,
-        botPath: true,
-        charge: true,
-        damage: true,
-        death: true,
+        // botChase: true,
+        // botFlee: true,
+        // botPath: true,
+        // charge: true,
+        // damage: true,
+        // death: true,
         hungerGame: false,
         // meatY: false,
-        performance: false,
-        playerNavigation: false,
-        reproduceGame: false,
+        // performance: false,
+        // playerNavigation: false,
+        // reproduceGame: false,
         // respawn: true,
-        timings: false,
-        visionRangeGame: false,
-        visionGame: false,
-        navigation: true,
+        // timings: false,
+        // visionRangeGame: false,
+        // visionGame: false,
+        navigation: true
         // waypointSpawnpointsY: false
-        controlLines: true,
-        waypoints: true
+        // controlLines: true,
+        // waypoints: true
       }),
       halfHeight: 20,
       halfWidth: 20
@@ -47,7 +47,7 @@ export class Maze extends Walled {
 
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
-    this.addTrisolaran({ position: Vec2(17, 17) })
+    this.addTardigrade({ position: Vec2(17, 17) })
 
     // this.addBrick({ position: Vec2(15, -5), halfHeight: 5, halfWidth: 5 })
     // this.addPuppet({

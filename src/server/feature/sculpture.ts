@@ -3,8 +3,7 @@ import { Rgb } from '../../shared/color'
 import { Actor } from '../actor/actor'
 import { Prop } from './prop'
 import { Feature } from './feature'
-import { Crate } from './crate'
-import { Debris } from '../actor/debris'
+import { Rock } from '../actor/rock'
 
 export class Sculpture extends Prop {
   constructor (props: {
@@ -29,7 +28,7 @@ export class Sculpture extends Prop {
   handleContact (props: {
     target: Feature
   }): void {
-    if (props.target.actor instanceof Debris) {
+    if (props.target.actor instanceof Rock) {
       this.dealDamage({ target: props.target })
     }
   }

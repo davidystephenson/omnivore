@@ -9,13 +9,13 @@ export class PrivatePerformance extends Performance {
     promptbook: Promptbook
   }) {
     const flags = new Flags({
-      performance: true,
+      // performance: true,
       // playerControl: true
       // playerDeath: true,
-      spawnpoints: true,
-      // respawn: true,
+      // spawnpoints: true,
+      respawn: true
       // summary: true
-      timings: true
+      // timings: true
     })
     super({
       flags,

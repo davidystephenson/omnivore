@@ -256,19 +256,28 @@ export class Stage {
   }
 
   debugAABB (props: {
-    box: AABB
+    aabb: AABB
     color: Rgb
+    width?: number
   }): void {
-    const upper = props.box.upperBound.clone()
-    const lower = props.box.lowerBound.clone()
+    const upper = props.aabb.upperBound.clone()
+    const lower = props.aabb.lowerBound.clone()
     const point1 = upper
     const point2 = Vec2(lower.x, upper.y)
     const point3 = lower
     const point4 = Vec2(upper.x, lower.y)
-    this.debugLine({ a: point1, b: point2, color: props.color })
-    this.debugLine({ a: point2, b: point3, color: props.color })
-    this.debugLine({ a: point3, b: point4, color: props.color })
-    this.debugLine({ a: point4, b: point1, color: props.color })
+    this.debugLine({
+      a: point1, b: point2, color: props.color, width: props.width
+    })
+    this.debugLine({
+      a: point2, b: point3, color: props.color, width: props.width
+    })
+    this.debugLine({
+      a: point3, b: point4, color: props.color, width: props.width
+    })
+    this.debugLine({
+      a: point4, b: point1, color: props.color, width: props.width
+    })
   }
 
   debugCircle (props: {
@@ -397,7 +406,7 @@ export class Stage {
     this.starvationQueue = []
     this.destructionQueue = []
     this.virtualBoxes.forEach(box => {
-      this.debugAABB({ box, color: RED })
+      this.debugAABB({ aabb: box, color: RED })
     })
     this.families = new Map()
     this.actors.forEach(actor => {
