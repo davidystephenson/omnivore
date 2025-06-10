@@ -53,9 +53,13 @@ export class Spawner {
 
   onStep (): void {
     this.stage.runner.features.forEach(feature => {
-      if (feature instanceof Prop && feature.actor instanceof Debris && feature.blockCount > 0) {
+      if (
+        feature instanceof Prop &&
+        feature.actor instanceof Debris &&
+        feature.blockCount > 0
+      ) {
         feature.takeDamage({
-          damage: 0.0001,
+          damage: 0.001,
           debug: this.stage.flags.curtains
         })
         if (this.stage.flags.curtains) {
@@ -81,7 +85,10 @@ export class Spawner {
       families.add(actor.color)
     })
     const habitable = this.stage.killingQueue.length === 0 && this.stage.starvationQueue.length === 0
-    const respawnable = habitable && this.queue.length > 0
+    const familiesNeeded = families.size < 5
+    const organismsNeeded = organisms.length < 10
+    const needed = familiesNeeded || organismsNeeded
+    const respawnable = habitable && this.queue.length > 0 && needed
     if (respawnable) {
       this.stage.flag({ f: 'spawn', vs: ['respawnQueue.length', this.queue.length] })
       this.stage.flag({ f: 'spawn', vs: ['spawnPoints.length', this.spawnpoints.length] })
