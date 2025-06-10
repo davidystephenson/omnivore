@@ -2,7 +2,6 @@ import { Vec2, Body } from 'planck'
 import { Flags } from '../flags'
 import { Playhouse } from './playhouse'
 import { Waypoint } from '../waypoint'
-import { NavArea } from '../navArea'
 import { Feature } from '../feature/feature'
 import { Element } from '../../shared/element'
 import { Promptbook } from '../types'
@@ -24,8 +23,6 @@ export class Performance extends Playhouse {
       const waypoint = new Waypoint({
         navigation: this.navigation,
         position: waypointData.position,
-        radius: waypointData.radius,
-        category: waypointData.category,
         id: waypointData.id
       })
       this.navigation.waypoints[waypoint.id] = waypoint
@@ -63,9 +60,6 @@ export class Performance extends Playhouse {
         this.navigation.waypointMatrix[i][j] = waypoint
       }
     }
-    this.navigation.navAreas = props.promptbook.navAreaDefs.map(navAreaDef => {
-      return new NavArea({ stage: this, ...navAreaDef })
-    })
     this.spawner.setupSpawnPoints()
     this.debug({ v: 'Starting the runner...' })
     setInterval(() => { this.runner.step() }, 1000 * this.runner.timeStep)

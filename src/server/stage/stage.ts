@@ -430,11 +430,6 @@ export class Stage {
       waypointIdMatrix
     }
     this.manager.saveToFile({ data: index, path: 'promptbooks/output/index.json' })
-    const navAreaDefs = this.navigation.navAreas.map(navArea => navArea.getDef())
-    this.manager.saveMany({
-      data: navAreaDefs,
-      path: 'promptbooks/output/navAreaDefs'
-    })
     const wallDefs = this.walls.map(wall => wall.getDef())
     this.manager.saveMany({
       data: wallDefs,
@@ -452,9 +447,7 @@ export class Stage {
       }
       const waypointIndex: WaypointDataIndex = {
         position: { x: waypoint.position.x, y: waypoint.position.y },
-        id: waypoint.id,
-        radius: waypoint.radius,
-        category: waypoint.category
+        id: waypoint.id
       }
       this.manager.saveToFile({
         data: waypointIndex,

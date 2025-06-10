@@ -1,4 +1,4 @@
-import { indexSchema, navAreaDefSchema, NestedNumberRecord, numberRecordSchema, Promptbook, wallDefSchema, WaypointData, waypointDataIndexSchema } from './types'
+import { indexSchema, NestedNumberRecord, numberRecordSchema, Promptbook, wallDefSchema, WaypointData, waypointDataIndexSchema } from './types'
 import { PublicPerformance } from './stage/publicPerformance'
 import { PrivatePerformance } from './stage/privatePerformance'
 import { TestPerformance } from './stage/testPerformance'
@@ -29,11 +29,6 @@ export default function perform (props: {
   const indexPath = `promptbooks/${promptbookName}/index.json`
   const index = read({ path: indexPath, schema: indexSchema, safe: props.onBook })
   console.info('Half size:', index.halfWidth, 'x', index.halfHeight)
-  const navAreaDefs = readMany({
-    path: `promptbooks/${promptbookName}/navAreaDefs`,
-    schema: navAreaDefSchema,
-    safe: props.onBook
-  })
   const wallDefs = readMany({
     path: `promptbooks/${promptbookName}/wallDefs`,
     schema: wallDefSchema,
@@ -75,7 +70,6 @@ export default function perform (props: {
   })
   const promptbook: Promptbook = {
     ...index,
-    navAreaDefs,
     wallDefs,
     waypointDatas
   }

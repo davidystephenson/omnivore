@@ -33,18 +33,9 @@ export const numberRecordSchema = z.record(numberishSchema, numberullishSchema)
   .or(numberullishSchema.array())
 export const nestedNumberRecordSchema = z.record(numberishSchema, numberRecordSchema)
 export type NestedNumberRecord = z.infer<typeof nestedNumberRecordSchema>
-export const navAreaDefSchema = z.object({
-  aabb: z.object({
-    upperBound: vec2Schema,
-    lowerBound: vec2Schema
-  })
-})
-export type NavAreaDef = z.infer<typeof navAreaDefSchema>
 export const waypointDataIndexSchema = z.object({
   position: vec2Schema,
-  id: z.number(),
-  radius: z.number(),
-  category: z.string()
+  id: z.number()
 })
 export type WaypointDataIndex = z.infer<typeof waypointDataIndexSchema>
 export const waypointDataExtendSchema = z.object({
@@ -69,7 +60,6 @@ export const tableOfContentsExtendSchema = z.object({
 export const tableOfContentsSchema = indexSchema.and(tableOfContentsExtendSchema)
 export type TableOfContents = z.infer<typeof tableOfContentsSchema>
 export const promptbookExtendSchema = z.object({
-  navAreaDefs: navAreaDefSchema.array(),
   wallDefs: wallDefSchema.array(),
   waypointDatas: waypointDataSchema.array()
 })

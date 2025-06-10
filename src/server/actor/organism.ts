@@ -88,13 +88,9 @@ export class Organism extends Actor {
     this.navigationRadius = validRadius
     const waypointArray = Object.values(this.stage.navigation.waypoints)
     waypointArray.forEach(waypoint => {
-      const isGrid = waypoint.category === 'grid'
-      const isSmallRadius = waypoint.radius === validRadius
-      if (isGrid || isSmallRadius) {
-        const position = waypoint.position
-        const explorationPoint = new ExplorationPoint({ position, id: waypoint.id })
-        this.explorationPoints[waypoint.id] = explorationPoint
-      }
+      const position = waypoint.position
+      const explorationPoint = new ExplorationPoint({ position, id: waypoint.id })
+      this.explorationPoints[waypoint.id] = explorationPoint
     })
     this.explorationIds = this.explorationPoints.map(p => p.id)
     this.sortExplorationPoints()
