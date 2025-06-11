@@ -105,7 +105,7 @@ export class Membrane extends Feature {
       this.damageLog({ k: 'baseDamage', v: baseDamage })
       const strengthDamage = baseDamage * Math.pow(reversed, 100)
       this.damageLog({ k: 'strengthDamage', v: strengthDamage })
-      const sizeFactor = Math.pow(reversed, 1000)
+      const sizeFactor = Math.pow(reversed, 500)
       this.damageLog({ k: 'sizeFactor', v: sizeFactor })
       const sizeDamage = 0.1 * sizeFactor
       this.damageLog({ k: 'sizeDamage', v: sizeDamage })
