@@ -117,7 +117,7 @@ export class Feature {
     const targetMass = props.target.body.getMass()
     this.actor.stage.flag({ f: 'damage', k: 'targetMass', v: targetMass })
     const ratio = multipliedMass / targetMass
-    const factor = 4
+    const factor = 3
     const combatDamage = 0.1 * Math.pow(ratio, factor)
     if (combatDamage < Feature.MINIMUM_DAMAGE) {
       return Feature.MINIMUM_DAMAGE

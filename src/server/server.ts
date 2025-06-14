@@ -9,7 +9,6 @@ import path from 'path'
 import * as SocketIo from 'socket.io'
 import { Config } from './config'
 import { Playhouse } from './stage/playhouse'
-import { Mission } from './stage/mission'
 import { Maze } from './stage/maze'
 
 export class Server {

@@ -17,7 +17,7 @@ export class SmallPerformance extends Performance {
       // playerControl: true
       // playerDeath: true,
       // spawnpoints: true
-      // respawn: true
+      respawn: true
       // summary: true
       // timings: true
       // tree: true
@@ -27,7 +27,8 @@ export class SmallPerformance extends Performance {
       promptbook: props.promptbook
     })
     this.addFamilies()
-    this.addCornerTrees()
+    this.addCenterTree()
+    this.addCenterTree()
     this.addCenterTree()
   }
 }

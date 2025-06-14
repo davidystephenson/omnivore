@@ -31,8 +31,8 @@ export interface Obituary extends OrganismSpawn {
 export class Organism extends Actor {
   static BLOCKED_DISTANCE = 4
   static TRAPPED_DISTANCE = 0.5 * Organism.BLOCKED_DISTANCE
-  static GENETIC_FORCE_SCALE = 2
-  static MINIMUM_FORCE = 0.75
+  static GENETIC_FORCE_SCALE = 1.9
+  static MINIMUM_FORCE = 1.1
   controlColor = LIME
   chasePoint: Vec2 | undefined
   chaseRadius = 0.2
@@ -99,6 +99,7 @@ export class Organism extends Actor {
     this.explorationIds = this.explorationPoints.map(p => p.id)
     this.sortExplorationPoints()
     this.giveUpTime = 30 / this.gene.speed
+    this.stage.organisms.push(this)
   }
 
   addCircles (props: {
@@ -167,6 +168,7 @@ export class Organism extends Actor {
     if (this.player != null) {
       this.player.organism = undefined
     }
+    this.stage.organisms = this.stage.organisms.filter(organism => organism.id !== this.id)
   }
 
   charge (enemy: Feature): Rgb {

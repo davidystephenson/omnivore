@@ -12,6 +12,7 @@ import { Curtain } from './curtain'
 export class Spawner {
   body: Body
   curtains: Curtain[] = []
+  message?: string
   queue: Obituary[] = []
   stage: Stage
   spawnpoints: Spawnpoint[] = []
@@ -59,7 +60,7 @@ export class Spawner {
         feature.blockCount > 0
       ) {
         feature.takeDamage({
-          damage: 0.001,
+          damage: 0.0002,
           debug: this.stage.flags.curtains
         })
         if (this.stage.flags.curtains) {
@@ -75,21 +76,11 @@ export class Spawner {
         curtain.debug({ color: WHITE })
       })
     }
-    const organisms: Organism[] = []
-    const families = new Set<Rgb>()
-    this.stage.actors.forEach(actor => {
-      if (!(actor instanceof Organism)) {
-        return
-      }
-      organisms.push(actor)
-      families.add(actor.color)
-    })
     const habitable = this.stage.killingQueue.length === 0 && this.stage.starvationQueue.length === 0
-    const familiesNeeded = families.size < 5
-    const organismsNeeded = organisms.length < 10
-    const needed = familiesNeeded || organismsNeeded
-    const respawnable = habitable && this.queue.length > 0 && needed
-    if (respawnable) {
+    if (this.stage.flags.respawn) {
+      this.stage.flag({ f: 'spawn', vs: ['respawnQueue.length', this.queue.length] })
+    }
+    if (habitable && this.queue.length > 0) {
       this.stage.flag({ f: 'spawn', vs: ['respawnQueue.length', this.queue.length] })
       this.stage.flag({ f: 'spawn', vs: ['spawnPoints.length', this.spawnpoints.length] })
       const clearSpawnPoints = this.stage.spawner.spawnpoints.filter(spawnPoint => spawnPoint.collideCount < 1)

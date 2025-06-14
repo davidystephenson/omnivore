@@ -11,8 +11,9 @@ export class PublicPerformance extends Performance {
     const flags = new Flags({
       // performance: true,
       // playerDeath: true
-      respawn: true
+      respawn: true,
       // spawn: true,
+      stats: true
       // timings: true
     })
     super({
@@ -20,13 +21,6 @@ export class PublicPerformance extends Performance {
       promptbook: props.promptbook
     })
     this.addFamilies()
-    this.addCenterTree()
-    this.addCenterTree()
-    this.addCenterTree()
-    this.addCenterTree()
-    this.addCenterTree()
-    this.addCenterTree()
-    this.addCenterTree()
-    this.addCenterTree()
+    this.addStarTrees()
   }
 }
