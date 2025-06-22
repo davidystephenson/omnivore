@@ -14,11 +14,11 @@ import { LIME } from '../../shared/color'
 export class Membrane extends Feature {
   static BASE_DAMAGE = 0.1
   static DAMAGE_FACTOR = 3
-  static GENETIC_LIFE_SECONDS = 100
+  static GENETIC_LIFE_SECONDS = 15
   static GROWTH = 0.01
   static INITIAL_RADIUS = 0.6 / Math.sqrt(2)
   static MINIMUM_DAMAGE = 0.1
-  static MINIMUM_LIFE_SECONDS = 40
+  static MINIMUM_LIFE_SECONDS = 60
   actor: Organism
   destroyed = false
   hungerDamage = 0
@@ -101,13 +101,13 @@ export class Membrane extends Feature {
       const reversed = 1 - ratio
       this.damageLog({ k: 'reversed', v: reversed })
       this.damageLog({ k: 'strength', v: this.actor.gene.strength })
-      const baseDamage = Math.pow(this.actor.gene.strength, 10) * 0.01
+      const baseDamage = Math.pow(this.actor.gene.strength, 10) * 0.02
       this.damageLog({ k: 'baseDamage', v: baseDamage })
       const strengthDamage = baseDamage * Math.pow(reversed, 100)
       this.damageLog({ k: 'strengthDamage', v: strengthDamage })
-      const sizeFactor = Math.pow(reversed, 1000)
+      const sizeFactor = Math.pow(reversed, 85)
       this.damageLog({ k: 'sizeFactor', v: sizeFactor })
-      const sizeDamage = 0.1 * sizeFactor
+      const sizeDamage = 0.01 * sizeFactor
       this.damageLog({ k: 'sizeDamage', v: sizeDamage })
       const damage = strengthDamage + sizeDamage
       this.damageLog({ k: 'damage', v: damage })
@@ -146,7 +146,8 @@ export class Membrane extends Feature {
     if (this.radius === this.targetRadius) return
     this.step += 1
     if (this.step % 2 === 0) {
-      const increase = Membrane.GROWTH * stepSize * this.radius
+      const strength = Math.max(this.actor.gene.strength, 0.01)
+      const increase = Membrane.GROWTH * stepSize * strength
       this.radius = Math.min(this.radius + increase, this.targetRadius)
       this.body.destroyFixture(this.fixture)
       this.fixture = this.body.createFixture({

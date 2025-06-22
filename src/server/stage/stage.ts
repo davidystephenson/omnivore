@@ -31,6 +31,8 @@ import readWaypointIndex from '../readWaypointIndex'
 
 export class Stage {
   actors = new Map<number, Actor>()
+  checkCount = 0
+  collider: Collider
   debugger: Debugger
   destructionQueue: Body[] = []
   fallQueue: Tree[] = []
@@ -42,6 +44,7 @@ export class Stage {
   killingQueue: Killing[] = []
   manager: Manager
   navigation: Navigation
+  organisms: Organism[] = []
   players = new Map<string, Player>()
   runner: Runner
   spawner: Spawner
@@ -50,8 +53,6 @@ export class Stage {
   vision: Vision
   walls: Wall[] = []
   world: World
-  collider: Collider
-  checkCount = 0
 
   constructor (props: {
     flags: Flags

@@ -32,6 +32,7 @@ export class Flags {
   spawn: boolean
   spawnpoints: boolean
   starveBricksGame: boolean
+  stats: boolean
   summary: boolean
   tree: boolean
   timings: boolean
@@ -75,6 +76,7 @@ export class Flags {
     spawn?: boolean
     spawnpoints?: boolean
     starveBricksGame?: boolean
+    stats?: boolean
     summary?: boolean
     timings?: boolean
     tree?: boolean
@@ -117,6 +119,7 @@ export class Flags {
     this.spawn = props.spawn ?? false
     this.spawnpoints = props.spawnpoints ?? false
     this.starveBricksGame = props.starveBricksGame ?? true
+    this.stats = props.stats ?? false
     this.summary = props.summary ?? false
     this.timings = props.timings ?? false
     this.tree = props.tree ?? false

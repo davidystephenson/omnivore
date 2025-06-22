@@ -118,14 +118,13 @@ export class Playhouse extends Stage {
   }
 
   addFamilies (): void {
-    this.addApe({ position: Vec2(45, 45) })
-    this.addApeBully({ position: Vec2(-35, 35) })
-    this.addTiger({ position: Vec2(-25, -25) })
-    this.addCrow({ position: Vec2(-15, 15) })
-    this.addFly({ position: Vec2(0, -5) })
-    this.addTardigrade({ position: Vec2(15, -15) })
-    this.addWhale({ position: Vec2(25, 10) })
-    this.addBoa({ position: Vec2(35, 10) })
+    // this.addApe({ position: Vec2(45, 45) })
+    // this.addTiger({ position: Vec2(-25, -25) })
+    // this.addCrow({ position: Vec2(-15, 15) })
+    this.addFly({ position: Vec2(-25, -25) })
+    // this.addTardigrade({ position: Vec2(15, -15) })
+    this.addWhale({ position: Vec2(25, 25) })
+    // this.addBoa({ position: Vec2(35, 10) })
   }
 
   addFly (props: {

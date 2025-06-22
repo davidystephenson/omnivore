@@ -254,9 +254,11 @@ export class Runner {
     }
     this.stage.onStep({ stepSize })
 
-    if (this.stage.flags.performance && this.timing) {
-      console.timeEnd('stage')
-      console.time('postStage')
+    if (this.timing) {
+      if (this.stage.flags.performance) {
+        console.timeEnd('stage')
+        console.time('postStage')
+      }
       if (this.stage.flags.timings) {
         // this.debugTiming({ key: 'vision' })
         // this.debugTiming({ key: 'movement' })
@@ -286,16 +288,34 @@ export class Runner {
         }
         organisms.push(actor)
       })
-      this.stage.flag({ f: 'organismsCount', k: 'organismsCount', v: organisms.length })
-      const entries = [...this.stage.families.entries()]
-      const labels = entries.map(entry => `${entry[0]}:${entry[1].length}`)
-      const familiesLabel = labels.join(',')
-      console.info('families', familiesLabel)
-      const botCount = sum(entries.map(entry => entry[1].length))
-      console.info('botCount', botCount)
-      console.info('checkCount', this.stage.checkCount)
-      const checksPerBot = this.stage.checkCount / botCount
-      console.info('checksPerBot', checksPerBot)
+      this.stage.flag({
+        f: 'organismsCount',
+        k: 'organismsCount',
+        v: organisms.length,
+        seconds: 10
+      })
+      if (this.stage.flags.stats) {
+        const totalSpeed = organisms.reduce((acc, organism) => acc + organism.gene.speed, 0)
+        const averageSpeed = totalSpeed / organisms.length
+        console.info('averageSpeed', averageSpeed)
+        const totalStrength = organisms.reduce((acc, organism) => acc + organism.gene.strength, 0)
+        const averageStrength = totalStrength / organisms.length
+        console.info('averageStrength', averageStrength)
+        const totalStamina = organisms.reduce((acc, organism) => acc + organism.gene.stamina, 0)
+        const averageStamina = totalStamina / organisms.length
+        console.info('averageStamina', averageStamina)
+      }
+      if (this.stage.flags.performance) {
+        const entries = [...this.stage.families.entries()]
+        const labels = entries.map(entry => `${entry[0]}:${entry[1].length}`)
+        const familiesLabel = labels.join(',')
+        console.info('families', familiesLabel)
+        const botCount = sum(entries.map(entry => entry[1].length))
+        console.info('botCount', botCount)
+        console.info('checkCount', this.stage.checkCount)
+        const checksPerBot = this.stage.checkCount / botCount
+        console.info('checksPerBot', checksPerBot)
+      }
     }
     this.features = this.getFeatures()
     if (this.stage.flags.performance && this.timing) {
