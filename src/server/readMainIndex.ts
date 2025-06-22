@@ -6,7 +6,8 @@ export default function readMainIndex (props: {
   onBook: boolean
 }): MainIndex {
   const indexPath = `promptbooks/${props.promptbookName}/index.json`
+  console.info(`Reading main index from ${indexPath}...`)
   const index = read({ path: indexPath, schema: mainIndexSchema, safe: props.onBook })
-  console.info('Read index:', index.halfWidth, 'x', index.halfHeight)
+  console.info(`Main index from ${indexPath} read: ${index.halfWidth}x${index.halfHeight}`)
   return index
 }

@@ -1,6 +1,6 @@
 import { AABB, Circle, CircleShape, Fixture, Vec2 } from 'planck'
 import { Stage } from './stage/stage'
-import { Waypoint } from './waypoint'
+import { Waypoint, WaypointDef } from './waypoint'
 import { clamp, directionFromTo, range, rotate, whichMin } from './math'
 import { Feature } from './feature/feature'
 import { Structure } from './feature/structure'
@@ -406,43 +406,52 @@ export class Navigation {
     })
   }
 
-  setupWaypoints (): void {
+  setupWaypoints (props: {
+    waypointDefs?: WaypointDef[]
+    main?: MainIndex
+  }): void {
     this.stage.debug({ v: 'Setting up waypoints...' })
-    const wallDefs = this.stage.walls.map(wall => wall.getDef())
-    this.stage.manager.saveMany({
-      data: wallDefs,
-      path: 'promptbooks/output/wallDefs'
-    })
-    this.createWaypoints()
-    const waypointIdMatrix = this.getWaypointIdMatrix()
-    const index: MainIndex = {
-      halfHeight: this.stage.halfHeight,
-      halfWidth: this.stage.halfWidth,
-      radii: this.radii,
-      waypointIdMatrix
-    }
-    this.stage.manager.saveToFile({ data: index, path: 'promptbooks/output/index.json' })
-    const waypointArray = Object.values(this.waypoints)
-    console.info(`Saving ${waypointArray.length} waypoint indexes...`)
-    let factor = 100
-    waypointArray.forEach((waypoint, index) => {
-      if (index % factor === 0) {
-        console.info(`Saving waypoint ${index} of ${waypointArray.length}...`)
-      }
-      if (index >= factor * 10) {
-        factor *= 10
-      }
-      const waypointIndex: WaypointDataIndex = {
-        position: { x: waypoint.position.x, y: waypoint.position.y },
-        id: waypoint.id
-      }
-      this.stage.manager.saveToFile({
-        data: waypointIndex,
-        path: `promptbooks/output/waypointDatas/${waypoint.id}/index.json`,
-        verbose: false
+    if (props.waypointDefs == null) {
+      this.createWaypoints()
+      const waypointArray = Object.values(this.waypoints)
+      console.info(`Saving ${waypointArray.length} waypoint indexes...`)
+      let factor = 100
+      waypointArray.forEach((waypoint, index) => {
+        if (index % factor === 0) {
+          console.info(`Saving waypoint ${index} of ${waypointArray.length}...`)
+        }
+        if (index >= factor * 10) {
+          factor *= 10
+        }
+        const waypointIndex: WaypointDataIndex = {
+          position: { x: waypoint.position.x, y: waypoint.position.y },
+          id: waypoint.id
+        }
+        this.stage.manager.saveToFile({
+          data: waypointIndex,
+          path: `promptbooks/output/waypointDatas/${waypoint.id}/index.json`,
+          verbose: false
+        })
       })
-    })
-    // STOP HERE
+    } else {
+      this.stage.buildWaypoints({ waypointDefs: props.waypointDefs })
+    }
+    if (props.main == null) {
+      const waypointIdMatrix = this.getWaypointIdMatrix()
+      const index: MainIndex = {
+        halfHeight: this.stage.halfHeight,
+        halfWidth: this.stage.halfWidth,
+        radii: this.radii,
+        wallCount: this.stage.walls.length,
+        waypointIdMatrix
+      }
+      this.stage.manager.saveToFile({ data: index, path: 'promptbooks/output/index.json' })
+    }
+    if (props.waypointDefs == null || props.main == null) {
+      console.info('Stopping here for progressive build')
+      process.exit(0)
+    }
+
     this.stage.debug({ v: 'Setting up neighbors...' })
     this.setupNeighbors()
     this.stage.debug({ v: 'Calculating distances...' })

@@ -2,6 +2,7 @@ import { Vec2 } from 'planck'
 import { Wall } from '../actor/wall'
 import { Flags } from '../flags'
 import { Walled } from './walled'
+import { MainIndex } from '../types'
 
 export interface Rectangle {
   x: number
@@ -23,8 +24,13 @@ export default class Procedural extends Walled {
     flags: Flags
     halfHeight: number
     halfWidth: number
+    main?: MainIndex
   }) {
     super(props)
+    if (props.main != null) {
+      console.info('Deferring procedure...')
+      return
+    }
     console.info('Initiating procedure for', props.halfWidth, 'x', props.halfHeight)
 
     while (!this.isDone()) {

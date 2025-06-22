@@ -1,14 +1,15 @@
 import { Server } from './server'
-import readPromptbook from './readPromptbook'
 import { PrivatePerformance } from './stage/privatePerformance'
 import { PublicPerformance } from './stage/publicPerformance'
 import { SmallPerformance } from './stage/smallPerformance'
 import { TestPerformance } from './stage/testPerformance'
+import { Promptbook } from './types'
 
 export default function perform (props: {
   filename?: string
   onBook: boolean
   performance?: string
+  promptbook: Promptbook
 }): void {
   const performanceName = props.performance ?? process.argv[2] ?? 'public'
   console.info(`Performing ${performanceName}...`)
@@ -22,11 +23,6 @@ export default function perform (props: {
   if (Performance == null) {
     throw new Error(`Unknown performance: ${performanceName}`)
   }
-  const promptbook = readPromptbook({
-    filename: props.filename,
-    onBook: props.onBook,
-    performance: props.performance
-  })
   const playhouse = new Performance({ promptbook })
   void new Server({ playhouse })
 }

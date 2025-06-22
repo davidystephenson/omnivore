@@ -17,14 +17,7 @@ export class Performance extends Playhouse {
       halfWidth: props.promptbook.halfWidth
     })
     this.buildWalls({ wallDefs: props.promptbook.wallDefs })
-    props.promptbook.waypointDatas.forEach(waypointData => {
-      const waypoint = new Waypoint({
-        navigation: this.navigation,
-        position: waypointData.position,
-        id: waypointData.id
-      })
-      this.navigation.waypoints[waypoint.id] = waypoint
-    })
+    this.buildWaypoints({ waypointDefs: props.promptbook.waypointDatas })
     props.promptbook.waypointDatas.forEach(waypointData => {
       const waypoint = this.navigation.waypoints[waypointData.id]
       if (waypoint == null) throw new Error(`Missing waypoint ${waypointData.id}`)

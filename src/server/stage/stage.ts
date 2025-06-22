@@ -1,4 +1,3 @@
-import fs from 'fs'
 import { World, Vec2, Body, AABB, PolygonShape, CircleShape, Shape, Transform, testOverlap } from 'planck'
 import { Runner } from '../runner'
 import { Organism } from '../actor/organism'
@@ -25,9 +24,7 @@ import { Flags } from '../flags'
 import { Collider } from '../collider'
 import { Manager } from '../../manager'
 import { WallDef } from '../types'
-import readWalls from '../readWalls'
-import readMainIndex from '../readMainIndex'
-import readWaypointIndex from '../readWaypointIndex'
+import { Waypoint, WaypointDef } from '../waypoint'
 
 export class Stage {
   actors = new Map<number, Actor>()
@@ -263,6 +260,19 @@ export class Stage {
     })
   }
 
+  buildWaypoints (props: {
+    waypointDefs: WaypointDef[]
+  }): void {
+    props.waypointDefs.forEach(waypointDef => {
+      const waypoint = new Waypoint({
+        navigation: this.navigation,
+        position: waypointDef.position,
+        id: waypointDef.id
+      })
+      this.navigation.waypoints[waypoint.id] = waypoint
+    })
+  }
+
   debug<Value>(props: LogProps<Value>): void {
     this.debugger.debug(props)
   }
@@ -374,31 +384,6 @@ export class Stage {
       return true
     })
     return featuresInShape
-  }
-
-  loadIndex (props: {
-    promptbookName: string
-    onBook: boolean
-  }): void {
-    const wallDefs = readWalls(props)
-    const index = readMainIndex(props)
-    const waypointFolders = fs.readdirSync(`promptbooks/${props.promptbookName}/waypointDatas`)
-    console.info(`Reading ${waypointFolders.length} waypoint folders...`)
-    let factor = 100
-    const waypointIndexes = waypointFolders.map((folder, index) => {
-      if (index % factor === 0) {
-        console.info(`Reading waypoint folder ${index} of ${waypointFolders.length}...`)
-      }
-      if (index >= factor * 10) {
-        factor *= 10
-      }
-      const waypointIndex = readWaypointIndex({
-        onBook: props.onBook,
-        promptbookName: props.promptbookName,
-        folder
-      })
-      return waypointIndex
-    })
   }
 
   log<Value>(props: LogProps<Value>): void {

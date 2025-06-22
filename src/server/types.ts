@@ -49,6 +49,7 @@ export const mainIndexSchema = z.object({
   halfHeight: z.number(),
   halfWidth: z.number(),
   radii: z.number().array(),
+  wallCount: z.number(),
   waypointIdMatrix: numberMatrixSchema
 })
 export type MainIndex = z.infer<typeof mainIndexSchema>
