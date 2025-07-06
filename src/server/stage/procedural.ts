@@ -2,7 +2,7 @@ import { Vec2 } from 'planck'
 import { Wall } from '../actor/wall'
 import { Flags } from '../flags'
 import { Walled } from './walled'
-import { MainIndex } from '../types'
+import { Initial, WaypointData } from '../types'
 
 export interface Rectangle {
   x: number
@@ -24,11 +24,15 @@ export default class Procedural extends Walled {
     flags: Flags
     halfHeight: number
     halfWidth: number
-    main?: MainIndex
+    initial?: Initial
+    onBook: boolean
+    promptbookName: string
+    waypointDatas?: WaypointData[]
   }) {
     super(props)
-    if (props.main != null) {
+    if (props.initial != null) {
       console.info('Deferring procedure...')
+      this.afterWalls()
       return
     }
     console.info('Initiating procedure for', props.halfWidth, 'x', props.halfHeight)
@@ -44,7 +48,10 @@ export default class Procedural extends Walled {
     }
 
     const fill = this.getFillString()
-    console.info(`Proceeded with ${fill}% and`, this.walls.length, 'walls after', this.fails, 'fails')
+    const internalWalls = this.walls.filter(wall => !wall.outer)
+    console.info(`Proceeded with ${fill}% and`, internalWalls.length, 'internal walls after', this.fails, 'fails')
+
+    this.afterWalls()
   }
 
   getCoordinate (props: {
@@ -171,11 +178,11 @@ export default class Procedural extends Walled {
     const blocked = xDist < xSpread && yDist < ySpread
     if (blocked && this.flags.procedural && this.debugging) {
       this.debug({ v: 'blocking wall' })
-      this.debug({ k: 'x:', v: props.y })
-      this.debug({ k: 'y:', v: props.x })
-      this.debug({ k: 'halfWidth:', v: props.halfWidth })
-      this.debug({ k: 'halfHeight:', v: props.halfHeight })
-      this.debug({ k: 'margin:', v: this.navigation.margin })
+      this.debug({ k: 'x', v: props.y })
+      this.debug({ k: 'y', v: props.x })
+      this.debug({ k: 'halfWidth', v: props.halfWidth })
+      this.debug({ k: 'halfHeight', v: props.halfHeight })
+      this.debug({ k: 'margin', v: this.navigation.margin })
     }
     return blocked
   }

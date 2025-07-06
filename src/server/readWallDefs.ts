@@ -8,7 +8,7 @@ export default function readWallDefs (props: {
   wallCount: number
 }): WallDef[] {
   console.info(`Reading ${props.wallCount} wall defs...`)
-  const indexes = range(0, props.wallCount)
+  const indexes = range(0, props.wallCount - 1)
   const wallDefs = indexes.map(index => {
     const wallDefPath = `promptbooks/${props.promptbookName}/wallDefs/${index}.json`
     const wallDef = read({ path: wallDefPath, schema: wallDefSchema, safe: props.onBook })

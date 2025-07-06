@@ -1,13 +1,18 @@
 import readMainIndex from './readMainIndex'
 import readWalls from './readWalls'
 import readWaypointIndex from './readWaypointIndex'
-import { Index } from './types'
+import { Initial } from './types'
 import fs from 'fs'
 
-export default function readIndex (props: {
+export default function readInitial (props: {
   promptbookName: string
   onBook: boolean
-}): Index {
+}): Initial | undefined {
+  const exists = fs.existsSync(`promptbooks/${props.promptbookName}`)
+  console.info(`Directory exists: ${exists ? 'Yes' : 'No'}`)
+  if (!exists) {
+    return undefined
+  }
   const wallDefs = readWalls(props)
   const mainIndex = readMainIndex(props)
   const waypointFolders = fs.readdirSync(`promptbooks/${props.promptbookName}/waypointDatas`)
@@ -27,8 +32,8 @@ export default function readIndex (props: {
     })
     return waypointIndex
   })
-  const index: Index = {
-    mainIndex,
+  const index: Initial = {
+    ...mainIndex,
     wallDefs,
     waypointIndexes
   }

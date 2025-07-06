@@ -774,7 +774,7 @@ export class Organism extends Actor {
   }): void {
     if (!this.stage.flags.reproduceGame) return
     const gene = this.gene.mutate()
-    const bot = this.stage.addOrganism({
+    const bot = this.stage.nature.addOrganism({
       color: this.color,
       gene,
       position: this.membrane.position

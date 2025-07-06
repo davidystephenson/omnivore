@@ -1,10 +1,13 @@
 import { Flags } from '../flags'
+import { Initial } from '../types'
 import { Walled } from './walled'
 
 export class Mission extends Walled {
-  playerGene = this.flyBullyGene
-
-  constructor () {
+  constructor (props: {
+    initial?: Initial
+    onBook: boolean
+    promptbookName: string
+  }) {
     super({
       flags: new Flags({
         // botChase: true,
@@ -29,7 +32,10 @@ export class Mission extends Walled {
         // waypoints: true
       }),
       halfHeight: 30,
-      halfWidth: 30
+      halfWidth: 30,
+      initial: props.initial,
+      onBook: props.onBook,
+      promptbookName: props.promptbookName
     })
     // this.addWall({
     //   position: Vec2(5, 0),
@@ -37,8 +43,7 @@ export class Mission extends Walled {
     //   halfWidth: 1,
     //   outer: false
     // })
-    this.navigation.setupWaypoints()
-    this.spawner.setupSpawnPoints()
+    this.afterWalls()
 
     // this.addFruit({ position: Vec2(-7, 5) })
     // this.addTrisolaran({ position: Vec2(0, 7) })

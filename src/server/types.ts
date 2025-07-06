@@ -33,15 +33,15 @@ export const numberRecordSchema = z.record(numberishSchema, numberullishSchema)
   .or(numberullishSchema.array())
 export const nestedNumberRecordSchema = z.record(numberishSchema, numberRecordSchema)
 export type NestedNumberRecord = z.infer<typeof nestedNumberRecordSchema>
-export const waypointDataIndexSchema = z.object({
+export const waypointDefSchema = z.object({
   position: vec2Schema,
   id: z.number()
 })
-export type WaypointDataIndex = z.infer<typeof waypointDataIndexSchema>
+export type WaypointDef = z.infer<typeof waypointDefSchema>
 export const waypointDataExtendSchema = z.object({
   nextWaypoints: nestedNumberRecordSchema
 })
-export const waypointDataSchema = waypointDataIndexSchema.and(waypointDataExtendSchema)
+export const waypointDataSchema = waypointDefSchema.and(waypointDataExtendSchema)
 export type WaypointData = z.infer<typeof waypointDataSchema>
 export const numberMatrixSchema = z.number().array().array()
 export type NumberMatrix = z.infer<typeof numberMatrixSchema>
@@ -53,14 +53,13 @@ export const mainIndexSchema = z.object({
   waypointIdMatrix: numberMatrixSchema
 })
 export type MainIndex = z.infer<typeof mainIndexSchema>
-export const indexSchema = z.object({
-  mainIndex: mainIndexSchema,
+export const initialExtendsSchema = z.object({
   wallDefs: wallDefSchema.array(),
-  waypointIndexes: waypointDataIndexSchema.array()
+  waypointIndexes: waypointDefSchema.array()
 })
-export type Index = z.infer<typeof indexSchema>
+export const initialSchema = mainIndexSchema.and(initialExtendsSchema)
+export type Initial = z.infer<typeof initialSchema>
 export const tableOfContentsExtendSchema = z.object({
-  navAreaDefs: z.unknown().array(),
   wallDefs: z.unknown().array(),
   waypointDatas: z.unknown().array()
 })

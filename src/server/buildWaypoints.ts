@@ -1,5 +1,6 @@
 import { Navigation } from './navigation'
-import { Waypoint, WaypointDef } from './waypoint'
+import { Waypoint } from './waypoint'
+import { WaypointDef } from './types'
 
 export default function buildWaypoints (props: {
   waypointDefs: WaypointDef[]

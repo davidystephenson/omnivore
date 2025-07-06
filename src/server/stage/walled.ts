@@ -1,19 +1,22 @@
 import { Vec2 } from 'planck'
 import { Flags } from '../flags'
-import { Playhouse } from './playhouse'
-import { MainIndex } from '../types'
+import { Initial, WaypointData } from '../types'
+import { Stage } from './stage'
 
-export class Walled extends Playhouse {
+export class Walled extends Stage {
   static SIZE = 100
   static HALF_SIZE = Walled.SIZE / 2
   constructor (props: {
     flags: Flags
     halfHeight: number
     halfWidth: number
-    main?: MainIndex
+    initial?: Initial
+    onBook: boolean
+    promptbookName: string
+    waypointDatas?: WaypointData[]
   }) {
     super(props)
-    if (props.main != null) {
+    if (props.initial != null) {
       console.info('Deferring outer walls...')
       return
     }

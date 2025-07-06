@@ -8,15 +8,14 @@ import readWaypointIndex from './readWaypointIndex'
 export default function readPromptbook (props: {
   filename?: string
   onBook: boolean
-  performance?: string
+  promptbookName: string
 }): Promptbook {
-  const promptbookName = props.filename ?? process.argv[3] ?? 'output'
-  const index = readMainIndex({ promptbookName, onBook: props.onBook })
+  const index = readMainIndex({ promptbookName: props.promptbookName, onBook: props.onBook })
   const wallDefs = readWalls({
-    promptbookName,
+    promptbookName: props.promptbookName,
     onBook: props.onBook
   })
-  const waypointFolders = fs.readdirSync(`promptbooks/${promptbookName}/waypointDatas`)
+  const waypointFolders = fs.readdirSync(`promptbooks/${props.promptbookName}/waypointDatas`)
   console.info(`Reading ${waypointFolders.length} waypoint folders...`)
   let factor = 100
   const waypointDatas = waypointFolders.map((folder, index) => {
@@ -28,15 +27,15 @@ export default function readPromptbook (props: {
     }
     const waypointIndex = readWaypointIndex({
       onBook: props.onBook,
-      promptbookName,
+      promptbookName: props.promptbookName,
       folder
     })
-    const files = fs.readdirSync(`promptbooks/${promptbookName}/waypointDatas/${folder}`)
+    const files = fs.readdirSync(`promptbooks/${props.promptbookName}/waypointDatas/${folder}`)
     const radiusFiles = files.filter(file => !file.endsWith('index.json'))
     const nextWaypoints: NestedNumberRecord = {}
     radiusFiles.forEach(radiusFile => {
       const numberRecord = read({
-        path: `promptbooks/${promptbookName}/waypointDatas/${folder}/${radiusFile}`,
+        path: `promptbooks/${props.promptbookName}/waypointDatas/${folder}/${radiusFile}`,
         schema: numberRecordSchema,
         safe: props.onBook
       })

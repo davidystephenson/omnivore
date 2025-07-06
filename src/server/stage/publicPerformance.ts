@@ -4,10 +4,9 @@ import { Promptbook } from '../types'
 import { Performance } from './performance'
 
 export class PublicPerformance extends Performance {
-  playerGene = this.apeGene
-
   constructor (props: {
     promptbook: Promptbook
+    promptbookName: string
   }) {
     const flags = new Flags({
       // performance: true,
@@ -19,46 +18,47 @@ export class PublicPerformance extends Performance {
     })
     super({
       flags,
-      promptbook: props.promptbook
+      promptbook: props.promptbook,
+      promptbookName: props.promptbookName
     })
-    this.addFamilies()
-    this.addStarTrees()
-    this.addBrick({
+    this.nature.addFamilies()
+    this.nature.addStarTrees()
+    this.nature.addRock({
       position: Vec2(0, 25),
       halfHeight: 10,
       halfWidth: 5
     })
-    this.addBrick({
+    this.nature.addRock({
       position: Vec2(25, 0),
       halfHeight: 5,
       halfWidth: 10
     })
-    this.addBrick({
+    this.nature.addRock({
       position: Vec2(0, 15),
       halfHeight: 10,
       halfWidth: 10
     })
-    this.addBrick({
+    this.nature.addRock({
       position: Vec2(15, 0),
       halfHeight: 10,
       halfWidth: 10
     })
-    this.addBrick({
+    this.nature.addRock({
       position: Vec2(0, 20),
       halfHeight: 5,
       halfWidth: 5
     })
-    this.addBrick({
+    this.nature.addRock({
       position: Vec2(20, 0),
       halfHeight: 1,
       halfWidth: 5
     })
-    this.addBrick({
+    this.nature.addRock({
       position: Vec2(10, 0),
       halfHeight: 5,
       halfWidth: 1
     })
-    this.addBrick({
+    this.nature.addRock({
       position: Vec2(0, 10),
       halfHeight: 1,
       halfWidth: 1

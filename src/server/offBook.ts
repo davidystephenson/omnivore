@@ -1,3 +1,7 @@
+import getPromptbookName from './getPromptbookName'
 import perform from './perform'
+import readPromptbook from './readPromptbook'
 
-perform({ onBook: false })
+const promptbookName = getPromptbookName()
+const promptbook = readPromptbook({ onBook: false, promptbookName })
+perform({ promptbook, promptbookName })

@@ -3,10 +3,9 @@ import { Promptbook } from '../types'
 import { Performance } from './performance'
 
 export class PrivatePerformance extends Performance {
-  playerGene = this.apeGene
-
   constructor (props: {
     promptbook: Promptbook
+    promptbookName: string
   }) {
     const flags = new Flags({
       // performance: true,
@@ -19,10 +18,11 @@ export class PrivatePerformance extends Performance {
     })
     super({
       flags,
-      promptbook: props.promptbook
+      promptbook: props.promptbook,
+      promptbookName: props.promptbookName
     })
-    this.addFamilies()
-    this.addStarTrees()
-    this.addStarTrees()
+    this.nature.addFamilies()
+    this.nature.addStarTrees()
+    this.nature.addStarTrees()
   }
 }

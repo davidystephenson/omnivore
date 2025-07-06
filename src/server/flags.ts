@@ -17,7 +17,6 @@ export class Flags {
   meatGame: boolean
   mutation: boolean
   navigation: boolean
-  navAreas: boolean
   organisms: boolean
   organismsCount: boolean
   performance: boolean
@@ -60,7 +59,6 @@ export class Flags {
     maneuverLines?: boolean
     meatGame?: boolean
     mutation?: boolean
-    navAreas?: boolean
     navigation?: boolean
     organisms?: boolean
     organismsCount?: boolean
@@ -103,7 +101,6 @@ export class Flags {
     this.maneuverLines = props.maneuverLines ?? false
     this.meatGame = props.meatGame ?? true
     this.mutation = props.mutation ?? false
-    this.navAreas = props.navAreas ?? false
     this.navigation = props.navigation ?? false
     this.organisms = props.organisms ?? false
     this.organismsCount = props.organismsCount ?? false

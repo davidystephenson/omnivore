@@ -1,6 +1,5 @@
 import fs from 'fs'
 import path from 'path'
-import json from 'big-json'
 
 /**
  * Represents a value that can be serialized to JSON.
@@ -93,51 +92,6 @@ export class Manager {
     if (this.verbose) {
       console.debug(props.message)
     }
-  }
-
-  read (props: {
-    onData: (props: { data: unknown }) => void
-  }): void {
-    const parseStream = json.createParseStream()
-
-    parseStream.on('data', function (data) {
-      props.onData({ data })
-    })
-
-    const filename = process.argv[3] ?? 'output'
-    const path = `promptbooks/${filename}.json`
-    console.info(`Reading ${path}...`)
-    const readStream = fs.createReadStream(path)
-
-    readStream.on('open', () => {
-      console.info('Promptbook opened')
-    })
-
-    readStream.on('close', () => {
-      console.info('Promptbook closed')
-    })
-
-    let index = 0
-    readStream.on('data', (chunk) => {
-      if (index === 0 || index % 500 === 0) {
-        console.info('Prompt', index, 'is', chunk.length, 'long')
-      }
-      index++
-    })
-
-    readStream.on('ready', () => {
-      console.info('Promptbook ready')
-    })
-
-    readStream.on('end', () => {
-      console.info('Promptbook read')
-    })
-
-    readStream.on('error', (error) => {
-      console.error('Error reading promptbook', error)
-    })
-
-    readStream.pipe(parseStream)
   }
 
   /**

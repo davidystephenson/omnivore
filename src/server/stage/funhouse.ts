@@ -1,9 +1,14 @@
 import { Vec2 } from 'planck'
 import { Walled } from './walled'
 import { Flags } from '../flags'
+import { Initial } from '../types'
 
 export class Funhouse extends Walled {
-  constructor () {
+  constructor (props: {
+    initial?: Initial
+    onBook: boolean
+    promptbookName: string
+  }) {
     super({
       flags: new Flags({
         botChase: true,
@@ -11,7 +16,10 @@ export class Funhouse extends Walled {
         waypoints: true
       }),
       halfHeight: 50,
-      halfWidth: 50
+      halfWidth: 50,
+      initial: props.initial,
+      onBook: props.onBook,
+      promptbookName: props.promptbookName
     })
 
     // this.addBrick({ halfHeight: 10, halfWidth: 1, position: Vec2(brickX, 16) })
@@ -91,70 +99,70 @@ export class Funhouse extends Walled {
 
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
-    this.addBricks({
+    this.nature.addRocks({
       count: 20,
       gap: 0.1,
       halfHeight: 1,
       halfWidth: 1,
       position: Vec2(-45, 0)
     })
-    this.addBricks({
+    this.nature.addRocks({
       count: 20,
       gap: 0.1,
       halfHeight: 1,
       halfWidth: 1,
       position: Vec2(5, 0)
     })
-    this.addBricks({
+    this.nature.addRocks({
       count: 20,
       gap: 0.1,
       halfHeight: 1,
       halfWidth: 1,
       position: Vec2(10, 0)
     })
-    this.addBricks({
+    this.nature.addRocks({
       count: 20,
       gap: 0.1,
       halfHeight: 1,
       halfWidth: 1,
       position: Vec2(15, 0)
     })
-    this.addBricks({
+    this.nature.addRocks({
       count: 20,
       gap: 0.1,
       halfHeight: 1,
       halfWidth: 1,
       position: Vec2(20, 0)
     })
-    this.addBricks({
+    this.nature.addRocks({
       count: 20,
       gap: 0.1,
       halfHeight: 1,
       halfWidth: 1,
       position: Vec2(25, 0)
     })
-    this.addBricks({
+    this.nature.addRocks({
       count: 20,
       gap: 0.1,
       halfHeight: 1,
       halfWidth: 1,
       position: Vec2(30, 0)
     })
-    this.addBricks({
+    this.nature.addRocks({
       count: 20,
       gap: 0.1,
       halfHeight: 1,
       halfWidth: 1,
       position: Vec2(35, 0)
     })
-    this.addBricks({
+    this.nature.addRocks({
       count: 20,
       gap: 0.1,
       halfHeight: 1,
       halfWidth: 1,
       position: Vec2(40, 0)
     })
-    this.addBricks({
+    this.nature.addRocks({
       count: 20,
       gap: 0.1,
       halfHeight: 1,
@@ -311,16 +319,16 @@ export class Funhouse extends Walled {
     //   halfWidth: 5,
     //   position: Vec2(-15, 14)
     // })
-    this.addTree({
+    this.nature.addTree({
       position: Vec2(20, 20)
     })
-    this.addTree({
+    this.nature.addTree({
       position: Vec2(20, -20)
     })
-    this.addTree({
+    this.nature.addTree({
       position: Vec2(-20, -20)
     })
-    this.addTree({
+    this.nature.addTree({
       position: Vec2(-20, -20)
     })
   }

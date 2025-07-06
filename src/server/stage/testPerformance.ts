@@ -4,10 +4,9 @@ import { Promptbook } from '../types'
 // import { Vec2 } from 'planck'
 
 export class TestPerformance extends Performance {
-  playerGene = this.tardigradeGene
-
   constructor (props: {
     promptbook: Promptbook
+    promptbookName: string
   }) {
     super({
       flags: new Flags({
@@ -28,7 +27,8 @@ export class TestPerformance extends Performance {
         // spawnpoints: true
         // waypoints: true
       }),
-      promptbook: props.promptbook
+      promptbook: props.promptbook,
+      promptbookName: props.promptbookName
     })
     // this.addTardigrade({ position: Vec2(3, 3) })
     // this.addFruit({ position: Vec2(-7, 7) })

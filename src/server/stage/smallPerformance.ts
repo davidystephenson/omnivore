@@ -3,10 +3,9 @@ import { Promptbook } from '../types'
 import { Performance } from './performance'
 
 export class SmallPerformance extends Performance {
-  playerGene = this.apeGene
-
   constructor (props: {
     promptbook: Promptbook
+    promptbookName: string
   }) {
     const flags = new Flags({
       // killing: true,
@@ -24,11 +23,12 @@ export class SmallPerformance extends Performance {
     })
     super({
       flags,
-      promptbook: props.promptbook
+      promptbook: props.promptbook,
+      promptbookName: props.promptbookName
     })
-    this.addFamilies()
-    this.addCenterTree()
-    this.addCenterTree()
-    this.addCenterTree()
+    this.nature.addFamilies()
+    this.nature.addCenterTree()
+    this.nature.addCenterTree()
+    this.nature.addCenterTree()
   }
 }

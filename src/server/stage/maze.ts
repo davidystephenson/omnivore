@@ -1,9 +1,14 @@
 import { Vec2 } from 'planck'
 import { Flags } from '../flags'
 import { Walled } from './walled'
+import { Initial } from '../types'
 
 export class Maze extends Walled {
-  constructor () {
+  constructor (props: {
+    initial?: Initial
+    onBook: boolean
+    promptbookName: string
+  }) {
     super({
       flags: new Flags({
         // botChase: true,
@@ -27,7 +32,10 @@ export class Maze extends Walled {
         // waypoints: true
       }),
       halfHeight: 20,
-      halfWidth: 20
+      halfWidth: 20,
+      initial: props.initial,
+      onBook: props.onBook,
+      promptbookName: props.promptbookName
     })
     this.addInnerWall({
       halfWidth: 3,
@@ -47,7 +55,7 @@ export class Maze extends Walled {
 
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
-    this.addTardigrade({ position: Vec2(17, 17) })
+    this.nature.addTardigrade({ position: Vec2(17, 17) })
 
     // this.addBrick({ position: Vec2(15, -5), halfHeight: 5, halfWidth: 5 })
     // this.addPuppet({

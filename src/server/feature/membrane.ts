@@ -75,7 +75,7 @@ export class Membrane extends Feature {
     if (this.actor.stage.flags.meatGame && this.combatDamage > 0) {
       const size = this.radius * Math.SQRT2
       const halfSize = size / 2
-      this.actor.stage.addFoodSquare({
+      this.actor.stage.nature.addFoodSquare({
         color: LIME,
         nutrition: this.combatDamage * 0.5,
         position: this.position,

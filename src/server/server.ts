@@ -8,7 +8,7 @@ import fs from 'fs-extra'
 import path from 'path'
 import * as SocketIo from 'socket.io'
 import { Config } from './config'
-import { Playhouse } from './stage/playhouse'
+import { Stage } from './stage/stage'
 
 export class Server {
   seed = Math.random().toString()
@@ -17,11 +17,11 @@ export class Server {
   app = express()
   httpServer: https.Server | http.Server
   io: SocketIo.Server
-  playhouse: Playhouse
+  playhouse: Stage
   step = 0
 
   constructor (props: {
-    playhouse: Playhouse
+    playhouse: Stage
   }) {
     this.setupApp()
     this.httpServer = this.getHttpServer()
@@ -40,7 +40,7 @@ export class Server {
       const player = this.playhouse.addPlayer({
         color: GREEN,
         id: socket.id,
-        gene: this.playhouse.playerGene,
+        gene: this.playhouse.nature.playerGene,
         position: Vec2(20, -10)
       })
       if (player.organism == null) {

@@ -1,9 +1,14 @@
 import { Vec2 } from 'planck'
 import { Flags } from '../flags'
 import { Walled } from './walled'
+import { Initial } from '../types'
 
 export class Lab extends Walled {
-  constructor () {
+  constructor (props: {
+    initial?: Initial
+    onBook: boolean
+    promptbookName: string
+  }) {
     super({
       flags: new Flags({
         // botChase: true,
@@ -14,7 +19,10 @@ export class Lab extends Walled {
         visionGame: true
       }),
       halfHeight: 25,
-      halfWidth: 25
+      halfWidth: 25,
+      initial: props.initial,
+      onBook: props.onBook,
+      promptbookName: props.promptbookName
     })
     this.addInnerWall({
       halfWidth: 5,
@@ -40,17 +48,17 @@ export class Lab extends Walled {
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
 
-    this.addApe({ position: Vec2(5, 5) })
-    this.addApeBully({ position: Vec2(-5, 5) })
-    this.addTiger({ position: Vec2(5, -5) })
-    this.addCrow({ position: Vec2(5, -5) })
-    this.addTardigrade({ position: Vec2(-5, -5) })
-    this.addWhale({ position: Vec2(0, 5) })
-    this.addFly({ position: Vec2(5, 0) })
-    this.addBoa({ position: Vec2(0, -5) })
+    this.nature.addApe({ position: Vec2(5, 5) })
+    this.nature.addApeBully({ position: Vec2(-5, 5) })
+    this.nature.addTiger({ position: Vec2(5, -5) })
+    this.nature.addCrow({ position: Vec2(5, -5) })
+    this.nature.addTardigrade({ position: Vec2(-5, -5) })
+    this.nature.addWhale({ position: Vec2(0, 5) })
+    this.nature.addFly({ position: Vec2(5, 0) })
+    this.nature.addBoa({ position: Vec2(0, -5) })
 
-    this.addTree({ position: Vec2(20, -20) })
-    this.addTree({ position: Vec2(-20, -20) })
-    this.addTree({ position: Vec2(-20, 20) })
+    this.nature.addTree({ position: Vec2(20, -20) })
+    this.nature.addTree({ position: Vec2(-20, -20) })
+    this.nature.addTree({ position: Vec2(-20, 20) })
   }
 }

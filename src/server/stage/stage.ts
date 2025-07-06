@@ -3,13 +3,11 @@ import { Runner } from '../runner'
 import { Organism } from '../actor/organism'
 import { Wall } from '../actor/wall'
 import { Actor } from '../actor/actor'
-import { Rock } from '../actor/rock'
 import { Feature } from '../feature/feature'
 import { Killing } from '../death/killing'
 import { Rgb, RED, Rgba } from '../../shared/color'
 import { DebugLine } from '../../shared/debugLine'
 import { Vision } from '../vision'
-import { River } from '../actor/river'
 import { range } from '../math'
 import { DebugCircle } from '../../shared/debugCircle'
 import { Starvation } from '../death/starvation'
@@ -23,8 +21,10 @@ import { Spawner } from '../spawner'
 import { Flags } from '../flags'
 import { Collider } from '../collider'
 import { Manager } from '../../manager'
-import { WallDef } from '../types'
-import { Waypoint, WaypointDef } from '../waypoint'
+import { Initial, Promptbook, WallDef, WaypointData, WaypointDef } from '../types'
+import { Waypoint } from '../waypoint'
+import { Nature } from '../nature'
+import readWallDefs from '../readWallDefs'
 
 export class Stage {
   actors = new Map<number, Actor>()
@@ -40,8 +40,12 @@ export class Stage {
   halfWidth: number
   killingQueue: Killing[] = []
   manager: Manager
+  nature: Nature
   navigation: Navigation
   organisms: Organism[] = []
+  initial?: Initial
+  onBook: boolean
+  promptbookName: string
   players = new Map<string, Player>()
   runner: Runner
   spawner: Spawner
@@ -49,78 +53,41 @@ export class Stage {
   virtualBoxes: AABB[] = []
   vision: Vision
   walls: Wall[] = []
+  waypointDatas?: WaypointData[]
   world: World
 
   constructor (props: {
     flags: Flags
     halfHeight: number
     halfWidth: number
+    initial?: Initial
+    onBook: boolean
+    promptbookName: string
+    waypointDatas?: WaypointData[]
   }) {
     this.flags = props.flags
+    this.initial = props.initial
+    this.onBook = props.onBook
+    this.promptbookName = props.promptbookName
+    this.waypointDatas = props.waypointDatas
     this.debugger = new Debugger()
     this.manager = new Manager()
     this.world = new World({ gravity: Vec2(0, 0) })
     this.halfHeight = props.halfHeight
     this.halfWidth = props.halfWidth
+    this.nature = new Nature({ stage: this })
     this.navigation = new Navigation({ stage: this })
     this.runner = new Runner({ stage: this })
     this.vision = new Vision({ stage: this })
     this.spawner = new Spawner(this)
     this.collider = new Collider(this)
-  }
-
-  addBrick (props: {
-    angle?: number
-    halfHeight: number
-    halfWidth: number
-    position: Vec2
-  }): Rock {
-    const brick = new Rock({ stage: this, ...props })
-    return brick
-  }
-
-  addFood (props: {
-    color?: Rgb
-    nutrition?: number
-    position: Vec2
-    vertices: Vec2[]
-  }): Food {
-    const food = new Food({ stage: this, ...props })
-    return food
-  }
-
-  addFoodSquare (props: {
-    color?: Rgb
-    halfSize: number
-    nutrition?: number
-    position: Vec2
-  }): Food {
-    const y0 = 0 - props.halfSize
-    const y1 = 0 + props.halfSize
-    const x0 = 0 - props.halfSize
-    const x1 = 0 + props.halfSize
-    const vertices = [
-      Vec2(x0, y0),
-      Vec2(x1, y0),
-      Vec2(x1, y1),
-      Vec2(x0, y1)
-    ]
-    return this.addFood({
-      color: props.color,
-      position: props.position,
-      nutrition: props.nutrition,
-      vertices
-    })
-  }
-
-  // TODO Compare to tree food size
-  addFruit (props: {
-    position: Vec2
-  }): Food {
-    return this.addFoodSquare({
-      halfSize: 1.25,
-      position: props.position
-    })
+    if (this.initial != null && this.waypointDatas != null) {
+      const promptbook: Promptbook = {
+        ...this.initial,
+        waypointDatas: this.waypointDatas
+      }
+      this.perform({ promptbook })
+    }
   }
 
   addInnerWall (props: {
@@ -129,15 +96,6 @@ export class Stage {
     position: Vec2
   }): Wall {
     return this.addWall({ ...props, outer: false })
-  }
-
-  addOrganism (props: {
-    color: Rgb
-    position: Vec2
-    gene: Gene
-  }): Organism {
-    const organism = new Organism({ stage: this, ...props })
-    return organism
   }
 
   addOuterWall (props: {
@@ -158,43 +116,6 @@ export class Stage {
     return player
   }
 
-  addPuppet (props: {
-    vertices: [Vec2, Vec2, Vec2]
-    position: Vec2
-    force: Vec2
-    speed: number
-  }): River {
-    const puppet = new River({ stage: this, ...props })
-    return puppet
-  }
-
-  addPuppets (props: {
-    count: number
-    spacing: number
-    vertices: [Vec2, Vec2, Vec2]
-    position: Vec2
-  }): void {
-    const puppetRange = range(1, props.count)
-    const indexOffset = (props.count - 1) / 2
-    puppetRange.forEach(index => {
-      const offsetIndex = index - indexOffset
-      const offset = props.spacing * offsetIndex
-      const position = props.position.clone()
-      position.y += offset
-      this.addPuppet({ vertices: props.vertices, position, force: Vec2(0, 0), speed: 0 })
-    })
-  }
-
-  addTree (props: {
-    position: Vec2
-  }): Tree {
-    const puppet = new Tree({
-      stage: this,
-      ...props
-    })
-    return puppet
-  }
-
   addWall (props: {
     halfWidth: number
     halfHeight: number
@@ -204,32 +125,6 @@ export class Stage {
     const wall = new Wall({ stage: this, ...props })
     this.walls.push(wall)
     return wall
-  }
-
-  addBricks (props: {
-    angle?: number
-    count: number
-    gap: number
-    halfHeight: number
-    halfWidth: number
-    position: Vec2
-  }): void {
-    const brickRange = range(1, props.count)
-    const indexOffset = (props.count) / 2
-    const height = props.halfHeight * 2
-    const offsetHeight = height + props.gap
-    brickRange.forEach(index => {
-      const offsetIndex = index - indexOffset
-      const offset = offsetHeight * offsetIndex
-      const position = props.position.clone()
-      position.y += offset
-      this.addBrick({
-        angle: props.angle,
-        halfHeight: props.halfHeight,
-        halfWidth: props.halfWidth,
-        position
-      })
-    })
   }
 
   addWalls (props: {
@@ -250,6 +145,26 @@ export class Stage {
       position.y += offset
       this.addInnerWall({ halfWidth: props.halfWidth, halfHeight: props.halfHeight, position })
     })
+  }
+
+  afterWalls (): void {
+    if (this.initial != null) {
+      const wallDefs = readWallDefs({
+        promptbookName: this.promptbookName,
+        onBook: this.onBook,
+        wallCount: this.initial.wallCount
+      })
+      this.buildWalls({ wallDefs })
+    } else {
+      const wallDefs = this.walls.map(wall => wall.getDef())
+      const path = `promptbooks/${this.promptbookName}/wallDefs`
+      this.manager.saveMany({ data: wallDefs, path })
+    }
+    this.navigation.setupWaypoints({
+      main: this.initial,
+      waypointDefs: this.initial?.waypointIndexes
+    })
+    this.spawner.setupSpawnPoints()
   }
 
   buildWalls (props: {
@@ -440,6 +355,50 @@ export class Stage {
         this.families.set(actor.color.label, [actor])
       }
     })
+  }
+
+  perform (props: {
+    promptbook: Promptbook
+  }): void {
+    this.buildWalls({ wallDefs: props.promptbook.wallDefs })
+    this.buildWaypoints({ waypointDefs: props.promptbook.waypointDatas })
+    props.promptbook.waypointDatas.forEach(waypointData => {
+      const waypoint = this.navigation.waypoints[waypointData.id]
+      if (waypoint == null) throw new Error(`Missing waypoint ${waypointData.id}`)
+      if (waypointData == null) return
+      props.promptbook.radii.forEach(radius => {
+        const nextWaypoints: Record<number, Waypoint> = {}
+        const record = waypointData.nextWaypoints[radius]
+        if (record == null) {
+          throw new Error(`Missing waypoint ${waypointData.id} ${radius}`)
+        }
+        const targetIds = Object.keys(record).map(s => Number(s))
+        targetIds.forEach(targetId => {
+          const nextId = waypointData.nextWaypoints[radius][targetId]
+          const nextWaypoint = this.navigation.waypoints[nextId]
+          if (nextWaypoint == null) throw new Error(`Missing waypoint ${radius} ${targetId}`)
+          nextWaypoints[targetId] = nextWaypoint
+        })
+        waypoint.nextWaypoints[radius] = nextWaypoints
+      })
+    })
+    const is = [...props.promptbook.waypointIdMatrix.keys()]
+    const js = [...props.promptbook.waypointIdMatrix[0].keys()]
+    for (const i of is) {
+      this.navigation.waypointMatrix[i] = []
+      for (const j of js) {
+        const id = props.promptbook.waypointIdMatrix[i][j]
+        const waypoint = this.navigation.waypoints[id]
+        if (waypoint == null) {
+          throw new Error('missing waypoint')
+        }
+        this.navigation.waypointMatrix[i][j] = waypoint
+      }
+    }
+    this.spawner.setupSpawnPoints()
+    this.debug({ v: 'Starting the runner...' })
+    setInterval(() => { this.runner.step() }, 1000 * this.runner.timeStep)
+    this.debug({ v: 'Runner started!' })
   }
 
   time (props: {

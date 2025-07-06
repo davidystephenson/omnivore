@@ -1,91 +1,32 @@
-import { Body } from 'planck'
 import { Flags } from '../flags'
-import { Playhouse } from './playhouse'
-import { Waypoint } from '../waypoint'
-import { Feature } from '../feature/feature'
-import { Element } from '../../shared/element'
-import { Promptbook } from '../types'
+import { Initial, Promptbook, WaypointDef } from '../types'
+import { Stage } from './stage'
 
-export class Performance extends Playhouse {
+export class Performance extends Stage {
   constructor (props: {
     flags: Flags
     promptbook: Promptbook
+    promptbookName: string
   }) {
+    const waypointIndexes = props.promptbook.waypointDatas.map(waypointData => {
+      const waypointIndex: WaypointDef = {
+        id: waypointData.id,
+        position: waypointData.position
+      }
+      return waypointIndex
+    })
+    const initial: Initial = {
+      ...props.promptbook,
+      waypointIndexes
+    }
     super({
       flags: props.flags,
       halfHeight: props.promptbook.halfHeight,
-      halfWidth: props.promptbook.halfWidth
+      halfWidth: props.promptbook.halfWidth,
+      initial,
+      onBook: false,
+      promptbookName: props.promptbookName,
+      waypointDatas: props.promptbook.waypointDatas
     })
-    this.buildWalls({ wallDefs: props.promptbook.wallDefs })
-    this.buildWaypoints({ waypointDefs: props.promptbook.waypointDatas })
-    props.promptbook.waypointDatas.forEach(waypointData => {
-      const waypoint = this.navigation.waypoints[waypointData.id]
-      if (waypoint == null) throw new Error(`Missing waypoint ${waypointData.id}`)
-      if (waypointData == null) return
-      props.promptbook.radii.forEach(radius => {
-        const nextWaypoints: Record<number, Waypoint> = {}
-        const record = waypointData.nextWaypoints[radius]
-        if (record == null) {
-          throw new Error(`Missing waypoint ${waypointData.id} ${radius}`)
-        }
-        const targetIds = Object.keys(record).map(s => Number(s))
-        targetIds.forEach(targetId => {
-          const nextId = waypointData.nextWaypoints[radius][targetId]
-          const nextWaypoint = this.navigation.waypoints[nextId]
-          if (nextWaypoint == null) throw new Error(`Missing waypoint ${radius} ${targetId}`)
-          nextWaypoints[targetId] = nextWaypoint
-        })
-        waypoint.nextWaypoints[radius] = nextWaypoints
-      })
-    })
-    const is = [...props.promptbook.waypointIdMatrix.keys()]
-    const js = [...props.promptbook.waypointIdMatrix[0].keys()]
-    for (const i of is) {
-      this.navigation.waypointMatrix[i] = []
-      for (const j of js) {
-        const id = props.promptbook.waypointIdMatrix[i][j]
-        const waypoint = this.navigation.waypoints[id]
-        if (waypoint == null) {
-          throw new Error('missing waypoint')
-        }
-        this.navigation.waypointMatrix[i][j] = waypoint
-      }
-    }
-    this.spawner.setupSpawnPoints()
-    this.debug({ v: 'Starting the runner...' })
-    setInterval(() => { this.runner.step() }, 1000 * this.runner.timeStep)
-    this.debug({ v: 'Runner started!' })
-  }
-
-  getBodies (): Body[] {
-    const bodies = []
-    for (
-      let body = this.world.getBodyList();
-      body != null;
-      body = body.getNext()
-    ) {
-      bodies.push(body)
-    }
-    return bodies
-  }
-
-  getFeatures (): Feature[] {
-    const bodies = this.getBodies()
-    const features: Feature[] = []
-    bodies.forEach(body => {
-      const feature = body.getUserData()
-      if (feature instanceof Feature) {
-        features.push(feature)
-      }
-    })
-    return features
-  }
-
-  getElements (): Element[] {
-    const filteredFeatures = this.getFeatures()
-    const elements: Element[] = filteredFeatures.map(feature => {
-      return feature.getElement(true)
-    })
-    return elements
   }
 }

@@ -1,10 +1,6 @@
 import { Vec2 } from 'planck'
 import { Navigation } from './navigation'
-
-export interface WaypointDef {
-  position: { x: number, y: number }
-  id: number
-}
+import { WaypointDef } from './types'
 
 export class Waypoint {
   navigation: Navigation
