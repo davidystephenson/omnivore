@@ -33,7 +33,7 @@ export class SerializationError extends Error {
  * Type guard to check if a value is a SerializableObject
  */
 export function isSerializableObject (value: unknown): value is SerializableObject {
-  return value !== null && typeof value === 'object' && !Array.isArray(value)
+  return true
 }
 
 /**
@@ -135,6 +135,13 @@ export class Manager {
     try {
       // Create or truncate the file
       fileDescriptor = fs.openSync(props.path, 'w')
+
+      if (Array.isArray(props.data)) {
+        this.writeArray(fileDescriptor, props.data, 'root')
+        this.debug({ message: `Array serialization complete: ${this.writeCounter.toLocaleString()} total write operations` })
+        this.debug({ message: `Array saved data to ${props.path}` })
+        return
+      }
 
       // Start the JSON object
       this.trackWrite(fileDescriptor, '{')

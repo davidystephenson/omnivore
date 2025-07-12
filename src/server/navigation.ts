@@ -8,6 +8,8 @@ import { Organism } from './actor/organism'
 import { COLOR, CYAN, RED, WHITE } from '../shared/color'
 import { MainIndex, NumberMatrix, WaypointDef } from './types'
 import fs from 'fs'
+import z from 'zod'
+import read from './read'
 
 export class Navigation {
   static spacing = 2
@@ -279,85 +281,114 @@ export class Navigation {
     radiusIndex: number
   }): void {
     const waypointArray = Object.values(this.waypoints)
-    // Initialize distance array for each waypoint for this radius
     const radiusCount = props.radiusIndex + 1
     const radiusLabel = `${radiusCount}/${this.radii.length}`
-    this.stage.debug({
-      v: `Pathing waypoints for ${props.radius} (${radiusLabel})`
-    })
-    waypointArray.forEach((waypoint, index) => {
-      const infinities: Record<number, number> = {}
-      waypointArray.forEach(waypoint => { infinities[waypoint.id] = Infinity })
-      waypoint.pathDistances[props.radius] = infinities
-      waypoint.nextWaypoints[props.radius] = {}
-    })
-    // Compute the minimal path distance from each waypoint to each other waypoint
-    let pathDivisor = 1
-    let pathNextDivisor = 100
-    const maxPathSize = 20
-    let emptySteps = 0
-    const pathLengths = range(1, maxPathSize)
-    for (const pathLength of pathLengths) {
-      let improvements = 0
-      const remainder = pathLength % pathDivisor
-      const divisible = remainder === 0
-      const pathLabel = `${pathLength}/${maxPathSize} r${radiusLabel}`
-      if (divisible && pathLength !== 0) {
-        this.stage.debug({ v: `Path length ${pathLabel}` })
-      }
-      if (pathLength === pathNextDivisor) {
-        pathDivisor = pathNextDivisor
-        pathNextDivisor *= 10
-      }
-      const maxId = Math.max(...Object.keys(this.waypoints).map(s => Number(s)))
-      waypointArray.forEach(waypoint => {
-        if (waypoint.id % 100 === 0) {
-          this.stage.debug({ v: `Waypoint ${waypoint.id}/${maxId} p${pathLabel}` })
+    const pathDistancesExist = fs.existsSync(`promptbooks/output/waypointDatas/${waypointArray[0].id}/pathDistances/${props.radius}.json`)
+    if (!pathDistancesExist) {
+      // Initialize distance array for each waypoint for this radius
+
+      this.stage.debug({
+        v: `Pathing waypoints for ${props.radius} (${radiusLabel})`
+      })
+      waypointArray.forEach((waypoint, index) => {
+        const infinities: Record<number, number> = {}
+        waypointArray.forEach(waypoint => { infinities[waypoint.id] = Infinity })
+        waypoint.pathDistances[props.radius] = infinities
+      })
+      // Compute the minimal path distance from each waypoint to each other waypoint
+      let pathDivisor = 1
+      let pathNextDivisor = 100
+      const maxPathSize = 20
+      let emptySteps = 0
+      const pathLengths = range(1, maxPathSize)
+      for (const pathLength of pathLengths) {
+        let improvements = 0
+        const remainder = pathLength % pathDivisor
+        const divisible = remainder === 0
+        const pathLabel = `${pathLength}/${maxPathSize} r${radiusLabel}`
+        if (divisible && pathLength !== 0) {
+          this.stage.debug({ v: `Path length ${pathLabel}` })
         }
-        const pathDistances = waypoint.pathDistances[props.radius]
-        if (pathDistances == null) throw new Error('Missing distances')
-        const neighbors = waypoint.neighbors[props.radius]
-        if (neighbors == null) throw new Error('Missing neighbors')
-        waypointArray.forEach(otherWaypoint => {
-          if (waypoint.id === otherWaypoint.id) {
-            pathDistances[otherWaypoint.id] = 0
-            return
+        if (pathLength === pathNextDivisor) {
+          pathDivisor = pathNextDivisor
+          pathNextDivisor *= 10
+        }
+        const maxId = Math.max(...Object.keys(this.waypoints).map(s => Number(s)))
+        waypointArray.forEach(waypoint => {
+          if (waypoint.id % 100 === 0) {
+            this.stage.debug({ v: `Waypoint ${waypoint.id}/${maxId} p${pathLabel}` })
           }
-          const neighborArray = Object.values(neighbors)
-          if (neighborArray.includes(otherWaypoint)) {
-            pathDistances[otherWaypoint.id] = waypoint.distances[otherWaypoint.id]
-            return
-          }
-          neighborArray.forEach(neighbor => {
-            const neighborDistances = neighbor.pathDistances[props.radius]
-            if (neighborDistances == null) throw new Error('Missing neighbor distances')
-            const neighborDistance = neighborDistances[otherWaypoint.id]
-            if (neighborDistance == null) {
-              throw new Error(`Missing neighbor distance at ${otherWaypoint.id}}`)
+          const pathDistances = waypoint.pathDistances[props.radius]
+          if (pathDistances == null) throw new Error('Missing distances')
+          const neighborIds = read({
+            path: `promptbooks/output/waypointDatas/${waypoint.id}/neighbors/${props.radius}.json`,
+            schema: z.number().array(),
+            safe: true
+          })
+          const neighbors = neighborIds.map(id => this.waypoints[id])
+          if (neighbors == null) throw new Error('Missing neighbors')
+          waypointArray.forEach(otherWaypoint => {
+            if (waypoint.id === otherWaypoint.id) {
+              pathDistances[otherWaypoint.id] = 0
+              return
             }
-            const distanceThroughNeighbor = waypoint.distances[neighbor.id] + neighborDistance
-            if (distanceThroughNeighbor < pathDistances[otherWaypoint.id]) improvements += 1
-            pathDistances[otherWaypoint.id] = Math.min(pathDistances[otherWaypoint.id], distanceThroughNeighbor)
+            const neighborArray = Object.values(neighbors)
+            if (neighborArray.includes(otherWaypoint)) {
+              pathDistances[otherWaypoint.id] = waypoint.distances[otherWaypoint.id]
+              return
+            }
+            neighborArray.forEach(neighbor => {
+              const neighborDistances = neighbor.pathDistances[props.radius]
+              if (neighborDistances == null) throw new Error('Missing neighbor distances')
+              const neighborDistance = neighborDistances[otherWaypoint.id]
+              if (neighborDistance == null) {
+                throw new Error(`Missing neighbor distance at ${otherWaypoint.id}}`)
+              }
+              const distanceThroughNeighbor = waypoint.distances[neighbor.id] + neighborDistance
+              if (distanceThroughNeighbor < pathDistances[otherWaypoint.id]) improvements += 1
+              pathDistances[otherWaypoint.id] = Math.min(pathDistances[otherWaypoint.id], distanceThroughNeighbor)
+            })
           })
         })
-      })
+        let maxPathDistance = 0
+        waypointArray.forEach(waypoint => {
+          const pathDistances = Object.values(waypoint.pathDistances[props.radius])
+          maxPathDistance = Math.max(maxPathDistance, ...pathDistances)
+        })
+        if (improvements === 0) emptySteps += 1
+        else emptySteps = 0
+        if (isFinite(maxPathDistance) && emptySteps > 1) break
+      }
       let maxPathDistance = 0
       waypointArray.forEach(waypoint => {
         const pathDistances = Object.values(waypoint.pathDistances[props.radius])
         maxPathDistance = Math.max(maxPathDistance, ...pathDistances)
       })
-      if (improvements === 0) emptySteps += 1
-      else emptySteps = 0
-      if (isFinite(maxPathDistance) && emptySteps > 1) break
+      if (!(maxPathDistance < Infinity)) {
+        throw new Error('Infinite Path Distance')
+      }
+      this.stage.debug({ v: 'Saving path distances...' })
+      waypointArray.forEach((waypoint, index) => {
+        const pathDistances = waypoint.pathDistances[props.radius]
+        this.stage.manager.saveToFile({
+          data: pathDistances,
+          path: `promptbooks/output/waypointDatas/${waypoint.id}/pathDistances/${props.radius}.json`,
+          verbose: false
+        })
+      })
+      this.stage.debug({ v: `Stopping after path distances for ${props.radius}` })
+      process.exit(0)
     }
-    let maxPathDistance = 0
+
     waypointArray.forEach(waypoint => {
-      const pathDistances = Object.values(waypoint.pathDistances[props.radius])
-      maxPathDistance = Math.max(maxPathDistance, ...pathDistances)
+      const pathDistances = read({
+        path: `promptbooks/output/waypointDatas/${waypoint.id}/pathDistances/${props.radius}.json`,
+        schema: z.record(z.coerce.number(), z.number()),
+        safe: true
+      })
+      waypoint.pathDistances[props.radius] = pathDistances
+      waypoint.nextWaypoints[props.radius] = {}
     })
-    if (!(maxPathDistance < Infinity)) {
-      throw new Error('Infinite Path Distance')
-    }
 
     this.stage.debug({ v: `Calculate nextWaypoints r${radiusLabel}` })
     // NOTE: Check for incorrect next waypoints. Look for loops. Save the results.
@@ -369,7 +400,12 @@ export class Navigation {
       if (nextWaypoints == null) {
         throw new Error(`Missing nextWaypoints for radius ${props.radius}`)
       }
-      const neighbors = Object.values(waypoint.neighbors[props.radius])
+      const neighborIds = read({
+        path: `promptbooks/output/waypointDatas/${waypoint.id}/neighbors/${props.radius}.json`,
+        schema: z.number().array(),
+        safe: true
+      })
+      const neighbors = neighborIds.map(id => this.waypoints[id])
       if (neighbors == null) {
         throw new Error(`Missing neighbors for waypoint ${waypoint.id}`)
       }
@@ -397,7 +433,7 @@ export class Navigation {
       const nextWaypoints = waypoint.getNextWaypointIds({ radius: props.radius })
       this.stage.manager.saveToFile({
         data: nextWaypoints,
-        path: `promptbooks/output/waypointDatas/${waypoint.id}/${props.radius}.json`,
+        path: `promptbooks/output/waypointDatas/${waypoint.id}/next/${props.radius}.json`,
         verbose: false
       })
     })
@@ -430,9 +466,54 @@ export class Navigation {
           verbose: false
         })
       })
+      this.stage.debug({ v: 'Setting up neighbors...' })
+      this.setupNeighbors()
+      Object.values(this.waypoints).forEach(waypoint => {
+        this.radii.forEach(radius => {
+          const neighborIds = waypoint.getNeighborsIds({ radius })
+          this.stage.manager.saveToFile({
+            data: neighborIds,
+            path: `promptbooks/output/waypointDatas/${waypoint.id}/neighbors/${radius}.json`,
+            verbose: false
+          })
+        })
+      })
+      this.stage.debug({ v: 'Calculating distances...' })
+      waypointArray.forEach(waypoint => {
+        waypointArray.forEach(otherWaypoint => {
+          waypoint.distances[otherWaypoint.id] = Vec2.distance(waypoint.position, otherWaypoint.position)
+        })
+      })
+      Object.values(this.waypoints).forEach(waypoint => {
+        const distancesRecord: Record<number, number> = {}
+        waypointArray.forEach(otherWaypoint => {
+          distancesRecord[otherWaypoint.id] = waypoint.distances[otherWaypoint.id]
+        })
+        this.stage.manager.saveToFile({
+          data: distancesRecord,
+          path: `promptbooks/output/waypointDatas/${waypoint.id}/distances.json`,
+          verbose: false
+        })
+      })
     } else {
+      this.stage.debug({ v: 'Building waypoints from waypointDefs...' })
       this.stage.buildWaypoints({ waypointDefs: props.waypointDefs })
+      const waypointArray = Object.values(this.waypoints)
+      this.stage.debug({ v: `Reading ${waypointArray.length} waypoint distances...` })
+      waypointArray.forEach(waypoint => {
+        const distances = read({
+          path: `promptbooks/output/waypointDatas/${waypoint.id}/distances.json`,
+          schema: z.record(z.number()),
+          safe: true
+        })
+        const ids = Object.keys(distances).map(key => Number(key))
+        ids.forEach(id => {
+          waypoint.distances[id] = distances[id]
+        })
+      })
     }
+    const waypointArray = Object.values(this.waypoints)
+    // The process USED TO exit HERE
     if (props?.main == null) {
       const waypointIdMatrix = this.getWaypointIdMatrix()
       const index: MainIndex = {
@@ -442,27 +523,18 @@ export class Navigation {
         wallCount: this.stage.walls.length,
         waypointIdMatrix
       }
+      this.stage.debug({ v: 'Saving main index...' })
       this.stage.manager.saveToFile({ data: index, path: 'promptbooks/output/index.json' })
     }
     if (props?.waypointDefs == null || props?.main == null) {
       console.info('Stopping after main index for progressive build')
       process.exit(0)
     }
-
-    this.stage.debug({ v: 'Setting up neighbors...' })
-    this.setupNeighbors()
-    this.stage.debug({ v: 'Calculating distances...' })
-    const waypointArray = Object.values(this.waypoints)
-    waypointArray.forEach(waypoint => {
-      waypointArray.forEach(otherWaypoint => {
-        waypoint.distances[otherWaypoint.id] = Vec2.distance(waypoint.position, otherWaypoint.position)
-      })
-    })
     this.stage.debug({ k: 'Checking radii', v: this.radii })
     const missing = this.radii.find((radius, radiusIndex) => {
       this.stage.debug({ v: `Checking radius ${radius}...` })
       const missing = waypointArray.some(waypoint => {
-        const path = `promptbooks/output/waypointDatas/${waypoint.id}/${radius}.json`
+        const path = `promptbooks/output/waypointDatas/${waypoint.id}/next/${radius}.json`
         if (waypoint.id % 100 === 0) {
           this.stage.debug({ v: `Checking ${path}` })
         }

@@ -6,7 +6,7 @@ export class Waypoint {
   navigation: Navigation
   position: Vec2
   id: number
-  neighbors: Record<number, Record<number, Waypoint>> = {}
+  neighbors: Record<number, Waypoint[]> = {}
   pathDistances: Record<number, Record<number, number>> = {}
   nextWaypoints: Record<number, Record<number, Waypoint>> = {}
   distances: number[] = []
@@ -23,11 +23,18 @@ export class Waypoint {
     radius: number
   }): Record<number, number> {
     const radiusNextWaypoints = this.nextWaypoints[props.radius]
-    const targetIds = Object.keys(radiusNextWaypoints).map(s => Number(s))
+    const targetIds = Object.keys(radiusNextWaypoints).map(id => Number(id))
     const radiusNextWaypointIds: Record<number, number> = {}
     targetIds.forEach(targetId => {
       radiusNextWaypointIds[targetId] = radiusNextWaypoints[targetId].id
     })
     return radiusNextWaypointIds
+  }
+
+  getNeighborsIds (props: {
+    radius: number
+  }): number[] {
+    const radiusNeighbors = this.neighbors[props.radius]
+    return radiusNeighbors.map(neighbor => neighbor.id)
   }
 }

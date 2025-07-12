@@ -164,7 +164,6 @@ export class Stage {
       main: this.initial,
       waypointDefs: this.initial?.waypointIndexes
     })
-    this.spawner.setupSpawnPoints()
   }
 
   buildWalls (props: {

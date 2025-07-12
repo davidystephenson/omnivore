@@ -159,7 +159,7 @@ export class Nature {
     // this.addApe({ position: Vec2(45, 45) })
     // this.addTiger({ position: Vec2(-25, -25) })
     // this.addCrow({ position: Vec2(-15, 15) })
-    this.addFly({ position: Vec2(-25, -25) })
+    // this.addFly({ position: Vec2(-25, -25) })
     // this.addTardigrade({ position: Vec2(15, -15) })
     this.addWhale({ position: Vec2(25, 25) })
     // this.addBoa({ position: Vec2(35, 10) })

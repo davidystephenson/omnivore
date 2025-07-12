@@ -18,9 +18,9 @@ export default function readPromptbook (props: {
   const waypointFolders = fs.readdirSync(`promptbooks/${props.promptbookName}/waypointDatas`)
   console.info(`Reading ${waypointFolders.length} waypoint folders...`)
   let factor = 100
-  const waypointDatas = waypointFolders.map((folder, index) => {
+  const waypointDatas = waypointFolders.map((id, index) => {
     if (index % factor === 0) {
-      console.info(`Reading waypoint folder ${index} of ${waypointFolders.length}...`)
+      console.info(`Reading waypoint folder ${id} of ${waypointFolders.length}...`)
     }
     if (index >= factor * 10) {
       factor *= 10
@@ -28,18 +28,17 @@ export default function readPromptbook (props: {
     const waypointIndex = readWaypointIndex({
       onBook: props.onBook,
       promptbookName: props.promptbookName,
-      folder
+      folder: id
     })
-    const files = fs.readdirSync(`promptbooks/${props.promptbookName}/waypointDatas/${folder}`)
-    const radiusFiles = files.filter(file => !file.endsWith('index.json'))
+    const nextFiles = fs.readdirSync(`promptbooks/${props.promptbookName}/waypointDatas/${id}/next`)
     const nextWaypoints: NestedNumberRecord = {}
-    radiusFiles.forEach(radiusFile => {
+    nextFiles.forEach(nextWaypointsForRadiusFile => {
       const numberRecord = read({
-        path: `promptbooks/${props.promptbookName}/waypointDatas/${folder}/${radiusFile}`,
+        path: `promptbooks/${props.promptbookName}/waypointDatas/${id}/next/${nextWaypointsForRadiusFile}`,
         schema: numberRecordSchema,
         safe: props.onBook
       })
-      const radiusString = radiusFile.replace('.json', '')
+      const radiusString = nextWaypointsForRadiusFile.replace('.json', '')
       const radius = Number(radiusString)
       nextWaypoints[radius] = numberRecord
     })
