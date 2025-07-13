@@ -284,7 +284,9 @@ export class Navigation {
     const radiusCount = props.radiusIndex + 1
     const radiusLabel = `${radiusCount}/${this.radii.length}`
     const pathDistancesExist = fs.existsSync(`promptbooks/output/waypointDatas/${waypointArray[0].id}/pathDistances/${props.radius}.json`)
+
     if (!pathDistancesExist) {
+      const totalPaths = waypointArray.length * waypointArray.length
       // Initialize distance array for each waypoint for this radius
 
       this.stage.debug({
@@ -303,6 +305,7 @@ export class Navigation {
       const pathLengths = range(1, maxPathSize)
       for (const pathLength of pathLengths) {
         let improvements = 0
+        let totalChecks = 0
         const remainder = pathLength % pathDivisor
         const divisible = remainder === 0
         const pathLabel = `${pathLength}/${maxPathSize} r${radiusLabel}`
@@ -326,7 +329,6 @@ export class Navigation {
             safe: true
           })
           const neighbors = neighborIds.map(id => this.waypoints[id])
-          if (neighbors == null) throw new Error('Missing neighbors')
           waypointArray.forEach(otherWaypoint => {
             if (waypoint.id === otherWaypoint.id) {
               pathDistances[otherWaypoint.id] = 0
@@ -344,6 +346,7 @@ export class Navigation {
               if (neighborDistance == null) {
                 throw new Error(`Missing neighbor distance at ${otherWaypoint.id}}`)
               }
+              totalChecks += 1
               const distanceThroughNeighbor = waypoint.distances[neighbor.id] + neighborDistance
               if (distanceThroughNeighbor < pathDistances[otherWaypoint.id]) improvements += 1
               pathDistances[otherWaypoint.id] = Math.min(pathDistances[otherWaypoint.id], distanceThroughNeighbor)
@@ -351,24 +354,39 @@ export class Navigation {
           })
         })
         let maxPathDistance = 0
+        let infinitePaths = 0
         waypointArray.forEach(waypoint => {
           const pathDistances = Object.values(waypoint.pathDistances[props.radius])
           maxPathDistance = Math.max(maxPathDistance, ...pathDistances)
+          for (const pathDistance of pathDistances) {
+            if (pathDistance === Infinity) infinitePaths += 1
+          }
         })
+        const infinitePathPercentage = (infinitePaths / totalPaths) * 100
+        this.stage.debug({ v: `Infinite paths: ${infinitePaths}/${totalPaths} (${infinitePathPercentage.toFixed(2)}%)` })
+        const improvedCheckPercentage = (improvements / totalChecks) * 100
+        this.stage.debug({ v: `Improved checks: ${improvements}/${totalChecks} (${improvedCheckPercentage.toFixed(2)}%)` })
+        this.stage.debug({ v: `Max path distance: ${maxPathDistance}` })
+        this.stage.debug({ v: `Empty steps: ${emptySteps}` })
         if (improvements === 0) emptySteps += 1
         else emptySteps = 0
         if (isFinite(maxPathDistance) && emptySteps > 1) break
       }
       let maxPathDistance = 0
+      let infinitePaths = 0
       waypointArray.forEach(waypoint => {
         const pathDistances = Object.values(waypoint.pathDistances[props.radius])
         maxPathDistance = Math.max(maxPathDistance, ...pathDistances)
+        for (const pathDistance of pathDistances) {
+          if (pathDistance === Infinity) infinitePaths += 1
+        }
       })
+      const infinitePathPercentage = (infinitePaths / totalPaths) * 100
       if (!(maxPathDistance < Infinity)) {
-        throw new Error('Infinite Path Distance')
+        throw new Error(`Failure: Still ${infinitePaths}/${totalPaths} (${infinitePathPercentage.toFixed(2)}%) infinite paths`)
       }
       this.stage.debug({ v: 'Saving path distances...' })
-      waypointArray.forEach((waypoint, index) => {
+      waypointArray.forEach((waypoint) => {
         const pathDistances = waypoint.pathDistances[props.radius]
         this.stage.manager.saveToFile({
           data: pathDistances,
