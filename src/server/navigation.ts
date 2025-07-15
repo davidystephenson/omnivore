@@ -353,24 +353,23 @@ export class Navigation {
             })
           })
         })
-        let maxPathDistance = 0
-        let infinitePaths = 0
+        let infinitePaths = 0 // NEW
         waypointArray.forEach(waypoint => {
+          // OLD
           const pathDistances = Object.values(waypoint.pathDistances[props.radius])
-          maxPathDistance = Math.max(maxPathDistance, ...pathDistances)
+          // NEW
           for (const pathDistance of pathDistances) {
             if (pathDistance === Infinity) infinitePaths += 1
           }
         })
         const infinitePathPercentage = (infinitePaths / totalPaths) * 100
-        this.stage.debug({ v: `Infinite paths: ${infinitePaths}/${totalPaths} (${infinitePathPercentage.toFixed(2)}%)` })
+        this.stage.debug({ v: `Infinite paths: ${infinitePaths}/${totalPaths} (${infinitePathPercentage.toFixed(5)}%)` })
         const improvedCheckPercentage = (improvements / totalChecks) * 100
-        this.stage.debug({ v: `Improved checks: ${improvements}/${totalChecks} (${improvedCheckPercentage.toFixed(2)}%)` })
-        this.stage.debug({ v: `Max path distance: ${maxPathDistance}` })
-        this.stage.debug({ v: `Empty steps: ${emptySteps}` })
+        this.stage.debug({ v: `Improved checks: ${improvements}/${totalChecks} (${improvedCheckPercentage.toFixed(5)}%)` })
         if (improvements === 0) emptySteps += 1
         else emptySteps = 0
-        if (isFinite(maxPathDistance) && emptySteps > 1) break
+        this.stage.debug({ v: `Empty steps: ${emptySteps}` })
+        if (infinitePaths === 0 && emptySteps > 1) break
       }
       let maxPathDistance = 0
       let infinitePaths = 0
@@ -383,7 +382,7 @@ export class Navigation {
       })
       const infinitePathPercentage = (infinitePaths / totalPaths) * 100
       if (!(maxPathDistance < Infinity)) {
-        throw new Error(`Failure: Still ${infinitePaths}/${totalPaths} (${infinitePathPercentage.toFixed(2)}%) infinite paths`)
+        throw new Error(`Failure: Still ${infinitePaths}/${totalPaths} (${infinitePathPercentage.toFixed(5)}%) infinite paths`)
       }
       this.stage.debug({ v: 'Saving path distances...' })
       waypointArray.forEach((waypoint) => {
@@ -497,16 +496,25 @@ export class Navigation {
         })
       })
       this.stage.debug({ v: 'Calculating distances...' })
+      const distanceFactor = 100
       waypointArray.forEach(waypoint => {
+        const verbose = waypoint.id % distanceFactor === 0
+        if (verbose) {
+          console.info(`Calculating distances for waypoint ${waypoint.id} of ${waypointArray.length}...`)
+        }
+        if (waypoint.id >= factor * 10) {
+          factor *= 10
+        }
         waypointArray.forEach(otherWaypoint => {
           waypoint.distances[otherWaypoint.id] = Vec2.distance(waypoint.position, otherWaypoint.position)
         })
-      })
-      Object.values(this.waypoints).forEach(waypoint => {
         const distancesRecord: Record<number, number> = {}
         waypointArray.forEach(otherWaypoint => {
           distancesRecord[otherWaypoint.id] = waypoint.distances[otherWaypoint.id]
         })
+        if (verbose) {
+          console.info(`Saving distances for waypoint ${waypoint.id} of ${waypointArray.length}...`)
+        }
         this.stage.manager.saveToFile({
           data: distancesRecord,
           path: `promptbooks/output/waypointDatas/${waypoint.id}/distances.json`,
