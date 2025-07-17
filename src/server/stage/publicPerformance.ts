@@ -9,12 +9,12 @@ export class PublicPerformance extends Performance {
     promptbookName: string
   }) {
     const flags = new Flags({
-      // performance: true,
+      performance: true,
       // playerDeath: true
       respawn: true,
       // spawn: true,
-      stats: true
-      // timings: true
+      // stats: true
+      timings: true
     })
     super({
       flags,

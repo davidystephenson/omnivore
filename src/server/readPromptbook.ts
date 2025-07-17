@@ -16,11 +16,17 @@ export default function readPromptbook (props: {
     onBook: props.onBook
   })
   const waypointFolders = fs.readdirSync(`promptbooks/${props.promptbookName}/waypointDatas`)
+  const sorted = waypointFolders.toSorted((a, b) => {
+    const aNumber = Number(a)
+    const bNumber = Number(b)
+    return aNumber - bNumber
+  })
   console.info(`Reading ${waypointFolders.length} waypoint folders...`)
   let factor = 100
-  const waypointDatas = waypointFolders.map((id, index) => {
-    if (index % factor === 0) {
-      console.info(`Reading waypoint folder ${id} of ${waypointFolders.length}...`)
+  const waypointDatas = sorted.map((id, index) => {
+    const folderPath = `promptbooks/${props.promptbookName}/waypointDatas/${id}`
+    if (index === 0 || (index + 1) % factor === 0) {
+      console.info(`Reading folder ${folderPath} of ${waypointFolders.length}...`)
     }
     if (index >= factor * 10) {
       factor *= 10

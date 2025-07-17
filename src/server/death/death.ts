@@ -7,7 +7,7 @@ import { LogProps } from '../debugger'
 import { BLUE, CYAN } from '../../shared/color'
 
 export class Death {
-  static MINIMUM_SIZE = 0.01
+  static MINIMUM_SIZE = 1
   static MINIMUM_HEALTH = 0.1
   stage: Stage
   victim: Membrane
