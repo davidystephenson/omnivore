@@ -439,13 +439,13 @@ export class Navigation {
     })
 
     console.info(`Saving ${waypointArray.length} waypoints for radius ${props.radius}...`)
-    let factor = 100
+    let waypointIndexFactor = 100
     waypointArray.forEach((waypoint, index) => {
-      if (index % factor === 0) {
+      if (index % waypointIndexFactor === 0) {
         console.info(`Saving waypoint ${index} of ${waypointArray.length}...`)
       }
-      if (index >= factor * 10) {
-        factor *= 10
+      if (index >= waypointIndexFactor * 10) {
+        waypointIndexFactor *= 10
       }
       const nextWaypoints = waypoint.getNextWaypointIds({ radius: props.radius })
       this.stage.manager.saveToFile({
@@ -465,13 +465,13 @@ export class Navigation {
       this.createWaypoints()
       const waypointArray = Object.values(this.waypoints)
       console.info(`Saving ${waypointArray.length} waypoint indexes...`)
-      let factor = 100
+      let waypointIndexFactor = 100
       waypointArray.forEach((waypoint, index) => {
-        if (index % factor === 0) {
+        if (index % waypointIndexFactor === 0) {
           console.info(`Saving waypoint ${index} of ${waypointArray.length}...`)
         }
-        if (index >= factor * 10) {
-          factor *= 10
+        if (index >= waypointIndexFactor * 10) {
+          waypointIndexFactor *= 10
         }
         const waypointIndex: WaypointDef = {
           position: { x: waypoint.position.x, y: waypoint.position.y },
@@ -496,14 +496,14 @@ export class Navigation {
         })
       })
       this.stage.debug({ v: 'Calculating distances...' })
-      const distanceFactor = 100
+      let distanceFactor = 1
       waypointArray.forEach(waypoint => {
         const verbose = waypoint.id % distanceFactor === 0
         if (verbose) {
           console.info(`Calculating distances for waypoint ${waypoint.id} of ${waypointArray.length}...`)
         }
-        if (waypoint.id >= factor * 10) {
-          factor *= 10
+        if (waypoint.id >= distanceFactor * 10) {
+          distanceFactor *= 10
         }
         waypointArray.forEach(otherWaypoint => {
           waypoint.distances[otherWaypoint.id] = Vec2.distance(waypoint.position, otherWaypoint.position)
