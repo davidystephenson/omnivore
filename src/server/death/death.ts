@@ -63,6 +63,8 @@ export class Death {
     }
     if (this.victim.actor instanceof Organism && this.victim.actor.player != null) {
       this.victim.actor.player.age = 0
+      this.victim.actor.player.ageCache = 0
+      this.victim.actor.player.points = 0
     }
     this.stage.spawner.queue.push(spawn)
   }

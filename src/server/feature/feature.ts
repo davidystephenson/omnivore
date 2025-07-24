@@ -10,7 +10,7 @@ let featureCount = 0
 
 export class Feature {
   static MINIMUM_DAMAGE = 0.00000001
-  static DAMPING = 0.14
+  static DAMPING = 0.11
   actor: Actor
   body: Body
   borderWidth: number
@@ -85,14 +85,19 @@ export class Feature {
 
   dealDamage (props: {
     damage?: number
+    damageMultiplier?: number
     target: Feature
-    multiplier?: number
+    sizeMultiplier?: number
   }): void {
     this.actor.stage.flag({ f: 'damage', k: 'attacker', v: this.label })
     this.actor.stage.flag({
       f: 'damage', k: 'target', v: props.target.label
     })
-    const damageDealt = props.damage ?? this.getDamageDealt({ multiplier: props.multiplier, target: props.target })
+    const damageDealt = props.damage ?? this.getDamageDealt({
+      damageMultiplier: props.damageMultiplier,
+      sizeMultiplier: props.sizeMultiplier,
+      target: props.target
+    })
     this.actor.stage.flag({
       f: 'damage', k: 'damageDealt', v: damageDealt
     })
@@ -107,18 +112,24 @@ export class Feature {
     this.actor.stage.destructionQueue.push(this.body)
   }
 
-  getDamageDealt (props: { multiplier?: number, target: Feature }): number {
-    const multiplier = props.multiplier ?? 1
-    this.actor.stage.flag({ f: 'damage', k: 'multiplier', v: multiplier })
+  getDamageDealt (props: {
+    damageMultiplier?: number
+    sizeMultiplier?: number
+    target: Feature
+  }): number {
+    const damageMultiplier = props.damageMultiplier ?? 1
+    this.actor.stage.flag({ f: 'damage', k: 'damageMultiplier', v: damageMultiplier })
+    const sizeMultiplier = props.sizeMultiplier ?? 1
+    this.actor.stage.flag({ f: 'damage', k: 'sizeMultiplier', v: sizeMultiplier })
     const myMass = this.body.getMass()
     this.actor.stage.flag({ f: 'damage', k: 'myMass', v: myMass })
-    const multipliedMass = myMass * multiplier
+    const multipliedMass = myMass * sizeMultiplier
     this.actor.stage.flag({ f: 'damage', k: 'multipliedMass', v: multipliedMass })
     const targetMass = props.target.body.getMass()
     this.actor.stage.flag({ f: 'damage', k: 'targetMass', v: targetMass })
     const ratio = multipliedMass / targetMass
     const factor = 3
-    const combatDamage = 0.1 * Math.pow(ratio, factor)
+    const combatDamage = 0.1 * Math.pow(ratio, factor) * damageMultiplier
     if (combatDamage < Feature.MINIMUM_DAMAGE) {
       return Feature.MINIMUM_DAMAGE
     }
@@ -136,7 +147,7 @@ export class Feature {
       y: position.y,
       n,
       s: 1,
-      a
+      h: a
     }
     element.u = this.radius
     if (!seen) {

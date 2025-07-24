@@ -7,11 +7,10 @@ import { DebugLine } from '../shared/debugLine'
 import { DebugCircle } from '../shared/debugCircle'
 import { LIGHT_GREEN } from '../shared/color'
 import { Input } from '../shared/input'
+import { getBaseLog } from '../server/math'
 
 export class Renderer {
   static BACKGROUND = 'rgba(50,50,50,0.9)'
-  static DURATION = 500
-  active = false
   camera = {
     position: new Vec2(0, 0),
     zoom: 0
@@ -22,11 +21,11 @@ export class Renderer {
   debugLines: DebugLine[] = []
   debugCircles: DebugCircle[] = []
   elements = new Map<number, ClientElement>()
+  frames = 0
   foodCount = 0
   fpsList: number[] = []
   id: number = 0
   input: Input
-  interval?: number
   lerp = 0.5
   ropes: Rope[] = []
   summary?: Summary
@@ -42,7 +41,271 @@ export class Renderer {
     this.render()
   }
 
+  drawCircle (element: ClientElement): void {
+    if (this.summary == null) {
+      throw new Error('Missing summary')
+    }
+    if (element.z == null) {
+      throw new Error('Missing circle center x')
+    }
+    if (element.w == null) {
+      throw new Error('Missing circle center y')
+    }
+    if (element.u == null) {
+      throw new Error('Missing circle radius')
+    }
+    const context = this.context
+    context.save()
+    this.context.fillStyle = `rgba(${element.r},${element.g},${element.b},${element.h})`
+    context.beginPath()
+    context.arc(element.z, element.w, element.u, 0, 2 * Math.PI)
+    context.fill()
+    context.clip()
+    const self = element.i === this.summary.id
+    const red = self ? LIGHT_GREEN.red : element.r
+    const green = self ? LIGHT_GREEN.green : element.g
+    const blue = self ? LIGHT_GREEN.blue : element.b
+    const strokeStyle = `rgba(${red},${green},${blue},1)`
+    this.context.strokeStyle = strokeStyle
+    this.context.lineWidth = 5 * element.o
+    context.beginPath()
+    context.arc(element.z, element.w, element.u, 0, 2 * Math.PI)
+    context.stroke()
+    if (self) {
+      if (this.summary.stamina == null) {
+        throw new Error('Missing stamina')
+      }
+      if (this.summary.speed == null) {
+        throw new Error('Missing speed')
+      }
+      const minimum = 0.14
+      const maximumBonus = element.u - minimum
+      const bonusLength = maximumBonus * this.summary.speed
+      const length = minimum + bonusLength
+      const bonusWidth = maximumBonus * this.summary.stamina
+      const width = minimum + bonusWidth
+      this.context.lineWidth = width
+      this.context.strokeStyle = 'lime'
+      console.log('this.summary.increase', this.summary.increase)
+      const x = this.summary.increase ?? 1
+      const ratio = 1 / (x + 0.5)
+      console.log('ratio', ratio)
+      const base = 1.007
+      const logarithm = getBaseLog(base, ratio)
+      console.log('logarithm', logarithm)
+      const interval = logarithm + 70
+      console.log('interval', interval)
+      const remainder = this.frames % interval
+      console.log('remainder', remainder)
+      const highlighted = this.summary.increase != null && remainder <= 5
+      console.log('highlighted', highlighted)
+      this.indicate({
+        control: this.input.controls.left,
+        element,
+        highlight: highlighted,
+        length
+      })
+      this.indicate({
+        control: this.input.controls.right,
+        element,
+        highlight: highlighted,
+        length,
+        positive: true
+      })
+      this.indicate({
+        control: this.input.controls.up,
+        element,
+        highlight: highlighted,
+        length,
+        positive: true,
+        vertical: true
+      })
+      this.indicate({
+        control: this.input.controls.down,
+        element,
+        highlight: highlighted,
+        length,
+        vertical: true
+      })
+    } else {
+      this.indicate({
+        element,
+        length
+      })
+      this.indicate({
+        element,
+        length,
+        positive: true
+      })
+      this.indicate({
+        element,
+        length,
+        positive: true,
+        vertical: true
+      })
+      this.indicate({
+        element,
+        length,
+        vertical: true
+      })
+    }
+    context.restore()
+  }
+
+  drawElement (props: {
+    element: ClientElement
+  }): void {
+    if (!props.element.visible) return
+    this.followCamera()
+    this.context.translate(props.element.x, props.element.y)
+    this.context.rotate(props.element.n)
+    if (props.element.z != null) {
+      this.drawCircle(props.element)
+    }
+    if (props.element.v != null) {
+      this.drawPolygon(props.element, props.element.v)
+      if (props.element.d != null) {
+        this.drawPolygon(props.element, props.element.d)
+      }
+    }
+  }
+
+  drawIndicator (props: {
+    color: string
+    element: ClientElement
+    length: number
+    positive?: boolean
+    vertical?: boolean
+  }): void {
+    if (props.element.z == null) {
+      throw new Error('Missing circle center x')
+    }
+    if (props.element.w == null) {
+      throw new Error('Missing circle center y')
+    }
+    if (props.element.u == null) {
+      throw new Error('Missing circle radius')
+    }
+    const vertical = props.vertical ?? false
+    const positive = props.positive ?? false
+    const directionCoordinate = vertical ? props.element.w : props.element.z
+    const outer = positive
+      ? directionCoordinate + props.element.u
+      : directionCoordinate - props.element.u
+    const inner = positive
+      ? outer - props.length
+      : outer + props.length
+    this.context.strokeStyle = props.color
+    this.context.beginPath()
+    if (vertical) {
+      this.context.moveTo(props.element.z, outer)
+      this.context.lineTo(props.element.z, inner)
+    } else {
+      this.context.moveTo(outer, props.element.w)
+      this.context.lineTo(inner, props.element.w)
+    }
+    this.context.stroke()
+  }
+
+  drawPolygon (element: ClientElement, vertices: Vec2[]): void {
+    const context = this.context
+    context.save()
+    this.context.fillStyle = `rgba(${element.r},${element.g},${element.b},${element.h})`
+    context.beginPath()
+    vertices.forEach((vertex, i) => {
+      const x = vertex.x
+      const y = vertex.y
+      if (i === 0) context.moveTo(x, y)
+      else context.lineTo(x, y)
+    })
+    context.closePath()
+    context.clip()
+    context.fill()
+    if (element.o > 0) {
+      this.context.strokeStyle = `rgba(${element.r},${element.g},${element.b},1)`
+      this.context.lineWidth = 2 * element.o
+      context.beginPath()
+      vertices.forEach((vertex, i) => {
+        const x = vertex.x
+        const y = vertex.y
+        if (i === 0) context.moveTo(x, y)
+        else context.lineTo(x, y)
+      })
+      context.closePath()
+      context.stroke()
+    }
+    context.restore()
+  }
+
+  followCamera (): void {
+    this.context.resetTransform()
+    this.context.translate(0.5 * this.canvas.width, 0.5 * this.canvas.height)
+    const vmin = Math.min(this.canvas.width, this.canvas.height)
+    this.context.scale(0.02 * vmin, -0.02 * vmin)
+    const cameraScale = 22 / HALF_SIGHT_HEIGHT * Math.exp(0.03 * this.camera.zoom)
+    this.context.scale(cameraScale, cameraScale)
+    this.context.translate(-this.camera.position.x, -this.camera.position.y)
+  }
+
+  getPoints (): string {
+    if (this.summary == null) {
+      throw new Error('Missing summary')
+    }
+    if (this.summary.points == null) {
+      throw new Error('Missing points in summary')
+    }
+    // if (this.summary.points > 1000000000) {
+    //   const billions = Math.floor(this.summary.points / 1000000000)
+    //   const billionsString = `${billions}b`
+    //   const millions = Math.floor((this.summary.points % 1000000000) / 1000000)
+    //   const millionsString = `${millions}m`
+    //   const thousands = Math.floor((this.summary.points % 1000000) / 1000)
+    //   const thousandsString = `${thousands}k`
+    //   const string = `${billionsString} ${millionsString} ${thousandsString}`
+    //   return string
+    // }
+    // if (this.summary.points >= 1000000) {
+    //   const millions = Math.floor(this.summary.points / 1000000)
+    //   const millionsString = `${millions}m`
+    //   const thousands = Math.floor((this.summary.points % 1000000) / 1000)
+    //   const thousandsString = `${thousands}k`
+    //   return `${millionsString} ${thousandsString}`
+    // }
+    // if (this.summary.points >= 10000) {
+    //   const thousands = Math.floor(this.summary.points / 1000)
+    //   return `${thousands}k`
+    // }
+    const rounded = Math.floor(this.summary.points)
+    return rounded.toLocaleString()
+  }
+
+  indicate (props: {
+    control?: boolean
+    element: ClientElement
+    highlight?: boolean
+    length: number
+    positive?: boolean
+    vertical?: boolean
+  }): void {
+    if (props.control !== true && props.element.h > 0.1) {
+      return
+    }
+    const color = props.control === true
+      ? props.highlight === true
+        ? 'white'
+        : 'lime'
+      : Renderer.BACKGROUND
+    this.drawIndicator({
+      color,
+      element: props.element,
+      length: props.length,
+      positive: props.positive,
+      vertical: props.vertical
+    })
+  }
+
   render (): void {
+    this.frames += 1
     window.requestAnimationFrame(t => this.render())
     this.context.resetTransform()
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
@@ -99,12 +362,16 @@ export class Renderer {
     this.context.resetTransform()
     this.context.fillStyle = 'white'
     this.context.font = '50px Arial'
-    this.context.fillText(String(this.summary.age), 10, 60)
+    const age = String(this.summary.age)
+    const points = this.getPoints()
+    const message = `${points} (+${age})`
+    this.context.fillText(message, 10, 60)
     if (this.summary.respawn != null && this.summary.respawn > -1) {
       const next = this.summary.respawn === 0
       const color = next ? 'lime' : 'white'
       this.context.fillStyle = color
-      this.context.fillText(`Respawning... ${String(this.summary.respawn)}`, 10, this.canvas.height * 0.95)
+      const message = `Respawning in ${this.summary.respawn}...`
+      this.context.fillText(message, 10, this.canvas.height * 0.95)
     }
     const total = this.fpsList.reduce((a, b) => a + b, 0)
     const average = total / this.fpsList.length
@@ -112,227 +379,6 @@ export class Renderer {
     const capped = Math.min(floored, 30)
     this.context.fillStyle = capped < 25 ? 'red' : 'green'
     this.context.fillText(`${capped} fps`, this.canvas.width * 0.909, 60)
-  }
-
-  followCamera (): void {
-    this.context.resetTransform()
-    this.context.translate(0.5 * this.canvas.width, 0.5 * this.canvas.height)
-    const vmin = Math.min(this.canvas.width, this.canvas.height)
-    this.context.scale(0.02 * vmin, -0.02 * vmin)
-    const cameraScale = 22 / HALF_SIGHT_HEIGHT * Math.exp(0.03 * this.camera.zoom)
-    this.context.scale(cameraScale, cameraScale)
-    this.context.translate(-this.camera.position.x, -this.camera.position.y)
-  }
-
-  drawElement (props: {
-    element: ClientElement
-  }): void {
-    if (!props.element.visible) return
-    this.followCamera()
-    this.context.translate(props.element.x, props.element.y)
-    this.context.rotate(props.element.n)
-    if (props.element.z != null) {
-      this.drawCircle(props.element)
-    }
-    if (props.element.v != null) {
-      this.drawPolygon(props.element, props.element.v)
-      if (props.element.d != null) {
-        this.drawPolygon(props.element, props.element.d)
-      }
-    }
-  }
-
-  drawPolygon (element: ClientElement, vertices: Vec2[]): void {
-    const context = this.context
-    context.save()
-    this.context.fillStyle = `rgba(${element.r},${element.g},${element.b},${element.a})`
-    context.beginPath()
-    vertices.forEach((vertex, i) => {
-      const x = vertex.x
-      const y = vertex.y
-      if (i === 0) context.moveTo(x, y)
-      else context.lineTo(x, y)
-    })
-    context.closePath()
-    context.clip()
-    context.fill()
-    if (element.o > 0) {
-      this.context.strokeStyle = `rgba(${element.r},${element.g},${element.b},1)`
-      this.context.lineWidth = 2 * element.o
-      context.beginPath()
-      vertices.forEach((vertex, i) => {
-        const x = vertex.x
-        const y = vertex.y
-        if (i === 0) context.moveTo(x, y)
-        else context.lineTo(x, y)
-      })
-      context.closePath()
-      context.stroke()
-    }
-    context.restore()
-  }
-
-  drawCircle (element: ClientElement): void {
-    if (this.summary == null) {
-      throw new Error('Missing summary')
-    }
-    if (element.z == null) {
-      throw new Error('Missing circle center x')
-    }
-    if (element.w == null) {
-      throw new Error('Missing circle center y')
-    }
-    if (element.u == null) {
-      throw new Error('Missing circle radius')
-    }
-    const context = this.context
-    context.save()
-    this.context.fillStyle = `rgba(${element.r},${element.g},${element.b},${element.a})`
-    context.beginPath()
-    context.arc(element.z, element.w, element.u, 0, 2 * Math.PI)
-    context.fill()
-    context.clip()
-    const self = element.i === this.summary.id
-    const red = self ? LIGHT_GREEN.red : element.r
-    const green = self ? LIGHT_GREEN.green : element.g
-    const blue = self ? LIGHT_GREEN.blue : element.b
-    const strokeStyle = `rgba(${red},${green},${blue},1)`
-    this.context.strokeStyle = strokeStyle
-    this.context.lineWidth = 5 * element.o
-    context.beginPath()
-    context.arc(element.z, element.w, element.u, 0, 2 * Math.PI)
-    context.stroke()
-    if (self) {
-      if (this.summary.stamina == null) {
-        throw new Error('Missing stamina')
-      }
-      if (this.summary.speed == null) {
-        throw new Error('Missing speed')
-      }
-      const warning = element.a < 0.1
-      if (warning && this.interval == null) {
-        this.active = true
-        this.interval = window.setInterval(() => {
-          this.active = !this.active
-        }, Renderer.DURATION)
-      }
-      if (!warning && this.interval != null) {
-        window.clearInterval(this.interval)
-        this.interval = undefined
-        this.active = false
-      }
-      const minimum = 0.1
-      const maximumBonus = element.u - minimum
-      const bonusLength = maximumBonus * this.summary.speed
-      const length = minimum + bonusLength
-      const bonusWidth = maximumBonus * this.summary.stamina
-      const width = minimum + bonusWidth
-      this.context.lineWidth = width
-      this.context.strokeStyle = 'lime'
-      this.indicate({
-        control: this.input.controls.left,
-        element,
-        length
-      })
-      this.indicate({
-        control: this.input.controls.right,
-        element,
-        length,
-        positive: true
-      })
-      this.indicate({
-        control: this.input.controls.up,
-        element,
-        length,
-        positive: true,
-        vertical: true
-      })
-      this.indicate({
-        control: this.input.controls.down,
-        element,
-        length,
-        vertical: true
-      })
-    } else {
-      this.indicate({
-        element,
-        length
-      })
-      this.indicate({
-        element,
-        length,
-        positive: true
-      })
-      this.indicate({
-        element,
-        length,
-        positive: true,
-        vertical: true
-      })
-      this.indicate({
-        element,
-        length,
-        vertical: true
-      })
-    }
-    context.restore()
-  }
-
-  drawIndicator (props: {
-    color: string
-    element: ClientElement
-    length: number
-    positive?: boolean
-    vertical?: boolean
-  }): void {
-    if (props.element.z == null) {
-      throw new Error('Missing circle center x')
-    }
-    if (props.element.w == null) {
-      throw new Error('Missing circle center y')
-    }
-    if (props.element.u == null) {
-      throw new Error('Missing circle radius')
-    }
-    const vertical = props.vertical ?? false
-    const positive = props.positive ?? false
-    const directionCoordinate = vertical ? props.element.w : props.element.z
-    const outer = positive
-      ? directionCoordinate + props.element.u
-      : directionCoordinate - props.element.u
-    const inner = positive
-      ? outer - props.length
-      : outer + props.length
-    this.context.strokeStyle = props.color
-    this.context.beginPath()
-    if (vertical) {
-      this.context.moveTo(props.element.z, outer)
-      this.context.lineTo(props.element.z, inner)
-    } else {
-      this.context.moveTo(outer, props.element.w)
-      this.context.lineTo(inner, props.element.w)
-    }
-    this.context.stroke()
-  }
-
-  indicate (props: {
-    control?: boolean
-    element: ClientElement
-    length: number
-    positive?: boolean
-    vertical?: boolean
-  }): void {
-    if (props.control !== true && props.element.a > 0.1) {
-      return
-    }
-    const color = props.control === true ? 'lime' : Renderer.BACKGROUND
-    this.drawIndicator({
-      color,
-      element: props.element,
-      length: props.length,
-      positive: props.positive,
-      vertical: props.vertical
-    })
   }
 
   update (summary: Summary): void {

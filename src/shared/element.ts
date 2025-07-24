@@ -1,22 +1,21 @@
 import { Vec2 } from 'planck'
 
 export interface Element {
+  b?: number // blue
+  d?: Vec2[] // seed
+  g?: number // green
+  h: number // health
   i: number // id
+  o?: number // borderWidth
   n: number // angle
   s: number // scale
-  a: number // alpha
+  r?: number // red
+  u?: number // radius
+  v?: Vec2[] // polygon
+  w?: number // center y
   x: number // x
   y: number // y
   z?: number // center x
-  w?: number // center y
-  // TODO Remove borderWidth
-  o?: number // borderWidth
-  u?: number // radius
-  v?: Vec2[] // polygon
-  d?: Vec2[] // seed
-  r?: number // red
-  g?: number // green
-  b?: number // blue
 }
 
 export interface CompleteElement extends Element {

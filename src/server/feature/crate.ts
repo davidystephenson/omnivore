@@ -2,6 +2,9 @@ import { Vec2, BoxShape } from 'planck'
 import { CYAN, Rgb } from '../../shared/color'
 import { Actor } from '../actor/actor'
 import { Prop } from './prop'
+import { Feature } from './feature'
+import { Rock } from '../actor/rock'
+import { River } from '../actor/river'
 
 export class Crate extends Prop {
   constructor (props: {
@@ -25,5 +28,20 @@ export class Crate extends Prop {
       position: props.position,
       shape
     })
+  }
+
+  handleContact (props: {
+    target: Feature
+  }): void {
+    if (!(this.actor instanceof Rock)) {
+      return
+    }
+    if (props.target.actor instanceof River) {
+      this.dealDamage({
+        damageMultiplier: 0.01,
+        sizeMultiplier: 0.01,
+        target: props.target
+      })
+    }
   }
 }

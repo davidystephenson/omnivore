@@ -155,12 +155,16 @@ export class Killing extends Death {
           })
 
           const killerSpeed = this.killer.body.getLinearVelocity().length()
+          console.log('killerSpeed', killerSpeed)
           const victimSpeed = this.victim.body.getLinearVelocity().length()
+          console.log('victimSpeed', victimSpeed)
           const victimPosition = this.victim.body.getPosition()
-          const power = Math.max(killerSpeed, victimSpeed) * 25
+          const power = Math.min(killerSpeed, victimSpeed) * 25
+          console.log('power', power)
           const direction = directionFromTo(killerPosition, victimPosition)
           const force = Vec2.mul(power, direction)
-          const speed = Math.min(killerSpeed, victimSpeed)
+          const speed = Math.max(killerSpeed, victimSpeed)
+          console.log('speed', speed)
           const averageStamina = (this.killer.actor.gene.stamina + this.victim.actor.gene.stamina) / 2
           const health = Math.max(averageStamina, Death.MINIMUM_HEALTH)
           const center = this.getCenter({

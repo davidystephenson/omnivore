@@ -83,8 +83,6 @@ export class Nature {
       strength: 0.01
     })
 
-    this.playerGene = this.apeGene
-
     this.boaGene = new Gene({
       speed: 0,
       stage: this.stage,
@@ -98,6 +96,30 @@ export class Nature {
       stamina: 1,
       strength: 0
     })
+
+    this.playerGene = this.apeGene
+    // this.summary.increase 0.33
+    // renderer.ts:223 ratio 1.2048192771084336
+    // renderer.ts:226 logarithm 26.711567645800226
+    // renderer.ts:228 interval 96.71156764580023
+
+    // this.playerGene = this.flyGene
+    // this.summary.increase 0.01
+    // renderer.ts:223 ratio 1.9607843137254901
+    // renderer.ts:226 logarithm 96.52835989867195
+    // renderer.ts:228 interval 166.52835989867197
+
+    // this.playerGene = this.whaleGene
+    // this.summary.increase 1
+    // renderer.ts:223 ratio 0.6666666666666666
+    // renderer.ts:226 logarithm -58.12608372950954
+    // renderer.ts:228 interval 11.873916270490461
+
+    // this.playerGene = this.tigerGene
+    // this.summary.increase 0.00016666666666666666
+    // renderer.ts:222 ratio 6
+    // renderer.ts:225 logarithm 60.6167819178331
+    // renderer.ts:227 interval 30.6167819178331
   }
 
   addApe (props: {

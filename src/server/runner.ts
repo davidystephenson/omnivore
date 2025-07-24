@@ -161,16 +161,18 @@ export class Runner {
     const summary: Summary = {
       age,
       curtains,
+      debugLines: this.debugLines,
+      debugCircles: this.debugCircles,
       features: elements,
       fps: this.fps,
       foodCount: this.stage.food.length,
+      points: props.player.points,
       ropes: this.getRopes(props.player),
-      debugLines: this.debugLines,
-      debugCircles: this.debugCircles,
       respawn: -1
     }
     if (props.player.organism != null) {
       summary.id = props.player.organism.membrane.id
+      summary.increase = props.player.organism.membrane.increase
       summary.controls = props.player.organism.controls
       summary.speed = props.player.organism.gene.speed
       summary.stamina = props.player.organism.gene.stamina

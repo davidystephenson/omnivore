@@ -14,6 +14,8 @@ export interface Summary {
   foodCount?: number
   fps: number
   id?: number
+  increase?: number
+  points?: number
   ropes?: Rope[]
   respawn: number
   speed?: number

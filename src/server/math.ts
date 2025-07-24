@@ -1,5 +1,9 @@
 import { AABB, Vec2 } from 'planck'
 
+export function getBaseLog (x: number, y: number): number {
+  return Math.log(y) / Math.log(x)
+}
+
 export function sum (x: number[]): number {
   let s = 0
   x.forEach(value => { s += value })

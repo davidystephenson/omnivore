@@ -7,6 +7,8 @@ import { PINK, Rgb } from '../../shared/color'
 export class Player {
   static INITIAL = 1
   age = 0
+  ageCache = 0
+  points = 0
   id: string
   organism?: Organism
   seenIds: number[] = []
@@ -44,7 +46,16 @@ export class Player {
     if (this.organism == null) {
       return
     }
+    this.stage.debug({
+      k: 'stepSize',
+      v: props.stepSize
+    })
     this.age += props.stepSize
+    const roundAge = Math.floor(this.age)
+    if (this.ageCache < roundAge) {
+      this.points += this.age
+      this.ageCache = roundAge
+    }
     if (this.stage.flags.playerNearest) {
       const features = this.organism.membrane.getFeaturesInRange()
       const sorted = this.organism.sortNearest({ features })

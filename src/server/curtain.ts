@@ -48,7 +48,7 @@ export class Curtain {
       y: 0,
       n,
       s: 1,
-      a: 1,
+      h: 1,
       r: 25,
       g: 25,
       b: 25,

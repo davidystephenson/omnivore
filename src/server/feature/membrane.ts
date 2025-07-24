@@ -14,13 +14,14 @@ import { LIME } from '../../shared/color'
 export class Membrane extends Feature {
   static BASE_DAMAGE = 0.1
   static DAMAGE_FACTOR = 3
-  static GENETIC_LIFE_SECONDS = 15
+  static GENETIC_LIFE_SECONDS = 90
   static GROWTH = 0.01
   static INITIAL_RADIUS = 0.6 / Math.sqrt(2)
   static MINIMUM_DAMAGE = 0.1
-  static MINIMUM_LIFE_SECONDS = 60
+  static MINIMUM_LIFE_SECONDS = 40
   actor: Organism
   destroyed = false
+  increase?: number
   hungerDamage = 0
   collideFeatures = new Set<Feature>()
   mass: number
@@ -143,11 +144,15 @@ export class Membrane extends Feature {
   }
 
   grow (stepSize: number): void {
-    if (this.radius === this.targetRadius) return
+    if (this.radius === this.targetRadius) {
+      this.increase = undefined
+      return
+    }
     this.step += 1
     if (this.step % 2 === 0) {
       const strength = Math.max(this.actor.gene.strength, 0.01)
       const increase = Membrane.GROWTH * stepSize * strength
+      this.increase = strength
       this.radius = Math.min(this.radius + increase, this.targetRadius)
       this.body.destroyFixture(this.fixture)
       this.fixture = this.body.createFixture({
