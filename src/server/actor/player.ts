@@ -46,10 +46,6 @@ export class Player {
     if (this.organism == null) {
       return
     }
-    this.stage.debug({
-      k: 'stepSize',
-      v: props.stepSize
-    })
     this.age += props.stepSize
     const roundAge = Math.floor(this.age)
     if (this.ageCache < roundAge) {

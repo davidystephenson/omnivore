@@ -56,21 +56,24 @@ export class Renderer {
     }
     const context = this.context
     context.save()
-    this.context.fillStyle = `rgba(${element.r},${element.g},${element.b},${element.h})`
+    this.context.fillStyle = `rgba(${element.r},${element.g},${element.b},1)`
     context.beginPath()
     context.arc(element.z, element.w, element.u, 0, 2 * Math.PI)
     context.fill()
     context.clip()
+    this.context.fillStyle = Renderer.BACKGROUND
+    const maximumInnerRadius = element.u - element.o
+    const damage = 1 - element.h
+    const innerRadius = maximumInnerRadius * damage
     const self = element.i === this.summary.id
-    const red = self ? LIGHT_GREEN.red : element.r
-    const green = self ? LIGHT_GREEN.green : element.g
-    const blue = self ? LIGHT_GREEN.blue : element.b
-    const strokeStyle = `rgba(${red},${green},${blue},1)`
-    this.context.strokeStyle = strokeStyle
-    this.context.lineWidth = 5 * element.o
+    if (self) {
+      console.log('maximumInnerRadius', maximumInnerRadius)
+      console.log('damage', damage)
+      console.log('innerRadius', innerRadius)
+    }
     context.beginPath()
-    context.arc(element.z, element.w, element.u, 0, 2 * Math.PI)
-    context.stroke()
+    context.arc(element.z, element.w, innerRadius, 0, 2 * Math.PI)
+    context.fill()
     if (self) {
       if (this.summary.stamina == null) {
         throw new Error('Missing stamina')
@@ -86,19 +89,13 @@ export class Renderer {
       const width = minimum + bonusWidth
       this.context.lineWidth = width
       this.context.strokeStyle = 'lime'
-      console.log('this.summary.increase', this.summary.increase)
       const x = this.summary.increase ?? 1
       const ratio = 1 / (x + 0.5)
-      console.log('ratio', ratio)
       const base = 1.007
       const logarithm = getBaseLog(base, ratio)
-      console.log('logarithm', logarithm)
       const interval = logarithm + 70
-      console.log('interval', interval)
       const remainder = this.frames % interval
-      console.log('remainder', remainder)
       const highlighted = this.summary.increase != null && remainder <= 5
-      console.log('highlighted', highlighted)
       this.indicate({
         control: this.input.controls.left,
         element,
