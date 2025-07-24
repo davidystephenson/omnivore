@@ -218,19 +218,22 @@ export class Renderer {
     context.closePath()
     context.clip()
     context.fill()
-    if (element.o > 0) {
-      this.context.strokeStyle = `rgba(${element.r},${element.g},${element.b},1)`
-      this.context.lineWidth = 2 * element.o
-      context.beginPath()
-      vertices.forEach((vertex, i) => {
-        const x = vertex.x
-        const y = vertex.y
-        if (i === 0) context.moveTo(x, y)
-        else context.lineTo(x, y)
-      })
-      context.closePath()
-      context.stroke()
-    }
+    this.context.strokeStyle = `rgba(${element.r},${element.g},${element.b},1)`
+    const longestSide = vertices.reduce((max, vertex) => {
+      const distance = Vec2.distance(vertex, vertices[0])
+      return Math.max(max, distance)
+    }, 0)
+    const borderWidth = longestSide * element.h
+    this.context.lineWidth = 2 * borderWidth
+    context.beginPath()
+    vertices.forEach((vertex, i) => {
+      const x = vertex.x
+      const y = vertex.y
+      if (i === 0) context.moveTo(x, y)
+      else context.lineTo(x, y)
+    })
+    context.closePath()
+    context.stroke()
     context.restore()
   }
 
