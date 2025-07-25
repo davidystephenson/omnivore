@@ -17,9 +17,10 @@ import { Food } from './food'
 import { Tree } from './tree'
 import { SIGHT } from '../../shared/sight'
 import { RayCastHit } from '../../shared/rayCastHit'
+import Family from '../family'
 
 export interface OrganismSpawn {
-  color: Rgb
+  family: Family
   gene: Gene
   player?: Player
 }
@@ -38,7 +39,6 @@ export class Organism extends Actor {
   chaseRadius = 0.2
   giveUpTime: number
   giveUpTimer = 0
-  color: Rgb
   createdAt: number
   controls: Controls = {
     up: false,
@@ -53,6 +53,7 @@ export class Organism extends Actor {
   explorationIds: number[]
   explorationPoints: ExplorationPoint[] = []
   dead = false
+  family: Family
   featuresInVision: Feature[] = []
   gap = 0.5
   gene: Gene
@@ -68,12 +69,13 @@ export class Organism extends Actor {
 
   constructor (props: {
     health?: number
+    family: Family
     position: Vec2
     stage: Stage
   } & OrganismSpawn) {
     super({ stage: props.stage, label: 'organism' })
     this.createdAt = Date.now()
-    this.color = props.color
+    this.family = props.family
     this.gene = props.gene
     this.player = props.player
     this.spawnPosition = props.position
@@ -133,7 +135,7 @@ export class Organism extends Actor {
       radius: props.radius,
       health: props.health,
       position: props.position,
-      actor: this
+      organism: this
     })
     if (props.cell != null) {
       const cellPosition = props.cell.body.getPosition()
@@ -165,6 +167,7 @@ export class Organism extends Actor {
       this.player.organism = undefined
     }
     this.stage.organisms = this.stage.organisms.filter(organism => organism.id !== this.id)
+    this.family.members.delete(this.id)
   }
 
   charge (enemy: Feature): Rgb {
@@ -578,7 +581,7 @@ export class Organism extends Actor {
 
   judge ({ feature }: { feature: Feature }): boolean | undefined {
     if (feature instanceof Membrane) {
-      const allied = feature.color === this.color
+      const allied = feature.color === this.family.color
       if (allied) return undefined
       const theirMass = feature.body.getMass()
       const myMass = this.membrane.body.getMass()
@@ -774,13 +777,12 @@ export class Organism extends Actor {
   }): void {
     if (!this.stage.flags.reproduceGame) return
     const gene = this.gene.mutate()
-    const bot = this.stage.nature.addOrganism({
-      color: this.color,
+    const child = this.family.addMember({
       gene,
       position: this.membrane.position
     })
     const half = this.membrane.maximumHealth / 2
-    bot.membrane.hungerDamage = half
+    child.membrane.hungerDamage = half
     const childHungerDamage = half - props.health
     this.membrane.hungerDamage = Math.max(0, childHungerDamage)
     // TODO maintain combat damage

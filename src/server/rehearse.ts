@@ -27,4 +27,4 @@ const stage = new Stage({
   onBook: false,
   promptbookName
 })
-void new Server({ playhouse: stage })
+void new Server({ stage: stage })

@@ -5,9 +5,9 @@ import { Rope } from '../shared/rope'
 import { HALF_SIGHT_HEIGHT, HALF_SIGHT_SIZE } from '../shared/sight'
 import { DebugLine } from '../shared/debugLine'
 import { DebugCircle } from '../shared/debugCircle'
-import { LIGHT_GREEN } from '../shared/color'
 import { Input } from '../shared/input'
 import { getBaseLog } from '../server/math'
+import { LIME, WHITE } from '../shared/color'
 
 export class Renderer {
   static BACKGROUND = 'rgba(50,50,50,0.9)'
@@ -34,9 +34,13 @@ export class Renderer {
     input: Input
   }) {
     this.input = props.input
-    this.canvas = document.getElementById('canvas') as HTMLCanvasElement
+    const element = document.getElementById('canvas')
+    if (!(element instanceof HTMLCanvasElement)) {
+      throw new Error('No canvas')
+    }
+    this.canvas = element
     const context = this.canvas.getContext('2d')
-    if (context == null) throw new Error('No Canvas')
+    if (context == null) throw new Error('No context')
     this.context = context
     this.render()
   }
@@ -289,8 +293,8 @@ export class Renderer {
     }
     const color = props.control === true
       ? props.highlight === true
-        ? 'white'
-        : 'lime'
+        ? WHITE.label
+        : LIME.label
       : Renderer.BACKGROUND
     this.drawIndicator({
       color,

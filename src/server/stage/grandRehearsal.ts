@@ -21,16 +21,7 @@ export class GrandRehearsal extends Procedural {
       onBook: props.onBook,
       promptbookName: props.promptbookName
     })
-
-    this.nature.addApe({ position: Vec2(45, 45) })
-    this.nature.addApeBully({ position: Vec2(-35, 35) })
-    this.nature.addTiger({ position: Vec2(-25, -25) })
-    this.nature.addCrow({ position: Vec2(-15, 15) })
-    this.nature.addFly({ position: Vec2(0, -5) })
-    this.nature.addTardigrade({ position: Vec2(15, -15) })
-    this.nature.addWhale({ position: Vec2(25, 10) })
-    this.nature.addBoa({ position: Vec2(35, 10) })
-
+    this.nature.addFamilies()
     this.nature.addTree({ position: Vec2(20, 20) })
     this.nature.addTree({ position: Vec2(20, -20) })
     this.nature.addTree({ position: Vec2(-20, -20) })

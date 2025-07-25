@@ -26,5 +26,5 @@ export default function perform (props: {
     promptbook: props.promptbook,
     promptbookName: props.promptbookName
   })
-  void new Server({ playhouse })
+  void new Server({ stage: playhouse })
 }

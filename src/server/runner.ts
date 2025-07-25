@@ -176,17 +176,16 @@ export class Runner {
       summary.controls = props.player.organism.controls
       summary.speed = props.player.organism.gene.speed
       summary.stamina = props.player.organism.gene.stamina
-    }
-    this.stage.spawner.queue.forEach((obituary, index) => {
-      if (obituary.player !== props.player) return
-      summary.respawn = index
-    })
-    if (this.stage.flags.playerDeath && props.player.organism == null) {
-      console.debug('playerDeath no organism, respawn?', summary.respawn, new Date().toLocaleTimeString())
-      const respawn = Number(summary.respawn)
-      if (respawn < 0) {
-        throw new Error(`Player.organism is null without respawning!!! ${respawn} ${new Date().toLocaleTimeString()}`)
+    } else {
+      const playerIndex = this.stage.spawner.queue.findIndex(
+        obituary => obituary.player === props.player
+      )
+      if (playerIndex < 0) {
+        console.debug('playerIndex', playerIndex)
+        console.debug('queue.length', this.stage.spawner.queue.length)
+        throw new Error(`Player.organism is null without respawning!!! ${new Date().toLocaleTimeString()}`)
       }
+      summary.respawn = playerIndex
     }
     if (this.stage.flags.summary) {
       this.stage.debug({ vs: ['getSummary elements.length', elements.length], seconds: 10 })

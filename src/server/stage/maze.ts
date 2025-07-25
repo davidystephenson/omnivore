@@ -55,7 +55,7 @@ export class Maze extends Walled {
 
     this.navigation.setupWaypoints()
     this.spawner.setupSpawnPoints()
-    this.nature.addTardigrade({ position: Vec2(17, 17) })
+    this.nature.tardigrade.addMember({ position: Vec2(17, 17) })
 
     // this.addBrick({ position: Vec2(15, -5), halfHeight: 5, halfWidth: 5 })
     // this.addPuppet({

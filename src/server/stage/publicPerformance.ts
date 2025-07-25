@@ -10,9 +10,9 @@ export class PublicPerformance extends Performance {
   }) {
     const flags = new Flags({
       // performance: true
-      // playerDeath: true
-      // respawn: true,
-      // spawn: true,
+      playerDeath: true,
+      respawn: true,
+      spawn: true
       // stats: true
       // timings: true
     })
