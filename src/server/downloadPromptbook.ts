@@ -2,7 +2,7 @@ import fs from 'fs'
 import { finished } from 'stream/promises'
 
 const URL = 'https://drive.usercontent.google.com/download?id=16zGxYMm6GRJcC9H8x4wksOtYS_RsksIN&export=download&authuser=0&confirm=t'
-const PATH = './promptbooks/download.json'
+const PATH = './promptbooks/download.zip'
 
 export default async function downloadPromptbook (): Promise<void> {
   console.info('Downloading...')
