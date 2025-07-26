@@ -28,14 +28,7 @@ export class DressRehearsal extends Procedural {
       promptbookName: props.promptbookName
     })
 
-    this.nature.addApe({ position: Vec2(5, 5) })
-    this.nature.addApeBully({ position: Vec2(-5, 5) })
-    this.nature.addTiger({ position: Vec2(5, -5) })
-    this.nature.addCrow({ position: Vec2(5, -5) })
-    this.nature.addTardigrade({ position: Vec2(-5, -5) })
-    this.nature.addWhale({ position: Vec2(0, 5) })
-    this.nature.addFly({ position: Vec2(5, 0) })
-    this.nature.addBoa({ position: Vec2(0, -5) })
+    this.nature.spawnFamilies({ count: 5 })
 
     const minimum = Math.min(this.halfWidth, this.halfHeight)
     const half = minimum / 2

@@ -5,12 +5,14 @@ import { Rope } from '../shared/rope'
 import { HALF_SIGHT_HEIGHT, HALF_SIGHT_SIZE } from '../shared/sight'
 import { DebugLine } from '../shared/debugLine'
 import { DebugCircle } from '../shared/debugCircle'
-import { LIGHT_GREEN } from '../shared/color'
 import { Input } from '../shared/input'
 import { getBaseLog } from '../server/math'
+import { Rgb, WHITE } from '../shared/color'
+import { Food } from '../server/actor/food'
+import { BLEEDING_DAMAGE } from '../shared/damage'
 
 export class Renderer {
-  static BACKGROUND = 'rgba(50,50,50,0.9)'
+  static BACKGROUND = 'rgba(50,50,50,1)'
   camera = {
     position: new Vec2(0, 0),
     zoom: 0
@@ -34,9 +36,13 @@ export class Renderer {
     input: Input
   }) {
     this.input = props.input
-    this.canvas = document.getElementById('canvas') as HTMLCanvasElement
+    const element = document.getElementById('canvas')
+    if (!(element instanceof HTMLCanvasElement)) {
+      throw new Error('No canvas')
+    }
+    this.canvas = element
     const context = this.canvas.getContext('2d')
-    if (context == null) throw new Error('No Canvas')
+    if (context == null) throw new Error('No context')
     this.context = context
     this.render()
   }
@@ -65,15 +71,10 @@ export class Renderer {
     const maximumInnerRadius = element.u - element.o
     const damage = 1 - element.h
     const innerRadius = maximumInnerRadius * damage
-    const self = element.i === this.summary.id
-    if (self) {
-      console.log('maximumInnerRadius', maximumInnerRadius)
-      console.log('damage', damage)
-      console.log('innerRadius', innerRadius)
-    }
     context.beginPath()
     context.arc(element.z, element.w, innerRadius, 0, 2 * Math.PI)
     context.fill()
+    const self = element.i === this.summary.id
     if (self) {
       if (this.summary.stamina == null) {
         throw new Error('Missing stamina')
@@ -81,14 +82,54 @@ export class Renderer {
       if (this.summary.speed == null) {
         throw new Error('Missing speed')
       }
+      if (this.summary.highlight == null) {
+        throw new Error('Missing highlight')
+      }
       const minimum = 0.14
+      const bleeding = element.h < BLEEDING_DAMAGE
+      if (bleeding) {
+        const length = (element.u * BLEEDING_DAMAGE) + minimum
+        this.drawIndicator({
+          color: Renderer.BACKGROUND,
+          element,
+          length,
+          width: element.u
+        })
+        this.drawIndicator({
+          color: Renderer.BACKGROUND,
+          element,
+          length,
+          positive: true,
+          width: element.u
+        })
+        this.drawIndicator({
+          color: Renderer.BACKGROUND,
+          element,
+          length,
+          positive: true,
+          vertical: true,
+          width: element.u
+        })
+        this.drawIndicator({
+          color: Renderer.BACKGROUND,
+          element,
+          length,
+          vertical: true,
+          width: element.u
+        })
+      }
+      const cap = 1 - Food.NUTRITION
+      if (element.h > cap) {
+        context.beginPath()
+        context.arc(element.z, element.w, 0.1, 0, 2 * Math.PI)
+        context.fillStyle = this.getColor({ rgb: this.summary.highlight })
+        context.fill()
+      }
       const maximumBonus = element.u - minimum
       const bonusLength = maximumBonus * this.summary.speed
       const length = minimum + bonusLength
       const bonusWidth = maximumBonus * this.summary.stamina
       const width = minimum + bonusWidth
-      this.context.lineWidth = width
-      this.context.strokeStyle = 'lime'
       const x = this.summary.increase ?? 1
       const ratio = 1 / (x + 0.5)
       const base = 1.007
@@ -100,14 +141,16 @@ export class Renderer {
         control: this.input.controls.left,
         element,
         highlight: highlighted,
-        length
+        length,
+        width
       })
       this.indicate({
         control: this.input.controls.right,
         element,
         highlight: highlighted,
         length,
-        positive: true
+        positive: true,
+        width
       })
       this.indicate({
         control: this.input.controls.up,
@@ -115,35 +158,16 @@ export class Renderer {
         highlight: highlighted,
         length,
         positive: true,
-        vertical: true
+        vertical: true,
+        width
       })
       this.indicate({
         control: this.input.controls.down,
         element,
         highlight: highlighted,
         length,
-        vertical: true
-      })
-    } else {
-      this.indicate({
-        element,
-        length
-      })
-      this.indicate({
-        element,
-        length,
-        positive: true
-      })
-      this.indicate({
-        element,
-        length,
-        positive: true,
-        vertical: true
-      })
-      this.indicate({
-        element,
-        length,
-        vertical: true
+        vertical: true,
+        width
       })
     }
     context.restore()
@@ -173,6 +197,7 @@ export class Renderer {
     length: number
     positive?: boolean
     vertical?: boolean
+    width: number
   }): void {
     if (props.element.z == null) {
       throw new Error('Missing circle center x')
@@ -183,6 +208,7 @@ export class Renderer {
     if (props.element.u == null) {
       throw new Error('Missing circle radius')
     }
+    this.context.lineWidth = props.width
     const vertical = props.vertical ?? false
     const positive = props.positive ?? false
     const directionCoordinate = vertical ? props.element.w : props.element.z
@@ -249,6 +275,12 @@ export class Renderer {
     this.context.translate(-this.camera.position.x, -this.camera.position.y)
   }
 
+  getColor (props: {
+    rgb: Rgb
+  }): string {
+    return `rgba(${props.rgb.red},${props.rgb.green},${props.rgb.blue},1)`
+  }
+
   getPoints (): string {
     if (this.summary == null) {
       throw new Error('Missing summary')
@@ -288,21 +320,27 @@ export class Renderer {
     length: number
     positive?: boolean
     vertical?: boolean
+    width: number
   }): void {
-    if (props.control !== true && props.element.h > 0.1) {
+    if (props.control !== true) {
       return
     }
-    const color = props.control === true
-      ? props.highlight === true
-        ? 'white'
-        : 'lime'
-      : Renderer.BACKGROUND
+    if (this.summary?.highlight == null) {
+      throw new Error('Missing highlight')
+    }
+    const color = props.highlight === true
+      ? WHITE.label
+      : this.getColor({ rgb: this.summary.highlight })
+    if (props.element.u == null) {
+      throw new Error('Missing circle radius')
+    }
     this.drawIndicator({
       color,
       element: props.element,
       length: props.length,
       positive: props.positive,
-      vertical: props.vertical
+      vertical: props.vertical,
+      width: props.width
     })
   }
 
@@ -321,8 +359,7 @@ export class Renderer {
       return
     }
     this.context.translate(eye.x, eye.y)
-
-    this.context.fillStyle = Renderer.BACKGROUND
+    this.context.fillStyle = 'rgba(50, 50, 50, 0.9)'
     this.context.lineWidth = 0.4
     this.context.beginPath()
     this.context.moveTo(-HALF_SIGHT_SIZE.x, HALF_SIGHT_SIZE.y)

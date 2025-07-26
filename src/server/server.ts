@@ -1,6 +1,4 @@
-import { Vec2 } from 'planck'
 import { Controls } from '../shared/input'
-import { GREEN } from '../shared/color'
 import express from 'express'
 import http from 'http'
 import https from 'https'
@@ -17,16 +15,16 @@ export class Server {
   app = express()
   httpServer: https.Server | http.Server
   io: SocketIo.Server
-  playhouse: Stage
+  stage: Stage
   step = 0
 
   constructor (props: {
-    playhouse: Stage
+    stage: Stage
   }) {
     this.setupApp()
     this.httpServer = this.getHttpServer()
     this.io = new SocketIo.Server(this.httpServer)
-    this.playhouse = props.playhouse
+    this.stage = props.stage
     void this.start()
   }
 
@@ -35,35 +33,27 @@ export class Server {
       console.info(`listening on port: ${this.config.port}`)
     })
     this.io.on('connection', socket => {
-      this.playhouse.debug({ vs: ['connection:', socket.id] })
+      this.stage.debug({ vs: ['connection:', socket.id] })
       socket.emit('connected')
-      const player = this.playhouse.addPlayer({
-        color: GREEN,
-        id: socket.id,
-        gene: this.playhouse.nature.playerGene,
-        position: Vec2(20, -10)
-      })
-      if (player.organism == null) {
-        throw new Error('player.organism is undefined')
-      }
+      const player = this.stage.addPlayer({ id: socket.id })
       socket.on('controls', (controls: Controls) => {
         if (controls.select) {
-          this.playhouse.runner.paused = true
+          this.stage.runner.paused = true
         }
         if (controls.cancel) {
-          this.playhouse.runner.paused = false
+          this.stage.runner.paused = false
         }
         if (player.organism != null) {
           player.organism.controls = controls
-          if (this.playhouse.flags.playerControl) {
+          if (this.stage.flags.playerControl) {
             player.organism.debugControls()
           }
         }
-        const summary = this.playhouse.runner.getSummary({ player })
+        const summary = this.stage.runner.getSummary({ player })
         socket.emit('serverUpdateClient', summary)
       })
       socket.on('disconnect', () => {
-        this.playhouse.debug({ vs: ['disconnect:', socket.id] })
+        this.stage.debug({ vs: ['disconnect:', socket.id] })
         player.destroy()
       })
     })

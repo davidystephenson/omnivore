@@ -28,12 +28,14 @@ import readWallDefs from '../readWallDefs'
 
 export class Stage {
   actors = new Map<number, Actor>()
+  bottomCenter: Vec2
+  bottomLeft: Vec2
+  bottomRight: Vec2
   checkCount = 0
   collider: Collider
   debugger: Debugger
   destructionQueue: Body[] = []
   fallQueue: Tree[] = []
-  families: Map<string, Organism[]> = new Map()
   flags: Flags
   food: Food[] = []
   halfHeight: number
@@ -50,6 +52,9 @@ export class Stage {
   runner: Runner
   spawner: Spawner
   starvationQueue: Starvation[] = []
+  topCenter: Vec2
+  topLeft: Vec2
+  topRight: Vec2
   virtualBoxes: AABB[] = []
   vision: Vision
   walls: Wall[] = []
@@ -75,6 +80,14 @@ export class Stage {
     this.world = new World({ gravity: Vec2(0, 0) })
     this.halfHeight = props.halfHeight
     this.halfWidth = props.halfWidth
+    const quarterWidth = this.halfWidth / 2
+    const quarterHeight = this.halfHeight / 2
+    this.bottomCenter = Vec2(0, quarterHeight)
+    this.bottomLeft = Vec2(-quarterWidth, quarterHeight)
+    this.bottomRight = Vec2(quarterWidth, quarterHeight)
+    this.topCenter = Vec2(0, -quarterHeight)
+    this.topLeft = Vec2(-quarterWidth, -quarterHeight)
+    this.topRight = Vec2(quarterWidth, -quarterHeight)
     this.nature = new Nature({ stage: this })
     this.navigation = new Navigation({ stage: this })
     this.runner = new Runner({ stage: this })
@@ -107,12 +120,16 @@ export class Stage {
   }
 
   addPlayer (props: {
-    color: Rgb
     id: string
-    position: Vec2
-    gene: Gene
+    position?: Vec2
+    gene?: Gene
   }): Player {
     const player = new Player({ stage: this, ...props })
+    const family = this.nature.families.find(family => family.members.size === 0)
+    if (family == null) {
+      throw new Error('There is no available family')
+    }
+    family.spawn({ player })
     return player
   }
 
@@ -343,16 +360,6 @@ export class Stage {
     this.destructionQueue = []
     this.virtualBoxes.forEach(box => {
       this.debugAABB({ aabb: box, color: RED })
-    })
-    this.families = new Map()
-    this.actors.forEach(actor => {
-      if (!(actor instanceof Organism)) return
-      const family = this.families.get(actor.color.label)
-      if (family != null) {
-        family.push(actor)
-      } else {
-        this.families.set(actor.color.label, [actor])
-      }
     })
   }
 

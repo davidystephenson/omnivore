@@ -1,155 +1,77 @@
 import { Vec2 } from 'planck'
-import { YELLOW, RED, PURPLE, ORANGE, BROWN, MAGENTA, PINK, GRAY, CYAN, Rgb } from '../shared/color'
-import { Gene } from './gene'
-import { Organism } from './actor/organism'
+import { YELLOW, RED, PURPLE, PINK, GRAY, Rgb, LIGHT_GRAY, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW, LIGHT_PINK, LIGHT_ORANGE, ORANGE } from '../shared/color'
 import { Stage } from './stage/stage'
 import { Tree } from './actor/tree'
 import { River } from './actor/river'
-import { range } from './math'
+import { range, shuffle } from './math'
 import { Food } from './actor/food'
 import { Rock } from './actor/rock'
+import Family from './family'
 
 export class Nature {
-  apeGene: Gene
-  apeBullyGene: Gene
-  boaGene: Gene
-  crowGene: Gene
-  flyGene: Gene
-  flyBullyGene: Gene
-  playerGene: Gene
+  boa: Family
+  crow: Family
+  fly: Family
+  tardigrade: Family
+  tiger: Family
+  whale: Family
+  families: Family[] = []
   stage: Stage
-  tardigradeGene: Gene
-  tigerGene: Gene
-  whaleGene: Gene
-  whaleVictimGene: Gene
 
   constructor (props: {
     stage: Stage
   }) {
     this.stage = props.stage
-    this.apeGene = new Gene({
-      speed: 0.33,
-      stage: this.stage,
-      stamina: 0.34,
-      strength: 0.33
+    // this.ape = this.addFamily({
+    //   color: GREEN,
+    //   highlight: LIME
+    //   // speed: 0.33,
+    //   // strength: 0.33,
+    //   // stamina: 0.34,
+    // })
+    this.boa = this.addFamily({
+      color: PURPLE,
+      highlight: LIGHT_PURPLE
+      // speed: 0
+      // stamina: 0.5,
+      // strength: 0.5
     })
-
-    this.whaleGene = new Gene({
-      speed: 0,
-      stage: this.stage,
-      stamina: 0,
-      strength: 1
-    })
-
-    this.whaleVictimGene = new Gene({
-      speed: 0.0,
-      stamina: 0.01,
-      strength: 0.99,
-      stage: this.stage
-    })
-
-    this.apeBullyGene = new Gene({
-      speed: 0.33,
-      stage: this.stage,
-      stamina: 0.33,
-      strength: 0.34
-    })
-
-    this.tigerGene = new Gene({
-      speed: 0.5,
-      stage: this.stage,
-      stamina: 0,
-      strength: 0.5
-    })
-
-    this.crowGene = new Gene({
-      speed: 0.5,
-      stage: this.stage,
-      stamina: 0.5,
-      strength: 0
-    })
-
-    this.flyGene = new Gene({
-      speed: 1,
-      stage: this.stage,
-      stamina: 0,
-      strength: 0
-    })
-
-    this.flyBullyGene = new Gene({
-      speed: 0.99,
-      stage: this.stage,
-      stamina: 0,
-      strength: 0.01
-    })
-
-    this.boaGene = new Gene({
-      speed: 0,
-      stage: this.stage,
-      stamina: 0.5,
-      strength: 0.5
-    })
-
-    this.tardigradeGene = new Gene({
-      speed: 0,
-      stage: this.stage,
-      stamina: 1,
-      strength: 0
-    })
-
-    this.playerGene = this.apeGene
-    // this.summary.increase 0.33
-    // renderer.ts:223 ratio 1.2048192771084336
-    // renderer.ts:226 logarithm 26.711567645800226
-    // renderer.ts:228 interval 96.71156764580023
-
-    // this.playerGene = this.flyGene
-    // this.summary.increase 0.01
-    // renderer.ts:223 ratio 1.9607843137254901
-    // renderer.ts:226 logarithm 96.52835989867195
-    // renderer.ts:228 interval 166.52835989867197
-
-    // this.playerGene = this.whaleGene
-    // this.summary.increase 1
-    // renderer.ts:223 ratio 0.6666666666666666
-    // renderer.ts:226 logarithm -58.12608372950954
-    // renderer.ts:228 interval 11.873916270490461
-
-    // this.playerGene = this.tigerGene
-    // this.summary.increase 0.00016666666666666666
-    // renderer.ts:222 ratio 6
-    // renderer.ts:225 logarithm 60.6167819178331
-    // renderer.ts:227 interval 30.6167819178331
-  }
-
-  addApe (props: {
-    position: Vec2
-  }): Organism {
-    return this.addOrganism({
+    this.crow = this.addFamily({
       color: ORANGE,
-      gene: this.apeGene,
-      position: props.position
+      highlight: LIGHT_ORANGE
+      // speed: 0.5,
+      // strength: 0,
+      // stamina: 0.5,
     })
-  }
-
-  addApeBully (props: {
-    position: Vec2
-  }): Organism {
-    return this.addOrganism({
-      color: GRAY,
-      gene: this.apeBullyGene,
-      position: props.position
+    this.fly = this.addFamily({
+      color: YELLOW,
+      highlight: LIGHT_YELLOW
+      // speed: 1,
+      // stamina: 0,
+      // strength: 0
     })
-  }
-
-  addBoa (props: {
-    position: Vec2
-  }): Organism {
-    return this.addOrganism({
+    this.tardigrade = this.addFamily({
       color: PINK,
-      gene: this.boaGene,
-      position: props.position
+      highlight: LIGHT_PINK
+      // speed: 0,
+      // stamina: 1,
+      // strength: 0
     })
+    this.tiger = this.addFamily({
+      color: RED,
+      highlight: LIGHT_RED
+      // speed: 0.5,
+      // strength: 0.5,
+      // stamina: 0,
+    })
+    this.whale = this.addFamily({
+      color: GRAY,
+      highlight: LIGHT_GRAY
+      // speed: 0,
+      // strength: 1,
+      // stamina: 0,
+    })
+    this.families = shuffle(this.families)
   }
 
   addCenterTree (): void {
@@ -167,34 +89,13 @@ export class Nature {
     this.addTree({ position: Vec2(negative, negative) })
   }
 
-  addCrow (props: {
-    position: Vec2
-  }): Organism {
-    return this.addOrganism({
-      color: BROWN,
-      gene: this.crowGene,
-      position: props.position
-    })
-  }
-
-  addFamilies (): void {
-    this.addApe({ position: Vec2(45, 45) })
-    this.addTiger({ position: Vec2(-25, -25) })
-    this.addCrow({ position: Vec2(-15, 15) })
-    this.addFly({ position: Vec2(-25, -25) })
-    this.addTardigrade({ position: Vec2(15, -15) })
-    this.addWhale({ position: Vec2(25, 25) })
-    this.addBoa({ position: Vec2(35, 10) })
-  }
-
-  addFly (props: {
-    position: Vec2
-  }): Organism {
-    return this.addOrganism({
-      color: YELLOW,
-      gene: this.flyGene,
-      position: props.position
-    })
+  addFamily (props: {
+    color: Rgb
+    highlight: Rgb
+  }): Family {
+    const family = new Family({ stage: this.stage, ...props })
+    this.families.push(family)
+    return family
   }
 
   addFood (props: {
@@ -255,15 +156,6 @@ export class Nature {
     this.addTree({ position: Vec2(half, negative) })
     this.addTree({ position: Vec2(negative, negative) })
     this.addTree({ position: Vec2(0, 0) })
-  }
-
-  addOrganism (props: {
-    color: Rgb
-    position: Vec2
-    gene: Gene
-  }): Organism {
-    const organism = new Organism({ stage: this.stage, ...props })
-    return organism
   }
 
   addRock (props: {
@@ -342,28 +234,7 @@ export class Nature {
     this.addTree({ position: Vec2(half, negative) })
     this.addTree({ position: Vec2(negative, negative) })
     this.addTree({ position: Vec2(negative, negative) })
-    this.addTree({ position: Vec2(negative, negative) })
-    // this.addTree({ position: Vec2(0, 0) })
-  }
-
-  addTardigrade (props: {
-    position: Vec2
-  }): Organism {
-    return this.addOrganism({
-      color: PURPLE,
-      gene: this.tardigradeGene,
-      position: props.position
-    })
-  }
-
-  addTiger (props: {
-    position: Vec2
-  }): Organism {
-    return this.addOrganism({
-      color: RED,
-      gene: this.tigerGene,
-      position: props.position
-    })
+    this.addTree({ position: Vec2(0, 0) })
   }
 
   addTree (props: {
@@ -384,23 +255,12 @@ export class Nature {
     this.addTree({ position: Vec2(0, -half) })
   }
 
-  addWhale (props: {
-    position: Vec2
-  }): Organism {
-    return this.addOrganism({
-      color: MAGENTA,
-      gene: this.whaleGene,
-      position: props.position
-    })
-  }
-
-  addWhaleVictim (props: {
-    position: Vec2
-  }): Organism {
-    return this.addOrganism({
-      color: CYAN,
-      gene: this.whaleVictimGene,
-      position: props.position
-    })
+  spawnFamilies (props: {
+    count: number
+  }): void {
+    for (let i = 0; i < props.count; i++) {
+      const family = this.families[i]
+      family.spawn()
+    }
   }
 }

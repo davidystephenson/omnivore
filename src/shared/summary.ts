@@ -3,6 +3,7 @@ import { Rope } from './rope'
 import { DebugLine } from './debugLine'
 import { DebugCircle } from './debugCircle'
 import { Controls } from './input'
+import { Rgb } from './color'
 
 export interface Summary {
   age?: number
@@ -13,6 +14,7 @@ export interface Summary {
   features?: Element[]
   foodCount?: number
   fps: number
+  highlight?: Rgb
   id?: number
   increase?: number
   points?: number

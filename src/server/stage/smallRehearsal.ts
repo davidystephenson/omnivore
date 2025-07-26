@@ -26,10 +26,10 @@ export class SmallRehearsal extends Procedural {
       promptbookName: props.promptbookName
     })
 
-    this.nature.addCrow({ position: Vec2(5, -5) })
-    this.nature.addWhale({ position: Vec2(0, 5) })
-    this.nature.addFly({ position: Vec2(5, 0) })
-    this.nature.addBoa({ position: Vec2(0, -5) })
+    this.nature.crow.addMember({ position: Vec2(5, -5) })
+    this.nature.whale.addMember({ position: Vec2(0, 5) })
+    this.nature.fly.addMember({ position: Vec2(5, 0) })
+    this.nature.boa.addMember({ position: Vec2(0, -5) })
 
     this.nature.addTree({ position: Vec2(20, -20) })
     this.nature.addTree({ position: Vec2(-20, -20) })

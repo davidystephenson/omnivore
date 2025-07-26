@@ -12,8 +12,10 @@ export class Prop extends Feature {
     shape: Shape
     label: string
     color?: Rgb
+    density?: number
   }) {
     const color = props.color ?? CYAN
+    const density = props.density ?? 1
     super({
       bodyDef: {
         type: 'dynamic',
@@ -24,7 +26,7 @@ export class Prop extends Feature {
       },
       fixtureDef: {
         shape: props.shape,
-        density: 1,
+        density,
         restitution: 0,
         friction: 0
       },

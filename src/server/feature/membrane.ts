@@ -10,6 +10,7 @@ import { Prop } from './prop'
 import { Debris } from '../actor/debris'
 import { SIGHT } from '../../shared/sight'
 import { LIME } from '../../shared/color'
+import { BLEEDING_DAMAGE } from '../../shared/damage'
 
 export class Membrane extends Feature {
   static BASE_DAMAGE = 0.1
@@ -17,7 +18,7 @@ export class Membrane extends Feature {
   static GENETIC_LIFE_SECONDS = 90
   static GROWTH = 0.01
   static INITIAL_RADIUS = 0.6 / Math.sqrt(2)
-  static MINIMUM_DAMAGE = 0.1
+  static MINIMUM_DAMAGE = BLEEDING_DAMAGE
   static MINIMUM_LIFE_SECONDS = 40
   actor: Organism
   destroyed = false
@@ -32,14 +33,14 @@ export class Membrane extends Feature {
 
   constructor (props: {
     position: Vec2
-    actor: Organism
+    organism: Organism
     health?: number
     radius?: number
   }) {
     const radius = props.radius ?? 1
-    const startRadius = props.actor.stage.flags.growGame ? Membrane.INITIAL_RADIUS : radius
+    const startRadius = props.organism.stage.flags.growGame ? Membrane.INITIAL_RADIUS : radius
     super({
-      actor: props.actor,
+      actor: props.organism,
       bodyDef: {
         type: 'dynamic',
         position: props.position,
@@ -47,7 +48,7 @@ export class Membrane extends Feature {
         fixedRotation: true,
         linearDamping: Feature.DAMPING
       },
-      color: props.actor.color,
+      color: props.organism.family.color,
       fixtureDef: {
         shape: new Circle(Vec2(0, 0), startRadius),
         density: 1,
@@ -57,7 +58,7 @@ export class Membrane extends Feature {
       health: props.health,
       label: 'membrane'
     })
-    this.actor = props.actor
+    this.actor = props.organism
     this.mass = this.body.getMass()
     this.radius = startRadius
     this.targetRadius = radius
@@ -176,7 +177,10 @@ export class Membrane extends Feature {
       props.target.actor.destroy()
     } else if (props.target.actor instanceof Tree) {
       props.target.actor.fall()
-    } else if (props.target instanceof Membrane && props.target.actor.color !== this.actor.color) {
+    } else if (
+      props.target instanceof Membrane &&
+      props.target.actor.family.color !== this.actor.family.color
+    ) {
       this.dealDamage({ target: props.target })
       this.shove(props.target)
     } else if (props.target instanceof Prop) {

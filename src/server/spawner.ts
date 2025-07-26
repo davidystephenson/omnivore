@@ -2,7 +2,7 @@ import { Vec2, Body, Circle } from 'planck'
 import { Spawnpoint } from './spawnpoint'
 import { Stage } from './stage/stage'
 import { RED, GREEN, Rgb, WHITE, YELLOW } from '../shared/color'
-import { Obituary, Organism } from './actor/organism'
+import { Obituary } from './actor/organism'
 import { SIGHT } from '../shared/sight'
 import { range } from './math'
 import { Prop } from './feature/prop'
@@ -40,11 +40,11 @@ export class Spawner {
   }
 
   getFarthest (props: {
-    obituary: Obituary
+    position: Vec2
     spawnpoints: Spawnpoint[]
   }): Spawnpoint {
     const distances = props.spawnpoints.map(spawnpoint => {
-      const distance = Vec2.distance(props.obituary.position, spawnpoint.position)
+      const distance = Vec2.distance(props.position, spawnpoint.position)
       return { spawnpoint, distance }
     })
     const sorted = distances.sort((a, b) => a.distance - b.distance)
@@ -83,7 +83,9 @@ export class Spawner {
     if (habitable && this.queue.length > 0) {
       this.stage.flag({ f: 'spawn', vs: ['respawnQueue.length', this.queue.length] })
       this.stage.flag({ f: 'spawn', vs: ['spawnPoints.length', this.spawnpoints.length] })
-      const clearSpawnPoints = this.stage.spawner.spawnpoints.filter(spawnPoint => spawnPoint.collideCount < 1)
+      const clearSpawnPoints = this.stage.spawner.spawnpoints.filter(
+        spawnPoint => spawnPoint.collideCount < 1
+      )
       this.stage.flag({ f: 'spawn', vs: ['clearSpawnPoints.length', clearSpawnPoints.length] })
 
       if (clearSpawnPoints.length > 0) {
@@ -92,14 +94,26 @@ export class Spawner {
           throw new Error('There is no first')
         }
         // TODO longest path away
-        const spawnpoint = this.getFarthest({ obituary: first, spawnpoints: clearSpawnPoints })
-        const gene = first.gene.mutate()
-        this.stage.flag({ f: 'respawn', k: 'Respawned', v: [first.color.label, new Date().toISOString()], seconds: 0 })
-        void new Organism({ ...first, gene, position: spawnpoint.position, stage: this.stage })
+        const spawnpoint = this.getFarthest({
+          position: first.position,
+          spawnpoints: clearSpawnPoints
+        })
+        const gene = first.gene?.mutate()
+        this.stage.flag({
+          f: 'respawn',
+          k: 'Respawned',
+          v: [first.family.color.label, new Date().toISOString()],
+          seconds: 0
+        })
+        first.family.addMember({
+          gene,
+          player: first.player,
+          position: spawnpoint.position
+        })
         this.debugSpawnpoints({ color: GREEN })
       } else {
         const first = this.queue[0]
-        this.stage.flag({ f: 'respawn', k: 'No spawnpoints for', v: first.color.label })
+        this.stage.flag({ f: 'respawn', k: 'No spawnpoints for', v: first.family.color.label })
         this.debugSpawnpoints({ color: YELLOW })
       }
     } else {

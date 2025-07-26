@@ -26,45 +26,47 @@ export class Death {
   execute (): void {
     if (this.stage.flags.playerDeath && this.victim.actor.player != null) {
       console.debug('playerDeath execute', new Date().toLocaleTimeString())
+      console.debug('victim id', this.victim.actor.id)
+      console.debug('family size', this.victim.actor.family.members.size)
     }
-    const actors = [...this.stage.actors.values()]
-    const organisms = actors.filter((actor) => actor instanceof Organism) as Organism[]
-    const relatives = organisms.filter((actor) => {
-      const self = actor === this.victim.actor
-      if (self) return false
-      const related = actor.color === this.victim.color
-      return related
-    })
-    if (relatives.length > 0) {
+    if (this.victim.actor.family.members.size > 0) {
       if (this.victim.actor.player == null) {
         return
       }
-      const first = relatives[0]
-      const oldest = relatives.reduce((a, b) => a.createdAt < b.createdAt ? a : b, first)
+      const relatives = [...this.victim.actor.family.members.values()]
+      const oldest = relatives.reduce(
+        (a, b) => a.createdAt < b.createdAt ? a : b
+      )
       if (oldest == null) {
         throw new Error('There is no oldest relative')
       }
+      if (oldest === this.victim.actor) {
+        throw new Error('The oldest relative is the victim')
+      }
       if (this.stage.flags.playerDeath && this.victim.actor.player != null) {
-        console.debug('playerDeath move', relatives.length, new Date().toLocaleTimeString())
+        console.debug('playerDeath transfer', new Date().toLocaleTimeString())
+        console.debug('oldest id', oldest.id)
       }
       this.victim.actor.player.organism = oldest
       oldest.player = this.victim.actor.player
       return
     }
     if (this.stage.flags.playerDeath && this.victim.actor.player != null) {
-      console.debug('playerDeath respawn', relatives.length, new Date().toLocaleTimeString())
-    }
-    this.victim.actor.respawning = true
-    const spawn: Obituary = {
-      color: this.victim.actor.color,
-      gene: this.victim.actor.gene,
-      player: this.victim.actor.player,
-      position: this.victim.deathPosition
+      console.debug(
+        'playerDeath respawn',
+        this.victim.actor.family.members.size,
+        new Date().toLocaleTimeString()
+      )
     }
     if (this.victim.actor instanceof Organism && this.victim.actor.player != null) {
       this.victim.actor.player.age = 0
       this.victim.actor.player.ageCache = 0
-      this.victim.actor.player.points = 0
+    }
+    const spawn: Obituary = {
+      family: this.victim.actor.family,
+      gene: this.victim.actor.gene,
+      player: this.victim.actor.player,
+      position: this.victim.deathPosition
     }
     this.stage.spawner.queue.push(spawn)
   }

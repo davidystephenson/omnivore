@@ -61,7 +61,7 @@ export class Killing extends Death {
           console.debug('feature.actor.label', feature.actor.label)
           if (feature instanceof Membrane) {
             console.debug('feature.actor.player', feature.actor.player != null)
-            console.debug('feature.actor.color', feature.actor.color)
+            console.debug('feature.actor.family.color', feature.actor.family.color)
           }
         }
         blocker = feature

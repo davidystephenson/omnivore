@@ -8,6 +8,7 @@ export class Flags {
   curtains: boolean
   damage: boolean
   death: boolean
+  families: boolean
   growGame: boolean
   hungerGame: boolean
   isOpen: boolean
@@ -51,6 +52,7 @@ export class Flags {
     controlLines?: boolean
     curtains?: boolean
     death?: boolean
+    families?: boolean
     growGame?: boolean
     hungerGame?: boolean
     isOpen?: boolean
@@ -93,6 +95,7 @@ export class Flags {
     this.curtains = props.curtains ?? false
     this.damage = props.damage ?? false
     this.death = props.death ?? false
+    this.families = props.families ?? false
     this.growGame = props.growGame ?? true
     this.hungerGame = props.hungerGame ?? true
     this.killing = props.killing ?? false
