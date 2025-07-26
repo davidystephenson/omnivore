@@ -219,8 +219,10 @@ export class Renderer {
     context.clip()
     context.fill()
     this.context.strokeStyle = `rgba(${element.r},${element.g},${element.b},1)`
-    const longestSide = vertices.reduce((max, vertex) => {
-      const distance = Vec2.distance(vertex, vertices[0])
+    const longestSide = vertices.reduce((max, vertex, index) => {
+      const nextIndex = (index + 1) % vertices.length
+      const nextVertex = vertices[nextIndex]
+      const distance = Vec2.distance(vertex, nextVertex)
       return Math.max(max, distance)
     }, 0)
     const borderWidth = longestSide * element.h
