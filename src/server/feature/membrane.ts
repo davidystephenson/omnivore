@@ -10,6 +10,7 @@ import { Prop } from './prop'
 import { Debris } from '../actor/debris'
 import { SIGHT } from '../../shared/sight'
 import { LIME } from '../../shared/color'
+import { BLEEDING_DAMAGE } from '../../shared/damage'
 
 export class Membrane extends Feature {
   static BASE_DAMAGE = 0.1
@@ -17,7 +18,7 @@ export class Membrane extends Feature {
   static GENETIC_LIFE_SECONDS = 90
   static GROWTH = 0.01
   static INITIAL_RADIUS = 0.6 / Math.sqrt(2)
-  static MINIMUM_DAMAGE = 0.1
+  static MINIMUM_DAMAGE = BLEEDING_DAMAGE
   static MINIMUM_LIFE_SECONDS = 40
   actor: Organism
   destroyed = false

@@ -42,6 +42,7 @@
     "@types/fs-extra": "^11.0.4",
     "buffer": "^6.0.3",
     "parcel": "^2.11.0",
+    "process": "^0.11.10",
     "ts-standard": "^12.0.2",
     "typescript": "^5.3.3"
   }

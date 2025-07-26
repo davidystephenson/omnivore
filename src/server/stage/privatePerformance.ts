@@ -21,7 +21,7 @@ export class PrivatePerformance extends Performance {
       promptbook: props.promptbook,
       promptbookName: props.promptbookName
     })
-    this.nature.addFamilies()
+    this.nature.spawnFamilies({ count: 5 })
     this.nature.addStarTrees()
     this.nature.addStarTrees()
   }

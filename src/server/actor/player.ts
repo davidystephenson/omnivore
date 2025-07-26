@@ -1,11 +1,8 @@
-import { Vec2 } from 'planck'
 import { Stage } from '../stage/stage'
 import { Organism } from './organism'
 import { PINK } from '../../shared/color'
-import { Gene } from '../gene'
 
 export class Player {
-  static INITIAL = 1
   age = 0
   ageCache = 0
   points = 0
@@ -15,26 +12,12 @@ export class Player {
   stage: Stage
 
   constructor (props: {
-    gene?: Gene
-    health?: number
     id: string
-    position?: Vec2
     stage: Stage
   }) {
     this.id = props.id
     this.stage = props.stage
     this.stage.players.set(this.id, this)
-    const family = this.stage.nature.players.find(family => family.members.size === 0)
-    if (family == null) {
-      throw new Error('There is no available family')
-    }
-    this.organism = family.addMember({
-      gene: props.gene,
-      health: props.health ?? Player.INITIAL,
-      player: this,
-      position: props.position
-    })
-    this.organism.player = this
   }
 
   destroy (): void {

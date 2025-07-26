@@ -27,9 +27,9 @@ export class SmallPerformance extends Performance {
       promptbook: props.promptbook,
       promptbookName: props.promptbookName
     })
-    this.nature.addFamilies()
-    // this.nature.addCenterTree()
-    // this.nature.addCenterTree()
-    // this.nature.addCenterTree()
+    this.nature.spawnFamilies({ count: 2 })
+    this.nature.addCenterTree()
+    this.nature.addCenterTree()
+    this.nature.addCenterTree()
   }
 }

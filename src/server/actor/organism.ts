@@ -21,7 +21,7 @@ import Family from '../family'
 
 export interface OrganismSpawn {
   family: Family
-  gene: Gene
+  gene?: Gene
   player?: Player
 }
 
@@ -31,6 +31,7 @@ export interface Obituary extends OrganismSpawn {
 
 export class Organism extends Actor {
   static BLOCKED_DISTANCE = 4
+  static INITIAL_HEALTH = 1 - Food.NUTRITION
   static TRAPPED_DISTANCE = 0.5 * Organism.BLOCKED_DISTANCE
   static GENETIC_FORCE_SCALE = 2.2
   static MINIMUM_FORCE = 0.8
@@ -64,7 +65,6 @@ export class Organism extends Actor {
   player?: Player
   navigationRadius: number
   readyToHatch = false
-  respawning = false
   spawnPosition: Vec2
 
   constructor (props: {
@@ -76,7 +76,7 @@ export class Organism extends Actor {
     super({ stage: props.stage, label: 'organism' })
     this.createdAt = Date.now()
     this.family = props.family
-    this.gene = props.gene
+    this.gene = props.gene ?? this.family.gene
     this.player = props.player
     this.spawnPosition = props.position
     this.membrane = this.grow({ gene: this.gene, health: props.health })

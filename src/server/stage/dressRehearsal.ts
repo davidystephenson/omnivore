@@ -28,7 +28,7 @@ export class DressRehearsal extends Procedural {
       promptbookName: props.promptbookName
     })
 
-    this.nature.addFamilies()
+    this.nature.spawnFamilies({ count: 5 })
 
     const minimum = Math.min(this.halfWidth, this.halfHeight)
     const half = minimum / 2

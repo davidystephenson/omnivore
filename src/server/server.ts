@@ -36,9 +36,6 @@ export class Server {
       this.stage.debug({ vs: ['connection:', socket.id] })
       socket.emit('connected')
       const player = this.stage.addPlayer({ id: socket.id })
-      if (player.organism == null) {
-        throw new Error('player.organism is undefined')
-      }
       socket.on('controls', (controls: Controls) => {
         if (controls.select) {
           this.stage.runner.paused = true

@@ -1,9 +1,9 @@
 import { Vec2 } from 'planck'
-import { YELLOW, RED, PURPLE, MAGENTA, PINK, GRAY, Rgb, LIGHT_GRAY, LIGHT_RED, LIGHT_PURPLE, LIGHT_MAGENTA, LIGHT_YELLOW, LIGHT_PINK, GREEN, LIGHT_GREEN, LIGHT_LIME, LIME, LIGHT_ORANGE, ORANGE } from '../shared/color'
+import { YELLOW, RED, PURPLE, PINK, GRAY, Rgb, LIGHT_GRAY, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW, LIGHT_PINK, LIGHT_ORANGE, ORANGE } from '../shared/color'
 import { Stage } from './stage/stage'
 import { Tree } from './actor/tree'
 import { River } from './actor/river'
-import { range } from './math'
+import { range, shuffle } from './math'
 import { Food } from './actor/food'
 import { Rock } from './actor/rock'
 import Family from './family'
@@ -15,97 +15,63 @@ export class Nature {
   tardigrade: Family
   tiger: Family
   whale: Family
-  players: Family[]
-
+  families: Family[] = []
   stage: Stage
 
   constructor (props: {
     stage: Stage
   }) {
     this.stage = props.stage
-    this.boa = new Family({
+    // this.ape = this.addFamily({
+    //   color: GREEN,
+    //   highlight: LIME
+    //   // speed: 0.33,
+    //   // strength: 0.33,
+    //   // stamina: 0.34,
+    // })
+    this.boa = this.addFamily({
       color: PURPLE,
-      highlight: LIGHT_PURPLE,
-      position: this.stage.bottomLeft,
-      speed: 0,
-      stage: this.stage,
-      stamina: 0.5,
-      strength: 0.5
+      highlight: LIGHT_PURPLE
+      // speed: 0
+      // stamina: 0.5,
+      // strength: 0.5
     })
-    this.crow = new Family({
-      color: MAGENTA,
-      highlight: LIGHT_MAGENTA,
-      position: this.stage.topRight,
-      speed: 0.5,
-      strength: 0,
-      stamina: 0.5,
-      stage: this.stage
-    })
-    this.fly = new Family({
-      color: YELLOW,
-      highlight: LIGHT_YELLOW,
-      position: this.stage.bottomCenter,
-      speed: 1,
-      stage: this.stage,
-      stamina: 0,
-      strength: 0
-    })
-    this.tardigrade = new Family({
-      color: PINK,
-      highlight: LIGHT_PINK,
-      position: this.stage.bottomRight,
-      speed: 0,
-      stage: this.stage,
-      stamina: 1,
-      strength: 0
-    })
-    this.tiger = new Family({
-      color: RED,
-      highlight: LIGHT_RED,
-      position: this.stage.topRight,
-      speed: 0.5,
-      strength: 0.5,
-      stamina: 0,
-      stage: this.stage
-    })
-    this.whale = new Family({
-      color: GRAY,
-      highlight: LIGHT_GRAY,
-      position: this.stage.topCenter,
-      speed: 0,
-      strength: 1,
-      stamina: 0,
-      stage: this.stage
-    })
-    const center = Vec2(0, 0)
-    const player1 = new Family({
-      color: GREEN,
-      highlight: LIGHT_GREEN,
-      position: center,
-      speed: 0.33,
-      strength: 0.33,
-      stamina: 0.34,
-      stage: this.stage
-    })
-    const player2 = new Family({
+    this.crow = this.addFamily({
       color: ORANGE,
-      highlight: LIGHT_ORANGE,
-      position: center,
-      speed: 0.33,
-      strength: 0.33,
-      stamina: 0.34,
-      stage: this.stage
+      highlight: LIGHT_ORANGE
+      // speed: 0.5,
+      // strength: 0,
+      // stamina: 0.5,
     })
-    const player3 = new Family({
-      color: LIME,
-      highlight: LIGHT_LIME,
-      position: center,
-      speed: 0.33,
-      strength: 0.33,
-      stamina: 0.34,
-      stage: this.stage
+    this.fly = this.addFamily({
+      color: YELLOW,
+      highlight: LIGHT_YELLOW
+      // speed: 1,
+      // stamina: 0,
+      // strength: 0
     })
-    this.players = [player1, player2, player3]
+    this.tardigrade = this.addFamily({
+      color: PINK,
+      highlight: LIGHT_PINK
+      // speed: 0,
+      // stamina: 1,
+      // strength: 0
+    })
+    this.tiger = this.addFamily({
+      color: RED,
+      highlight: LIGHT_RED
+      // speed: 0.5,
+      // strength: 0.5,
+      // stamina: 0,
+    })
+    this.whale = this.addFamily({
+      color: GRAY,
+      highlight: LIGHT_GRAY
+      // speed: 0,
+      // strength: 1,
+      // stamina: 0,
+    })
+    this.families = shuffle(this.families)
   }
 
   addCenterTree (): void {
@@ -123,13 +89,13 @@ export class Nature {
     this.addTree({ position: Vec2(negative, negative) })
   }
 
-  addFamilies (): void {
-    this.boa.addMember()
-    this.crow.addMember()
-    this.fly.addMember()
-    this.tardigrade.addMember()
-    this.tiger.addMember()
-    this.whale.addMember()
+  addFamily (props: {
+    color: Rgb
+    highlight: Rgb
+  }): Family {
+    const family = new Family({ stage: this.stage, ...props })
+    this.families.push(family)
+    return family
   }
 
   addFood (props: {
@@ -268,8 +234,7 @@ export class Nature {
     this.addTree({ position: Vec2(half, negative) })
     this.addTree({ position: Vec2(negative, negative) })
     this.addTree({ position: Vec2(negative, negative) })
-    this.addTree({ position: Vec2(negative, negative) })
-    // this.addTree({ position: Vec2(0, 0) })
+    this.addTree({ position: Vec2(0, 0) })
   }
 
   addTree (props: {
@@ -288,5 +253,14 @@ export class Nature {
 
     this.addTree({ position: Vec2(0, half) })
     this.addTree({ position: Vec2(0, -half) })
+  }
+
+  spawnFamilies (props: {
+    count: number
+  }): void {
+    for (let i = 0; i < props.count; i++) {
+      const family = this.families[i]
+      family.spawn()
+    }
   }
 }

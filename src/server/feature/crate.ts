@@ -23,6 +23,7 @@ export class Crate extends Prop {
     super({
       actor: props.actor,
       color,
+      density: 0.01,
       health: props.health,
       label: 'crate',
       position: props.position,

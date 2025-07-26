@@ -36,7 +36,6 @@ export class Stage {
   debugger: Debugger
   destructionQueue: Body[] = []
   fallQueue: Tree[] = []
-  families: Map<string, Organism[]> = new Map()
   flags: Flags
   food: Food[] = []
   halfHeight: number
@@ -126,6 +125,11 @@ export class Stage {
     gene?: Gene
   }): Player {
     const player = new Player({ stage: this, ...props })
+    const family = this.nature.families.find(family => family.members.size === 0)
+    if (family == null) {
+      throw new Error('There is no available family')
+    }
+    family.spawn({ player })
     return player
   }
 

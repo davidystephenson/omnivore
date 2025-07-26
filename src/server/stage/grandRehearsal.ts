@@ -21,7 +21,7 @@ export class GrandRehearsal extends Procedural {
       onBook: props.onBook,
       promptbookName: props.promptbookName
     })
-    this.nature.addFamilies()
+    this.nature.spawnFamilies({ count: 5 })
     this.nature.addTree({ position: Vec2(20, 20) })
     this.nature.addTree({ position: Vec2(20, -20) })
     this.nature.addTree({ position: Vec2(-20, -20) })

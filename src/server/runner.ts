@@ -171,9 +171,10 @@ export class Runner {
       respawn: -1
     }
     if (props.player.organism != null) {
+      summary.controls = props.player.organism.controls
+      summary.highlight = props.player.organism.membrane.actor.family.highlight
       summary.id = props.player.organism.membrane.id
       summary.increase = props.player.organism.membrane.increase
-      summary.controls = props.player.organism.controls
       summary.speed = props.player.organism.gene.speed
       summary.stamina = props.player.organism.gene.stamina
     } else {
@@ -188,9 +189,15 @@ export class Runner {
       summary.respawn = playerIndex
     }
     if (this.stage.flags.summary) {
-      this.stage.debug({ vs: ['getSummary elements.length', elements.length], seconds: 10 })
+      this.stage.debug({
+        seconds: 10,
+        vs: ['getSummary elements.length', elements.length]
+      })
       const json = JSON.stringify(summary)
-      this.stage.debug({ vs: ['getSummary json.length', json.length], seconds: 10 })
+      this.stage.debug({
+        seconds: 10,
+        vs: ['getSummary json.length', json.length]
+      })
     }
     this.endTiming({ key: 'summary', start })
     return summary
@@ -306,12 +313,15 @@ export class Runner {
         const averageStamina = totalStamina / organisms.length
         console.info('averageStamina', averageStamina)
       }
-      if (this.stage.flags.performance) {
-        const entries = [...this.stage.families.entries()]
-        const labels = entries.map(entry => `${entry[0]}:${entry[1].length}`)
+      if (this.stage.flags.families) {
+        const labels = this.stage.nature.families.map(family =>
+          `${family.color.label}:${family.members.size}`
+        )
         const familiesLabel = labels.join(',')
         console.info('families', familiesLabel)
-        const botCount = sum(entries.map(entry => entry[1].length))
+      }
+      if (this.stage.flags.performance) {
+        const botCount = sum(this.stage.nature.families.map(family => family.members.size))
         console.info('botCount', botCount)
         console.info('checkCount', this.stage.checkCount)
         const checksPerBot = this.stage.checkCount / botCount

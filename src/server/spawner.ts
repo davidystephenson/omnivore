@@ -40,11 +40,11 @@ export class Spawner {
   }
 
   getFarthest (props: {
-    obituary: Obituary
+    position: Vec2
     spawnpoints: Spawnpoint[]
   }): Spawnpoint {
     const distances = props.spawnpoints.map(spawnpoint => {
-      const distance = Vec2.distance(props.obituary.position, spawnpoint.position)
+      const distance = Vec2.distance(props.position, spawnpoint.position)
       return { spawnpoint, distance }
     })
     const sorted = distances.sort((a, b) => a.distance - b.distance)
@@ -94,8 +94,11 @@ export class Spawner {
           throw new Error('There is no first')
         }
         // TODO longest path away
-        const spawnpoint = this.getFarthest({ obituary: first, spawnpoints: clearSpawnPoints })
-        const gene = first.gene.mutate()
+        const spawnpoint = this.getFarthest({
+          position: first.position,
+          spawnpoints: clearSpawnPoints
+        })
+        const gene = first.gene?.mutate()
         this.stage.flag({
           f: 'respawn',
           k: 'Respawned',

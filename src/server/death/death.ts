@@ -58,17 +58,15 @@ export class Death {
         new Date().toLocaleTimeString()
       )
     }
-    this.victim.actor.respawning = true
+    if (this.victim.actor instanceof Organism && this.victim.actor.player != null) {
+      this.victim.actor.player.age = 0
+      this.victim.actor.player.ageCache = 0
+    }
     const spawn: Obituary = {
       family: this.victim.actor.family,
       gene: this.victim.actor.gene,
       player: this.victim.actor.player,
       position: this.victim.deathPosition
-    }
-    if (this.victim.actor instanceof Organism && this.victim.actor.player != null) {
-      this.victim.actor.player.age = 0
-      this.victim.actor.player.ageCache = 0
-      this.victim.actor.player.points = 0
     }
     this.stage.spawner.queue.push(spawn)
   }
