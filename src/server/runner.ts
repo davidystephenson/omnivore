@@ -315,14 +315,16 @@ export class Runner {
         console.info('averageStamina', averageStamina)
       }
       if (this.stage.flags.families) {
-        const labels = this.stage.nature.families.map(family =>
+        const labels = this.stage.nature.players.map(family =>
           `${family.color.label}:${family.members.size}`
         )
+        labels.push(`blue:${this.stage.nature.growing.members.size}`)
+        labels.push(`green:${this.stage.nature.grown.members.size}`)
         const familiesLabel = labels.join(',')
         console.info('families', familiesLabel)
       }
       if (this.stage.flags.performance) {
-        const botCount = sum(this.stage.nature.families.map(family => family.members.size))
+        const botCount = sum(this.stage.nature.players.map(family => family.members.size))
         console.info('botCount', botCount)
         console.info('checkCount', this.stage.checkCount)
         const checksPerBot = this.stage.checkCount / botCount

@@ -12,6 +12,7 @@ export class Flags {
   families: boolean
   growGame: boolean
   hungerGame: boolean
+  indigenous: boolean
   isOpen: boolean
   killing: boolean
   killingGame: boolean
@@ -58,6 +59,7 @@ export class Flags {
     families?: boolean
     growGame?: boolean
     hungerGame?: boolean
+    indigenous?: boolean
     isOpen?: boolean
     killing?: boolean
     killingGame?: boolean
@@ -102,6 +104,7 @@ export class Flags {
     this.families = props.families ?? false
     this.growGame = props.growGame ?? true
     this.hungerGame = props.hungerGame ?? true
+    this.indigenous = props.indigenous ?? false
     this.killing = props.killing ?? false
     this.killingGame = props.killingGame ?? true
     this.isOpen = props.isOpen ?? false

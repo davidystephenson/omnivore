@@ -26,6 +26,7 @@ export interface OrganismSpawn {
 }
 
 export interface Obituary extends OrganismSpawn {
+  grown?: boolean
   position: Vec2
 }
 
@@ -70,6 +71,7 @@ export class Organism extends Actor {
   constructor (props: {
     health?: number
     family: Family
+    grown?: boolean
     position: Vec2
     stage: Stage
   } & OrganismSpawn) {
@@ -79,7 +81,9 @@ export class Organism extends Actor {
     this.gene = props.gene ?? this.family.gene
     this.player = props.player
     this.spawnPosition = props.position
-    this.membrane = this.grow({ gene: this.gene, health: props.health })
+    this.membrane = this.grow({
+      gene: this.gene, grown: props.grown, health: props.health
+    })
     if (this.player != null) {
       this.player.organism = this
     }
@@ -97,7 +101,6 @@ export class Organism extends Actor {
     this.explorationIds = this.explorationPoints.map(p => p.id)
     this.sortExplorationPoints()
     this.giveUpTime = 30 / this.gene.speed
-    this.stage.organisms.push(this)
   }
 
   addCircles (props: {
@@ -126,16 +129,18 @@ export class Organism extends Actor {
   }
 
   addMembrane (props: {
-    position: Vec2
     cell?: Membrane
+    grown?: boolean
     health?: number
+    position: Vec2
     radius?: number
   }): Membrane {
     const membrane = new Membrane({
-      radius: props.radius,
+      grown: props.grown,
       health: props.health,
+      organism: this,
       position: props.position,
-      organism: this
+      radius: props.radius
     })
     if (props.cell != null) {
       const cellPosition = props.cell.body.getPosition()
@@ -166,8 +171,8 @@ export class Organism extends Actor {
     if (this.player != null) {
       this.player.organism = undefined
     }
-    this.stage.organisms = this.stage.organisms.filter(organism => organism.id !== this.id)
     this.family.members.delete(this.id)
+    this.stage.nature.organisms.delete(this.id)
   }
 
   charge (enemy: Feature): Rgb {
@@ -513,6 +518,7 @@ export class Organism extends Actor {
 
   grow (props: {
     gene: Gene
+    grown?: boolean
     health?: number
     parent?: Membrane
   }): Membrane {
@@ -523,11 +529,12 @@ export class Organism extends Actor {
     const membrane = this.addMembrane({
       position,
       cell: props.parent,
+      grown: props.grown,
       health: props.health,
       radius
     })
     for (const childBranch of props.gene.branches) {
-      this.grow({ gene: childBranch, parent: membrane })
+      this.grow({ gene: childBranch, grown: props.grown, parent: membrane })
     }
     return membrane
   }

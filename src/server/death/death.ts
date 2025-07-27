@@ -1,7 +1,7 @@
 import { AABB, CircleShape, Fixture, Vec2 } from 'planck'
 import { Membrane } from '../feature/membrane'
 import { Stage } from '../stage/stage'
-import { Obituary, Organism } from '../actor/organism'
+import { Obituary } from '../actor/organism'
 import { Spawnpoint } from '../spawnpoint'
 import { LogProps } from '../debugger'
 import { BLUE, CYAN } from '../../shared/color'
@@ -58,21 +58,23 @@ export class Death {
         new Date().toISOString()
       )
     }
-    if (this.stage.flags.extinctGame && this.victim.actor.player != null) {
-      this.victim.actor.player.extinct = true
+    if (this.stage.flags.extinctGame) {
+      if (this.victim.actor.player != null) {
+        this.victim.actor.player.extinct = true
+      }
       return
     }
-    if (this.victim.actor instanceof Organism && this.victim.actor.player != null) {
+    if (this.victim.actor.player != null) {
       this.victim.actor.player.age = 0
       this.victim.actor.player.ageCache = 0
     }
-    const spawn: Obituary = {
+    const obituary: Obituary = {
       family: this.victim.actor.family,
       gene: this.victim.actor.gene,
-      player: this.victim.actor.player,
-      position: this.victim.deathPosition
+      position: this.victim.deathPosition,
+      player: this.victim.actor.player
     }
-    this.stage.spawner.queue.push(spawn)
+    this.stage.spawner.queue.push(obituary)
   }
 
   getArea (box: AABB): number {

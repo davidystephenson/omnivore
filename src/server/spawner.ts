@@ -107,6 +107,7 @@ export class Spawner {
         })
         first.family.addMember({
           gene,
+          grown: first.grown,
           player: first.player,
           position: spawnpoint.position
         })

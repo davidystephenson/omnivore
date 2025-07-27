@@ -6,7 +6,7 @@ import { HALF_SIGHT_HEIGHT } from '../shared/sight'
 
 const input = new Input()
 const renderer = new Renderer({ input })
-
+let lastSummary: Summary
 window.onkeydown = function (event: KeyboardEvent) {
   input.take({
     key: event.key,
@@ -18,16 +18,15 @@ window.onkeyup = function (event: KeyboardEvent) {
     key: event.key,
     value: false
   })
+  if (event.key === '/') {
+    console.info('lastSummary', lastSummary)
+  }
 }
 window.onwheel = function (event: WheelEvent) {
   renderer.camera.zoom -= 0.005 * event.deltaY
   const cameraScale = 20 / HALF_SIGHT_HEIGHT * Math.exp(0.03 * renderer.camera.zoom)
   console.info('renderer.camera.zoom', renderer.camera.zoom)
   console.info('cameraScale', cameraScale)
-}
-let lastSummary: Summary
-window.onmousedown = (event: MouseEvent) => {
-  console.info('lastSummary', lastSummary)
 }
 
 const socket = io()
@@ -36,7 +35,7 @@ socket.on('connected', () => {
 })
 socket.on('serverUpdateClient', (summary: Summary) => {
   lastSummary = summary
-  renderer.update(summary)
+  renderer.update({ summary })
 })
 
 function updateServer (): void {

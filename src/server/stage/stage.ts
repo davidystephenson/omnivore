@@ -44,7 +44,6 @@ export class Stage {
   manager: Manager
   nature: Nature
   navigation: Navigation
-  organisms: Organism[] = []
   initial?: Initial
   onBook: boolean
   promptbookName: string
@@ -125,12 +124,12 @@ export class Stage {
     gene?: Gene
   }): Player {
     const player = new Player({ stage: this, ...props })
-    const minimumPlayerCount = this.nature.families.reduce((minimumPlayerCount, family) => {
+    const minimumPlayerCount = this.nature.players.reduce((minimumPlayerCount, family) => {
       const playerCount = family.getPlayerCount()
       const minimum = Math.min(minimumPlayerCount, playerCount)
       return minimum
     }, Infinity)
-    const minimumPlayerFamilies = this.nature.families.filter(family => {
+    const minimumPlayerFamilies = this.nature.players.filter(family => {
       const playerCount = family.getPlayerCount()
       return playerCount === minimumPlayerCount
     })
@@ -340,6 +339,7 @@ export class Stage {
     this.debugger.onStep()
     this.navigation.onStep()
     this.spawner.onStep()
+    this.nature.onStep({ stepSeconds: props.stepSize })
     this.players.forEach(player => player.onStep({ stepSize: props.stepSize }))
     const bots = [...this.actors.values()].filter(actor => actor instanceof Organism && actor.player == null)
     this.time({ label: 'bots' })

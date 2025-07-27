@@ -1,5 +1,5 @@
 import { Vec2 } from 'planck'
-import { YELLOW, RED, PURPLE, PINK, GRAY, Rgb, LIGHT_GRAY, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW, LIGHT_PINK, LIGHT_ORANGE, ORANGE } from '../shared/color'
+import { YELLOW, RED, PURPLE, PINK, GRAY, Rgb, LIGHT_GRAY, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW, LIGHT_PINK, LIGHT_ORANGE, ORANGE, LIGHT_BLUE, CYAN, GREEN, LIME } from '../shared/color'
 import { Stage } from './stage/stage'
 import { Tree } from './actor/tree'
 import { River } from './actor/river'
@@ -7,16 +7,24 @@ import { range, shuffle } from './math'
 import { Food } from './actor/food'
 import { Rock } from './actor/rock'
 import Family from './family'
+import { Gene } from './gene'
+import { Organism } from './actor/organism'
 
 export class Nature {
+  static INITIAL_INDIGENOUS = 100
   boa: Family
   crow: Family
+  players: Family[] = []
   fly: Family
+  growing: Family
+  grown: Family
+  indigenousTimer = Nature.INITIAL_INDIGENOUS
+  organisms = new Map<number, Organism>()
+  stage: Stage
   tardigrade: Family
   tiger: Family
+  tolerance = 1
   whale: Family
-  families: Family[] = []
-  stage: Stage
 
   constructor (props: {
     stage: Stage
@@ -29,49 +37,65 @@ export class Nature {
     //   // strength: 0.33,
     //   // stamina: 0.34,
     // })
-    this.boa = this.addFamily({
+    this.boa = this.addPlayer({
       color: PURPLE,
       highlight: LIGHT_PURPLE,
       speed: 0,
       stamina: 0.5,
       strength: 0.5
     })
-    this.crow = this.addFamily({
+    this.crow = this.addPlayer({
       color: ORANGE,
       highlight: LIGHT_ORANGE,
       speed: 0.5,
       strength: 0,
       stamina: 0.5
     })
-    this.fly = this.addFamily({
+    this.fly = this.addPlayer({
       color: YELLOW,
       highlight: LIGHT_YELLOW,
       speed: 1,
       stamina: 0,
       strength: 0
     })
-    this.tardigrade = this.addFamily({
+    this.growing = new Family({
+      color: LIGHT_BLUE,
+      highlight: CYAN,
+      speed: 0,
+      stage: this.stage,
+      stamina: 0,
+      strength: 1
+    })
+    this.grown = new Family({
+      color: GREEN,
+      highlight: LIME,
+      speed: 1,
+      stage: this.stage,
+      stamina: 0,
+      strength: 0
+    })
+    this.tardigrade = this.addPlayer({
       color: PINK,
       highlight: LIGHT_PINK,
       speed: 0,
       stamina: 1,
       strength: 0
     })
-    this.tiger = this.addFamily({
+    this.tiger = this.addPlayer({
       color: RED,
       highlight: LIGHT_RED,
       speed: 0.5,
       strength: 0.5,
       stamina: 0
     })
-    this.whale = this.addFamily({
+    this.whale = this.addPlayer({
       color: GRAY,
       highlight: LIGHT_GRAY,
       speed: 0,
       strength: 1,
       stamina: 0
     })
-    this.families = shuffle(this.families)
+    this.players = shuffle(this.players)
   }
 
   addCenterTree (): void {
@@ -89,7 +113,7 @@ export class Nature {
     this.addTree({ position: Vec2(negative, negative) })
   }
 
-  addFamily (props: {
+  addPlayer (props: {
     color: Rgb
     highlight: Rgb
     speed: number
@@ -97,7 +121,7 @@ export class Nature {
     strength: number
   }): Family {
     const family = new Family({ stage: this.stage, ...props })
-    this.families.push(family)
+    this.players.push(family)
     return family
   }
 
@@ -258,11 +282,64 @@ export class Nature {
     this.addTree({ position: Vec2(0, -half) })
   }
 
+  indigenousInfo (props: {
+    k: string
+    v: string | number
+  }): void {
+    if (!this.stage.flags.indigenous) {
+      return
+    }
+    console.info(`Indigenous ${props.k}`, props.v)
+  }
+
+  onStep (props: {
+    stepSeconds: number
+  }): void {
+    if (!this.stage.flags.extinctGame) {
+      return
+    }
+    if (this.stage.players.size === 0) {
+      this.stage.flag({ f: 'indigenous', v: 'No players, no indigenous' })
+      return
+    }
+    if (this.stage.nature.organisms.size > 100) {
+      const v = `${this.stage.nature.organisms.size} organisms, no indigenous`
+      this.stage.flag({ f: 'indigenous', v })
+      return
+    }
+    this.indigenousTimer -= props.stepSeconds
+    if (this.indigenousTimer > 0) {
+      return
+    }
+    this.tolerance = this.tolerance * 0.9
+    this.indigenousInfo({ k: 'Tolerance', v: this.tolerance })
+    const aggression = 1 - this.tolerance
+    this.indigenousInfo({ k: 'Aggression', v: aggression })
+    this.indigenousTimer = Math.max(Nature.INITIAL_INDIGENOUS * this.tolerance, 5)
+    this.indigenousInfo({ k: 'Timer', v: this.indigenousTimer })
+    const growingGene = new Gene({
+      speed: aggression,
+      stage: this.stage,
+      stamina: 0,
+      strength: this.tolerance
+    })
+    this.growing.spawn({ gene: growingGene })
+    this.indigenousInfo({ k: 'Growing', v: this.growing.members.size })
+    const grownGene = new Gene({
+      speed: this.tolerance,
+      stamina: 0,
+      stage: this.stage,
+      strength: aggression
+    })
+    this.grown.spawn({ gene: grownGene, grown: true })
+    this.indigenousInfo({ k: 'Grown', v: this.grown.members.size })
+  }
+
   spawnFamilies (props: {
     count: number
   }): void {
     for (let i = 0; i < props.count; i++) {
-      const family = this.families[i]
+      const family = this.players[i]
       family.spawn()
     }
   }

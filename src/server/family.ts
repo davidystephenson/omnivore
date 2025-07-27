@@ -42,6 +42,7 @@ export default class Family {
 
   addMember (props: {
     gene?: Gene
+    grown?: boolean
     health?: number
     player?: Player
     position: Vec2
@@ -50,6 +51,7 @@ export default class Family {
     const member = new Organism({
       family: this,
       gene,
+      grown: props?.grown,
       health: props.health,
       player: props.player,
       position: props.position,
@@ -57,6 +59,7 @@ export default class Family {
     })
     member.membrane.hungerDamage = 1 - Organism.INITIAL_HEALTH
     this.members.set(member.id, member)
+    this.stage.nature.organisms.set(member.id, member)
     return member
   }
 
@@ -67,12 +70,16 @@ export default class Family {
   }
 
   spawn (props?: {
+    gene?: Gene
+    grown?: boolean
     player?: Player
     position?: Vec2
   }): void {
     const position = props?.position ?? Vec2(0, 0)
     const spawn: Obituary = {
       family: this,
+      gene: props?.gene,
+      grown: props?.grown,
       player: props?.player,
       position
     }

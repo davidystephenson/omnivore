@@ -32,6 +32,20 @@ export class Renderer {
   lerp = 0.5
   ropes: Rope[] = []
   summary?: Summary
+  joystick = false
+  baseX = 0
+  baseY = 0
+  knobX = 0
+  knobY = 0
+  radius = 60
+  knobRadius = 25
+  maxDistance = 35
+  up = false
+  down = false
+  left = false
+  right = false
+  joystickX = 0
+  joystickY = 0
 
   constructor (props: {
     input: Input
@@ -42,9 +56,39 @@ export class Renderer {
       throw new Error('No canvas')
     }
     this.canvas = element
+
     const context = this.canvas.getContext('2d')
     if (context == null) throw new Error('No context')
     this.context = context
+    this.canvas.addEventListener('mousedown', (event) => {
+      this.startJoystick({ event })
+    })
+    this.canvas.addEventListener('mousemove', (event) => {
+      this.moveJoystick({ event })
+    })
+    this.canvas.addEventListener('mouseup', (event) => {
+      this.endJoystick({ event })
+    })
+    this.canvas.addEventListener('mouseleave', (event) => {
+      this.endJoystick({ event })
+    })
+    this.canvas.addEventListener('touchstart', (event) => {
+      this.startJoystick({ event })
+    })
+    this.canvas.addEventListener('touchmove', (event) => {
+      this.moveJoystick({ event })
+    })
+    this.canvas.addEventListener('touchend', (event) => {
+      this.endJoystick({ event })
+    })
+    this.canvas.addEventListener('touchcancel', (event) => {
+      this.endJoystick({ event })
+    })
+    const body = document.querySelector('body')
+    if (body == null) {
+      throw new Error('No body')
+    }
+    body.requestFullscreen()
     this.render()
   }
 
@@ -266,6 +310,26 @@ export class Renderer {
     context.restore()
   }
 
+  endJoystick (props: {
+    event: MouseEvent | TouchEvent
+  }): void {
+    props.event.preventDefault()
+    this.joystick = false
+
+    // Reset input
+    this.up = false
+    this.down = false
+    this.left = false
+    this.right = false
+    this.joystickX = 0
+    this.joystickY = 0
+
+    this.input.take({ key: 'ArrowUp', value: false })
+    this.input.take({ key: 'ArrowDown', value: false })
+    this.input.take({ key: 'ArrowLeft', value: false })
+    this.input.take({ key: 'ArrowRight', value: false })
+  }
+
   followCamera (): void {
     this.context.resetTransform()
     this.context.translate(0.5 * this.canvas.width, 0.5 * this.canvas.height)
@@ -280,6 +344,43 @@ export class Renderer {
     rgb: Rgb
   }): string {
     return `rgba(${props.rgb.red},${props.rgb.green},${props.rgb.blue},1)`
+  }
+
+  getPressPosition (props: {
+    debug?: boolean
+    event: MouseEvent | TouchEvent
+  }): {
+      x: number
+      y: number
+    } {
+    if (props.debug === true) {
+      console.info('getEventPosition', props.event)
+    }
+    if ('touches' in props.event && props.event.touches.length > 0) {
+      console.log('touch', props.event.touches[0])
+      const percentX = props.event.touches[0].clientX / window.innerWidth
+      const percentY = props.event.touches[0].clientY / window.innerHeight
+      const x = percentX * this.canvas.width
+      const y = percentY * this.canvas.height
+      return { x, y }
+    }
+    if (!(props.event instanceof MouseEvent)) {
+      throw new Error('Expected MouseEvent')
+    }
+    const rect = this.canvas.getBoundingClientRect()
+    // const canvasY = this.canvas.getBoundingClientRect().top
+    const offsetX = props.event.clientX - rect.left
+    console.log('offsetX', offsetX)
+    const offsetY = props.event.clientY - rect.top
+    const percentX = offsetX / rect.width
+    console.info('percentX', percentX)
+    const percentY = offsetY / rect.height
+    console.info('percentY', percentY)
+    const x = percentX * this.canvas.width
+    console.info('x', x)
+    const y = percentY * this.canvas.height
+    console.info('y', y)
+    return { x, y }
   }
 
   getPoints (): string {
@@ -343,6 +444,29 @@ export class Renderer {
       vertical: props.vertical,
       width: props.width
     })
+  }
+
+  moveJoystick (props: {
+    event: MouseEvent | TouchEvent
+  }): void {
+    if (!this.joystick) return
+    props.event.preventDefault()
+
+    const position = this.getPressPosition({ event: props.event })
+    const dx = position.x - this.baseX
+    const dy = position.y - this.baseY
+    const distance = Math.sqrt(dx * dx + dy * dy)
+
+    if (distance <= this.maxDistance) {
+      this.knobX = position.x
+      this.knobY = position.y
+    } else {
+      const angle = Math.atan2(dy, dx)
+      this.knobX = this.baseX + Math.cos(angle) * this.maxDistance
+      this.knobY = this.baseY + Math.sin(angle) * this.maxDistance
+    }
+
+    this.updateInput()
   }
 
   render (): void {
@@ -436,18 +560,78 @@ export class Renderer {
     const capped = Math.min(floored, 30)
     this.context.fillStyle = capped < 25 ? 'red' : 'green'
     this.context.fillText(`${capped} fps`, this.canvas.width * 0.909, 60)
+
+    if (this.joystick) {
+      console.log('this.baseX', this.baseX)
+      console.log('this.baseY', this.baseY)
+
+      // Draw base circle
+      this.context.beginPath()
+      this.context.arc(this.baseX, this.baseY, this.radius, 0, 2 * Math.PI)
+      this.context.fillStyle = 'rgba(255, 255, 255, 0.1)'
+      this.context.fill()
+      this.context.strokeStyle = 'rgba(255, 255, 255, 0.3)'
+      this.context.lineWidth = 2
+      this.context.stroke()
+
+      // Draw inner boundary
+      this.context.beginPath()
+      this.context.arc(this.baseX, this.baseY, this.maxDistance, 0, 2 * Math.PI)
+      this.context.strokeStyle = 'rgba(255, 255, 255, 0.2)'
+      this.context.lineWidth = 1
+      this.context.stroke()
+
+      // Draw knob
+      this.context.beginPath()
+      this.context.arc(this.knobX, this.knobY, this.knobRadius, 0, 2 * Math.PI)
+      this.context.fillStyle = 'rgba(255, 255, 255, 0.8)'
+      this.context.fill()
+      this.context.strokeStyle = 'rgba(255, 255, 255, 1)'
+      this.context.lineWidth = 2
+      this.context.stroke()
+
+      // Draw connection line
+      this.context.beginPath()
+      this.context.moveTo(this.baseX, this.baseY)
+      this.context.lineTo(this.knobX, this.knobY)
+      this.context.strokeStyle = 'rgba(255, 255, 255, 0.4)'
+      this.context.lineWidth = 2
+      this.context.stroke()
+
+      this.input.take({ key: 'ArrowUp', value: this.up })
+      this.input.take({ key: 'ArrowDown', value: this.down })
+      this.input.take({ key: 'ArrowLeft', value: this.left })
+      this.input.take({ key: 'ArrowRight', value: this.right })
+    }
   }
 
-  update (summary: Summary): void {
-    this.summary = summary
-    this.fpsList.push(summary.fps)
+  startJoystick (props: {
+    event: MouseEvent | TouchEvent
+  }): void {
+    props.event.preventDefault()
+    const position = this.getPressPosition({ debug: true, event: props.event })
+
+    this.joystick = true
+    this.baseX = position.x
+    this.baseY = position.y
+    this.knobX = position.x
+    this.knobY = position.y
+
+    this.updateInput()
+  }
+
+  update (props: {
+    summary: Summary
+  }): void {
+    this.summary = props.summary
+    this.fpsList.push(props.summary.fps)
     if (this.fpsList.length > 100) {
       this.fpsList.shift()
     }
     this.elements.forEach(element => {
       element.visible = false
     })
-    summary.features?.forEach(element => {
+    props.summary.features?.forEach(element => {
       const oldElement = this.elements.get(element.i)
       if (oldElement != null) {
         const oldPosition = new Vec2(oldElement.x, oldElement.y)
@@ -486,24 +670,42 @@ export class Renderer {
         }
         this.elements.set(element.i, complete)
       }
-      if (element.i === summary.id) {
+      if (element.i === props.summary.id) {
         this.camera.position = new Vec2(element.x, element.y)
       }
     })
-    if (summary.foodCount != null) {
-      this.foodCount = summary.foodCount
+    if (props.summary.foodCount != null) {
+      this.foodCount = props.summary.foodCount
     }
-    if (summary.ropes != null) {
-      this.ropes = summary.ropes
+    if (props.summary.ropes != null) {
+      this.ropes = props.summary.ropes
     }
-    if (summary.debugLines != null) {
-      this.debugLines = summary.debugLines
+    if (props.summary.debugLines != null) {
+      this.debugLines = props.summary.debugLines
     }
-    if (summary.debugCircles != null) {
-      this.debugCircles = summary.debugCircles
+    if (props.summary.debugCircles != null) {
+      this.debugCircles = props.summary.debugCircles
     }
-    if (summary.id != null) {
-      this.id = summary.id
+    if (props.summary.id != null) {
+      this.id = props.summary.id
     }
+  }
+
+  updateInput (): void {
+    if (!this.joystick) return
+
+    const dx = this.knobX - this.baseX
+    const dy = this.knobY - this.baseY
+
+    // Normalize to -1 to 1 range
+    this.joystickX = Math.max(-1, Math.min(1, dx / this.maxDistance))
+    this.joystickY = Math.max(-1, Math.min(1, dy / this.maxDistance))
+
+    // Determine directional inputs with deadzone
+    const deadzone = 0.3
+    this.left = this.joystickX < -deadzone
+    this.right = this.joystickX > deadzone
+    this.up = this.joystickY < -deadzone
+    this.down = this.joystickY > deadzone
   }
 }
