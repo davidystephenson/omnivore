@@ -32,13 +32,15 @@ export class Membrane extends Feature {
   step = 0
 
   constructor (props: {
-    position: Vec2
-    organism: Organism
+    grown?: boolean
     health?: number
+    organism: Organism
+    position: Vec2
     radius?: number
   }) {
     const radius = props.radius ?? 1
-    const startRadius = props.organism.stage.flags.growGame ? Membrane.INITIAL_RADIUS : radius
+    const growing = props.organism.stage.flags.growGame && props.grown !== true
+    const startRadius = growing ? Membrane.INITIAL_RADIUS : radius
     super({
       actor: props.organism,
       bodyDef: {

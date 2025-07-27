@@ -125,7 +125,20 @@ export class Stage {
     gene?: Gene
   }): Player {
     const player = new Player({ stage: this, ...props })
-    const family = this.nature.families.find(family => family.members.size === 0)
+    const minimumPlayerCount = this.nature.families.reduce((minimumPlayerCount, family) => {
+      const playerCount = family.getPlayerCount()
+      const minimum = Math.min(minimumPlayerCount, playerCount)
+      return minimum
+    }, Infinity)
+    const minimumPlayerFamilies = this.nature.families.filter(family => {
+      const playerCount = family.getPlayerCount()
+      return playerCount === minimumPlayerCount
+    })
+    const minimumSize = minimumPlayerFamilies.reduce((minimumSize, family) => {
+      const minimum = Math.min(minimumSize, family.members.size)
+      return minimum
+    }, Infinity)
+    const family = minimumPlayerFamilies.find(family => family.members.size === minimumSize)
     if (family == null) {
       throw new Error('There is no available family')
     }

@@ -52,7 +52,6 @@ export class Curtain {
       r: 25,
       g: 25,
       b: 25,
-      o: 0,
       v,
       visible: true
     }

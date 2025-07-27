@@ -13,6 +13,7 @@ import { BLEEDING_DAMAGE } from '../shared/damage'
 
 export class Renderer {
   static BACKGROUND = 'rgba(50,50,50,1)'
+  static MINIMUM_BORDER_WIDTH = 0.1
   camera = {
     position: new Vec2(0, 0),
     zoom: 0
@@ -68,7 +69,7 @@ export class Renderer {
     context.fill()
     context.clip()
     this.context.fillStyle = Renderer.BACKGROUND
-    const maximumInnerRadius = element.u - element.o
+    const maximumInnerRadius = element.u - Renderer.MINIMUM_BORDER_WIDTH
     const damage = 1 - element.h
     const innerRadius = maximumInnerRadius * damage
     context.beginPath()
@@ -85,10 +86,10 @@ export class Renderer {
       if (this.summary.highlight == null) {
         throw new Error('Missing highlight')
       }
-      const minimum = 0.14
+      const minimumIndicator = 0.14
       const bleeding = element.h < BLEEDING_DAMAGE
       if (bleeding) {
-        const length = (element.u * BLEEDING_DAMAGE) + minimum
+        const length = (element.u * BLEEDING_DAMAGE) + minimumIndicator
         this.drawIndicator({
           color: Renderer.BACKGROUND,
           element,
@@ -125,11 +126,11 @@ export class Renderer {
         context.fillStyle = this.getColor({ rgb: this.summary.highlight })
         context.fill()
       }
-      const maximumBonus = element.u - minimum
+      const maximumBonus = element.u - minimumIndicator
       const bonusLength = maximumBonus * this.summary.speed
-      const length = minimum + bonusLength
+      const length = minimumIndicator + bonusLength
       const bonusWidth = maximumBonus * this.summary.stamina
-      const width = minimum + bonusWidth
+      const width = minimumIndicator + bonusWidth
       const x = this.summary.increase ?? 1
       const ratio = 1 / (x + 0.5)
       const base = 1.007
@@ -243,15 +244,15 @@ export class Renderer {
     })
     context.closePath()
     context.clip()
-    context.fill()
+    // context.fill()
     this.context.strokeStyle = `rgba(${element.r},${element.g},${element.b},1)`
-    const longestSide = vertices.reduce((max, vertex, index) => {
+    const shortedSide = vertices.reduce((max, vertex, index) => {
       const nextIndex = (index + 1) % vertices.length
       const nextVertex = vertices[nextIndex]
       const distance = Vec2.distance(vertex, nextVertex)
-      return Math.max(max, distance)
-    }, 0)
-    const borderWidth = longestSide * element.h
+      return Math.min(max, distance)
+    }, Infinity)
+    const borderWidth = (((shortedSide / 2) - Renderer.MINIMUM_BORDER_WIDTH) * element.h) + Renderer.MINIMUM_BORDER_WIDTH
     this.context.lineWidth = 2 * borderWidth
     context.beginPath()
     vertices.forEach((vertex, i) => {
@@ -455,10 +456,6 @@ export class Renderer {
           console.error(`missing element ${element.i} blue`)
           return
         }
-        if (element.o == null) {
-          console.error(`missing element ${element.i} borderWidth`)
-          return
-        }
         if (element.z == null && element.v == null) {
           console.error(`missing element ${element.i} center x and polygon`)
           return
@@ -468,7 +465,6 @@ export class Renderer {
           r: element.r,
           g: element.g,
           b: element.b,
-          o: element.o,
           visible: true
         }
         this.elements.set(element.i, complete)

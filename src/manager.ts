@@ -47,7 +47,7 @@ export function isSerializableArray (value: unknown): value is SerializableArray
  * Manager class for handling large data serialization and file operations
  */
 export class Manager {
-  static LOG_FREQUENCY = 1000000
+  static DEBUG_FREQUENCY = 1000000
   private writeCounter: number = 0
   private verbose: boolean = true
 
@@ -81,7 +81,7 @@ export class Manager {
     fs.writeSync(fileDescriptor, data)
     this.writeCounter++
 
-    if (this.writeCounter % Manager.LOG_FREQUENCY === 0) {
+    if (this.writeCounter % Manager.DEBUG_FREQUENCY === 0) {
       console.info(`${this.writeCounter.toLocaleString()} writes`)
     }
   }

@@ -13,7 +13,6 @@ export class Feature {
   static DAMPING = 0.11
   actor: Actor
   body: Body
-  borderWidth: number
   center: Vec2
   color: Rgb
   combatDamage: number
@@ -71,7 +70,6 @@ export class Feature {
       ? { vertices: shape.m_vertices }
       : { vertices: [] }
     this.color = props.color
-    this.borderWidth = props.borderWidth ?? 0.1
   }
 
   addSensor (): Fixture {
@@ -154,7 +152,6 @@ export class Feature {
       element.r = this.color.red
       element.g = this.color.green
       element.b = this.color.blue
-      element.o = this.borderWidth
       if (this.radius > 0) {
         element.z = this.center.x
         element.w = this.center.y

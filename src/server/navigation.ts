@@ -411,7 +411,7 @@ export class Navigation {
     // NOTE: Check for incorrect next waypoints. Look for loops. Save the results.
     waypointArray.forEach(waypoint => {
       if (waypoint.id % 100 === 0) {
-        this.stage.log({ k: 'waypoint', v: `${waypoint.id} / ${waypointArray.length} r${radiusLabel}` })
+        this.stage.debug({ k: 'waypoint', v: `${waypoint.id} / ${waypointArray.length} r${radiusLabel}` })
       }
       const nextWaypoints = waypoint.nextWaypoints[props.radius]
       if (nextWaypoints == null) {

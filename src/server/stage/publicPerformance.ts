@@ -10,11 +10,12 @@ export class PublicPerformance extends Performance {
     const flags = new Flags({
       families: true
       // performance: true
-      // playerDeath: true,
-      // respawn: true,
+      // playerDeath: true
+      // respawn: true
       // spawn: true
       // stats: true
       // timings: true
+      // hungerGame: false
     })
     super({
       flags,
@@ -22,46 +23,42 @@ export class PublicPerformance extends Performance {
       promptbookName: props.promptbookName
     })
     this.nature.spawnFamilies({ count: 4 })
+    // this.nature.addCenterTree()
     this.nature.addStarTrees()
-    // this.nature.addRock({
-    //   position: Vec2(0, 25),
-    //   halfHeight: 10,
-    //   halfWidth: 5
+    // this.nature.addRiver({
+    //   position: Vec2(0, 0),
+    //   vertices: [
+    //     new Vec2(-5, 0),
+    //     new Vec2(5, -0.5),
+    //     new Vec2(5, 0.5)
+    //   ],
+    //   force: Vec2(0, 0),
+    //   speed: 0
+    // })
+    // this.nature.addRiver({
+    //   position: Vec2(80, 80),
+    //   vertices: [
+    //     new Vec2(-5, 0),
+    //     new Vec2(5, -0.5),
+    //     new Vec2(5, 0.5)
+    //   ],
+    //   force: Vec2(0, 0),
+    //   speed: 0
     // })
     // this.nature.addRock({
-    //   position: Vec2(25, 0),
-    //   halfHeight: 5,
-    //   halfWidth: 10
+    //   position: Vec2(80, 80),
+    //   halfWidth: 5,
+    //   halfHeight: 1
     // })
     // this.nature.addRock({
-    //   position: Vec2(0, 15),
-    //   halfHeight: 10,
-    //   halfWidth: 10
+    //   position: Vec2(45, -45),
+    //   halfWidth: 5,
+    //   halfHeight: 1
     // })
     // this.nature.addRock({
-    //   position: Vec2(15, 0),
-    //   halfHeight: 10,
-    //   halfWidth: 10
-    // })
-    // this.nature.addRock({
-    //   position: Vec2(0, 20),
-    //   halfHeight: 5,
-    //   halfWidth: 5
-    // })
-    // this.nature.addRock({
-    //   position: Vec2(20, 0),
-    //   halfHeight: 1,
-    //   halfWidth: 5
-    // })
-    // this.nature.addRock({
-    //   position: Vec2(10, 0),
-    //   halfHeight: 5,
-    //   halfWidth: 1
-    // })
-    // this.nature.addRock({
-    //   position: Vec2(0, 10),
-    //   halfHeight: 1,
-    //   halfWidth: 1
+    //   position: Vec2(-45, -45),
+    //   halfWidth: 5,
+    //   halfHeight: 1
     // })
   }
 }

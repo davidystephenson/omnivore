@@ -205,7 +205,7 @@ export class Organism extends Actor {
     const nearWaypointStart = this.stage.navigation.getNearWaypoint(myPosition)
     const nextPoint = this.stage.navigation.navigate(myPosition, props.target, this.membrane.radius, this.chaseRadius)
     if (this.stage.flags.botChase) {
-      this.stage.log({ v: `start: ${nearWaypointStart.id}, end: ${nearWaypointEnd.id}` })
+      this.stage.debug({ v: `start: ${nearWaypointStart.id}, end: ${nearWaypointEnd.id}` })
       this.stage.debugCircle({
         circle: new CircleShape(props.target, 0.3),
         color: COLOR.ORANGE
@@ -538,7 +538,6 @@ export class Organism extends Actor {
     this.stage.destructionQueue.push(this.membrane.body)
     this.spawnPosition = this.membrane.body.getPosition()
     this.membrane = this.grow({ gene: this.gene })
-    this.membrane.borderWidth = 0.2
   }
 
   isFeatureReachable (props: {

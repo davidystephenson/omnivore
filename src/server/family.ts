@@ -54,6 +54,12 @@ export default class Family {
     return member
   }
 
+  getPlayerCount (): number {
+    const members = [...this.members.values()]
+    const playerCount = members.filter(member => member.player != null).length
+    return playerCount
+  }
+
   spawn (props?: {
     player?: Player
     position?: Vec2

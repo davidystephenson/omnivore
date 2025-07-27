@@ -6,7 +6,6 @@ export interface Element {
   g?: number // green
   h: number // health
   i: number // id
-  o?: number // borderWidth
   n: number // angle
   s: number // scale
   r?: number // red
@@ -19,7 +18,6 @@ export interface Element {
 }
 
 export interface CompleteElement extends Element {
-  o: number
   r: number
   g: number
   b: number
