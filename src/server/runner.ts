@@ -153,17 +153,14 @@ export class Runner {
     player: Player
   }): Summary {
     const start = performance.now()
-    const elements = this.getElements(props.player)
-    const curtains = this.stage.spawner.curtains.map(
-      curtain => curtain.getElement()
-    )
     const age = Math.floor(props.player.age)
     const summary: Summary = {
       age,
-      curtains,
+      curtains: [],
       debugLines: this.debugLines,
       debugCircles: this.debugCircles,
-      features: elements,
+      extinct: props.player.extinct,
+      features: [],
       fps: this.fps,
       foodCount: this.stage.food.length,
       points: props.player.points,
@@ -177,7 +174,22 @@ export class Runner {
       summary.increase = props.player.organism.membrane.increase
       summary.speed = props.player.organism.gene.speed
       summary.stamina = props.player.organism.gene.stamina
-    } else {
+      summary.features = this.getElements(props.player)
+      summary.curtains = this.stage.spawner.curtains.map(
+        curtain => curtain.getElement()
+      )
+      if (this.stage.flags.summary) {
+        this.stage.debug({
+          seconds: 10,
+          vs: ['getSummary features.length', summary.features.length]
+        })
+        const json = JSON.stringify(summary)
+        this.stage.debug({
+          seconds: 10,
+          vs: ['getSummary json.length', json.length]
+        })
+      }
+    } else if (!props.player.extinct) {
       const playerIndex = this.stage.spawner.queue.findIndex(
         obituary => obituary.player === props.player
       )
@@ -187,17 +199,6 @@ export class Runner {
         throw new Error(`Player.organism is null without respawning!!! ${new Date().toLocaleTimeString()}`)
       }
       summary.respawn = playerIndex
-    }
-    if (this.stage.flags.summary) {
-      this.stage.debug({
-        seconds: 10,
-        vs: ['getSummary elements.length', elements.length]
-      })
-      const json = JSON.stringify(summary)
-      this.stage.debug({
-        seconds: 10,
-        vs: ['getSummary json.length', json.length]
-      })
     }
     this.endTiming({ key: 'summary', start })
     return summary

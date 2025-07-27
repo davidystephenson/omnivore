@@ -55,8 +55,12 @@ export class Death {
       console.debug(
         'playerDeath respawn',
         this.victim.actor.family.members.size,
-        new Date().toLocaleTimeString()
+        new Date().toISOString()
       )
+    }
+    if (this.stage.flags.extinctGame && this.victim.actor.player != null) {
+      this.victim.actor.player.extinct = true
+      return
     }
     if (this.victim.actor instanceof Organism && this.victim.actor.player != null) {
       this.victim.actor.player.age = 0

@@ -8,6 +8,7 @@ export class Flags {
   curtains: boolean
   damage: boolean
   death: boolean
+  extinctGame: boolean
   families: boolean
   growGame: boolean
   hungerGame: boolean
@@ -29,6 +30,7 @@ export class Flags {
   procedural: boolean
   reproduceGame: boolean
   respawn: boolean
+  singleGame: boolean
   spawn: boolean
   spawnpoints: boolean
   starveBricksGame: boolean
@@ -52,6 +54,7 @@ export class Flags {
     controlLines?: boolean
     curtains?: boolean
     death?: boolean
+    extinctGame?: boolean
     families?: boolean
     growGame?: boolean
     hungerGame?: boolean
@@ -73,6 +76,7 @@ export class Flags {
     procedural?: boolean
     reproduceGame?: boolean
     respawn?: boolean
+    singleGame?: boolean
     spawn?: boolean
     spawnpoints?: boolean
     starveBricksGame?: boolean
@@ -116,6 +120,8 @@ export class Flags {
     this.procedural = props.procedural ?? false
     this.reproduceGame = props.reproduceGame ?? true
     this.respawn = props.respawn ?? false
+    this.extinctGame = props.extinctGame ?? false
+    this.singleGame = props.singleGame ?? false
     this.spawn = props.spawn ?? false
     this.spawnpoints = props.spawnpoints ?? false
     this.starveBricksGame = props.starveBricksGame ?? true

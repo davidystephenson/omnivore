@@ -8,7 +8,8 @@ export class PublicPerformance extends Performance {
     promptbookName: string
   }) {
     const flags = new Flags({
-      families: true
+      families: true,
+      extinctGame: true
       // performance: true
       // playerDeath: true
       // respawn: true

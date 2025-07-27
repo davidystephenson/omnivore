@@ -15,23 +15,29 @@ export default class Family {
   constructor (props: {
     color: Rgb
     highlight: Rgb
-    speed?: number
-    strength?: number
-    stamina?: number
+    speed: number
+    strength: number
+    stamina: number
     stage: Stage
   }) {
     this.color = props.color
-    const speed = props.speed ?? 0.33
-    const strength = props.strength ?? 0.33
-    const stamina = props.stamina ?? 0.34
+    this.highlight = props.highlight
+    this.stage = props.stage
+    const speed = this.stage.flags.singleGame
+      ? props.speed
+      : 0.33
+    const strength = this.stage.flags.singleGame
+      ? props.strength
+      : 0.33
+    const stamina = this.stage.flags.singleGame
+      ? props.stamina
+      : 0.34
     this.gene = new Gene({
       speed,
       strength,
       stamina,
       stage: props.stage
     })
-    this.highlight = props.highlight
-    this.stage = props.stage
   }
 
   addMember (props: {

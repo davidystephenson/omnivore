@@ -5,6 +5,7 @@ import { PINK } from '../../shared/color'
 export class Player {
   age = 0
   ageCache = 0
+  extinct = false
   points = 0
   id: string
   organism?: Organism

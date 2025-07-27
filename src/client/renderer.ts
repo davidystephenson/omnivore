@@ -360,7 +360,9 @@ export class Renderer {
       return
     }
     this.context.translate(eye.x, eye.y)
-    this.context.fillStyle = 'rgba(50, 50, 50, 0.9)'
+    this.context.fillStyle = this.summary.extinct
+      ? 'black'
+      : 'rgba(50, 50, 50, 0.9)'
     this.context.lineWidth = 0.4
     this.context.beginPath()
     this.context.moveTo(-HALF_SIGHT_SIZE.x, HALF_SIGHT_SIZE.y)
@@ -406,6 +408,21 @@ export class Renderer {
     const points = this.getPoints()
     const message = `${points} (+${age})`
     this.context.fillText(message, 10, 60)
+    if (this.summary.extinct) {
+      this.context.fillStyle = 'red'
+      this.context.font = 'bold 50px Arial'
+      const measurement = this.context.measureText('EXTINCT')
+      const height = measurement.actualBoundingBoxAscent + measurement.actualBoundingBoxDescent
+      console.log('height', height)
+      const halfHeight = height * 0.5
+      console.log('halfHeight', halfHeight)
+      const halfWidth = measurement.width * 0.5
+      console.log('halfWidth', halfWidth)
+      const x = (this.canvas.width * 0.5) - halfWidth
+      const y = (this.canvas.height * 0.5) + halfHeight
+      this.context.fillText('EXTINCT', x, y)
+      return
+    }
     if (this.summary.respawn != null && this.summary.respawn > -1) {
       const next = this.summary.respawn === 0
       const color = next ? 'lime' : 'white'

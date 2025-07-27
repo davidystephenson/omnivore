@@ -11,6 +11,7 @@ export interface Summary {
   curtains?: ClientElement[]
   debugLines?: DebugLine[]
   debugCircles?: DebugCircle[]
+  extinct: boolean
   features?: Element[]
   foodCount?: number
   fps: number

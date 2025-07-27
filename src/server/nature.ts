@@ -31,45 +31,45 @@ export class Nature {
     // })
     this.boa = this.addFamily({
       color: PURPLE,
-      highlight: LIGHT_PURPLE
-      // speed: 0
-      // stamina: 0.5,
-      // strength: 0.5
+      highlight: LIGHT_PURPLE,
+      speed: 0,
+      stamina: 0.5,
+      strength: 0.5
     })
     this.crow = this.addFamily({
       color: ORANGE,
-      highlight: LIGHT_ORANGE
-      // speed: 0.5,
-      // strength: 0,
-      // stamina: 0.5,
+      highlight: LIGHT_ORANGE,
+      speed: 0.5,
+      strength: 0,
+      stamina: 0.5
     })
     this.fly = this.addFamily({
       color: YELLOW,
-      highlight: LIGHT_YELLOW
-      // speed: 1,
-      // stamina: 0,
-      // strength: 0
+      highlight: LIGHT_YELLOW,
+      speed: 1,
+      stamina: 0,
+      strength: 0
     })
     this.tardigrade = this.addFamily({
       color: PINK,
-      highlight: LIGHT_PINK
-      // speed: 0,
-      // stamina: 1,
-      // strength: 0
+      highlight: LIGHT_PINK,
+      speed: 0,
+      stamina: 1,
+      strength: 0
     })
     this.tiger = this.addFamily({
       color: RED,
-      highlight: LIGHT_RED
-      // speed: 0.5,
-      // strength: 0.5,
-      // stamina: 0,
+      highlight: LIGHT_RED,
+      speed: 0.5,
+      strength: 0.5,
+      stamina: 0
     })
     this.whale = this.addFamily({
       color: GRAY,
-      highlight: LIGHT_GRAY
-      // speed: 0,
-      // strength: 1,
-      // stamina: 0,
+      highlight: LIGHT_GRAY,
+      speed: 0,
+      strength: 1,
+      stamina: 0
     })
     this.families = shuffle(this.families)
   }
@@ -92,6 +92,9 @@ export class Nature {
   addFamily (props: {
     color: Rgb
     highlight: Rgb
+    speed: number
+    stamina: number
+    strength: number
   }): Family {
     const family = new Family({ stage: this.stage, ...props })
     this.families.push(family)
