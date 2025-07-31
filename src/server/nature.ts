@@ -9,6 +9,7 @@ import { Rock } from './actor/rock'
 import Family from './family'
 import { Gene } from './gene'
 import { Organism } from './actor/organism'
+import { Membrane } from './feature/membrane'
 
 export class Nature {
   static INITIAL_INDIGENOUS = 100
@@ -298,13 +299,32 @@ export class Nature {
     if (!this.stage.flags.extinctGame) {
       return
     }
-    if (this.stage.players.size === 0) {
-      this.stage.flag({ f: 'indigenous', v: 'No players, no indigenous' })
+    const invasive = [...this.players.values()].reduce((sum, player) => {
+      return sum + player.members.size
+    }, 0)
+    if (invasive > 60) {
+      const v = `${invasive} invasive organisms, depopulating`
+      this.stage.flag({ f: 'indigenous', v })
+      this.organisms.forEach(organism => {
+        if (organism.player != null) {
+          return
+        }
+        if (organism.family.members.size === 1) {
+          return
+        }
+        organism.membrane.hungerDamage = Infinity
+        organism.membrane.health = organism.membrane.getHealth()
+        organism.starve({ membrane: organism.membrane })
+      })
       return
     }
-    if (this.stage.nature.organisms.size > 100) {
-      const v = `${this.stage.nature.organisms.size} organisms, no indigenous`
-      this.stage.flag({ f: 'indigenous', v })
+    const playerControlled = [...this.organisms.values()].filter(
+      organism => organism.player != null
+    )
+    if (playerControlled.length === 0) {
+      this.stage.flag({ f: 'indigenous', v: 'No players, reset indigenous' })
+      this.indigenousTimer = Nature.INITIAL_INDIGENOUS
+      this.tolerance = 1
       return
     }
     this.indigenousTimer -= props.stepSeconds

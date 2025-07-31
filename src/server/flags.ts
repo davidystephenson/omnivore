@@ -20,6 +20,7 @@ export class Flags {
   meatGame: boolean
   mutation: boolean
   navigation: boolean
+  pebbleGame: boolean
   organisms: boolean
   organismsCount: boolean
   performance: boolean
@@ -69,6 +70,7 @@ export class Flags {
     navigation?: boolean
     organisms?: boolean
     organismsCount?: boolean
+    pebbleGame?: boolean
     performance?: boolean
     playerControl?: boolean
     playerDeath?: boolean
@@ -114,6 +116,7 @@ export class Flags {
     this.navigation = props.navigation ?? false
     this.organisms = props.organisms ?? false
     this.organismsCount = props.organismsCount ?? false
+    this.pebbleGame = props.pebbleGame ?? false
     this.performance = props.performance ?? false
     this.playerControl = props.playerControl ?? false
     this.playerNavigation = props.playerNavigation ?? true

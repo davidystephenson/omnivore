@@ -321,7 +321,24 @@ export class Runner {
         labels.push(`blue:${this.stage.nature.growing.members.size}`)
         labels.push(`green:${this.stage.nature.grown.members.size}`)
         const familiesLabel = labels.join(',')
-        console.info('families', familiesLabel)
+        const playerTotal = this.stage.nature.players.reduce(
+          (acc, family) => acc + family.members.size,
+          0
+        )
+        const invasive = playerTotal + this.stage.nature.growing.members.size + this.stage.nature.grown.members.size
+        const now = new Date()
+        // timestamp in local timezone with swedish format
+        const timestamp = now.toLocaleString('sv-SE', {
+          hour12: false
+        })
+        console.info(timestamp, invasive, 'invasive', familiesLabel)
+        console.info(
+          timestamp,
+          this.stage.nature.grown.members.size,
+          'grown',
+          this.stage.nature.growing.members.size,
+          'growing'
+        )
       }
       if (this.stage.flags.performance) {
         const botCount = sum(this.stage.nature.players.map(family => family.members.size))

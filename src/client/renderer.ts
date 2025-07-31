@@ -88,7 +88,7 @@ export class Renderer {
     if (body == null) {
       throw new Error('No body')
     }
-    body.requestFullscreen()
+    void body.requestFullscreen()
     this.render()
   }
 

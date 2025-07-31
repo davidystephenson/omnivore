@@ -70,6 +70,16 @@ export class Starvation extends Death {
           position: center,
           stage: this.stage
         })
+      } else {
+        const size = this.victim.radius * Math.SQRT2
+        const halfSize = size / 2
+        void new Rock({
+          halfWidth: halfSize,
+          halfHeight: halfSize,
+          health: 1,
+          position: victimPosition,
+          stage: this.stage
+        })
       }
       if (this.stage.flags.death) {
         this.stage.runner.paused = true
