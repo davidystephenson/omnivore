@@ -11,7 +11,7 @@ let featureCount = 0
 
 export class Feature {
   static MINIMUM_DAMAGE = 0.00000001
-  static DAMPING = 0.11
+  static DAMPING = 0.15
   actor: Actor
   body: Body
   center: Vec2

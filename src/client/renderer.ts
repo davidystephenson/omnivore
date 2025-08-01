@@ -174,10 +174,16 @@ export class Renderer {
         if (element.h > cap) {
           context.beginPath()
           context.arc(element.z, element.w, 0.1, 0, 2 * Math.PI)
-          context.fillStyle = this.getColor({ rgb: this.summary.highlight })
+          context.fillStyle = this.getColor({ rgb: WHITE })
           context.fill()
         }
         console.log('this.summary.stamina', this.summary.stamina)
+      } else {
+        context.beginPath()
+        context.arc(element.z, element.w, element.u, 0, 2 * Math.PI)
+        context.strokeStyle = this.getColor({ rgb: this.summary.highlight })
+        context.lineWidth = Renderer.MINIMUM_BORDER_WIDTH * 2
+        context.stroke()
       }
       this.drawIndicators({
         down: element.o,

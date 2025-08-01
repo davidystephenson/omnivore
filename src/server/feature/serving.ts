@@ -1,5 +1,5 @@
 import { Vec2 } from 'planck'
-import { GREEN, Rgb } from '../../shared/color'
+import { LIME, Rgb } from '../../shared/color'
 import { Actor } from '../actor/actor'
 import { Sculpture } from './sculpture'
 import { Feature } from './feature'
@@ -11,7 +11,7 @@ export class Serving extends Sculpture {
     position: Vec2
     vertices: Vec2[]
   }) {
-    const color = props.color ?? GREEN
+    const color = props.color ?? LIME
     super({
       label: 'serving',
       position: props.position,

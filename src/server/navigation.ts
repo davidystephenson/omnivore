@@ -369,7 +369,7 @@ export class Navigation {
         if (improvements === 0) emptySteps += 1
         else emptySteps = 0
         this.stage.debug({ v: `Empty steps: ${emptySteps}` })
-        if (infinitePaths === 0 && emptySteps > 1) break
+        if (infinitePaths === 0 && emptySteps > 0) break
       }
       let maxPathDistance = 0
       let infinitePaths = 0

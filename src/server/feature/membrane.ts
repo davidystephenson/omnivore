@@ -9,7 +9,7 @@ import { Runner } from '../runner'
 import { Prop } from './prop'
 import { Debris } from '../actor/debris'
 import { SIGHT } from '../../shared/sight'
-import { LIME } from '../../shared/color'
+import { COLOR } from '../../shared/color'
 import { BLEEDING_DAMAGE } from '../../shared/damage'
 import { Element } from '../../shared/element'
 import { Player } from '../actor/player'
@@ -81,7 +81,7 @@ export class Membrane extends Feature {
       const size = this.radius * Math.SQRT2
       const halfSize = size / 2
       this.actor.stage.nature.addFoodSquare({
-        color: LIME,
+        color: COLOR.GREEN,
         nutrition: this.combatDamage * 0.5,
         position: this.position,
         halfSize
@@ -137,7 +137,8 @@ export class Membrane extends Feature {
       player: props.player,
       seen: props.seen
     })
-    const teamed = props.player.organism != null &&
+    const teamed = this.actor.player != null &&
+      props.player.organism != null &&
       props.player.organism.family.id === this.actor.family.id
     if (teamed) {
       element.e = this.actor.gene.speed

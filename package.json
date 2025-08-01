@@ -9,6 +9,7 @@
     "off": "npm run build && node --enable-source-maps --max-old-space-size=4096 build/server/offBook.js",
     "on": "npm run build && node --enable-source-maps --max-old-space-size=4096 build/server/onBook.js",
     "rehearse": "npm run build && npm run serve",
+    "resume": "npm run off public download",
     "serve": "node --enable-source-maps build/server/rehearse.js",
     "start": "npm run build && node --enable-source-maps --max-old-space-size=4096 build/server/produce.js",
     "watch:server": "npx onchange -i -k \"src/shared/**\" \"src/server/**\" -- npm run serve",

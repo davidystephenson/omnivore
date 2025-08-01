@@ -1,5 +1,5 @@
 import { Vec2 } from 'planck'
-import { YELLOW, RED, PURPLE, PINK, Rgb, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW, LIGHT_PINK, LIGHT_ORANGE, ORANGE, LIGHT_BLUE, CYAN, GREEN, LIME, LIGHT_MAGENTA, MAGENTA } from '../shared/color'
+import { YELLOW, RED, PURPLE, PINK, Rgb, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW, LIGHT_PINK, LIGHT_ORANGE, ORANGE, LIGHT_BLUE, CYAN, LIME, LIGHT_GREEN, GRAY, LIGHT_GRAY } from '../shared/color'
 import { Stage } from './stage/stage'
 import { Tree } from './actor/tree'
 import { River } from './actor/river'
@@ -54,8 +54,8 @@ export class Nature {
       stamina: 0.5
     })
     this.fly = this.addPlayer({
-      color: YELLOW,
-      highlight: LIGHT_YELLOW,
+      color: LIGHT_YELLOW,
+      highlight: YELLOW,
       id: 'fly',
       speed: 1,
       stamina: 0,
@@ -71,7 +71,7 @@ export class Nature {
       strength: 0.33
     })
     this.grown = new Family({
-      color: GREEN,
+      color: LIGHT_GREEN,
       highlight: LIME,
       id: 'grown',
       speed: 0.33,
@@ -96,8 +96,8 @@ export class Nature {
       stamina: 0
     })
     this.whale = this.addPlayer({
-      color: MAGENTA,
-      highlight: LIGHT_MAGENTA,
+      color: LIGHT_GRAY,
+      highlight: GRAY,
       id: 'whale',
       speed: 0,
       strength: 1,

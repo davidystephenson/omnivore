@@ -19,8 +19,8 @@ export class SmallRehearsal extends Procedural {
         // vision: false,
         performance: false
       }),
-      halfHeight: 25,
-      halfWidth: 25,
+      halfHeight: 30,
+      halfWidth: 30,
       initial: props.initial,
       onBook: props.onBook,
       promptbookName: props.promptbookName
