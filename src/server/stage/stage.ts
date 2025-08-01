@@ -124,24 +124,36 @@ export class Stage {
     gene?: Gene
   }): Player {
     const player = new Player({ stage: this, ...props })
-    const minimumPlayerCount = this.nature.players.reduce((minimumPlayerCount, family) => {
-      const playerCount = family.getPlayerCount()
-      const minimum = Math.min(minimumPlayerCount, playerCount)
-      return minimum
-    }, Infinity)
-    const minimumPlayerFamilies = this.nature.players.filter(family => {
-      const playerCount = family.getPlayerCount()
-      return playerCount === minimumPlayerCount
-    })
-    const minimumSize = minimumPlayerFamilies.reduce((minimumSize, family) => {
-      const minimum = Math.min(minimumSize, family.members.size)
-      return minimum
-    }, Infinity)
-    const family = minimumPlayerFamilies.find(family => family.members.size === minimumSize)
-    if (family == null) {
-      throw new Error('There is no available family')
+    if (this.flags.singleGame) {
+      this.nature.grown.spawn({ player })
+    } else if (this.flags.extinctGame) {
+      const openFamily = this.nature.players.find(family => {
+        return family.members.size === 0
+      })
+      if (openFamily == null) {
+        throw new Error('There are no open families')
+      }
+      openFamily.spawn({ player })
+    } else {
+      const minimumPlayerCount = this.nature.players.reduce((minimumPlayerCount, family) => {
+        const playerCount = family.getPlayerCount()
+        const minimum = Math.min(minimumPlayerCount, playerCount)
+        return minimum
+      }, Infinity)
+      const minimumPlayerFamilies = this.nature.players.filter(family => {
+        const playerCount = family.getPlayerCount()
+        return playerCount === minimumPlayerCount
+      })
+      const minimumSize = minimumPlayerFamilies.reduce((minimumSize, family) => {
+        const minimum = Math.min(minimumSize, family.members.size)
+        return minimum
+      }, Infinity)
+      const family = minimumPlayerFamilies.find(family => family.members.size === minimumSize)
+      if (family == null) {
+        throw new Error('There is no available family')
+      }
+      family.spawn({ player })
     }
-    family.spawn({ player })
     return player
   }
 

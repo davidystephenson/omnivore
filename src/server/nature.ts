@@ -65,19 +65,19 @@ export class Nature {
       color: LIGHT_BLUE,
       highlight: CYAN,
       id: 'growing',
-      speed: 0,
+      speed: 0.33,
       stage: this.stage,
-      stamina: 0,
-      strength: 1
+      stamina: 0.34,
+      strength: 0.33
     })
     this.grown = new Family({
       color: GREEN,
       highlight: LIME,
       id: 'grown',
-      speed: 1,
+      speed: 0.33,
       stage: this.stage,
-      stamina: 0,
-      strength: 0
+      stamina: 0.34,
+      strength: 0.33
     })
     this.tardigrade = this.addPlayer({
       color: PINK,
