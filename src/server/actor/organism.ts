@@ -27,6 +27,7 @@ export interface OrganismSpawn {
 
 export interface Obituary extends OrganismSpawn {
   grown?: boolean
+  mutate?: false
   position: Vec2
 }
 

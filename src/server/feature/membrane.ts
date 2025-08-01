@@ -11,6 +11,8 @@ import { Debris } from '../actor/debris'
 import { SIGHT } from '../../shared/sight'
 import { LIME } from '../../shared/color'
 import { BLEEDING_DAMAGE } from '../../shared/damage'
+import { Element } from '../../shared/element'
+import { Player } from '../actor/player'
 
 export class Membrane extends Feature {
   static BASE_DAMAGE = 0.1
@@ -22,7 +24,6 @@ export class Membrane extends Feature {
   static MINIMUM_LIFE_SECONDS = 40
   actor: Organism
   destroyed = false
-  increase?: number
   hungerDamage = 0
   collideFeatures = new Set<Feature>()
   mass: number
@@ -128,6 +129,28 @@ export class Membrane extends Feature {
     return damage
   }
 
+  getElement (props: {
+    player: Player
+    seen: boolean
+  }): Element {
+    const element = super.getElement({
+      player: props.player,
+      seen: props.seen
+    })
+    const teamed = props.player.organism != null &&
+      props.player.organism.family.id === this.actor.family.id
+    if (teamed) {
+      element.e = this.actor.gene.speed
+      element.m = this.actor.gene.stamina
+      element.p = this.actor.controls.up
+      element.o = this.actor.controls.down
+      element.l = this.actor.controls.left
+      element.s = this.actor.gene.strength
+      element.t = this.actor.controls.right
+    }
+    return element
+  }
+
   getHealth (): number {
     const combatHealth = super.getHealth()
     if (this.hungerDamage < 0) {
@@ -148,14 +171,12 @@ export class Membrane extends Feature {
 
   grow (stepSize: number): void {
     if (this.radius === this.targetRadius) {
-      this.increase = undefined
       return
     }
     this.step += 1
     if (this.step % 2 === 0) {
       const strength = Math.max(this.actor.gene.strength, 0.01)
       const increase = Membrane.GROWTH * stepSize * strength
-      this.increase = strength
       this.radius = Math.min(this.radius + increase, this.targetRadius)
       this.body.destroyFixture(this.fixture)
       this.fixture = this.body.createFixture({

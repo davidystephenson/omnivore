@@ -12,6 +12,7 @@ export const BLACK: Rgb = { red: 0, green: 0, label: 'black', blue: 0 } // backg
 export const BLUE: Rgb = { red: 25, green: 25, label: 'blue', blue: 255 } // neutral
 export const CYAN: Rgb = { red: 0, green: 255, label: 'cyan', blue: 255 } // debris
 export const DARK_BLUE: Rgb = { red: 0, green: 0, label: 'dark blue', blue: 255 }
+export const DARK_GRAY: Rgb = { red: 96, green: 96, label: 'dark gray', blue: 96 }
 export const GRAY: Rgb = { red: 128, green: 128, label: 'gray', blue: 128 } // whale
 export const GREEN: Rgb = { red: 0, green: 128, label: 'green', blue: 0 } // player
 export const LIGHT_BLUE: Rgb = { red: 148, green: 148, label: 'light blue', blue: 255 }
@@ -41,6 +42,7 @@ export const COLOR = {
   LIME,
   GRAY,
   WHITE,
+  LIGHT_BLUE,
   LIGHT_GRAY,
   LIGHT_GREEN,
   LIGHT_MAGENTA,

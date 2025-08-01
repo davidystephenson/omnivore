@@ -7,13 +7,15 @@ import { DebugLine } from '../shared/debugLine'
 import { DebugCircle } from '../shared/debugCircle'
 import { Input } from '../shared/input'
 import { getBaseLog } from '../server/math'
-import { Rgb, WHITE } from '../shared/color'
+import { BLACK, Rgb, Rgba, WHITE } from '../shared/color'
 import { Food } from '../server/actor/food'
 import { BLEEDING_DAMAGE } from '../shared/damage'
 
 export class Renderer {
-  static BACKGROUND = 'rgba(50,50,50,1)'
+  static BACKGROUND = BLACK
+  static JOYSTICK_THRESHOLD = 0.3
   static MINIMUM_BORDER_WIDTH = 0.1
+  static MINIMUM_INDICATOR = 0.14
   camera = {
     position: new Vec2(0, 0),
     zoom: 0
@@ -32,20 +34,13 @@ export class Renderer {
   lerp = 0.5
   ropes: Rope[] = []
   summary?: Summary
-  joystick = false
-  baseX = 0
-  baseY = 0
-  knobX = 0
-  knobY = 0
-  radius = 60
-  knobRadius = 25
-  maxDistance = 35
-  up = false
-  down = false
-  left = false
-  right = false
-  joystickX = 0
-  joystickY = 0
+  joystickContainer: HTMLElement
+  joystickMaxDistance: number = 40
+  joystickX: number = 0
+  joystickY: number = 0
+  knob: HTMLElement
+  knobX: number = 0
+  knobY: number = 0
 
   constructor (props: {
     input: Input
@@ -60,28 +55,38 @@ export class Renderer {
     const context = this.canvas.getContext('2d')
     if (context == null) throw new Error('No context')
     this.context = context
-    this.canvas.addEventListener('mousedown', (event) => {
+    const joystickContainer = document.getElementById('joystick-container')
+    if (joystickContainer == null) {
+      throw new Error('There is no joystick container')
+    }
+    this.joystickContainer = joystickContainer
+    const knob = document.getElementById('joystick-knob')
+    if (knob == null) {
+      throw new Error('There is no joystick knob')
+    }
+    this.knob = knob
+    document.addEventListener('mousedown', (event) => {
       this.startJoystick({ event })
     })
-    this.canvas.addEventListener('mousemove', (event) => {
+    document.addEventListener('mousemove', (event) => {
       this.moveJoystick({ event })
     })
-    this.canvas.addEventListener('mouseup', (event) => {
+    document.addEventListener('mouseup', (event) => {
       this.endJoystick({ event })
     })
-    this.canvas.addEventListener('mouseleave', (event) => {
+    document.addEventListener('mouseleave', (event) => {
       this.endJoystick({ event })
     })
-    this.canvas.addEventListener('touchstart', (event) => {
+    document.addEventListener('touchstart', (event) => {
       this.startJoystick({ event })
     })
-    this.canvas.addEventListener('touchmove', (event) => {
+    document.addEventListener('touchmove', (event) => {
       this.moveJoystick({ event })
     })
-    this.canvas.addEventListener('touchend', (event) => {
+    document.addEventListener('touchend', (event) => {
       this.endJoystick({ event })
     })
-    this.canvas.addEventListener('touchcancel', (event) => {
+    document.addEventListener('touchcancel', (event) => {
       this.endJoystick({ event })
     })
     const body = document.querySelector('body')
@@ -95,6 +100,9 @@ export class Renderer {
   drawCircle (element: ClientElement): void {
     if (this.summary == null) {
       throw new Error('Missing summary')
+    }
+    if (this.summary.highlight == null) {
+      throw new Error('Missing highlight')
     }
     if (element.z == null) {
       throw new Error('Missing circle center x')
@@ -112,107 +120,74 @@ export class Renderer {
     context.arc(element.z, element.w, element.u, 0, 2 * Math.PI)
     context.fill()
     context.clip()
-    this.context.fillStyle = Renderer.BACKGROUND
+    this.context.fillStyle = this.getColor({ rgb: Renderer.BACKGROUND })
     const maximumInnerRadius = element.u - Renderer.MINIMUM_BORDER_WIDTH
     const damage = 1 - element.h
     const innerRadius = maximumInnerRadius * damage
     context.beginPath()
     context.arc(element.z, element.w, innerRadius, 0, 2 * Math.PI)
     context.fill()
-    const self = element.i === this.summary.id
-    if (self) {
-      if (this.summary.stamina == null) {
-        throw new Error('Missing stamina')
+    if (
+      element.p != null &&
+      element.o != null &&
+      element.l != null &&
+      element.t != null &&
+      element.m != null &&
+      element.e != null &&
+      element.s != null
+    ) {
+      const self = element.i === this.summary.id
+      if (self) {
+        const bleeding = element.h < BLEEDING_DAMAGE
+        if (bleeding) {
+          const length = (element.u * BLEEDING_DAMAGE) + Renderer.MINIMUM_INDICATOR
+          this.drawIndicator({
+            color: Renderer.BACKGROUND,
+            element,
+            length,
+            width: element.u
+          })
+          this.drawIndicator({
+            color: Renderer.BACKGROUND,
+            element,
+            length,
+            positive: true,
+            width: element.u
+          })
+          this.drawIndicator({
+            color: Renderer.BACKGROUND,
+            element,
+            length,
+            positive: true,
+            vertical: true,
+            width: element.u
+          })
+          this.drawIndicator({
+            color: Renderer.BACKGROUND,
+            element,
+            length,
+            vertical: true,
+            width: element.u
+          })
+        }
+        const cap = 1 - Food.NUTRITION
+        if (element.h > cap) {
+          context.beginPath()
+          context.arc(element.z, element.w, 0.1, 0, 2 * Math.PI)
+          context.fillStyle = this.getColor({ rgb: this.summary.highlight })
+          context.fill()
+        }
+        console.log('this.summary.stamina', this.summary.stamina)
       }
-      if (this.summary.speed == null) {
-        throw new Error('Missing speed')
-      }
-      if (this.summary.highlight == null) {
-        throw new Error('Missing highlight')
-      }
-      const minimumIndicator = 0.14
-      const bleeding = element.h < BLEEDING_DAMAGE
-      if (bleeding) {
-        const length = (element.u * BLEEDING_DAMAGE) + minimumIndicator
-        this.drawIndicator({
-          color: Renderer.BACKGROUND,
-          element,
-          length,
-          width: element.u
-        })
-        this.drawIndicator({
-          color: Renderer.BACKGROUND,
-          element,
-          length,
-          positive: true,
-          width: element.u
-        })
-        this.drawIndicator({
-          color: Renderer.BACKGROUND,
-          element,
-          length,
-          positive: true,
-          vertical: true,
-          width: element.u
-        })
-        this.drawIndicator({
-          color: Renderer.BACKGROUND,
-          element,
-          length,
-          vertical: true,
-          width: element.u
-        })
-      }
-      const cap = 1 - Food.NUTRITION
-      if (element.h > cap) {
-        context.beginPath()
-        context.arc(element.z, element.w, 0.1, 0, 2 * Math.PI)
-        context.fillStyle = this.getColor({ rgb: this.summary.highlight })
-        context.fill()
-      }
-      const maximumBonus = element.u - minimumIndicator
-      const bonusLength = maximumBonus * this.summary.speed
-      const length = minimumIndicator + bonusLength
-      const bonusWidth = maximumBonus * this.summary.stamina
-      const width = minimumIndicator + bonusWidth
-      const x = this.summary.increase ?? 1
-      const ratio = 1 / (x + 0.5)
-      const base = 1.007
-      const logarithm = getBaseLog(base, ratio)
-      const interval = logarithm + 70
-      const remainder = this.frames % interval
-      const highlighted = this.summary.increase != null && remainder <= 5
-      this.indicate({
-        control: this.input.controls.left,
+      this.drawIndicators({
+        down: element.o,
         element,
-        highlight: highlighted,
-        length,
-        width
-      })
-      this.indicate({
-        control: this.input.controls.right,
-        element,
-        highlight: highlighted,
-        length,
-        positive: true,
-        width
-      })
-      this.indicate({
-        control: this.input.controls.up,
-        element,
-        highlight: highlighted,
-        length,
-        positive: true,
-        vertical: true,
-        width
-      })
-      this.indicate({
-        control: this.input.controls.down,
-        element,
-        highlight: highlighted,
-        length,
-        vertical: true,
-        width
+        left: element.l,
+        right: element.t,
+        speed: element.e,
+        stamina: element.m,
+        strength: element.s,
+        up: element.p
       })
     }
     context.restore()
@@ -237,7 +212,7 @@ export class Renderer {
   }
 
   drawIndicator (props: {
-    color: string
+    color: Rgb | Rgba
     element: ClientElement
     length: number
     positive?: boolean
@@ -263,7 +238,7 @@ export class Renderer {
     const inner = positive
       ? outer - props.length
       : outer + props.length
-    this.context.strokeStyle = props.color
+    this.context.strokeStyle = this.getColor({ rgb: props.color })
     this.context.beginPath()
     if (vertical) {
       this.context.moveTo(props.element.z, outer)
@@ -273,6 +248,65 @@ export class Renderer {
       this.context.lineTo(inner, props.element.w)
     }
     this.context.stroke()
+  }
+
+  drawIndicators (props: {
+    down: boolean
+    element: ClientElement
+    left: boolean
+    right: boolean
+    speed: number
+    stamina: number
+    strength?: number
+    up: boolean
+  }): void {
+    if (props.element.u == null) {
+      throw new Error('Missing circle radius')
+    }
+    const maximumBonus = props.element.u - Renderer.MINIMUM_INDICATOR
+    const bonusLength = maximumBonus * props.speed
+    const length = Renderer.MINIMUM_INDICATOR + bonusLength
+    const bonusWidth = maximumBonus * props.stamina
+    const width = Renderer.MINIMUM_INDICATOR + bonusWidth
+    const x = props.strength ?? 1
+    const ratio = 1 / (x + 0.5)
+    const base = 1.007
+    const logarithm = getBaseLog(base, ratio)
+    const interval = logarithm + 70
+    const remainder = this.frames % interval
+    const highlight = props.strength != null && remainder <= 5
+    this.indicate({
+      control: props.left,
+      element: props.element,
+      highlight,
+      length,
+      width
+    })
+    this.indicate({
+      control: props.right,
+      element: props.element,
+      highlight,
+      length,
+      positive: true,
+      width
+    })
+    this.indicate({
+      control: props.up,
+      element: props.element,
+      highlight,
+      length,
+      positive: true,
+      vertical: true,
+      width
+    })
+    this.indicate({
+      control: props.down,
+      element: props.element,
+      highlight,
+      length,
+      vertical: true,
+      width
+    })
   }
 
   drawPolygon (element: ClientElement, vertices: Vec2[]): void {
@@ -313,16 +347,11 @@ export class Renderer {
   endJoystick (props: {
     event: MouseEvent | TouchEvent
   }): void {
-    props.event.preventDefault()
-    this.joystick = false
+    if (this.joystickContainer.style.display !== 'block') return
 
-    // Reset input
-    this.up = false
-    this.down = false
-    this.left = false
-    this.right = false
-    this.joystickX = 0
-    this.joystickY = 0
+    this.joystickContainer.style.display = 'none'
+    this.knobX = 0
+    this.knobY = 0
 
     this.input.take({ key: 'ArrowUp', value: false })
     this.input.take({ key: 'ArrowDown', value: false })
@@ -341,8 +370,11 @@ export class Renderer {
   }
 
   getColor (props: {
-    rgb: Rgb
+    rgb: Rgb | Rgba
   }): string {
+    if ('alpha' in props.rgb) {
+      return `rgba(${props.rgb.red},${props.rgb.green},${props.rgb.blue},${props.rgb.alpha})`
+    }
     return `rgba(${props.rgb.red},${props.rgb.green},${props.rgb.blue},1)`
   }
 
@@ -431,8 +463,8 @@ export class Renderer {
       throw new Error('Missing highlight')
     }
     const color = props.highlight === true
-      ? WHITE.label
-      : this.getColor({ rgb: this.summary.highlight })
+      ? WHITE
+      : this.summary.highlight
     if (props.element.u == null) {
       throw new Error('Missing circle radius')
     }
@@ -449,24 +481,44 @@ export class Renderer {
   moveJoystick (props: {
     event: MouseEvent | TouchEvent
   }): void {
-    if (!this.joystick) return
+    if (this.joystickContainer.style.display !== 'block') return
+    console.log('this.joystickContainer.style.display', this.joystickContainer.style.display)
+
     props.event.preventDefault()
 
-    const position = this.getPressPosition({ event: props.event })
-    const dx = position.x - this.baseX
-    const dy = position.y - this.baseY
-    const distance = Math.sqrt(dx * dx + dy * dy)
+    const touch = 'touches' in props.event ? props.event.touches[0] : props.event
+    const deltaX: number = touch.clientX - this.joystickX
+    const deltaY: number = touch.clientY - this.joystickY
 
-    if (distance <= this.maxDistance) {
-      this.knobX = position.x
-      this.knobY = position.y
+    const distance: number = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+    const constrainedDistance: number = Math.min(distance, this.joystickMaxDistance)
+
+    if (distance > 0) {
+      const ratio: number = constrainedDistance / distance
+      this.knobX = deltaX * ratio
+      this.knobY = deltaY * ratio
     } else {
-      const angle = Math.atan2(dy, dx)
-      this.knobX = this.baseX + Math.cos(angle) * this.maxDistance
-      this.knobY = this.baseY + Math.sin(angle) * this.maxDistance
+      this.knobX = 0
+      this.knobY = 0
     }
 
-    this.updateInput()
+    const maxPixelOffset: number = 40
+    const offsetX: number = (this.knobX / this.joystickMaxDistance) * maxPixelOffset
+    const offsetY: number = (this.knobY / this.joystickMaxDistance) * maxPixelOffset
+    this.knob.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`
+
+    const normalizedX: number = this.knobX / this.joystickMaxDistance
+    const normalizedY: number = this.knobY / this.joystickMaxDistance
+
+    const left = normalizedX < -Renderer.JOYSTICK_THRESHOLD
+    const right = normalizedX > Renderer.JOYSTICK_THRESHOLD
+    const up = normalizedY < -Renderer.JOYSTICK_THRESHOLD
+    const down = normalizedY > Renderer.JOYSTICK_THRESHOLD
+
+    this.input.take({ key: 'ArrowUp', value: up })
+    this.input.take({ key: 'ArrowDown', value: down })
+    this.input.take({ key: 'ArrowLeft', value: left })
+    this.input.take({ key: 'ArrowRight', value: right })
   }
 
   render (): void {
@@ -486,7 +538,7 @@ export class Renderer {
     this.context.translate(eye.x, eye.y)
     this.context.fillStyle = this.summary.extinct
       ? 'black'
-      : 'rgba(50, 50, 50, 0.9)'
+      : this.getColor({ rgb: { ...WHITE, alpha: 0.1 } })
     this.context.lineWidth = 0.4
     this.context.beginPath()
     this.context.moveTo(-HALF_SIGHT_SIZE.x, HALF_SIGHT_SIZE.y)
@@ -560,64 +612,22 @@ export class Renderer {
     const capped = Math.min(floored, 30)
     this.context.fillStyle = capped < 25 ? 'red' : 'green'
     this.context.fillText(`${capped} fps`, this.canvas.width * 0.909, 60)
-
-    if (this.joystick) {
-      console.log('this.baseX', this.baseX)
-      console.log('this.baseY', this.baseY)
-
-      // Draw base circle
-      this.context.beginPath()
-      this.context.arc(this.baseX, this.baseY, this.radius, 0, 2 * Math.PI)
-      this.context.fillStyle = 'rgba(255, 255, 255, 0.1)'
-      this.context.fill()
-      this.context.strokeStyle = 'rgba(255, 255, 255, 0.3)'
-      this.context.lineWidth = 2
-      this.context.stroke()
-
-      // Draw inner boundary
-      this.context.beginPath()
-      this.context.arc(this.baseX, this.baseY, this.maxDistance, 0, 2 * Math.PI)
-      this.context.strokeStyle = 'rgba(255, 255, 255, 0.2)'
-      this.context.lineWidth = 1
-      this.context.stroke()
-
-      // Draw knob
-      this.context.beginPath()
-      this.context.arc(this.knobX, this.knobY, this.knobRadius, 0, 2 * Math.PI)
-      this.context.fillStyle = 'rgba(255, 255, 255, 0.8)'
-      this.context.fill()
-      this.context.strokeStyle = 'rgba(255, 255, 255, 1)'
-      this.context.lineWidth = 2
-      this.context.stroke()
-
-      // Draw connection line
-      this.context.beginPath()
-      this.context.moveTo(this.baseX, this.baseY)
-      this.context.lineTo(this.knobX, this.knobY)
-      this.context.strokeStyle = 'rgba(255, 255, 255, 0.4)'
-      this.context.lineWidth = 2
-      this.context.stroke()
-
-      this.input.take({ key: 'ArrowUp', value: this.up })
-      this.input.take({ key: 'ArrowDown', value: this.down })
-      this.input.take({ key: 'ArrowLeft', value: this.left })
-      this.input.take({ key: 'ArrowRight', value: this.right })
-    }
   }
 
   startJoystick (props: {
     event: MouseEvent | TouchEvent
   }): void {
     props.event.preventDefault()
-    const position = this.getPressPosition({ debug: true, event: props.event })
 
-    this.joystick = true
-    this.baseX = position.x
-    this.baseY = position.y
-    this.knobX = position.x
-    this.knobY = position.y
+    const touch = 'touches' in props.event ? props.event.touches[0] : props.event
+    this.joystickX = touch.clientX
+    this.joystickY = touch.clientY
 
-    this.updateInput()
+    this.joystickContainer.style.left = `${this.joystickX - 60}px`
+    this.joystickContainer.style.top = `${this.joystickY - 60}px`
+    this.joystickContainer.style.display = 'block'
+
+    this.knob.style.transform = 'translate(-50%, -50%)'
   }
 
   update (props: {
@@ -689,23 +699,5 @@ export class Renderer {
     if (props.summary.id != null) {
       this.id = props.summary.id
     }
-  }
-
-  updateInput (): void {
-    if (!this.joystick) return
-
-    const dx = this.knobX - this.baseX
-    const dy = this.knobY - this.baseY
-
-    // Normalize to -1 to 1 range
-    this.joystickX = Math.max(-1, Math.min(1, dx / this.maxDistance))
-    this.joystickY = Math.max(-1, Math.min(1, dy / this.maxDistance))
-
-    // Determine directional inputs with deadzone
-    const deadzone = 0.3
-    this.left = this.joystickX < -deadzone
-    this.right = this.joystickX > deadzone
-    this.up = this.joystickY < -deadzone
-    this.down = this.joystickY > deadzone
   }
 }

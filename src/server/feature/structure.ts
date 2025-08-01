@@ -24,7 +24,7 @@ export class Structure extends Feature {
       },
       label: 'structure',
       actor: props.actor,
-      color: COLOR.BLUE
+      color: COLOR.DARK_BLUE
     })
     this.wall = props.actor
   }

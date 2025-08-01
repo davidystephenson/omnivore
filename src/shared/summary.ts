@@ -17,10 +17,10 @@ export interface Summary {
   fps: number
   highlight?: Rgb
   id?: number
-  increase?: number
   points?: number
   ropes?: Rope[]
   respawn: number
   speed?: number
   stamina?: number
+  strength?: number
 }

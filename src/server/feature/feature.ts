@@ -5,6 +5,7 @@ import { Rope } from '../../shared/rope'
 import { Element } from '../../shared/element'
 import { roundNumber, roundVector } from '../math'
 import { HALF_SIGHT_SIZE } from '../../shared/sight'
+import { Player } from '../actor/player'
 
 let featureCount = 0
 
@@ -134,7 +135,10 @@ export class Feature {
     return combatDamage
   }
 
-  getElement (seen: boolean): Element {
+  getElement (props: {
+    player: Player
+    seen: boolean
+  }): Element {
     const position = roundVector({ vector: this.position })
     const angle = this.body.getAngle()
     const n = roundNumber({ number: angle, decimals: 3 })
@@ -144,11 +148,11 @@ export class Feature {
       x: position.x,
       y: position.y,
       n,
-      s: 1,
+      c: 1,
       h: a
     }
     element.u = this.radius
-    if (!seen) {
+    if (!props.seen) {
       element.r = this.color.red
       element.g = this.color.green
       element.b = this.color.blue

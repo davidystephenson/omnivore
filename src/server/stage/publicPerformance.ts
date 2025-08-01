@@ -9,7 +9,7 @@ export class PublicPerformance extends Performance {
   }) {
     const flags = new Flags({
       families: true,
-      // extinctGame: true,
+      // singleGame: true,
       indigenous: true
       // performance: true
       // playerDeath: true

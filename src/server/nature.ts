@@ -1,5 +1,5 @@
 import { Vec2 } from 'planck'
-import { YELLOW, RED, PURPLE, PINK, GRAY, Rgb, LIGHT_GRAY, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW, LIGHT_PINK, LIGHT_ORANGE, ORANGE, LIGHT_BLUE, CYAN, GREEN, LIME } from '../shared/color'
+import { YELLOW, RED, PURPLE, PINK, Rgb, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW, LIGHT_PINK, LIGHT_ORANGE, ORANGE, LIGHT_BLUE, CYAN, GREEN, LIME, LIGHT_MAGENTA, MAGENTA } from '../shared/color'
 import { Stage } from './stage/stage'
 import { Tree } from './actor/tree'
 import { River } from './actor/river'
@@ -9,7 +9,6 @@ import { Rock } from './actor/rock'
 import Family from './family'
 import { Gene } from './gene'
 import { Organism } from './actor/organism'
-import { Membrane } from './feature/membrane'
 
 export class Nature {
   static INITIAL_INDIGENOUS = 100
@@ -41,6 +40,7 @@ export class Nature {
     this.boa = this.addPlayer({
       color: PURPLE,
       highlight: LIGHT_PURPLE,
+      id: 'boa',
       speed: 0,
       stamina: 0.5,
       strength: 0.5
@@ -48,6 +48,7 @@ export class Nature {
     this.crow = this.addPlayer({
       color: ORANGE,
       highlight: LIGHT_ORANGE,
+      id: 'crow',
       speed: 0.5,
       strength: 0,
       stamina: 0.5
@@ -55,6 +56,7 @@ export class Nature {
     this.fly = this.addPlayer({
       color: YELLOW,
       highlight: LIGHT_YELLOW,
+      id: 'fly',
       speed: 1,
       stamina: 0,
       strength: 0
@@ -62,6 +64,7 @@ export class Nature {
     this.growing = new Family({
       color: LIGHT_BLUE,
       highlight: CYAN,
+      id: 'growing',
       speed: 0,
       stage: this.stage,
       stamina: 0,
@@ -70,6 +73,7 @@ export class Nature {
     this.grown = new Family({
       color: GREEN,
       highlight: LIME,
+      id: 'grown',
       speed: 1,
       stage: this.stage,
       stamina: 0,
@@ -78,6 +82,7 @@ export class Nature {
     this.tardigrade = this.addPlayer({
       color: PINK,
       highlight: LIGHT_PINK,
+      id: 'tardigrade',
       speed: 0,
       stamina: 1,
       strength: 0
@@ -85,13 +90,15 @@ export class Nature {
     this.tiger = this.addPlayer({
       color: RED,
       highlight: LIGHT_RED,
+      id: 'tiger',
       speed: 0.5,
       strength: 0.5,
       stamina: 0
     })
     this.whale = this.addPlayer({
-      color: GRAY,
-      highlight: LIGHT_GRAY,
+      color: MAGENTA,
+      highlight: LIGHT_MAGENTA,
+      id: 'whale',
       speed: 0,
       strength: 1,
       stamina: 0
@@ -117,6 +124,7 @@ export class Nature {
   addPlayer (props: {
     color: Rgb
     highlight: Rgb
+    id: string
     speed: number
     stamina: number
     strength: number
@@ -302,7 +310,7 @@ export class Nature {
     const invasive = [...this.players.values()].reduce((sum, player) => {
       return sum + player.members.size
     }, 0)
-    if (invasive > 60) {
+    if (invasive >= 60) {
       const v = `${invasive} invasive organisms, depopulating`
       this.stage.flag({ f: 'indigenous', v })
       this.organisms.forEach(organism => {

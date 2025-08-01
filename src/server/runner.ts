@@ -92,14 +92,16 @@ export class Runner {
     return fixtures
   }
 
-  getElements (player: Player): Element[] {
+  getElements (props: {
+    player: Player
+  }): Element[] {
     this.stage.flag({
       f: 'summary',
       k: 'featuresInVision.length',
-      v: player.organism?.featuresInVision.length,
+      v: props.player.organism?.featuresInVision.length,
       seconds: 10
     })
-    const idsInVision = player.organism?.featuresInVision.map(feature => feature.id)
+    const idsInVision = props.player.organism?.featuresInVision.map(feature => feature.id)
     this.stage.flag({ f: 'summary', k: 'features.length', v: this.features.length, seconds: 10 })
     const filteredFeatures = this.features.filter(feature => {
       return idsInVision?.includes(feature.id)
@@ -107,14 +109,18 @@ export class Runner {
     this.stage.flag({
       f: 'summary',
       k: 'seenIds.length',
-      v: player.seenIds.length,
+      v: props.player.seenIds.length,
       seconds: 10
     })
     const elements = filteredFeatures.map(feature => {
       const tree = feature.actor instanceof Tree
-      const seen = player.seenIds.includes(feature.id)
-      if (!seen) player.seenIds.push(feature.id)
-      return feature.getElement(seen && !tree)
+      const idSeen = props.player.seenIds.includes(feature.id)
+      if (!idSeen) props.player.seenIds.push(feature.id)
+      const seen = idSeen && !tree
+      return feature.getElement({
+        player: props.player,
+        seen
+      })
     })
     return elements
   }
@@ -171,10 +177,10 @@ export class Runner {
       summary.controls = props.player.organism.controls
       summary.highlight = props.player.organism.membrane.actor.family.highlight
       summary.id = props.player.organism.membrane.id
-      summary.increase = props.player.organism.membrane.increase
       summary.speed = props.player.organism.gene.speed
       summary.stamina = props.player.organism.gene.stamina
-      summary.features = this.getElements(props.player)
+      summary.strength = props.player.organism.gene.strength
+      summary.features = this.getElements({ player: props.player })
       summary.curtains = this.stage.spawner.curtains.map(
         curtain => curtain.getElement()
       )

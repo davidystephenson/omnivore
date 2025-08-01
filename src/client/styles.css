@@ -15,8 +15,39 @@ canvas {
   max-width: 177.78vh;
   margin: auto;
   position: absolute;
-  top:0;
-  bottom:0; /* vertical center */
-  left:0;
-  right:0; /* horizontal center */
+  top: 0;
+  bottom: 0;
+  /* vertical center */
+  left: 0;
+  right: 0;
+  /* horizontal center */
+}
+
+#joystick-container {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  display: none;
+  pointer-events: none;
+}
+
+#joystick-base {
+  width: 100%;
+  height: 100%;
+  border: 3px solid #666;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+#joystick-knob {
+  width: 40px;
+  height: 40px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid #333;
 }

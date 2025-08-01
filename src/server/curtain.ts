@@ -47,10 +47,10 @@ export class Curtain {
       x: 0,
       y: 0,
       n,
-      s: 1,
+      c: 1,
       h: 1,
-      r: 25,
-      g: 25,
+      r: 1,
+      g: 0,
       b: 25,
       v,
       visible: true

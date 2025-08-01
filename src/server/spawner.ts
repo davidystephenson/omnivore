@@ -98,7 +98,9 @@ export class Spawner {
           position: first.position,
           spawnpoints: clearSpawnPoints
         })
-        const gene = first.gene?.mutate()
+        const gene = first.mutate === false
+          ? first.gene
+          : first.gene?.mutate()
         this.stage.flag({
           f: 'respawn',
           k: 'Respawned',

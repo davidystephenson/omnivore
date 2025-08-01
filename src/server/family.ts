@@ -9,12 +9,14 @@ export default class Family {
   color: Rgb
   gene: Gene
   highlight: Rgb
+  id: string
   members: Map<number, Organism> = new Map()
   stage: Stage
 
   constructor (props: {
     color: Rgb
     highlight: Rgb
+    id: string
     speed: number
     strength: number
     stamina: number
@@ -22,6 +24,7 @@ export default class Family {
   }) {
     this.color = props.color
     this.highlight = props.highlight
+    this.id = props.id
     this.stage = props.stage
     const speed = this.stage.flags.singleGame
       ? props.speed
@@ -80,6 +83,7 @@ export default class Family {
       family: this,
       gene: props?.gene,
       grown: props?.grown,
+      mutate: false,
       player: props?.player,
       position
     }
