@@ -6,7 +6,7 @@ const URL = 'https://drive.usercontent.google.com/download?id=1e7QeIVHvBYspa_JQe
 const PATH = './promptbooks/download.zip'
 
 export default async function downloadPromptbook (): Promise<void> {
-  console.info('Downloading...')
+  console.info(`Downloading from ${URL} to ${PATH}...`)
   const response = await fetch(URL)
   console.info('Response received')
   if (!response.ok) {
