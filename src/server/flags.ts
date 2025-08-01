@@ -5,6 +5,7 @@ export class Flags {
   botPath: boolean
   charge: boolean
   controlLines: boolean
+  cooperativeGame: boolean
   curtains: boolean
   damage: boolean
   death: boolean
@@ -32,7 +33,6 @@ export class Flags {
   procedural: boolean
   reproduceGame: boolean
   respawn: boolean
-  singleGame: boolean
   spawn: boolean
   spawnpoints: boolean
   starveBricksGame: boolean
@@ -53,6 +53,7 @@ export class Flags {
     botChase?: boolean
     botFlee?: boolean
     botPath?: boolean
+    cooperativeGame?: boolean
     controlLines?: boolean
     curtains?: boolean
     death?: boolean
@@ -80,7 +81,6 @@ export class Flags {
     procedural?: boolean
     reproduceGame?: boolean
     respawn?: boolean
-    singleGame?: boolean
     spawn?: boolean
     spawnpoints?: boolean
     starveBricksGame?: boolean
@@ -100,6 +100,7 @@ export class Flags {
     this.botPath = props.botPath ?? false
     this.charge = props.charge ?? false
     this.controlLines = props.controlLines ?? false
+    this.cooperativeGame = props.cooperativeGame ?? false
     this.curtains = props.curtains ?? false
     this.damage = props.damage ?? false
     this.death = props.death ?? false
@@ -127,7 +128,6 @@ export class Flags {
     this.reproduceGame = props.reproduceGame ?? true
     this.respawn = props.respawn ?? false
     this.extinctGame = props.extinctGame ?? false
-    this.singleGame = props.singleGame ?? false
     this.spawn = props.spawn ?? false
     this.spawnpoints = props.spawnpoints ?? false
     this.starveBricksGame = props.starveBricksGame ?? true

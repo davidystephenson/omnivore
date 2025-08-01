@@ -10,7 +10,7 @@
     "on": "npm run build && node --enable-source-maps --max-old-space-size=4096 build/server/onBook.js",
     "rehearse": "npm run build && npm run serve",
     "serve": "node --enable-source-maps build/server/rehearse.js",
-    "start": "npm run build && node --enable-source-maps --max-old-space-size=4096 build/server/direct.js",
+    "start": "npm run build && node --enable-source-maps --max-old-space-size=4096 build/server/produce.js",
     "watch:server": "npx onchange -i -k \"src/shared/**\" \"src/server/**\" -- npm run serve",
     "watch:client": "npx onchange -i -k \"src/shared/**\" \"src/client/**\" -- npm run build:client",
     "watch": "npx concurrently \"npm run watch:server\" \"npm run watch:client\""

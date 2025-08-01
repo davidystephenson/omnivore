@@ -5,7 +5,7 @@ import readPromptbook from './readPromptbook'
 import decompress from 'decompress'
 
 async function main (): Promise<void> {
-  console.info('Directing...')
+  console.info('Producing...')
   await promises.mkdir('./promptbooks/download', { recursive: true })
   await downloadPromptbook()
   console.info('Decompressing...')

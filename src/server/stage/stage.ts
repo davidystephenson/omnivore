@@ -124,7 +124,7 @@ export class Stage {
     gene?: Gene
   }): Player {
     const player = new Player({ stage: this, ...props })
-    if (this.flags.singleGame) {
+    if (this.flags.cooperativeGame) {
       this.nature.grown.spawn({ player })
     } else if (this.flags.extinctGame) {
       const openFamily = this.nature.players.find(family => {

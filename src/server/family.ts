@@ -26,13 +26,13 @@ export default class Family {
     this.highlight = props.highlight
     this.id = props.id
     this.stage = props.stage
-    const speed = this.stage.flags.singleGame
+    const speed = this.stage.flags.cooperativeGame
       ? props.speed
       : 0.33
-    const strength = this.stage.flags.singleGame
+    const strength = this.stage.flags.cooperativeGame
       ? props.strength
       : 0.33
-    const stamina = this.stage.flags.singleGame
+    const stamina = this.stage.flags.cooperativeGame
       ? props.stamina
       : 0.34
     this.gene = new Gene({
