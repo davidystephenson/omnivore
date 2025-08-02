@@ -13,6 +13,8 @@ async function main (): Promise<void> {
   await downloadPromptbook()
   console.info('Decompressing...')
   await decompress('./promptbooks/download.zip', DOWNLOAD_PATH, { strip: 1 })
+  console.info('Removing download...')
+  await promises.rm('./promptbooks/download.zip')
   console.info('Reading promptbook...')
   const promptbook = readPromptbook({
     onBook: false,

@@ -3,9 +3,10 @@ import { finished } from 'stream/promises'
 
 const URL = 'https://firebasestorage.googleapis.com/v0/b/playomnivore.firebasestorage.app/o/100.zip?alt=media&token=1da4edc5-6d58-4b5f-9d58-a8dc29dbe507'
 // https://drive.google.com/file/d/1e7QeIVHvBYspa_JQeu82SS1mIexB4Pey/view?usp=sharing
-const PATH = './promptbooks/download.zip'
+const PATH = process.env.RAILWAY_VOLUME_MOUNT_PATH ?? './promptbooks/download.zip'
 
 export default async function downloadPromptbook (): Promise<void> {
+  console.log('RAILWAY_VOLUME_MOUNT_PATH:', process.env.RAILWAY_VOLUME_MOUNT_PATH)
   console.info(`Downloading from ${URL} to ${PATH}...`)
   const response = await fetch(URL)
   console.info('Response received')
