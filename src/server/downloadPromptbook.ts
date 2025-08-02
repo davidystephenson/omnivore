@@ -1,7 +1,7 @@
 import fs from 'fs'
 import { finished } from 'stream/promises'
 
-const URL = 'https://drive.usercontent.google.com/download?id=1e7QeIVHvBYspa_JQeu82SS1mIexB4Pey&export=download&authuser=0&confirm=t'
+const URL = 'https://dl.dropbox.com/scl/fi/4jgpzlpn1qro0flmhs9ew/100.zip?rlkey=7rx2khh2yk1gi59dallfdt8d7&st=o2r0i7tn&dl=0'
 // https://drive.google.com/file/d/1e7QeIVHvBYspa_JQeu82SS1mIexB4Pey/view?usp=sharing
 const PATH = './promptbooks/download.zip'
 
@@ -19,17 +19,24 @@ export default async function downloadPromptbook (): Promise<void> {
   const writer = fs.createWriteStream(PATH)
   const reader = response.body.getReader()
   let bytes = 0
-  let factor = 1000
+  const total = 1894731371
+  let factor = 1
+  let progress = 0
   try {
     while (true) {
       const result = await reader.read()
       if (result.done) break
       bytes += result.value.length
-      if (bytes > factor) {
-        factor *= 10
-        // local timezone with swedish format
+      const percent = Math.floor((bytes / total) * 100)
+      const remainder = percent % factor
+      if (remainder === 0 && percent > progress) {
+        progress = percent
         const timestamp = new Date().toLocaleString('sv-SE')
-        console.info(timestamp, 'Downloaded', bytes, 'bytes')
+        console.info(timestamp, `Downloaded ${bytes} bytes (${percent}%)`)
+      }
+      const nextFactor = factor * 10
+      if (percent >= nextFactor) {
+        factor = nextFactor
       }
       writer.write(result.value)
     }
