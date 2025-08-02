@@ -1,7 +1,7 @@
 import fs from 'fs'
 import { finished } from 'stream/promises'
 
-const URL = 'https://dl.dropbox.com/scl/fi/4jgpzlpn1qro0flmhs9ew/100.zip?rlkey=7rx2khh2yk1gi59dallfdt8d7&st=o2r0i7tn&dl=0'
+const URL = 'https://firebasestorage.googleapis.com/v0/b/playomnivore.firebasestorage.app/o/100.zip?alt=media&token=1da4edc5-6d58-4b5f-9d58-a8dc29dbe507'
 // https://drive.google.com/file/d/1e7QeIVHvBYspa_JQeu82SS1mIexB4Pey/view?usp=sharing
 const PATH = './promptbooks/download.zip'
 
