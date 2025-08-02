@@ -8,6 +8,7 @@ const DOWNLOAD_PATH = './promptbooks/download'
 
 async function main (): Promise<void> {
   console.info('Producing...')
+  await promises.rm('./promptbooks/download.zip')
   await promises.rm(DOWNLOAD_PATH, { recursive: true, force: true })
   await promises.mkdir(DOWNLOAD_PATH, { recursive: true })
   await downloadPromptbook()
