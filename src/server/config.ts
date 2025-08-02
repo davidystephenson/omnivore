@@ -2,6 +2,8 @@ import fs from 'fs-extra'
 import path from 'path'
 
 export class Config {
+  extinct?: boolean
+  cooperative?: false
   port = 3001
   secure = false
 
@@ -13,6 +15,8 @@ export class Config {
       const json = fs.readJSONSync(configPath)
       if (typeof json.port === 'number') this.port = json.port
       if (typeof json.secure === 'boolean') this.secure = json.secure
+      if (typeof json.extinct === 'boolean') this.extinct = json.extinct
+      if (typeof json.cooperative === 'boolean') this.cooperative = json.cooperative
     }
     console.info('port:', this.port)
     console.info('secure:', this.secure)

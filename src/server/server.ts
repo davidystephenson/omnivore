@@ -25,6 +25,12 @@ export class Server {
     this.httpServer = this.getHttpServer()
     this.io = new SocketIo.Server(this.httpServer)
     this.stage = props.stage
+    if (this.config.extinct != null) {
+      props.stage.flags.extinctGame = this.config.extinct
+    }
+    if (this.config.cooperative != null) {
+      props.stage.flags.cooperativeGame = this.config.cooperative
+    }
     void this.start()
   }
 

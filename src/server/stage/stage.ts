@@ -25,6 +25,7 @@ import { Initial, Promptbook, WallDef, WaypointData, WaypointDef } from '../type
 import { Waypoint } from '../waypoint'
 import { Nature } from '../nature'
 import readWallDefs from '../readWallDefs'
+import { Server } from '../server'
 
 export class Stage {
   actors = new Map<number, Actor>()
@@ -49,6 +50,7 @@ export class Stage {
   promptbookName: string
   players = new Map<string, Player>()
   runner: Runner
+  server?: Server
   spawner: Spawner
   starvationQueue: Starvation[] = []
   topCenter: Vec2
