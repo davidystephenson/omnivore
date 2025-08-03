@@ -60,7 +60,7 @@ export class Starvation extends Death {
         })
         const health = Math.max(
           Death.MINIMUM_HEALTH,
-          this.victim.actor.gene.stamina
+          this.victim.actor.gene.stamina * 2
         )
         this.deathLog({ k: 'health', v: health })
         void new Rock({

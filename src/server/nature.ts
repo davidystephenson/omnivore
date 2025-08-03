@@ -20,11 +20,14 @@ export class Nature {
   grown: Family
   indigenousTimer = Nature.INITIAL_INDIGENOUS
   organisms = new Map<number, Organism>()
+  spawnCount = 0
   stage: Stage
   tardigrade: Family
   tiger: Family
   tolerance = 1
+  waiting = false
   whale: Family
+  depopulateTime = 0
 
   constructor (props: {
     stage: Stage
@@ -291,6 +294,18 @@ export class Nature {
     this.addTree({ position: Vec2(0, -half) })
   }
 
+  depopulate (): void {
+    this.depopulateTime = Date.now()
+    this.organisms.forEach(organism => {
+      if (organism.player != null) {
+        return
+      }
+      organism.membrane.hungerDamage = Infinity
+      organism.membrane.health = organism.membrane.getHealth()
+      organism.starve({ membrane: organism.membrane })
+    })
+  }
+
   indigenousInfo (props: {
     k: string
     v: string | number
@@ -298,7 +313,7 @@ export class Nature {
     if (!this.stage.flags.indigenous) {
       return
     }
-    console.info(`Indigenous ${props.k}`, props.v)
+    console.info(`Indigenous:', ${props.k}`, props.v)
   }
 
   onStep (props: {
@@ -310,38 +325,49 @@ export class Nature {
     const invasive = [...this.players.values()].reduce((sum, player) => {
       return sum + player.members.size
     }, 0)
-    if (invasive >= 60) {
-      const v = `${invasive} invasive organisms, depopulating`
+    if (invasive >= 100) {
+      const v = `${invasive} invasive organisms, depopulating with players`
       this.stage.flag({ f: 'indigenous', v })
-      this.organisms.forEach(organism => {
-        if (organism.player != null) {
-          return
-        }
-        if (organism.family.members.size === 1) {
-          return
-        }
-        organism.membrane.hungerDamage = Infinity
-        organism.membrane.health = organism.membrane.getHealth()
-        organism.starve({ membrane: organism.membrane })
-      })
+      this.depopulate()
+      this.spawnFamilies()
       return
     }
     const playerControlled = [...this.organisms.values()].filter(
       organism => organism.player != null
     )
     if (playerControlled.length === 0) {
-      this.stage.flag({ f: 'indigenous', v: 'No players, reset indigenous' })
+      if (invasive >= 50) {
+        const v = `${invasive} invasive organisms, depopulating without players`
+        this.stage.flag({ f: 'indigenous', v })
+        this.depopulate()
+        this.spawnFamilies()
+        return
+      }
+      this.depopulateTime += props.stepSeconds
+      if (this.depopulateTime > 150) {
+        this.depopulate()
+        this.stage.runner.paused = true
+        console.info('READY')
+        return
+      }
+      this.stage.flag({
+        f: 'indigenous',
+        k: 'No players reset, time difference',
+        v: this.depopulateTime.toLocaleString()
+      })
       this.indigenousTimer = Nature.INITIAL_INDIGENOUS
       this.tolerance = 1
       return
+    } else if (playerControlled.length === invasive) {
+      this.spawnFamilies({ count: this.spawnCount })
     }
     this.indigenousTimer -= props.stepSeconds
     if (this.indigenousTimer > 0) {
       return
     }
-    this.tolerance = this.tolerance * 0.9
+    this.tolerance = Math.round(this.tolerance - 0.02)
     this.indigenousInfo({ k: 'Tolerance', v: this.tolerance })
-    const aggression = 1 - this.tolerance
+    const aggression = Math.round(1 - this.tolerance)
     this.indigenousInfo({ k: 'Aggression', v: aggression })
     this.indigenousTimer = Math.max(Nature.INITIAL_INDIGENOUS * this.tolerance, 5)
     this.indigenousInfo({ k: 'Timer', v: this.indigenousTimer })
@@ -353,21 +379,29 @@ export class Nature {
     })
     this.growing.spawn({ gene: growingGene })
     this.indigenousInfo({ k: 'Growing', v: this.growing.members.size })
+    const grownSpeed = Math.round(this.tolerance * 0.5 * 100) / 100
+    this.indigenousInfo({ k: 'Grown speed', v: grownSpeed })
+    const grownStrength = Math.round(aggression * 0.5 * 100) / 100
+    this.indigenousInfo({ k: 'Grown strength', v: grownStrength })
     const grownGene = new Gene({
-      speed: this.tolerance,
-      stamina: 0,
+      speed: grownSpeed,
+      stamina: 0.5,
       stage: this.stage,
-      strength: aggression
+      strength: grownStrength
     })
     this.grown.spawn({ gene: grownGene, grown: true })
     this.indigenousInfo({ k: 'Grown', v: this.grown.members.size })
   }
 
-  spawnFamilies (props: {
-    count: number
+  spawnFamilies (props?: {
+    count?: number
   }): void {
-    for (let i = 0; i < props.count; i++) {
+    this.spawnCount = props?.count ?? this.spawnCount
+    for (let i = 0; i < this.spawnCount; i++) {
       const family = this.players[i]
+      if (family.members.size > 0) {
+        continue
+      }
       family.spawn()
     }
   }

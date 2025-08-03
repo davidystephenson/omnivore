@@ -4,7 +4,7 @@ import path from 'path'
 export class Config {
   extinct?: boolean
   cooperative?: false
-  port = 3001
+  port = 3000
   secure = false
 
   constructor () {

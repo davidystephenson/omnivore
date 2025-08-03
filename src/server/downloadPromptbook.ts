@@ -1,15 +1,12 @@
 import fs from 'fs'
 import { finished } from 'stream/promises'
 
-const URL = 'https://firebasestorage.googleapis.com/v0/b/playomnivore.firebasestorage.app/o/100.zip?alt=media&token=1da4edc5-6d58-4b5f-9d58-a8dc29dbe507'
-// https://drive.google.com/file/d/1e7QeIVHvBYspa_JQeu82SS1mIexB4Pey/view?usp=sharing
-const DIRECTORY = process.env.RAILWAY_VOLUME_MOUNT_PATH ?? './promptbooks'
-const PATH = `${DIRECTORY}/download.zip`
-
-export default async function downloadPromptbook (): Promise<void> {
-  console.log('RAILWAY_VOLUME_MOUNT_PATH:', process.env.RAILWAY_VOLUME_MOUNT_PATH)
-  console.info(`Downloading from ${URL} to ${PATH}...`)
-  const response = await fetch(URL)
+export default async function downloadPromptbook (props: {
+  url: string
+  zipPath: string
+}): Promise<void> {
+  console.info(`Downloading from ${props.url} to ${props.zipPath}...`)
+  const response = await fetch(props.url)
   console.info('Response received')
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`)
@@ -18,7 +15,7 @@ export default async function downloadPromptbook (): Promise<void> {
     throw new Error('No body')
   }
   console.info('Saving...')
-  const writer = fs.createWriteStream(PATH)
+  const writer = fs.createWriteStream(props.zipPath)
   const reader = response.body.getReader()
   let bytes = 0
   const total = 1894731371
